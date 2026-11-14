@@ -1,0 +1,37 @@
+name: AgentPlatform independent runner handoff
+on:
+  push:
+    branches: [research/3a-independent-runners]
+    paths: ['.github/workflows/agentplatform-independent-runners.yml', 'prototypes/topic-03a/runner-handoff/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: python3 -m venv "$RUNNER_TEMP/venv" && "$RUNNER_TEMP/venv/bin/pip" install XlsxWriter==3.2.9 openpyxl==3.1.5
+      - run: '"$RUNNER_TEMP/venv/bin/python" prototypes/topic-03a/runner-handoff/transfer.py publish "$RUNNER_TEMP/published"'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: published-candidate
+          path: ${{ runner.temp }}/published/
+          retention-days: 1
+          if-no-files-found: error
+  receive:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: published-candidate
+          path: ${{ runner.temp }}/inbound
+      - run: python3 prototypes/topic-03a/runner-handoff/transfer.py receive "$RUNNER_TEMP/inbound" --require-distinct-boot
