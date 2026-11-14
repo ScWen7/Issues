@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-当前为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版补齐本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据及宿主终态 / 恢复拒绝五条研究线，校准 Provider 清理确认与取消专项收敛的源码结论。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。后续通过能力矩阵、反例和真实执行验证收敛平台设计。
+当前为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版补齐本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据及宿主终态 / 恢复拒绝五条研究线，校准 Provider 清理确认与取消专项收敛的源码结论。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。第一阶段 Runtime / Daemon 底层机制已完成源码追踪；后续按 V0.2 顺序研究宿主与本地交互入口、上下文与任务身份、Workspace / Script / 结构化回报，再形成完整设计。
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 

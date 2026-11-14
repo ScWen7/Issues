@@ -198,6 +198,157 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 
 ## 7. 新增追踪：上下文、凭据与会话结果
 
+## 10. 第一阶段完成：Runtime / Daemon 注册、调度、领取与恢复
+
+本节沿固定上游提交 fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc，追踪 Daemon 注册、服务端授权、批量 Claim、SQL 原子领取、Start generation、心跳、Runtime liveness、失联收敛和数据库测试。此处为实现与测试断言阅读结果；本轮没有运行 Multica 上游 Go 测试。
+
+### 10.1 Runtime 的真实粒度：不是一台机器一条记录
+
+源码：
+- [Daemon 按 Workspace 注册 Runtime](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L2923-L3052)
+- [Builtin Runtime Upsert](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/runtime.sql#L33-L115)
+- [Runtime 数据结构](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L12-L120)
+
+**代码事实：**
+1. Daemon 是本机常驻管理进程，注册时携带 daemon_id、device_name、CLI 版本和一组本机可用 Runtime。
+2. Runtime 注册按 Workspace 发生。同一 Host 上的 Codex 可以在多个 Workspace 分别形成 Runtime 实例；一个 Workspace 下也可以由同一 Daemon 注册多个内置 Provider 和自定义 Profile Runtime。
+3. Builtin Runtime 的唯一性由 workspace + daemon + provider 约束；Custom Runtime 由 workspace + daemon + profile 约束。Runtime ID 是服务端分配的具体执行目标 ID。
+4. 内置 CLI 先按机器探测，再批量用于各 Workspace 注册，避免多个 Workspace 重复启动 version probe。Profile 是 Workspace 级配置，命令路径在每台 Host 本地解析；Profile 只选择已有 Protocol Family。
+5. 注册响应与本地 workspaceState 合并；运行时集合变化会通知 heartbeat loop 和 poller 更新 Runtime 集合。
+
+**设计原因：** Host 的物理机器事实与 Workspace 中可被调度的 Runtime 实例不同。注册要把“机器上安装了什么”与“某 Workspace 获得了哪个执行目标”结合，同时避免重复探测。
+
+**对本项目的启发：** 采用 Host / Daemon / Runtime Instance 三层关系。Host 表示机器或虚拟执行节点；Daemon 表示当前运行的管理进程及其连接身份；Runtime Instance 表示该 Host 在某 Workspace 下提供的具体 Provider / Profile 执行能力。Agent Role 不作为 Runtime 的同义词。Daemon 进程重启和 Runtime 实例重注册分别记录。
+
+### 10.2 Claim 调度：机器批量领取，数据库逐 Agent 原子占用
+
+源码：
+- [Daemon 批量轮询与本地并发槽](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L5519-L5658)
+- [批量 Claim 服务流程](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4173-L4403)
+- [单任务原子 Claim SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L770-L838)
+- [批量候选 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L2196-L2350)
+- [批量 Claim Handler 与上限](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2080-L2160)
+
+**真实调度链：**
+1. Daemon 维护本地并发槽 semaphore。每轮先拿至少一个空槽，再尽量取满其他空槽；本地无空槽时不请求服务端。
+2. Daemon 把本机所有 Runtime ID 和空闲槽数量放进一次批量 Claim 请求。单次最多 32 个任务，避免无界响应和过长数据库事务。
+3. 服务端先校验请求中的 daemon_id、Workspace、Runtime 所有权和 daemon 绑定，再对授权 Runtime 集合做一次批量候选查询。
+4. 候选按 priority DESC、created_at ASC 排序；服务端按不同 Agent 去重，再逐 Agent 进入 claimTask 事务。
+5. Claim SQL 在数据库中执行 FOR UPDATE SKIP LOCKED，将 queued 原子改成 dispatched，并写入 dispatched_at 与 prepare lease。同一 Issue + Agent 的活动执行互斥；不同 Agent 可以并行处理同一 Issue。
+6. Claim 成功后，Handler 构造任务上下文并创建 task-scoped token；最终交付前再次读取并锁定 Runtime 和 Agent，重新核验 owner、runtime binding 与私有 Runtime sharing。Token 创建和交付凭据写入同一事务。
+7. Handler 返回的每个 Task 带 Runtime ID，Daemon 按 Runtime 路由到本地执行槽。
+
+**设计原因：** 机器级批量请求降低多 Runtime 的 HTTP / DB 往返；数据库仍以 Agent、Issue 和 Runtime 的真实约束做最终原子仲裁。服务端先列候选再逐 Agent Claim，使不同 Agent 可以并行，同时由 SKIP LOCKED 避免并发请求重复占用同一队列行。
+
+**重要边界：** Batch Claim 的 max_tasks 是本次请求可接收的执行数量，不是 Agent 或 Runtime 的长期并发上限。长期容量由 Daemon 本地槽、Agent max_concurrent_tasks 和可选 Runtime max_concurrent_tasks 三层共同限制。
+
+### 10.3 三层并发控制与资源竞争
+
+源码：
+- [Agent 与 Runtime 容量检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L3684-L3853)
+- [Runtime 容量 Advisory Lock](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/runtime.sql#L694-L727)
+- [Agent 并发竞争数据库测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_claim_race_test.go#L22-L88)
+- [Runtime 并发上限数据库测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_runtime_concurrency_db_test.go#L55-L306)
+- [Runtime 上限修改与 Claim 锁同步测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_concurrency_test.go#L20-L134)
+
+| 层次 | 控制者 | 约束对象 |
+|---|---|---|
+| Daemon 本地槽 | Host Daemon | 该 Daemon 同时启动的本地任务数 |
+| Agent 并发上限 | Agent 配置 | 同一个 Agent 同时承接的任务数 |
+| Runtime 并发上限 | Runtime 所有者配置 | 同一执行资源跨多个 Agent 的总活动任务数 |
+
+Agent 容量检查在 Agent 行锁内完成。Runtime 容量使用事务级 Advisory Lock，锁定后才读取 Runtime 上限和活动任务数。容量更新也使用相同锁，保证修改上限返回后，不再有 Claim 按旧上限提交。选用 Advisory Lock 而非 Runtime 行锁，是为了避免 Claim 的 Agent → Runtime 锁顺序与 Runtime 修改 / teardown 的 Runtime → Agent 锁顺序形成死锁环。
+
+上游测试覆盖两个并发 Claim 争一个 Agent 槽、多个 Agent 共享 Runtime 上限、Claim 等待容量锁、等待期间降低容量，以及多个并发 Claim 不超过 Runtime 上限。
+
+### 10.4 Claim / Start generation 与丢失响应恢复
+
+源码：
+- [Claim 响应丢失重领 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L892-L990)
+- [Start claim generation 锁定 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L970-L990)
+- [StartTaskForClaim 事务](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4480-L4560)
+- [Start 请求携带 runtime_id / dispatched_at](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4674-L4794)
+- [Start 丢失回执、重领代次、并发重放和取消竞争测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_start_claim_test.go#L17-L213)
+
+Claim 将任务从 queued 改为 dispatched，并写入 dispatched_at 和短期 prepare_lease_expires_at。Start 必须携带 task ID、Runtime ID 和本次 dispatched_at。服务端按三者锁定精确 Claim generation。同一 generation 的 Start 回执丢失后可以安全重放；已经 running 时返回同一个 started_at，不重复启动状态迁移。旧 generation 即使任务仍属于同一 Runtime，也会被拒绝。
+
+Claim 成功但响应未送达时，90 秒 recovery window 之后，且 prepare lease 已过期，服务端刷新 dispatched_at 并重新交付。环境准备超过初始 45 秒时，Daemon 通过 ExtendTaskPrepareLease 延长租约，避免仍在准备的任务被误回收。Cancel、reclaim 和 Start 对同一任务行锁串行化，取消提交后，迟到 Start 会冲突退出。
+
+**设计原因：** Runtime ID 只说明执行目标，不能识别同一任务的哪一次领取。dispatched_at 作为 generation token，使同 Runtime 重领、响应重放、取消和 Start 之间具备可比较的所有权版本。
+
+### 10.5 Heartbeat、WebSocket 与 Runtime 在线状态
+
+源码：
+- [Daemon 每 Runtime 心跳循环与 WS fallback](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L4545-L4680)
+- [WS RuntimeLease 与连接生命周期](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemonws/hub.go#L23-L158)
+- [WS 心跳帧处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemonws/hub.go#L1087-L1174)
+- [批量 Heartbeat Scheduler](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/heartbeat_scheduler.go#L104-L325)
+- [Redis Liveness Store 与 DB fallback](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_liveness_store.go#L13-L141)
+
+**代码事实：**
+1. Daemon 默认约每 15 秒为每个 Runtime 发送心跳；收到近期 WS heartbeat ack 时跳过重复 HTTP heartbeat，WS ack 连续缺失后 HTTP 自动恢复。
+2. WS 握手时批量读取并校验固定 Runtime 集合，建立连接级 RuntimeLease。每次 WS 心跳复用这份授权快照，避免每 15 秒重新读取 Runtime 行；Runtime 被删除时通过 RuntimeGone 消息从连接范围剔除。
+3. 生产 Heartbeat Scheduler 将 Runtime ID 合并，每 30 秒批量写一次 DB；Redis TTL 记录更近实时的 liveness。Redis 不可用时回退 DB heartbeat；批量写入遗漏项会进一步区分刚被明确下线、被 sweeper 竞争下线和已经删除。
+4. RuntimeClaimFreshnessSeconds 为 150 秒，覆盖 60 秒 DB heartbeat flush、15 秒 Daemon heartbeat 和 30 秒 batch scheduler 的最坏组合，并留出余量。
+5. Runtime Sweeper 每 30 秒运行。DB stale 候选还要经过 Redis liveness 过滤；Redis 不可用时按 DB stale window 工作。真正标记 offline 的 UPDATE 会再次核对 stale 条件，防止与刚到达的心跳竞争。
+6. Runtime 先标记 offline，活动任务按 3 小时 reconnect grace 延迟失败，避免短期网络分区直接杀掉仍在本地运行的进程。Daemon 真正重启时则通过启动后的 RecoverOrphanedTasksForRuntime 主动报告，不等待 grace 到期。
+7. 运行任务的 9000 秒 backstop 受 Runtime 心跳新鲜度约束，健康 Runtime 上的长任务不会仅因墙钟超时被扫掉；dispatched 的 300 秒 backstop则受 prepare lease 保护。
+
+**设计原因：** 在线状态需要兼顾实时性、DB 写入成本和网络分区。Redis 提供短期活跃证明，DB 保存持久状态，连接级 Lease 减少 WS 热路径查询；任务终止与 Runtime 变 offline 分开，让网络抖动不等于本地进程已经死亡。
+
+### 10.6 Daemon 重启、Runtime 删除与接管边界
+
+源码：
+- [Daemon RuntimeGone 去重与 Workspace 重注册](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L1298-L1484)
+- [Runtime 离线后的 reconnect grace sweeper](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/cmd/server/runtime_sweeper.go#L218-L395)
+- [RecoverOrphanedTasksForRuntime 查询](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1239-L1287)
+
+**两种故障路径：**
+- 网络分区 / 心跳暂失：Runtime 先 offline，执行任务仍在 reconnect grace 内保留；Daemon 恢复心跳后 Runtime 回 online，原本地进程仍可能继续。
+- Daemon 进程重启：新进程启动后主动调用 RecoverOrphanedTasksForRuntime，将上一个进程遗留的 dispatched / running 工作收敛为失败，再进入统一 HandleFailedTasks 流程决定是否安全重试。已启动的特定远端执行有额外 cleanup fence。
+
+Runtime 被服务端删除时，Daemon 会从本地 Runtime 集合移除对应 ID，并对同一 Workspace 的并发 RuntimeGone 做去重与合并，随后重新注册剩余可用 Runtime。服务端暂时不可达和 Runtime 真实不存在分别处理，避免把一次 DB 故障误判成 Runtime 已删除。
+
+### 10.7 Runtime 所有权与共享授权
+
+源码：
+- [Workspace、Daemon、Runtime Owner 三层校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L58-L160)
+- [Runtime Owner / Shared With 判定](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/runtime_access.go#L12-L30)
+- [Claim 最终交付事务与锁定重验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2440-L2540)
+- [跨 Workspace、Ownerless Runtime 拒绝测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_batch_claim_test.go#L231-L347)
+- [Runtime 可见性撤销测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_visibility_revocation_test.go#L1-L260)
+
+权限按用途分层：
+
+| 层次 | 校验内容 |
+|---|---|
+| Workspace | 请求身份是否有该 Workspace 的访问权 |
+| Daemon | daemon token 是否绑定请求中的 Daemon ID |
+| Runtime Owner | user credential 是否为 Runtime Owner；daemon token 的 owner 是否与 Runtime 当前 owner 一致 |
+| Private Runtime sharing | Agent Owner 是否为 Runtime Owner 或在 shared_with 范围内 |
+| Task delivery | 交付前锁定 Runtime 和 Agent，重新校验 owner、visibility、runtime binding，再签发任务级 token |
+
+Runtime 分享给其他成员只授予使用该执行资源的权限，不授予机器管理权限。Runtime Owner 缺失时不能签发任务级凭据，任务不会送到执行端。访问撤销会事务性取消受影响的活动任务并收敛关联的聊天输入、Session 指针和补充任务。
+
+### 10.8 第一阶段结论
+
+Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器”，而是一套围绕执行资源身份、数据库原子派发、容量互斥、Claim generation、心跳租约、故障分类、授权复核和恢复收敛形成的执行控制机制。
+
+对本项目的直接设计输入：
+
+1. Host、Daemon、Runtime Instance 分开建模；Runtime Instance 按 Workspace 和 Provider / Profile 形成。
+2. 以 Run 作为实际执行记录，派发需包含可比较的 Claim Generation；领取、准备、Start、进程启动和终态观察分别留证。
+3. 资源调度同时考虑 Host 本地槽、Runtime 容量和执行者 / Agent 容量；容量更新与 Claim 使用同一互斥机制。
+4. 所有入口最终进入同一派发服务；数据库原子占用是并发正确性的最终依据，通知与轮询只负责降低延迟。
+5. Runtime 在线状态采用心跳租约与持久状态结合；短暂离线、进程退出、Daemon 重启和 Runtime 删除必须走不同恢复分支。
+6. Claim / Start / Result 回报都要绑定 Claim Generation；旧执行者的迟到 Start 和结果只能归档，不能覆盖当前代次。
+7. Workspace、Host / Daemon、Runtime Owner、共享授权和 Task Token 是不同权限层，最终交付时必须重新核验当前授权。
+
+本阶段完成源码路径与代表测试断言追踪，未执行上游 Go 测试。下一阶段按 V0.2 顺序进入“宿主与本地交互入口”，重点比较中心派发、成员从 CLI / IDE 主动关联、事后补录，以及会话观察和真实用量归属。
+
+
+## 7. 新增追踪：上下文、凭据与会话结果
+
 以下核对沿用本记录的固定提交，证据为公开实现与测试断言阅读。代表路径用于补齐探索输入，各宿主的真实运行覆盖由下一轮能力矩阵验证。
 
 ### 7.1 ContextReceipt 的生成时机与证据等级
