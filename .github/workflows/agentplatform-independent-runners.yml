@@ -90,3 +90,35 @@ jobs:
           mv "$RUNNER_TEMP/cli/codex-x86_64-unknown-linux-musl" "$RUNNER_TEMP/cli/codex"
           export PATH="$RUNNER_TEMP/cli:$PATH"
           python3 -u prototypes/topic-03a/codex-context-probe.py project
+  loopforge-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: Tencent/LoopForge
+          ref: 97b3cdc2f29a88e8767a8dc6c03bfb8865622653
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.11'
+          cache: false
+      - name: Test chunked checkpoint recovery and node attempt semantics
+        run: |
+          go test -count=1 -parallel 1 -v -run '^Test(ConversationWorkspaceChunkedWorkerTransportRoundTrip|ShouldCommitNodeOutcome)$' ./internal/engine
+  teamai-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: Tencent/teamai-cli
+          ref: 1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Run complete handoff and workspace suites
+        run: |
+          npm ci
+          ./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 --no-file-parallelism src/__tests__/shell-command.test.ts src/__tests__/workflow-handoff-ends-and-workspaces.test.ts src/__tests__/workflow-place.test.ts
