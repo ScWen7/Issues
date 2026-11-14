@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3 与[专题二 V0.3](docs/architecture/02-sop-workflow.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.2 探索基线](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -52,7 +52,7 @@
 
 **交付记录**：某次交付候选、验收要求及其证据和验收结论的组合引用，不是额外一套任务或执行系统。
 
-
+## 执行环境与宿主
 
 **Host（执行主机）**：成员提供的物理或虚拟机器，承载一个或多个 Daemon 及本地执行资源。
 
@@ -80,9 +80,19 @@
 
 **节点尝试（Node Attempt）**：某个 SOP 节点在固定定义、当前委托与输入基准下的一次履行，记录结果及其证据。一次尝试可关联多次实际 Run，例如实施、后置检查与自修正；已结束尝试后的重试、返工使用新尝试。
 
-**节点内自修正**：针对当前节点产物的检查反馈，在同一工作目标、定义和授权内修复并重验。仍在运行的执行记入原 Run，重新启动的实际执行使用新 Run；两者都沿用本轮节点尝试并消耗其修正预算。\n\n**Delegation Round（委托轮次）**：一个 SOP 节点激活对子 Issue 的一次受托交付周期，绑定节点激活 ID、Node Attempt、Grant 版本、输入 / 候选基准和交付契约。子 Issue 重开后的新交付使用新轮次；旧轮次的完成和迟到回报只保留历史效力。\n\n**Delivery Record（交付记录）**：子 Issue 在特定委托轮次提交的结果集合，引用实际 Run、制品、候选、核验和结论。父 SOP 按轮次和候选消费交付记录；child_done 仅是唤醒信号。\n\n**SOP Result ID（流程出口结果标识）**：一次 SOP 出口结算的稳定标识，用于 Project Workflow 交接幂等。结果绑定实例版本、出口、候选和期望的 Workflow revision；重复提交返回同一交接回执。
+**节点内自修正**：针对当前节点产物的检查反馈，在同一工作目标、定义和授权内修复并重验。仍在运行的执行记入原 Run，重新启动的实际执行使用新 Run；两者都沿用本轮节点尝试并消耗其修正预算。
 
-**Delegation Grant（委托授权）**：有权 Member 针对一个父 Issue 和 SOP Execution 授予的范围化操作许可，绑定受托范围、允许创建 / 绑定的子项、执行者与 Runtime 范围、状态和返工动作、预算、交还对象及有效期。SOP 依据 Grant 提出操作请求，Issue 工作机制校验调用者、授权版本和操作范围后执行；Grant 不授予业务决策和最终验收权。\n\n**Dispatch Control Binding（派发控制绑定）**：某个明确工作范围当前唯一有效的派发控制关系，记录自主协作、SOP 托管或外部结果引用模式及控制者、授权、节点激活和控制代次。它用于统一仲裁与幂等，不是业务工作对象。\n\n**子 Issue 委托关联**：SOP 节点本轮尝试与子 Issue 本轮交付之间的关联，明确可创建、指派、启动、返工和交还的工作范围。节点依此消费结果、关联实际 Run 与费用，子 Issue 继续承担工作责任。
+**Delegation Round（委托轮次）**：一个 SOP 节点激活对子 Issue 的一次受托交付周期，绑定节点激活 ID、Node Attempt、Grant 版本、输入 / 候选基准和交付契约。子 Issue 重开后的新交付使用新轮次；旧轮次的完成和迟到回报只保留历史效力。
+
+**Delivery Record（交付记录）**：子 Issue 在特定委托轮次提交的结果集合，引用实际 Run、制品、候选、核验和结论。父 SOP 按轮次和候选消费交付记录；child_done 仅是唤醒信号。
+
+**SOP Result ID（流程出口结果标识）**：一次 SOP 出口结算的稳定标识，用于 Project Workflow 交接幂等。结果绑定实例版本、出口、候选和期望的 Workflow revision；重复提交返回同一交接回执。
+
+**Delegation Grant（委托授权）**：有权 Member 针对一个父 Issue 和 SOP Execution 授予的范围化操作许可，绑定受托范围、允许创建 / 绑定的子项、执行者与 Runtime 范围、状态和返工动作、预算、交还对象及有效期。SOP 依据 Grant 提出操作请求，Issue 工作机制校验调用者、授权版本和操作范围后执行；Grant 不授予业务决策和最终验收权。
+
+**Dispatch Control Binding（派发控制绑定）**：某个明确工作范围当前唯一有效的派发控制关系，记录自主协作、SOP 托管或外部结果引用模式及控制者、授权、节点激活和控制代次。它用于统一仲裁与幂等，不是业务工作对象。
+
+**子 Issue 委托关联**：SOP 节点本轮尝试与子 Issue 本轮交付之间的关联，明确可创建、指派、启动、返工和交还的工作范围。节点依此消费结果、关联实际 Run 与费用，子 Issue 继续承担工作责任。
 
 **制品契约（Artifact Contract）** 规定一次交付要提供的具名输出、版本或摘要、生产者以及消费者要求的检查。制品可获取、内容核验和业务接受分别记录。
 

@@ -4,10 +4,9 @@
 
 ## 当前交付
 
-当前进入专题三 A「执行平面与宿主适配」探索阶段。研究从 Multica 的 Daemon / Runtime / Provider Adapter / Execution Environment / Session 实际代码路径展开，先建立执行生命周期、宿主适配和恢复机制的源码证据，再形成平台设计。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。
+当前为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版补齐本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据及宿主终态 / 恢复拒绝五条研究线，校准 Provider 清理确认与取消专项收敛的源码结论。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。后续通过能力矩阵、反例和真实执行验证收敛平台设计。
 
-
-当前为专题二「SOP 与研发工作流融合」V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
+专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
 专题一 V0.3 的关键设计如下。
 
@@ -29,6 +28,9 @@
 | [统一术语](CONTEXT.md) | 核对总责人、当前负责人、平台强制规则、结果核验方式等统一概念 |
 | [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | 审阅分工、图依赖、人工门禁、返工与接管规则以及实现前的验证条件 |
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
+| [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
+| [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、五条研究线、停止与恢复观察以及订单导出核对场景 |
+| [专题三 A：源码研究记录](docs/research/03a-source-evidence.md) | 查看固定版本的注册、授权、加载回执、任务凭据及宿主结果证据 |
 | [专题一：源码研究依据](docs/research/01-source-evidence.md) | 查看固定提交、代码事实与提示词约定对照、代表测试及设计推论 |
 
 后续专题完成后同步更新架构总览、相关术语和贯穿案例；不在各专题另建一套工作状态、上下文或执行证据。
@@ -38,6 +40,6 @@
 
 ## 研究与核验
 
-专题二核验包括固定版本源码追踪、上游定向测试、工作场景推演及跨文档审查。案例中的业务决定与证据采用模拟数据。项目运行、多机演练和真实业务验收留待实现阶段分别取证。
+专题二保留上游定向测试记录和状态模型复跑结果。专题 3A 本轮以固定版本源码、代表测试断言阅读、工作场景及跨文档复核为依据。案例采用模拟决定与证据，宿主能力、真实多进程和跨机执行进入后续原型验证。
 
 参考仓库副本和阶段笔记存放于已忽略的 `.tmp/`；正式文档引用固定的上游源码链接，不依赖临时目录长期存在。

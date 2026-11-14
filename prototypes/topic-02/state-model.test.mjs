@@ -88,7 +88,7 @@ test('Decision for stale candidate cannot satisfy current exit', () => {
 test('same SOP Result ID applies workflow transition once and returns original receipt', () => {
   const state = { stage: 'development', revision: 10, receipts: new Map() };
   function apply(resultId) {
-    if (state.receipts.has(nesultId)) return { replay: true, receipt: state.receipts.get(resultId) };
+    if (state.receipts.has(resultId)) return { replay: true, receipt: state.receipts.get(resultId) };
     const receipt = { from: state.stage, to: 'uat', revision: state.revision + 1 };
     state.stage = 'uat'; state.revision++; state.receipts.set(resultId, receipt);
     return { replay: false, receipt };

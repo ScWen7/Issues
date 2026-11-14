@@ -3,13 +3,15 @@
 日期：2026-11-14  
 设计基线：专题二 V0.3  
 验证方式：Node.js 内置 `node:test` 的确定性状态转换模型  
-测试文件：[state-model.test.mjs](../../prototypes/topic-02/state-model.test.mjs)
+测试文件：[state-model.test.mjs](../../../prototypes/topic-02/state-model.test.mjs)
 
 ## 结论
 
 **结果：17 / 17 PASS**
 
 本轮将 V0.3 的核心约束抽象成小型状态模型，执行 17 项确定性测试，全部通过。测试覆盖三入口派发去重、DAG 就绪门禁、Grant 撤销和扩权、子 Issue 跨轮次迟到回报、`child_done` 唤醒语义、并行结果、SOP 出口与人工验收、工作流交接幂等、控制权代次、重启恢复及跨 Runtime 代码候选重建。
+
+**本次基线完善复核：** 对 `63e2df7` 工作区运行时得到 16 PASS / 1 FAIL，定位到回执去重判断中的 `nesultId` 笔误。修正为 `resultId` 后，按本页命令重新执行，结果为 17 PASS / 0 FAIL；当前结论采用这次修复后的运行结果。
 
 这次验证确认：**按 V0.3 规定的控制绑定、授权版本、节点激活、委托轮次和出口 Result ID 组织状态，设计层面的预期结果一致。**
 
@@ -43,7 +45,7 @@
 node --test prototypes/topic-02/state-model.test.mjs
 ```
 
-本轮执行结果：
+本次修复后复跑结果：
 
 ```text
 tests 17
