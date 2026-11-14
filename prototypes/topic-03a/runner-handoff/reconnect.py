@@ -20,9 +20,11 @@ def save(path, data):
 
 def stop_worker(private, publication):
     private.mkdir()
-    report = EXPECTED.with_name("order-export-c1.json").read_bytes()
-    (private / "outbox.json").write_bytes(report)
     c = json.loads((publication / "sender.json").read_text())["challenge"]
+    report = (publication.parent / ("sender-" + c) / "C1/report.json").read_bytes()
+    if report != EXPECTED.with_name("order-export-c1.json").read_bytes():
+        raise ValueError("the producer generated a different C1 report")
+    (private / "outbox.json").write_bytes(report)
     save(private / "stopped.json", {"host": host_signature(c), "challenge": c, "pending": sha(report)})
 
 

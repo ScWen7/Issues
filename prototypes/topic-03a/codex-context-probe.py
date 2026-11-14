@@ -110,6 +110,7 @@ def probe(home, project, endpoint, binary, channel, version):
         ("codex-cli 0.144.6", "home"): False,
         ("codex-cli 0.144.6", "project"): False,
         ("codex-cli 0.167.0-alpha.4", "home"): True,
+        ("codex-cli 0.167.0-alpha.4", "project"): False,
     }
     baseline = live_baselines.get((version, channel))
     review = []
