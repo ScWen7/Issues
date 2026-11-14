@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import time
+from urllib.parse import urlencode
 import urllib.request
 
 from transfer import EXPECTED, host_signature, receive
@@ -31,7 +32,7 @@ def stop_worker(private, publication):
 def wait_for(name):
     repo = os.environ["GITHUB_REPOSITORY"]
     run = os.environ["GITHUB_RUN_ID"]
-    api = f"https://api.github.com/repos/{repo}/actions/runs/{run}/artifacts"
+    api = f"https://api.github.com/repos/{repo}/actions/runs/{run}/artifacts?" + urlencode({"name": name})
     deadline = time.monotonic() + 210
     while time.monotonic() < deadline:
         req = urllib.request.Request(api, headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
