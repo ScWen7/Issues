@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.4 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.5 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -63,6 +63,8 @@
 **Provider Adapter（宿主适配器）**：将平台统一执行契约映射为具体 Agent 工具或远端执行服务的协议、启动参数、消息、会话、取消和用量语义。
 
 **Execution Environment（执行环境）**：一次 Run 使用的工作目录、代码或文件输入、运行配置、临时目录、技能和工具配置等本地资源集合。
+
+**工作副本** 是本次 Run 或节点尝试获准使用的实际目录及其输入基准。执行、复用和回收均保留本地资源身份；可迁移的候选以提交和具名制品摘要识别。
 
 **Session（宿主会话）**：Agent 工具维护的对话 / 线程连续性资源，可被多个 Run 先后引用；其恢复能力受宿主、账号、机器和工作目录条件影响。
 

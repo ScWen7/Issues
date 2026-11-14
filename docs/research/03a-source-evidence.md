@@ -4,6 +4,7 @@
 第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
 第一阶段采用源码与测试断言阅读。第二阶段的四份固定源码、上游定向测试、真实 CLI 回环实验及设计模型见[第二阶段研究](#11-第二阶段宿主协议与本地观察)。  
 第三阶段用两个真实 CLI 和 Multica 服务端验证上下文换版、共享任务身份与报告归属。[第三阶段研究](#12-第三阶段上下文与任务身份)  
+第四阶段沿两个真实 Git 候选、XLSX、脚本与 Daemon 回报检查制品及结果归属。[第四阶段研究](#13-第四阶段工作副本受管脚本与结果交接)  
 平台设计入口：[专题三 A：执行平面与宿主适配](../architecture/03a-execution-plane.md)
 
 ## 1. 已追踪的底层路径
@@ -27,7 +28,7 @@
 
 - [Runtime / Task 数据结构](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L12-L120)
 - [Daemon ClaimTasks 客户端](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/client.go#L230-L370)
-- [WS RPC 优先领取](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/wsrpc.go#L315-L387)
+- [WS RPC 优先领取](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/wsrpc.go#L315-L386)
 - [服务端批量领取](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2100-L2380)
 - [StartTask 绑定 claim generation](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4674-L4794)
 - [Runtime / Daemon 官方说明](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/apps/docs/content/docs/daemon-runtimes.mdx#L12-L23)
@@ -45,7 +46,7 @@
 - [统一 Backend / Session / Message / Result 契约](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L18-L120)
 - [Session 的流式消息、补充指令与终态能力](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L194-L248)
 - [Backend 工厂与 Provider 路由](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L449-L574)
-- [Runtime Identity 与 Protocol Family 映射](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/builtin_runtimes.go#L18-L204)
+- [Runtime Identity 与 Protocol Family 映射](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/builtin_runtimes.go#L18-L203)
 - [Claude CLI 适配入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L56-L180)
 - [Codex Backend 重试与 Session 包装](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L956-L1082)
 - [OpenCode ACP 选择逻辑](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/opencode_acp.go#L97-L180)
@@ -128,7 +129,7 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 ### 5.1 Runtime 注册与配置漂移
 
 - [Daemon Runtime 探测与注册](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L2923-L3238)
-- [Runtime Profile 测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/runtime_profile_test.go#L205-L545)
+- [Runtime Profile 测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/runtime_profile_test.go#L205-L544)
 - [服务端注册与 Runtime Upsert](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L448-L572)
 - [Runtime 所有者 / Daemon 身份授权](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L58-L227)
 - [心跳与在线状态更新](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L1483-L1605)
@@ -145,13 +146,13 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 - [Claim 与 Start 入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2100-L2455)
 - [StartTask claim generation 校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4674-L4794)
 - [Runtime heartbeat 与授权校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L1483-L1605)
-- [Claim 决策原因分类](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_claim_decision.go#L41-L192)
+- [Claim 决策原因分类](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_claim_decision.go#L41-L191)
 
 **源码观察：** Claim 响应有交付截止和失败重排；claim-aware Start 使用 Runtime ID + dispatched_at 识别具体 claim generation；Heartbeat 同时承载在线状态和服务端发给 Runtime 的待处理命令。三者分别回答“拿到工作”“当前领取者仍有权开始”“执行资源仍在线”。
 
 ### 5.3 进程树停止与执行准备隔离
 
-- [进程树统一控制入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/processtree/run.go#L19-L93)
+- [进程树统一控制入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/processtree/run.go#L19-L92)
 - [Unix 进程组 interrupt / stop / finish](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/processtree/controller_unix.go#L17-L88)
 - [执行环境准备的隔离 helper](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/isolation.go#L109-L222)
 - [EnvRoot Claim 与复用锁](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/execenv.go#L1277-L1453)
@@ -301,10 +302,10 @@ fresh fallback 在该原生分支中执行一次，并重新构造冷启动上�
 
 源码：
 - [Agent 与 Runtime 容量检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L3684-L3853)
-- [Runtime 容量 Advisory Lock](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/runtime.sql#L694-L727)
+- [Runtime 容量 Advisory Lock](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/runtime.sql#L694-L726)
 - [Agent 并发竞争数据库测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_claim_race_test.go#L22-L88)
-- [Runtime 并发上限数据库测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_runtime_concurrency_db_test.go#L55-L306)
-- [Runtime 上限修改与 Claim 锁同步测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_concurrency_test.go#L20-L134)
+- [Runtime 并发上限数据库测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_runtime_concurrency_db_test.go#L55-L305)
+- [Runtime 上限修改与 Claim 锁同步测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_concurrency_test.go#L20-L133)
 
 | 层次 | 控制者 | 约束对象 |
 |---|---|---|
@@ -323,7 +324,7 @@ Agent 容量检查在 Agent 行锁内完成。Runtime 容量使用事务级 Advi
 - [Start claim generation 锁定 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1002-L1008)
 - [StartTaskForClaim 事务](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4480-L4560)
 - [Start 请求携带 runtime_id / dispatched_at](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4674-L4794)
-- [Start 丢失回执、重领代次、并发重放和取消竞争测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_start_claim_test.go#L17-L213)
+- [Start 丢失回执、重领代次、并发重放和取消竞争测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_start_claim_test.go#L17-L212)
 
 Claim 将任务从 queued 改为 dispatched，并写入 dispatched_at 和短期 prepare_lease_expires_at。Start 存在两条兼容路径：
 
@@ -343,9 +344,9 @@ Claim 成功但响应未送达时，90 秒 recovery window 之后，且 prepare 
 源码：
 - [Daemon 每 Runtime 心跳循环与 WS fallback](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L4545-L4680)
 - [WS RuntimeLease 与连接生命周期](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemonws/hub.go#L23-L158)
-- [WS 心跳帧处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemonws/hub.go#L1087-L1174)
-- [批量 Heartbeat Scheduler](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/heartbeat_scheduler.go#L104-L325)
-- [Redis Liveness Store 与 DB fallback](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_liveness_store.go#L13-L141)
+- [WS 心跳帧处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemonws/hub.go#L1087-L1173)
+- [批量 Heartbeat Scheduler](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/heartbeat_scheduler.go#L104-L324)
+- [Redis Liveness Store 与 DB fallback](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_liveness_store.go#L13-L140)
 
 **代码事实：**
 1. Daemon 默认约每 15 秒为每个 Runtime 发送心跳；收到近期 WS heartbeat ack 时跳过重复 HTTP heartbeat，WS ack 连续缺失后 HTTP 自动恢复。
@@ -385,7 +386,7 @@ Runtime 被服务端删除时，Daemon 会从本地 Runtime 集合移除对应 I
 
 源码：
 - [Workspace、Daemon、Runtime Owner 三层校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L58-L160)
-- [Runtime Owner / Shared With 判定](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/runtime_access.go#L12-L30)
+- [Runtime Owner / Shared With 判定](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/runtime_access.go#L12-L15)
 - [Claim 最终交付事务与锁定重验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2440-L2540)
 - [跨 Workspace、Ownerless Runtime 拒绝测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_batch_claim_test.go#L231-L347)
 - [Runtime 可见性撤销测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_visibility_revocation_test.go#L1-L260)
@@ -523,3 +524,49 @@ go test -count=1 -run '^Test(IssueReadCommandsUseInjectedTaskToken|IssueReadComm
 2. 用真实工作副本和受管 Script 产出订单导出 C2。A2 用不同角色和订单范围核对；A3 对候选实际文件核对付款时间、未付款空值和时区，记录候选摘要、执行版本、退出与检查结果。
 3. 在真实 Daemon 和共享 Runtime 上复跑两端交接。在节点尝试换代、撤销后回报、重复上报与跨机恢复时，核对关联到的 Run、尝试、制品和历史；对比服务端已取消与宿主已停止的时间点。SOP 专属的 Grant 检查本轮由设计模型验证，服务端实现和在途回报竞争留在集成阶段。
 4. 对 Prepare 跨领取代次和同一 Issue / Agent 的 SOP 并行设置独立工作副本，检查迟到的旧进程写入、目录占用、清理与 C2 接续。结合这些结果确定结构化回报和制品回收规则。
+
+## 13. 第四阶段：工作副本、受管脚本与结果交接
+
+本轮从同一订单导出规则 D2 出发，把两个真实 Git 提交、导出的 XLSX、核验器、结构化报告和控制平面回执对到同一次节点尝试。实验分段使用同一批报告或文件字节衔接。业务数据取自四类角色和三个合成订单，宿主使用协议夹具，Daemon 与 PostgreSQL 使用 Multica 的真实实现。专题一保留其完整验收规则。[阶段设计](../architecture/03a-execution-plane.md#48-结构化节点结果与制品回报)
+
+| 要回答的问题 | 实际测到的结果 | 复跑与固定源码 |
+|---|---|---|
+| 谁可并行，哪一代可继续写？ | 同 Issue、同 Agent 的另一讨论等待，不同 Agent 能分别领取。本地锁保护占用的工作副本；G2 已获准开工后，G1 仍可在独立目录完成准备，随后 Start 返回 409。G1 清理后 G2 分支保留自己的改动。原生 20 项 execenv 与 9 项 Daemon 回归，另有 2 项组合用例 | [工作区、领取与恢复](topic-03a/workspace-continuity.md) |
+| 接收方如何重建 C2？ | 只发布 C1 时，独立接收仓库在 fetch 后缺少 C2；发布后以固定 C2 提交检出，从 HTTP 取得东区 XLSX 并复核摘要。迟到推送移动了 main，已检出的 C2 保持原值。附件被改动一个字节、长度相同时，接收方拒收且保留原件。Git HTTP 与附件 HTTP 均在本机 | [独立接收端交接](topic-03a/workspace-continuity.md#从独立接收端取回-c2) |
+| 核验脚本退出 0，工作流该往哪边走？ | C1 的 XLSX 格式和金额正确，但东区多看了一条西区订单。C1 退出 0、A2 失败、A3 通过，进入返工。C2 退出 0、A2/A3 通过。真实 TeamAI 本地命令驱动重算两份报告，两个后续节点按报告分支；缺输入时验证器退出 1，无报告 | [工作副本、四角色、五个内容反例和 TeamAI](topic-03a/order-export-workspace.md) · [C1](topic-03a/fixtures/order-export-c1.json) · [C2](topic-03a/fixtures/order-export-c2.json) |
+| 下载的工作簿是否就是核验过的工作簿？ | 同一份 5,494 字节 XLSX 走 LoopForge 普通 Runner 具名输出，JSON 接收端得到 9,406 字节，ZIP 无法打开。走 Multica 授权附件上传下载，长度、SHA-256 与字节完全一致。重复上传相同内容取得不同附件 ID | [真实协议与附件对照](topic-03a/binary-artifacts.md) |
+| 发出回报后断线、撤销或旧回复晚到，会改写哪次结果？ | 真实 Daemon 的 C2 回报在服务端落库后首次收到 503，待确认队列从 1 到 0，重复回调只留一条源评论。重放 C1 后两份原报告仍可分别读取。按 C1 留下的本机路径，则已读到 C2。撤销后服务端先取消，再观察到本机子进程退出与一次取消确认。另复跑 5 项原生终态队列测试 | [生产 Daemon / 服务端 / PostgreSQL 贯通](topic-03a/result-handoff.md) |
+| 平台何时允许 SOP 消费？ | 13 项 SQLite 设计原型测试通过。包含对照派发、Grant、核验器版本、候选提交、供应端文件摘要和验收值。首交并发与缺附件补齐后并发分别重复 50 次，两种情形均只消费一次。当前结果与旧尝试证据分别归档 | [接收原型与并发断言](../../prototypes/topic-03a/result-admission/test_admission.py) |
+
+**三个上游各能复用什么。** Multica 的领取、运行身份、终态重放和附件读写可作为执行底座。LoopForge 在 Script 节点运行前准备工作区、按运行范围启动命令，在自动检查前校验声明制品，并在成功提交节点结果时核对尝试和执行代次。其具名文件与节点尝试关联，适合追溯返工。TeamAI 的命令产生退出和结构化输出，后续节点可根据这些输出选择动作；其驱动和派发把尝试、修订及来源带回。这里借用命令与回报机制，平台的成员关系、分派和结果仍由中心工作模型维护。[LoopForge 的命令执行](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L597-L637) · [产物门禁与提交](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L1015-L1043) · [制品先于检查的测试](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/engine_test.go#L2521-L2553) · [TeamAI 命令到回报](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/protocol.ts#L1023-L1043)
+
+### 原型与回归如何复跑
+
+1. 按[订单实验](topic-03a/order-export-workspace.md#复跑)安装 Python 依赖并运行，输出 C1/C2 工作副本、各角色实际文件和核验报告。C2 东区原件 SHA-256 为 `5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852`。运行文中的 TeamAI 命令可验证回报确实驱动后续节点。
+2. 将 C2 的 east.xlsx 作为[制品传输对照](topic-03a/binary-artifacts.md#复跑)的输入，将 C1/C2 的 report.json 作为[终态回报实测](topic-03a/result-handoff.md)的输入。各自的原生存储、服务端认证及隔离数据库条件见对应研究页。
+3. 参照[工作区实验](topic-03a/workspace-continuity.md#复跑)运行两个组合用例与原生回归。在本项目根目录执行下面两条命令，可重建订单样本、核对平台接收规则，并回归专题二、三 A 既有的 38 项状态模型测试。
+
+```bash
+python3 prototypes/topic-03a/result-admission/test_admission.py
+node --test prototypes/topic-02/state-model.test.mjs prototypes/topic-03a/local-observation.test.mjs prototypes/topic-03a/context-decision.test.mjs
+```
+
+LoopForge 固定提交 `97b3cdc`、Go 1.26.11，原生定向回归的以下 8 个顶层测试全部通过。覆盖脚本顺序、逐仓库产物、制品门禁、旧代/旧尝试、最近尝试和准备脚本的重复执行。在该上游仓库根目录执行。
+
+```bash
+go test -count=1 -run '^Test(ShellAndPythonScriptNodesExecuteInOrder|ArtifactContractIsValidatedBeforeAutomaticGate|RunnerScriptAndCommandTerminalResults|RepositoryScopedRoleGateAndScriptArtifacts|StaleOwnerCannotFailAfterGenerationTakeover|StaleAttemptFailureIsIgnored|ImportChildArtifactsTakesNewestAttempt|WorkspacePreparationRecordFailureDoesNotRetrySuccessfulBusinessScript)$' ./internal/engine
+```
+
+TeamAI 的业务贯穿采用专题二固定提交 `556b524`，C1 和 C2 都通过真实 CLI 及本地命令驱动。另在专题三宿主研究提交 `1bc2ce1` 上独立运行 shell-command 原生测试，5 项通过，覆盖进程停止、超时、输出和启动失败。一次并跑交接、工作区与命令的扩展原生套件被运行环境终止（退出 137）；本轮没有该组合的通过结果。可在该版本的 checkout 用 `npm ci` 安装依赖后分别执行下列命令。[命令执行原生测试](https://github.com/Tencent/teamai-cli/blob/1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956/src/__tests__/shell-command.test.ts)
+
+```bash
+./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 src/__tests__/shell-command.test.ts
+./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 src/__tests__/workflow-handoff-ends-and-workspaces.test.ts
+./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 src/__tests__/workflow-place.test.ts
+```
+
+### 第五阶段验收输入
+
+- 用两台独立主机与各自的成员身份跑一次跨机接续。原机离线、另一台按精确提交及具名附件恢复、原机重连后发送旧结果，把三次观察对到同一 Issue 和各自的 Run。记录接管时不可达的未提交文件和仍占用的资源。
+- 汇总中心派发、本地关联和事后补录三种入口在每个已测宿主上的能力。逐项注明证据由谁提供、缺失时用户看到什么、重要决定换版后怎样继续，并据此明确 3A 交给 3B 的资产加载回执。
+- 对 Codex 0.167.0-alpha.4 的项目 AGENTS.md 通道，本轮重跑仍在原生文件沙盒创建 NETLINK_ROUTE socket 时被宿主环境拒绝，模型请求数为零。保留正常文件沙盒的独立主机复跑项。真实部门订单服务、其余验收项和用户接受按专题一另行核验。

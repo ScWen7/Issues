@@ -4,9 +4,9 @@
 
 ## 当前交付
 
-当前交付为专题三 A「执行平面与宿主适配」V0.4 阶段研究稿。第一阶段追踪 Runtime / Daemon，第二阶段确定本地执行分段、Run 与用量去重和选区共享。第三阶段实测两个宿主如何载入换版规则、Skill 和 MCP，以及共享 Runtime 上谁可以提交哪份报告。[阶段设计](docs/architecture/03a-execution-plane.md#47-上下文注入与加载回执) · [实测结果与复跑要求](docs/research/03a-source-evidence.md#12-第三阶段上下文与任务身份)
+当前交付为专题三 A「执行平面与宿主适配」V0.5 阶段研究稿。第四阶段用真实 Git 工作副本生成订单导出 XLSX，跑通 C1 返工、C2 通过、终态回报重发和文件下载，并验证共享 Runtime 撤销与本地进程停止的先后关系。[阶段设计](docs/architecture/03a-execution-plane.md#48-结构化节点结果与制品回报) · [第四阶段实验与源码](docs/research/03a-source-evidence.md#13-第四阶段工作副本受管脚本与结果交接)
 
-下一阶段验证工作区、受管 Script 与结构化回报。用订单导出候选 C1 / C2 检查工作副本、实际导出内容、节点尝试和制品归属，并补齐跨机接续与旧尝试迟到的场景。[验证顺序](docs/architecture/03a-execution-plane.md#7-本轮研究顺序)
+下一阶段收敛专题三 A 的完整方案，重点补两台独立机器之间的执行接续，以及工作区、候选、会话和制品在原机离线时各自的恢复条件。[研究顺序](docs/architecture/03a-execution-plane.md#7-本轮研究顺序)
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
@@ -42,6 +42,6 @@
 
 ## 研究与核验
 
-专题 3A 第三阶段完成 24 项上游定向回归、8 项新增设计模型测试，以及两个真实 CLI 的本地模型协议实验。共享 Runtime 使用真实认证与 PostgreSQL，已将宿主报告摘要与付款时间检查失败值交回源 Issue。真实导出内容、跨机并发与账单对账分别留在后续集成场景。第二阶段的 13 项归属模型测试保留并复跑。[实验索引](docs/research/03a-source-evidence.md#12-第三阶段上下文与任务身份)
+专题三 A 的四阶段分别验证 Runtime 与领取、本地会话与执行归属、上下文与任务身份、实际工作副本及交付。订单导出的第四阶段记录涵盖真实宿主协议适配、实际 Daemon、PostgreSQL、二进制附件与脚本。各项对照保留版本、输入和复跑命令。[研究记录](docs/research/03a-source-evidence.md)
 
 参考仓库副本和阶段笔记存放于已忽略的 `.tmp/`；正式文档引用固定的上游源码链接，不依赖临时目录长期存在。

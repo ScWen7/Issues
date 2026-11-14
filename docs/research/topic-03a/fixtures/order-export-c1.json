@@ -1,0 +1,68 @@
+{
+  "A2": false,
+  "A3": true,
+  "artifacts": [
+    {
+      "bytes": 5534,
+      "name": "east.xlsx",
+      "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+    },
+    {
+      "bytes": 5444,
+      "name": "west.xlsx",
+      "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+    },
+    {
+      "bytes": 5534,
+      "name": "cross.xlsx",
+      "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+    }
+  ],
+  "attempt": 1,
+  "candidate": "C1",
+  "checks": {
+    "cross": {
+      "A2": true,
+      "A3": true,
+      "exit": 0,
+      "ids": [
+        "A-101",
+        "A-102",
+        "B-201"
+      ],
+      "workbook": true
+    },
+    "east": {
+      "A2": false,
+      "A3": true,
+      "exit": 0,
+      "ids": [
+        "A-101",
+        "A-102",
+        "B-201"
+      ],
+      "workbook": true
+    },
+    "viewer": {
+      "A2": true,
+      "exit": 3,
+      "workbook": false
+    },
+    "west": {
+      "A2": true,
+      "A3": true,
+      "exit": 0,
+      "ids": [
+        "B-201"
+      ],
+      "workbook": true
+    }
+  },
+  "commit": "6880625de52ceb834e3e60b07cd8748c4ad79058",
+  "issue": "order-export-verification",
+  "node": "verify-order-export",
+  "rule": "D2",
+  "run": "verify-C1",
+  "verdict": "rework",
+  "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c"
+}
