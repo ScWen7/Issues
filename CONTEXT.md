@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3 方案使用的业务含义，供案例和跨专题讨论保持一致。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3 与[专题二 V0.1](docs/architecture/02-sop-workflow.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -63,6 +63,12 @@
 **Workflow（工作流）**：对有组织工作过程的统称；TeamAI、LoopForge 的同名执行机制需要与 Project Workflow 分层衔接，Issue 状态统一由现有工作机制管理。
 
 **SOP Execution（流程执行实例）**：某个 SOP 版本在 Issue 或其明确工作范围内的一次调用及进度，关联实际执行、决定和制品。
+
+**节点尝试（Node Attempt）** 是某个 SOP 节点针对指定输入的一次尝试。实际 Agent 或 Script 执行关联所属 Issue 的 Run，依赖汇合和纯人工决定各记录自身的事实。重试和返工保留前次尝试及证据。
+
+**制品契约（Artifact Contract）** 规定一次交付要提供的具名输出、版本或摘要、生产者以及消费者要求的检查。制品可获取、内容核验和业务接受分别记录。
+
+**人工门禁（Human Gate）** 请求有权的成员对当前问题给出决定。问题关联流程实例、节点轮次、候选和适用标准。工作流引用同一份 Issue 决定，按此次放行、例外或验收的权限生效。
 
 **Knowledge（正式知识）**：具有来源、适用范围和有效版本、已被认可可供后续工作使用的项目或团队知识。候选经验经确认和发布后成为正式知识。
 
