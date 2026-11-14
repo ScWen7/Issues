@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.3 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.4 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -40,6 +40,8 @@
 
 **Execution Contract（执行契约）**：一次工作执行所依据的目标、边界、输入、授权、预期产物和验证要求，以及相应结果的约定。
 
+**上下文回执（ContextReceipt）** 记录一次宿主调用收到哪些工作材料，有哪些投递、加载或当轮输入证据。材料由文件投递、由调用者显式补发、或从会话历史带入时分别标明来源，候选内容由对应验收标准核验。
+
 **Conversation（共享讨论）**：参与者围绕 Issue 形成的交流，可关联本地会话中选定共享的内容。私有会话、共享消息和正式决定具有不同效力。
 
 **Decision（决策）**：Issue 工作记录中有明确决定者、作用范围和依据的选择，包括澄清、审批、接管和验收。此语义不预设另一套独立决策管理系统。
@@ -65,6 +67,8 @@
 **Session（宿主会话）**：Agent 工具维护的对话 / 线程连续性资源，可被多个 Run 先后引用；其恢复能力受宿主、账号、机器和工作目录条件影响。
 
 **执行段** 表示同一次工作归属覆盖的一组可识别宿主活动，可由一个或多个回合组成。同一 Session 可以先后服务多个 Issue。平台通过宿主标识或已记录的调用关系把执行段关联到既有 Run 或外部执行来源，成员可在段内选择共享内容。
+
+**任务身份** 是 Agent 或 Script 为某次 Run 访问平台时使用的授权身份。回报保留实际执行主体、源任务和目标 Issue；Runtime 所有者、工作发起人和业务验收者按各自关系记录。
 
 **Script Executor（受管命令执行器）**：在授权 Runtime 上运行确定性命令，采集退出结果、输出、制品和副作用事实；与 Agent Adapter 共用 Run 生命周期，但不模拟 Agent Session。
 

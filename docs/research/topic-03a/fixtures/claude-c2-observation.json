@@ -1,0 +1,385 @@
+{
+  "cli_processes": 10,
+  "user_turns": 12,
+  "model_requests": 14,
+  "results": {
+    "fresh": {
+      "disk_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "baseline": {
+      "disk_sha256": "a0db65cf9be3d330905f68ed8bf796cf61f83b30d64e1ebbf184416efdf1edbd",
+      "expected_content_sha256": "a0db65cf9be3d330905f68ed8bf796cf61f83b30d64e1ebbf184416efdf1edbd",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "restored": {
+      "disk_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[2].content[1].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "stale": {
+      "disk_sha256": "a0db65cf9be3d330905f68ed8bf796cf61f83b30d64e1ebbf184416efdf1edbd",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": false,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "absent": {
+      "disk_sha256": null,
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": false,
+      "instruction_hook": [],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "invoke": {
+      "disk_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        },
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [
+            "messages[2].content[1].text"
+          ],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [
+        [
+          "PreToolUse",
+          "toolu_order_skill",
+          "order-evidence"
+        ],
+        [
+          "PostToolUse",
+          "toolu_order_skill",
+          "order-evidence"
+        ]
+      ],
+      "mcp_requests": [],
+      "payment_time_check": false
+    },
+    "mcp-discover": {
+      "disk_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [
+            "tools[25].name"
+          ],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [
+        "initialize",
+        "tools/list"
+      ],
+      "payment_time_check": false
+    },
+    "mcp-call": {
+      "disk_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "expected_content_sha256": "d019c8dd026e1e380621526f9b73623cd373cccecb6cbe58bf4277908efb1961",
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [
+            "tools[25].name"
+          ],
+          "MCP_ORDER_CHECK_7B3A": []
+        },
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [
+            "messages[1].content[0].name",
+            "tools[25].name"
+          ],
+          "MCP_ORDER_CHECK_7B3A": [
+            "messages[2].content[0].content[0].text"
+          ]
+        }
+      ],
+      "tool_events": [
+        [
+          "PreToolUse",
+          "toolu_order_mcp",
+          null
+        ],
+        [
+          "PostToolUse",
+          "toolu_order_mcp",
+          null
+        ]
+      ],
+      "mcp_requests": [
+        "initialize",
+        "tools/list",
+        "tools/call"
+      ],
+      "payment_time_check": false
+    },
+    "active-baseline": {
+      "disk_expected_match": true,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "explicit_supplement": false,
+      "payment_time_check": false
+    },
+    "active-changed": {
+      "disk_expected_match": true,
+      "instruction_hook": [],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "explicit_supplement": false,
+      "payment_time_check": false
+    },
+    "active-supplement": {
+      "disk_expected_match": true,
+      "instruction_hook": [],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[4].content[1].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "explicit_supplement": true,
+      "payment_time_check": false
+    },
+    "multica-materialized": {
+      "disk_sha256": "55ded205902c995ab41e733f8d4261004b033e7bd751ff33158cb6e8676b5ab0",
+      "expected_content_sha256": null,
+      "disk_expected_match": null,
+      "instruction_hook": [
+        [
+          "Project",
+          "session_start"
+        ]
+      ],
+      "request_marker_locations": [
+        {
+          "ORDER_RULE_F831_V1_NO_PAYMENT_TIME": [],
+          "ORDER_RULE_5A72_V2_INCLUDE_PAYMENT_TIME": [
+            "messages[0].content[5].text"
+          ],
+          "ORDER_SKILL_DESC_9483": [
+            "messages[0].content[3].text"
+          ],
+          "ORDER_SKILL_BODY_C93E": [],
+          "mcp__context_fixture__check_order": [],
+          "MCP_ORDER_CHECK_7B3A": []
+        }
+      ],
+      "tool_events": [],
+      "mcp_requests": [],
+      "payment_time_check": false
+    }
+  }
+}

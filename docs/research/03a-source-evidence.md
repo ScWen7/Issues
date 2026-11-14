@@ -3,6 +3,7 @@
 更新日期：2026-11-15  
 第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
 第一阶段采用源码与测试断言阅读。第二阶段的四份固定源码、上游定向测试、真实 CLI 回环实验及设计模型见[第二阶段研究](#11-第二阶段宿主协议与本地观察)。  
+第三阶段用两个真实 CLI 和 Multica 服务端验证上下文换版、共享任务身份与报告归属。[第三阶段研究](#12-第三阶段上下文与任务身份)  
 平台设计入口：[专题三 A：执行平面与宿主适配](../architecture/03a-execution-plane.md)
 
 ## 1. 已追踪的底层路径
@@ -478,3 +479,47 @@ node --test prototypes/topic-03a/local-observation.test.mjs
 [Codex 探针](../../prototypes/topic-03a/codex_observation_probe.py)使用 codex-cli 0.167.0-alpha.4。[Claude Code 探针](../../prototypes/topic-03a/claude-local-probe.py)使用 Claude Code 2.1.325。[13 项设计模型测试](../../prototypes/topic-03a/local-observation.test.mjs)通过，涵盖重复观察、部分重叠绑定、切换 Issue、撤权后补传、累计值与重置、父子计量覆盖和 C1 迟到回报。模型验证单进程下的归属规则，两个探针验证各自宿主的实际行为。
 
 后续集成验收以同一成员同时打开 CLI 和 IDE 为起点。让已授权的本地适配器与中心 Daemon 同时观察同一回合，再断网、缩小选区、重连、补录并在新回合切换 Issue。应得到原 Run 或明确的外部观察、有效选区的单份投影，以及与唯一原生请求集合一致的用量。另验证无原始标识、部分消息缺失、父子代理并行和只有会话总额时的降级结果。下一阶段研究上下文投递、加载回执与任务身份。
+
+## 12. 第三阶段：上下文与任务身份
+
+订单导出的 D2 要求在 C2 增加付款时间列。实验沿着两个问题追踪同一份报告：D2 在哪一轮到达宿主，谁有权把 C2 的核验结果交到哪个 Issue。宿主使用真实可执行文件、本机模拟模型服务和合成工作材料；权限实验运行 Multica 生产 handler、认证中间件与实际迁移过的 PostgreSQL。两组实验以同一份结果文件的 SHA-256 贯通。
+
+| 已跑的实验 | 主要结果 | 可复核材料 |
+|---|---|---|
+| Codex 0.144.6 项目文件与 HOME；0.167.0-alpha.4 HOME。每组 11 回合、12 次模型请求 | 两个 0.144.6 通道热继续、同服务恢复均只带 D1，跨进程恢复带回历史 D1 并加入新版 D2。显式补发可在原线程交付 D2。alpha 的 HOME 热继续能读取 D2。另验证 Skill 正文和 MCP 调用者、结果去向 | [版本、源码与矩阵](topic-03a/codex-context.md) · [探针](../../prototypes/topic-03a/codex-context-probe.py) |
+| Claude Code 2.1.325，含 Multica 原生材料生成，共 10 个进程、12 回合、14 次模型请求 | 同进程立即续轮仍只带 D1；显式补发和跨进程恢复都能把 D2 放进请求，进入的通道不同。文件过期仍可触发路径 Hook。Skill 描述与正文、MCP 工具发现与调用均可分别举证 | [版本、源码与矩阵](topic-03a/claude-context.md) · [探针](../../prototypes/topic-03a/claude-context-probe.py) |
+| Multica fdfbfcd，共享 Runtime、真实 Claim / Start 与目标 Issue 读写；PostgreSQL 17.5 迁移至 657 | 在独立用例中各用内建报告和 Claude 实测报告跑一遍。获授权评论 201，私有项目 404，过期凭据 401，撤销后原任务读写均 401；源 Issue 回读作者、源任务、摘要及失败值 | [权限调用链、结果、复跑命令](topic-03a/shared-runtime-identity.md) · [集成用例](../../prototypes/topic-03a/shared-runtime-identity_test.go) · [本次输入文件](topic-03a/fixtures/claude-c2-observation.json) |
+| Multica 上游 24 项定向回归；本项目 8 项新增设计模型测试 | 上游 Daemon 10、execenv 7、CLI 7 全部通过，覆盖投递、Skill、身份和工作区 marker。模型覆盖历史与本轮、证据冲突、受托操作范围、迟到回报和失败检查值 | [模型断言](../../prototypes/topic-03a/context-decision.test.mjs)；原始命令见下文 |
+
+**为什么要保留每次尝试。** Daemon 在 Backend 执行前编制 ContextReceipt。文件加载等级沿用固定宿主的既有探测，记录中的指纹取 SHA-256 前 12 个十六进制字符。恢复失败后开启新会话重试时，Daemon 为同一 Task 再次上报，服务端以 task_id 更新原回执。该机制便于排查最近一次执行准备。C1 用哪版规则、C2 何时补发和工具在哪一轮使用，需保留带调用及回合的证据，并关联到原尝试。候选和报告以完整内容摘要核对。[等级与版本筛选](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L37-L127) · [构建与指纹](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L151-L265) · [首次上报](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9206-L9231) · [重试上报](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9298-L9315) · [存储行为](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_context_receipt.sql#L1-L13)
+
+**从文件到 Issue 的实测结果。** Multica 原生函数将 D2 写入项目文件，Claude 读取后，其模型请求含 D2。合成模型固定返回只含 `order_id` 的列清单，独立字段检查得到 `payment_time_check=false`。源 Issue 的评论回读得到同一文件摘要 `fa62cdc8d28be2b59e735ce051d687b44f914c5b1b641d678da604a1c161c64b` 和相同的失败值。服务端确认了评论作者、源任务、目标和回报内容；D2 对应 A3 内容要求，这次候选缺少必需字段。A2 的导出资格与订单可见范围、A3 的空值和时区规则仍需用实际导出样例检查。[专题一订单导出案例](../architecture/01-unified-work-lifecycle.md) · [本次回读对应的宿主报告](topic-03a/fixtures/claude-c2-observation.json)
+
+### 在本地复跑
+
+在本项目根目录执行。将 `MULTICA_CHECKOUT` 指向上述固定提交的独立工作副本，使用 Go 1.26.9、Python 3.10+ 和目标宿主版本。构建器通过 Go overlay 调用上游实现。在 Codex 命令中用 PATH 选择目标版本；Claude 命令接受 CLI 的绝对路径。使用临时 HOME 与只监听本机的模型端点。安装来源与具体选项见两个宿主的实验页。
+
+```bash
+python3 prototypes/topic-03a/multica-context/build.py "$MULTICA_CHECKOUT" /tmp/ap-context-materialize
+AP_CONTEXT_MATERIALIZER=/tmp/ap-context-materialize python3 prototypes/topic-03a/codex-context-probe.py project
+python3 prototypes/topic-03a/codex-context-probe.py home
+AP_CONTEXT_MATERIALIZER=/tmp/ap-context-materialize python3 prototypes/topic-03a/claude-context-probe.py "$CLAUDE_CLI" > /tmp/claude-c2-observation.json
+node --test prototypes/topic-03a/context-decision.test.mjs prototypes/topic-03a/local-observation.test.mjs
+```
+
+按[服务端复跑说明](topic-03a/shared-runtime-identity.md#复跑)准备一次性数据库，先执行内建报告组，再把 `AP_CANDIDATE_REPORT` 指向刚生成的 JSON 或上述已提交的固定样本，执行同一组断言。动态生成的报告用自身完整摘要比对，固定样本可核对此处列出的摘要。宿主实验与服务端测试交接的是结果文件；本轮没有运行跨机常驻 Daemon、商业模型端点或完整订单导出应用。
+
+以下为 24 项上游回归的选集，在 Multica 工作副本的 server 目录运行。定向测试读取固定提交的生产源码。此次运行在 Daemon、CLI 两个较大的包用 Go overlay 略去无关测试文件以控制编译资源，保留所选测试源码、生产实现与依赖。
+
+```bash
+go test -count=1 -run '^Test(BuildContextReceiptFileDeliveredBrief|BuildContextReceiptLoadStates|BuildContextReceiptOmitsEmptySections|ExistingRuntimeConfigContentStripsManagedBlock|ReportContextReceiptPostsAndToleratesOldServer|ContextReceiptFailedBriefWrite|ContextReceiptUsesMaterializedSkill|RunTaskRejectsMismatchedAgentIdentityBeforePreparation|ValidateTaskIdentityRequiresExpandedAgent|ValidateTaskIdentityAcceptsMatchingAgent)$' ./internal/daemon
+go test -count=1 -run '^Test(WriteRuntimeConfigFilePreservesUserContent|WriteRuntimeConfigFileReplacesExistingBlock|WriteRuntimeConfigFileIsIdempotent|PreparedSkillNamesMatchPrivateDiscoveryDirectories|WriteContextFilesHydratesDisableModelInvocationSkillButDoesNotAdvertiseIt|Prepare_WritesWorkspacesRootMarker|Reuse_SelfHealsWorkspacesRootMarker)$' ./internal/daemon/execenv
+go test -count=1 -run '^Test(IssueReadCommandsUseInjectedTaskToken|IssueReadCommandsFailClosedWithoutTaskToken|NewAPIClient_WorkdirMarkerRequiresTaskToken|NewAPIClient_AgentContextRequiresTaskToken|ResolveWorkspaceID_AgentContextSkipsConfig|ResolveToken_AgentContextSkipsConfig|NewAPIClient_WorkdirParentEscapeFailsClosed)$' ./cmd/multica
+```
+
+### 留给下一阶段的测试要求
+
+1. 在支持 Codex 文件沙盒的机器上用 0.167.0-alpha.4 跑项目 `AGENTS.md` 通道。固定预期 D1 → D2、热继续、显式补发、同进程恢复、跨进程恢复、文件移除；保存各次实际请求对应的版本。当前容器在读取项目文件阶段遇到 NETLINK_ROUTE 限制。该版本已跑通 HOME 组；以上项目通道保留为独立验项。
+2. 用真实工作副本和受管 Script 产出订单导出 C2。A2 用不同角色和订单范围核对；A3 对候选实际文件核对付款时间、未付款空值和时区，记录候选摘要、执行版本、退出与检查结果。
+3. 在真实 Daemon 和共享 Runtime 上复跑两端交接。在节点尝试换代、撤销后回报、重复上报与跨机恢复时，核对关联到的 Run、尝试、制品和历史；对比服务端已取消与宿主已停止的时间点。SOP 专属的 Grant 检查本轮由设计模型验证，服务端实现和在途回报竞争留在集成阶段。
+4. 对 Prepare 跨领取代次和同一 Issue / Agent 的 SOP 并行设置独立工作副本，检查迟到的旧进程写入、目录占用、清理与 C2 接续。结合这些结果确定结构化回报和制品回收规则。
