@@ -248,7 +248,9 @@ Script 不需要模拟 Agent Session，也不需要伪造模型消息。它应�
 
 ## 7.1 第一阶段研究结论
 
-第一阶段源码追踪已完成。当前采用的研究结论是：Host / Daemon / Runtime Instance 分层；机器批量 Claim、数据库逐 Agent 原子领取；Daemon 本地槽、Agent 上限、Runtime 上限三层容量控制；Claim Generation 保护 Start 与重放；心跳租约、Runtime Sweeper、reconnect grace 和启动孤儿恢复分流不同故障。详细证据、SQL 与测试断言见[源码研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
+第一阶段源码追踪已完成。当前采用的研究结论是：Host / Daemon / Runtime Instance 分层；机器批量 Claim、数据库逐 Agent 原子领取；Daemon 本地槽、Agent 上限、Runtime 上限三层容量控制；claim-aware Start 采用 Claim Generation 校验及幂等重放，legacy 路径保留兼容语义；在线新鲜度、按最后心跳起算的 reconnect grace 与任务 backstop 分别判定；普通 Daemon 与 Qoder 托管连接分别核验授权，启动孤儿恢复分流进程重启。详细证据、SQL 与测试断言见[源码研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
+
+本轮已校准新旧 Start、超时组合、托管授权与源码引用。后续保留三项输入：Prepare 跨代写入的故障注入、原生 Issue / Agent 串行与 SOP 并行的适配、共享 Runtime 的任务身份与有效权限。证据与承接阶段见[研究记录第 10.9 节](../research/03a-source-evidence.md#109-本轮收口与后续验证输入)。
 
 ## 8. 订单导出与后续原型的核对场景
 

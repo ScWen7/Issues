@@ -10,7 +10,7 @@
 | 研究主题 | 实际代码路径 | 初步发现 |
 |---|---|---|
 | Daemon / Runtime 身份 | `server/internal/daemon/types.go`、`daemon.go` Runtime 注册与运行时索引 | Daemon 是 Host 上的管理进程；Runtime 是 workspace 下的具体工具执行目标，provider 与 runtime profile 共同决定实际适配器 |
-| Claim 与 Start 分离 | `server/internal/daemon/client.go` Claim / Start；`server/internal/handler/daemon.go` Claim / StartTask | Claim 先占用任务，Daemon 完成本地准备后再 Start；Start 绑定 runtime_id 与 dispatched_at，旧 claim 返回冲突 |
+| Claim 与 Start 分离 | `server/internal/daemon/client.go` Claim / Start；`server/internal/handler/daemon.go` Claim / StartTask | Claim 先占用任务，Daemon 完成本地准备后再 Start；claim-aware Start 绑定 runtime_id 与 dispatched_at，旧 claim 返回冲突；legacy 路径保留兼容语义 |
 | 任务执行与终态 | `server/internal/daemon/daemon.go` handleTask / runTask / reportTaskResult；`client.go` Complete / Fail / Cancel Ack | Run 管理不止子进程生命周期，还包括进度、消息、Usage、会话 ID、工作目录、分支和清理确认 |
 | 取消与恢复 | `daemon.go` watchTaskCancellation / handleTask；`handler/daemon.go` AckTaskCancelled / CancelTask；`task_lifecycle.go` RecoverOrphanedTasks | 取消采用服务端状态检查与本地进程中断配合；取消后仍需回传保留的工作目录、分支和会话处置结果 |
 | Runtime / Agent 适配 | `server/pkg/agent/agent.go` Backend / Session / Result / New；`builtin_runtimes.go` ResolveBackend / NewRuntime | 多宿主通过统一 Backend 接口归一化，但底层协议和能力由各自 Adapter 实现；Runtime Identity 与 Protocol Family 分开 |
@@ -70,7 +70,7 @@
 
 ### 3.1 为什么 Claim 与 Start 分离
 
-本地准备可能包含仓库、工作目录、技能包、MCP、Provider Home 和上下文文件等步骤。若领取即标记 running，工作台和其他消费者可能读取一个尚未准备完成的工作目录。Multica 因此在本地准备后才调用 StartTask；Start 又绑定 runtime_id 与 dispatched_at，防止过期领取者启动已经转交的任务。
+本地准备可能包含仓库、工作目录、技能包、MCP、Provider Home 和上下文文件等步骤。若领取即标记 running，工作台和其他消费者可能读取一个尚未准备完成的工作目录。Multica 因此在本地准备后才调用 StartTask；claim-aware Start 再绑定 runtime_id 与 dispatched_at，防止过期领取者启动已经转交的任务。新旧路径的具体行为见[第 10.4 节](#104-claim--start-generation-与丢失响应恢复)。
 
 **本项目启发：** Run 生命周期至少需要区分领取、准备、实际启动和终态回报；SOP 节点的 ready 不能直接当作 Agent 已开工。
 
@@ -137,7 +137,7 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 1. Daemon 先在机器级探测本地 CLI，再按 Workspace 注册 Runtime；自定义 Runtime Profile 是 Workspace 配置，但由每台机器本地解析命令路径，只有命令在该 Host 可用的机器才注册对应 Runtime。
 2. Profile 只选择已支持的 Protocol Family，并配置 command / fixed args。命令行包装器可以复用现有协议族；协议不兼容的工具需要新的 Adapter。
 3. Runtime 注册有配置漂移收敛：profile 列表签名变化触发重新注册；本地 CLI 不可用、版本探测失败和确认不可执行的处理不同，避免一次探测故障就把正在运行的 Runtime 全部下线。
-4. Runtime 授权至少分 Workspace、Daemon ID、Runtime Owner 三层。Workspace 成员身份本身不足以领取其他成员机器的任务；daemon token 与特定 Daemon 和 Owner 绑定。
+4. Runtime 授权分 Workspace、Daemon ID 与资源授权校验。普通 daemon token 与特定 Daemon 和 Runtime Owner 绑定；Qoder 托管采用连接级凭据授权，具体分支见[第 10.7 节](#107-runtime-所有权与共享授权)。
 
 ### 5.2 Claim / Start / Heartbeat 的控制链
 
@@ -146,7 +146,7 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 - [Runtime heartbeat 与授权校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L1483-L1605)
 - [Claim 决策原因分类](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task_claim_decision.go#L41-L192)
 
-**源码观察：** Claim 响应有交付截止和失败重排；Start 使用 Runtime ID + dispatched_at 识别具体 claim generation；Heartbeat 同时承载在线状态和服务端发给 Runtime 的待处理命令。三者分别回答“拿到工作”“当前领取者仍有权开始”“执行资源仍在线”。
+**源码观察：** Claim 响应有交付截止和失败重排；claim-aware Start 使用 Runtime ID + dispatched_at 识别具体 claim generation；Heartbeat 同时承载在线状态和服务端发给 Runtime 的待处理命令。三者分别回答“拿到工作”“当前领取者仍有权开始”“执行资源仍在线”。
 
 ### 5.3 进程树停止与执行准备隔离
 
@@ -319,14 +319,21 @@ Agent 容量检查在 Agent 行锁内完成。Runtime 容量使用事务级 Advi
 
 源码：
 - [Claim 响应丢失重领 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L892-L990)
-- [Start claim generation 锁定 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L970-L990)
+- [Start claim generation 锁定 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1002-L1008)
 - [StartTaskForClaim 事务](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4480-L4560)
 - [Start 请求携带 runtime_id / dispatched_at](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4674-L4794)
 - [Start 丢失回执、重领代次、并发重放和取消竞争测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_start_claim_test.go#L17-L213)
 
-Claim 将任务从 queued 改为 dispatched，并写入 dispatched_at 和短期 prepare_lease_expires_at。Start 必须携带 task ID、Runtime ID 和本次 dispatched_at。服务端按三者锁定精确 Claim generation。同一 generation 的 Start 回执丢失后可以安全重放；已经 running 时返回同一个 started_at，不重复启动状态迁移。旧 generation 即使任务仍属于同一 Runtime，也会被拒绝。
+Claim 将任务从 queued 改为 dispatched，并写入 dispatched_at 和短期 prepare_lease_expires_at。Start 存在两条兼容路径：
 
-Claim 成功但响应未送达时，90 秒 recovery window 之后，且 prepare lease 已过期，服务端刷新 dispatched_at 并重新交付。环境准备超过初始 45 秒时，Daemon 通过 ExtendTaskPrepareLease 延长租约，避免仍在准备的任务被误回收。Cancel、reclaim 和 Start 对同一任务行锁串行化，取消提交后，迟到 Start 会冲突退出。
+| 路径 | 请求与状态检查 | 回执重放 |
+|---|---|---|
+| Claim-aware Start | 携带 task ID、Runtime ID 与本次 dispatched_at，服务端锁定精确领取代次；旧代次返回冲突 | 同代次已 running 时返回原 started_at，复用同次状态迁移 |
+| Legacy Start | Runtime ID 与 dispatched_at 均为空时调用原 StartTask，保留单次状态迁移行为 | 首次有效请求成功，重复请求返回 400；采用原有兼容语义 |
+
+新 Daemon 按 StartClaimSupported 选择代次请求和对应重试行为。代次校验及同代次幂等保证属于 claim-aware 路径。[Handler 分支](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4694-L4763)、[客户端选择](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/client.go#L510-L525)、[legacy 重复请求断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_start_claim_test.go#L166-L180)。
+
+Claim 成功但响应未送达时，90 秒 recovery window 之后，且 prepare lease 已过期，服务端刷新 dispatched_at 并重新交付。环境准备超过初始 45 秒时，Daemon 通过 ExtendTaskPrepareLease 延长租约，避免仍在准备的任务被误回收。claim-aware Start 与 cancel、reclaim 对同一任务行锁串行化；取消提交后，该路径的迟到 Start 返回冲突。
 
 **设计原因：** Runtime ID 只说明执行目标，不能识别同一任务的哪一次领取。dispatched_at 作为 generation token，使同 Runtime 重领、响应重放、取消和 Start 之间具备可比较的所有权版本。
 
@@ -345,8 +352,18 @@ Claim 成功但响应未送达时，90 秒 recovery window 之后，且 prepare 
 3. 生产 Heartbeat Scheduler 将 Runtime ID 合并，每 30 秒批量写一次 DB；Redis TTL 记录更近实时的 liveness。Redis 不可用时回退 DB heartbeat；批量写入遗漏项会进一步区分刚被明确下线、被 sweeper 竞争下线和已经删除。
 4. RuntimeClaimFreshnessSeconds 为 150 秒，覆盖 60 秒 DB heartbeat flush、15 秒 Daemon heartbeat 和 30 秒 batch scheduler 的最坏组合，并留出余量。
 5. Runtime Sweeper 每 30 秒运行。DB stale 候选还要经过 Redis liveness 过滤；Redis 不可用时按 DB stale window 工作。真正标记 offline 的 UPDATE 会再次核对 stale 条件，防止与刚到达的心跳竞争。
-6. Runtime 先标记 offline，活动任务按 3 小时 reconnect grace 延迟失败，避免短期网络分区直接杀掉仍在本地运行的进程。Daemon 真正重启时则通过启动后的 RecoverOrphanedTasksForRuntime 主动报告，不等待 grace 到期。
-7. 运行任务的 9000 秒 backstop 受 Runtime 心跳新鲜度约束，健康 Runtime 上的长任务不会仅因墙钟超时被扫掉；dispatched 的 300 秒 backstop则受 prepare lease 保护。
+6. Runtime 离线后的活动任务收敛使用默认 3 小时 reconnect grace，按最后心跳计算；缺少 last_seen_at 时采用 updated_at。Daemon 真正重启另走启动孤儿恢复路径。
+7. 在线判定、失联保护和任务 backstop 分别使用下表条件。数值为本固定版本的默认值。
+
+| 判定 | 条件与时间基准 |
+|---|---|
+| 领取及健康在线判定 | 采用 150 秒 Runtime 心跳新鲜度 |
+| 离线 Runtime 的活动任务收敛 | 心跳年龄超过默认 3 小时 grace，覆盖 dispatched / running / waiting_local_directory |
+| running backstop，Runtime 记录存在 | started_at 超过 9000 秒，且 Runtime 心跳年龄超过 grace |
+| dispatched backstop，Runtime 记录存在 | dispatched_at 超过 300 秒、prepare lease 已失效，且 Runtime 健康在线或心跳年龄已超过 grace |
+| Runtime 引用为空或记录缺失 | 按对应任务 backstop 条件另行收敛；dispatched 仍检查准备租约 |
+
+[FailStaleTasks 组合条件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1294-L1328)、[离线 Runtime 的 grace 条件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/runtime.sql#L300-L328)。
 
 **设计原因：** 在线状态需要兼顾实时性、DB 写入成本和网络分区。Redis 提供短期活跃证明，DB 保存持久状态，连接级 Lease 减少 WS 热路径查询；任务终止与 Runtime 变 offline 分开，让网络抖动不等于本地进程已经死亡。
 
@@ -378,11 +395,14 @@ Runtime 被服务端删除时，Daemon 会从本地 Runtime 集合移除对应 I
 |---|---|
 | Workspace | 请求身份是否有该 Workspace 的访问权 |
 | Daemon | daemon token 是否绑定请求中的 Daemon ID |
-| Runtime Owner | user credential 是否为 Runtime Owner；daemon token 的 owner 是否与 Runtime 当前 owner 一致 |
+| 普通 Daemon / Runtime Owner | 用户凭据对应 Runtime Owner；普通 daemon token 的 owner 与 Runtime 当前 owner 一致 |
+| Qoder 托管连接 | qoder-managed-* 在 Daemon ID 匹配后走连接级授权，校验连接启用、当前 token、hash、有效期及连接所有者的 Workspace owner/admin 身份 |
 | Private Runtime sharing | Agent Owner 是否为 Runtime Owner 或在 shared_with 范围内 |
 | Task delivery | 交付前锁定 Runtime 和 Agent，重新校验 owner、visibility、runtime binding，再签发任务级 token |
 
-Runtime 分享给其他成员只授予使用该执行资源的权限，不授予机器管理权限。Runtime Owner 缺失时不能签发任务级凭据，任务不会送到执行端。访问撤销会事务性取消受影响的活动任务并收敛关联的聊天输入、Session 指针和补充任务。
+普通本地 Runtime 的共享授予资源使用权，任务交付要求有效 Owner，并按当前共享范围复核。Qoder 托管按 Daemon 身份进入专门的连接凭据路径；普通本地 Qoder CLI 仍采用普通 Daemon 规则。访问撤销会事务性取消受影响的活动任务，并收敛关联的聊天输入、Session 指针和补充任务。
+
+[普通与托管绑定分支](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L132-L147)、[Qoder 连接凭据校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/qoder_connection.go#L596-L609)。
 
 ### 10.8 第一阶段结论
 
@@ -392,10 +412,28 @@ Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器
 
 1. Host、Daemon、Runtime Instance 分开建模；Runtime Instance 按 Workspace 和 Provider / Profile 形成。
 2. 以 Run 作为实际执行记录，派发需包含可比较的 Claim Generation；领取、准备、Start、进程启动和终态观察分别留证。
-3. 资源调度同时考虑 Host 本地槽、Runtime 容量和执行者 / Agent 容量；容量更新与 Claim 使用同一互斥机制。
+3. 资源调度同时考虑 Daemon 本地槽、Runtime 容量和执行者 / Agent 容量；容量更新与 Claim 使用同一互斥机制。
 4. 所有入口最终进入同一派发服务；数据库原子占用是并发正确性的最终依据，通知与轮询只负责降低延迟。
 5. Runtime 在线状态采用心跳租约与持久状态结合；短暂离线、进程退出、Daemon 重启和 Runtime 删除必须走不同恢复分支。
-6. Claim / Start / Result 回报都要绑定 Claim Generation；旧执行者的迟到 Start 和结果只能归档，不能覆盖当前代次。
+6. 平台后续验证逐项核对准备续租、Waiting、Start 与结果回报的代次资格；原生已核对的领取重放及 claim-aware Start 保护与待补链路分别记录。
 7. Workspace、Host / Daemon、Runtime Owner、共享授权和 Task Token 是不同权限层，最终交付时必须重新核验当前授权。
 
 本阶段完成源码路径与代表测试断言追踪，未执行上游 Go 测试。下一阶段按 V0.2 顺序进入“宿主与本地交互入口”，重点比较中心派发、成员从 CLI / IDE 主动关联、事后补录，以及会话观察和真实用量归属。
+
+### 10.9 本轮收口与后续验证输入
+
+已收口新旧 Start 路径、超时组合条件、Qoder 托管授权和 Start 锁定 SQL 引用。以下事项按固定提交核对后保留为后续研究输入。
+
+**Prepare 跨代写入。** 固定提交 fdfbfcd 中，准备续租按任务、Runtime 与准备状态更新；等待目录 `MarkAgentTaskWaitingLocalDirectory` 和失败更新按任务及活动状态匹配。这些更新条件未包含 dispatched_at，入口仍执行 Daemon / Runtime 授权检查。本轮关注同一仍获授权 Runtime 重领时的旧准备动作。[准备续租](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L989-L1000)、[等待目录](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1010-L1026)、[失败更新](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1201-L1214)、[执行者鉴权](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L220-L292)。
+
+续租失败仅记录 warning，准备流程继续；旧领取到达 Start 并收到 409 时，Daemon 识别 `errStartClaimRejected` 并丢弃其终态回报。静态链路揭示：旧准备在租约失效、任务重领后继续运行，若在到达 Start 前失败，普通失败回报仍可能命中当前活动任务。[续租失败处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L7494-L7526)、[Start 拒绝与普通失败分支](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L5956-L6031)。
+
+目录锁保护工作副本，同任务终态回报跟踪串行化本地发送；两处保护分别围绕目录占用与任务回报投递，领取代次隔离仍需逐项验证。[目录锁](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/execenv.go#L1464-L1503)、[终态回报跟踪](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L6539-L6600)。
+
+| 后续验证输入 | 已核对依据与待取得的结果 | 承接阶段 |
+|---|---|---|
+| Prepare 跨代写入 | 用同 Runtime 的租约失效、重领和旧准备失败注入，分别观察续租、Waiting、失败回报对新代次的影响；以旧 Start 返回 409 且无终态回报为对照，取得实际时序与结果后确定适配范围 | 恢复链路与原型验证 |
+| 同 Issue / Agent 串行与 SOP 并行 | 原生 Issue + Agent 活动互斥及每批按 Agent 去重已确认；比较并行 Script、同角色 DAG 节点的执行身份与目录策略，按实际开工情况确定互斥粒度 | Workspace / Script 与设计收敛 |
+| 共享 Runtime 的任务身份 | 已核对任务 token 的 UserID 取 Runtime Owner；继续跟踪服务端任务作用域、Issue 访问和 Grant 校验，分别判断资源所有者身份与实际平台操作权限。[签发身份](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4441-L4456) | 上下文与任务身份 |
+
+本轮新增 Prepare 结论采用固定源码的静态路径核对，故障注入结果由后续原型取得。第一阶段源码研究已收口；下一项仍按计划研究宿主与本地交互入口。
