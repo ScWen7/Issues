@@ -91,7 +91,7 @@ flowchart LR
 |---|---|---|
 | Issue 工作目标、父子分工、当前负责人与总责人、完成与验收 | 专题一，依托 Multica 工作机制 | SOP / 评价提供依据，由现有工作机制确认业务完成 |
 | 工作分配、接管和验收的授权语义 | 专题一 | 复用成员与项目权限；专题 3A 处理 Runtime 资源授权，专题五呈现操作入口 |
-| Project Workflow 与 SOP 的衔接、分工组织双轨矛盾消解 | 专题二 | Project Workflow 管状态与交接；SOP 通过 Delegation Grant 获得范围化操作许可，以 Dispatch Control Binding 成为托管范围唯一派发控制者；SOP 提交结构化出口结果，Project Workflow 校验后推进 Issue；stage 提醒与 DAG 就绪分别处理 |
+| Project Workflow 与 SOP 的衔接、分工组织双轨矛盾消解 | 专题二 | Project Workflow 管状态与交接；SOP 通过 Delegation Grant 获得范围化操作许可，以 Dispatch Control Binding 成为托管范围唯一派发控制者；SOP 提交带稳定 Result ID 的结构化出口结果，Project Workflow 幂等校验并原子推进 Issue 与控制绑定；stage 提醒与 DAG 就绪分别处理 |
 | 执行平面、宿主适配与资源授权（3A 先行线） | 专题 3A | 先复用 Multica 执行链；验证受管命令、在途 Run 停止回执、代码接续与加载确认，明确结构化节点结论、制品摘要和候选绑定的回报承载 |
 | 能力知识治理、上下文选择与版本发布（3B 顺延线） | 专题 3B | 统一治理 SOP、受管 Script、Agent、Skill、Rule、Playbook 的版本、作用域、审核与分发；工作事实由 Issue 提供，实际加载由 3A 确认 |
 | 成本、评价、后台活动、提案及 Benchmark | 专题四 | 复用执行事实；正式资产发布走专题 3B 的治理，流程可执行性由专题二验证 |
