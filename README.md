@@ -4,7 +4,9 @@
 
 ## 当前交付
 
-当前为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版补齐本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据及宿主终态 / 恢复拒绝五条研究线，校准 Provider 清理确认与取消专项收敛的源码结论。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。第一阶段 Runtime / Daemon 底层机制已完成源码追踪；后续按 V0.2 顺序研究宿主与本地交互入口、上下文与任务身份、Workspace / Script / 结构化回报，再形成完整设计。
+当前交付为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版覆盖本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据，以及宿主终态与恢复拒绝。第一阶段已完成 Multica Runtime / Daemon 的源码追踪，核对了注册、任务领取与启动、容量控制、授权和失联恢复。证据来自固定版本的实现与测试断言阅读。[专题三 A 设计 §7.1](docs/architecture/03a-execution-plane.md#71-第一阶段研究结论)记录本阶段采用的设计结论。
+
+下一阶段研究宿主与本地交互入口，比较中心派发、成员从 CLI / IDE 主动关联 Issue、事后补录三种路径。后续验证覆盖三项问题，包括旧领取的准备动作对新领取的影响、同一 Issue / Agent 串行约束下的 SOP 并行，以及共享 Runtime 上的任务身份与有效权限。各项的源码依据、承接阶段和待取得的结果见[研究记录 §10.9](docs/research/03a-source-evidence.md#109-本轮收口与后续验证输入)。
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
