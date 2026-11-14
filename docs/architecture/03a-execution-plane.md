@@ -239,7 +239,7 @@ Script 不需要模拟 Agent Session，也不需要伪造模型消息。它应�
 
 ## 7. 本轮研究顺序
 
-1. **<text>已完成</text> Multica Runtime / Daemon 底层机制**：注册、心跳、Claim、Start、并发、权限、取消、终态回报和重启恢复。源码证据见[研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
+1. **已完成：Multica Runtime / Daemon 底层机制**：注册、心跳、Claim、Start、并发、权限、取消、终态回报和重启恢复。源码证据见[研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
 2. **当前推进：宿主与本地交互入口**：比较中心派发、主动关联和事后补录，追踪 skill driver、会话观察、实际用量及选定共享；核对 TerminalObserved、恢复拒绝识别和新会话重试条件。
 3. **上下文与任务身份**：追踪 ContextReceipt、资源注入和加载探测，核对任务令牌、marker、配置回退与执行环境的真实隔离能力。
 4. **工作区、Script 与结构化回报**：Prepare / Reuse、代码候选、制品采集、命令执行、节点结果解析、关联校验及停止回执。
