@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.2 探索基线](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.3 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -63,6 +63,8 @@
 **Execution Environment（执行环境）**：一次 Run 使用的工作目录、代码或文件输入、运行配置、临时目录、技能和工具配置等本地资源集合。
 
 **Session（宿主会话）**：Agent 工具维护的对话 / 线程连续性资源，可被多个 Run 先后引用；其恢复能力受宿主、账号、机器和工作目录条件影响。
+
+**执行段** 表示同一次工作归属覆盖的一组可识别宿主活动，可由一个或多个回合组成。同一 Session 可以先后服务多个 Issue。平台通过宿主标识或已记录的调用关系把执行段关联到既有 Run 或外部执行来源，成员可在段内选择共享内容。
 
 **Script Executor（受管命令执行器）**：在授权 Runtime 上运行确定性命令，采集退出结果、输出、制品和副作用事实；与 Agent Adapter 共用 Run 生命周期，但不模拟 Agent Session。
 

@@ -4,9 +4,9 @@
 
 ## 当前交付
 
-当前交付为专题三 A「执行平面与宿主适配」V0.2 探索基线。本版覆盖本地交互接入、上下文投递与加载回执、结构化节点回报、任务凭据，以及宿主终态与恢复拒绝。第一阶段已完成 Multica Runtime / Daemon 的源码追踪，核对了注册、任务领取与启动、容量控制、授权和失联恢复。证据来自固定版本的实现与测试断言阅读。[专题三 A 设计 §7.1](docs/architecture/03a-execution-plane.md#71-第一阶段研究结论)记录本阶段采用的设计结论。
+当前交付为专题三 A「执行平面与宿主适配」V0.3 阶段研究稿。第一阶段完成 Runtime / Daemon 源码追踪。[第二阶段设计](docs/architecture/03a-execution-plane.md#46-本地交互式执行的接入)明确中心派发、本地主动关联和事后补录三种入口，以及同一会话如何按 Issue 分段、多路观察如何归入同一 Run、成员选中的消息和制品如何成为证据。[固定源码与实跑记录](docs/research/03a-source-evidence.md#11-第二阶段宿主协议与本地观察)包括 TeamAI、Codex、Claude Code、Multica 与本项目的归属模型。
 
-下一阶段研究宿主与本地交互入口，比较中心派发、成员从 CLI / IDE 主动关联 Issue、事后补录三种路径。后续验证覆盖三项问题，包括旧领取的准备动作对新领取的影响、同一 Issue / Agent 串行约束下的 SOP 并行，以及共享 Runtime 上的任务身份与有效权限。各项的源码依据、承接阶段和待取得的结果见[研究记录 §10.9](docs/research/03a-source-evidence.md#109-本轮收口与后续验证输入)。
+下一阶段研究上下文投递、实际加载回执与任务身份，承接共享 Runtime 上任务凭据和有效权限的核对。准备动作跨领取代次、同一 Issue / Agent 串行与 SOP 并行仍分别进入恢复原型和 Workspace / Script 研究。[后续验证输入](docs/research/03a-source-evidence.md#109-本轮收口与后续验证输入)
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
@@ -42,6 +42,6 @@
 
 ## 研究与核验
 
-专题二保留上游定向测试记录和状态模型复跑结果。专题 3A 本轮以固定版本源码、代表测试断言阅读、工作场景及跨文档复核为依据。案例采用模拟决定与证据，宿主能力、真实多进程和跨机执行进入后续原型验证。
+专题二保留上游定向测试记录和状态模型复跑结果。专题 3A 第二阶段已运行上游定向测试、两个真实 CLI 回环实验和 13 项设计模型测试。订单导出采用模拟决定与候选。跨机并发、成员授权与真实账单对账进入集成验证。
 
 参考仓库副本和阶段笔记存放于已忽略的 `.tmp/`；正式文档引用固定的上游源码链接，不依赖临时目录长期存在。

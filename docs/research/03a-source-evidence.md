@@ -1,8 +1,8 @@
 # 专题三 A · 执行平面源码研究记录
 
-日期：2026-11-14  
-本轮上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
-本轮方式：读取远端仓库树、实现文件、官方项目文档及对应测试文件；本轮尚未在本地克隆运行上游测试。  
+更新日期：2026-11-15  
+第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
+第一阶段采用源码与测试断言阅读。第二阶段的四份固定源码、上游定向测试、真实 CLI 回环实验及设计模型见[第二阶段研究](#11-第二阶段宿主协议与本地观察)。  
 平台设计入口：[专题三 A：执行平面与宿主适配](../architecture/03a-execution-plane.md)
 
 ## 1. 已追踪的底层路径
@@ -437,3 +437,44 @@ Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器
 | 共享 Runtime 的任务身份 | 已核对任务 token 的 UserID 取 Runtime Owner；继续跟踪服务端任务作用域、Issue 访问和 Grant 校验，分别判断资源所有者身份与实际平台操作权限。[签发身份](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4441-L4456) | 上下文与任务身份 |
 
 本轮新增 Prepare 结论采用固定源码的静态路径核对，故障注入结果由后续原型取得。第一阶段源码研究已收口；下一项仍按计划研究宿主与本地交互入口。
+
+## 11. 第二阶段：宿主协议与本地观察
+
+这一阶段固定四份源码，沿“本地开始工作、宿主产生事件、重读历史、多路结算、成员选择共享”追到协议、适配器和记账实现。实验使用临时配置与合成输入，真实 CLI 执行协议和本地操作，模型响应由回环服务提供。[项目接入规则](../architecture/03a-execution-plane.md#46-本地交互式执行的接入)
+
+| 对象 | 读到哪一层 | 可复核结果 |
+|---|---|---|
+| [TeamAI](topic-03a/teamai.md) | Skill Driver 交接与回报、AgentObservation 结算、宿主 Hooks、转录解析、账本、制品 | 同一原始请求从原路径重读只计一次，换路径导入同一文件后上游再次计费。配置指纹在项目和驱动不同的两次执行中可相同 |
+| [Codex](topic-03a/codex.md) | App Server 的线程、回合、事件、只读回放与监听，CLI JSON 的事件转换，宿主 Hooks | 同线程两轮的 last/total 为 11/11、22/33。resume 再次给出 33，回环服务仍只收到两次请求。第三轮单独测试 CLI JSON 中的累计语义 |
+| [Claude Code](topic-03a/claude.md) | Hooks、流式 CLI、官方 SDK 的消息及本地会话读取、身份关联、成本口径 | 同会话两轮恢复后的估价分别为 0.00009 与 0.00018 美元。展示消息 ID、转录 UUID 和模型消息 ID 属于不同域。真实 Read 的前置、后置 Hook 与流式结果共享同一工具调用 ID。本地 OTel 接收器取得四条请求，两轮都经 prompt 和消息 UUID 对回宿主记录 |
+| Multica | 固定 `fdfbfcd` 的两种宿主适配、消息入库、用量 upsert、恢复与回报 | 以下 9 项上游 Go 定向测试通过。验证层为宿主适配器，存储与 Daemon 恢复路径为源码追踪 |
+
+### 两个现有适配器如何消费用量
+
+Multica 的 Codex Adapter 在处理 turn 状态之前过滤其他 thread；它只把属于本次活动或刚结束 turn 的用量计入。首个匹配快照取 last，后续读取 total 变化。对历史重放、重复快照、终态之后的最后一次用量、多次模型请求分别有测试。RPC 提供了实际用量时优先使用它，必要时从落盘记录补模型名；RPC 缺量才从会话记录取量。补录设计沿用该来源顺序，并保留观察缺口、乱序和计数重置的处理。[线程过滤](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L3035-L3062) · [快照差量](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L3885-L3925) · [落盘补充](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L4067-L4092) · [四个用量回归场景](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex_test.go#L3951-L4059)
+
+Claude Adapter 保留所有内容块，按模型消息 ID 对主循环输入和缓存用量去重。恢复前捕获基线，读取最终 modelUsage 时按模型计算差额。若恢复时基线捕获失败，优先保留流式取得的本次用量。它的返回值与 SDK 会话估价分别解释。[块与消息去重](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L539-L573) · [基线缺失分支](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L327-L358) · [按模型相减](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L811-L904)
+
+控制平面接收任务消息时检查 Daemon 的任务访问权；提供幂等键时在任务的命名空间派生消息 ID。缺键会生成新 ID，因此两个独立采集器还需要共享宿主标识或明确对应。用量按 task / provider / model 以当前快照覆盖，过程快照跳过加法指标，防止每次刷新重复记账。SQL 基于已有 task，所以跨系统先解析到同一个 Run，再使用这条写入路径。多来源并发更新、覆盖关系、来源冲突和修订次序是本项目的设计工作。[消息身份及任务鉴权](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5765-L5813) · [生成 ID 与脱敏](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5851-L5871) · [过程和最终用量](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5529-L5595) · [用量 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L1-L25)
+
+Codex 收到 turn/completed，Claude 收到 result，两者都能表明一次宿主交互已给出终态。固定版本的两个 Multica Backend 构造 Session 时都未设置可选的 TerminalObserved 回调。应分别呈现宿主的终态、Daemon 已收到 Result、清理以及副作用是否可重做。Codex 恢复遇传输错误就上抛，部分协议错误会新建 thread，特定恢复读取溢出会显式标记；Claude 则结合失败、是否请求过恢复、拒绝原因和实际会话 ID 来判定。外部观察只补事实；决定是否重试的是原执行控制者。已有工具动作、可能遗漏副作用或仅仅丢了观察连接时，先核对原执行。[Codex 终态](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L3532-L3582) · [Codex Session](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L1073-L1080) · [Claude Session](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L519-L538) · [Codex 恢复与回退](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L2040-L2065) · [Claude 拒绝判据](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L1284-L1317) · [Daemon 的重试条件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9602-L9646)
+
+### 如何复核
+
+在 Multica 固定提交的 server 目录执行以下命令。使用 Go 1.26.9，按顶层用例计 9 项通过。第一阶段当时的测试断言阅读与此次实跑分别记录。
+
+```bash
+go test -count=1 -v -run '^(TestCodexRawTurnCompletedDeduplication|TestCodexRawTurnCompletedWithoutIDDeduplicatesLifecycleAndUsage|TestCodexThreadTokenUsageUpdatedDropsResumeReplay|TestCodexThreadTokenUsageUpdatedDeduplicatesSnapshot|TestCodexTokenUsageArrivingAfterTurnCompleted|TestCodexThreadTokenUsageUpdatedAccumulatesCurrentTurnResponses|TestClaudeResultUsageSinceCumulativeTurns|TestClaudeExecuteReportsResumeRejectedOnAccountBinding|TestCodexResumeOverflowError)$' ./pkg/agent
+```
+
+本仓库的两个回环探针和一组设计模型可以分别运行。回环探针使用真实宿主二进制、临时工作区和标准库实现的模拟服务；模型测试使用合成的归一化观察。用量数值是可复现的协议输入，供应商实付数据留待账单核对。
+
+```bash
+python3 prototypes/topic-03a/codex_observation_probe.py
+python3 prototypes/topic-03a/claude-local-probe.py /path/to/claude
+node --test prototypes/topic-03a/local-observation.test.mjs
+```
+
+[Codex 探针](../../prototypes/topic-03a/codex_observation_probe.py)使用 codex-cli 0.167.0-alpha.4。[Claude Code 探针](../../prototypes/topic-03a/claude-local-probe.py)使用 Claude Code 2.1.325。[13 项设计模型测试](../../prototypes/topic-03a/local-observation.test.mjs)通过，涵盖重复观察、部分重叠绑定、切换 Issue、撤权后补传、累计值与重置、父子计量覆盖和 C1 迟到回报。模型验证单进程下的归属规则，两个探针验证各自宿主的实际行为。
+
+后续集成验收以同一成员同时打开 CLI 和 IDE 为起点。让已授权的本地适配器与中心 Daemon 同时观察同一回合，再断网、缩小选区、重连、补录并在新回合切换 Issue。应得到原 Run 或明确的外部观察、有效选区的单份投影，以及与唯一原生请求集合一致的用量。另验证无原始标识、部分消息缺失、父子代理并行和只有会话总额时的降级结果。下一阶段研究上下文投递、加载回执与任务身份。
