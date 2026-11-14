@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3 与[专题二 V0.1](docs/architecture/02-sop-workflow.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3 与[专题二 V0.2](docs/architecture/02-sop-workflow.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -64,7 +64,11 @@
 
 **SOP Execution（流程执行实例）**：某个 SOP 版本在 Issue 或其明确工作范围内的一次调用及进度，关联实际执行、决定和制品。
 
-**节点尝试（Node Attempt）** 是某个 SOP 节点针对指定输入的一次尝试。实际 Agent 或 Script 执行关联所属 Issue 的 Run，依赖汇合和纯人工决定各记录自身的事实。重试和返工保留前次尝试及证据。
+**节点尝试（Node Attempt）**：某个 SOP 节点在固定定义、当前委托与输入基准下的一次履行，记录结果及其证据。一次尝试可关联多次实际 Run，例如实施、后置检查与自修正；已结束尝试后的重试、返工使用新尝试。
+
+**节点内自修正**：针对当前节点产物的检查反馈，在同一工作目标、定义和授权内修复并重验。仍在运行的执行记入原 Run，重新启动的实际执行使用新 Run；两者都沿用本轮节点尝试并消耗其修正预算。
+
+**子 Issue 委托关联**：SOP 节点本轮尝试与子 Issue 本轮交付之间的关联，明确可创建、指派、启动、返工和交还的工作范围。节点依此消费结果、关联实际 Run 与费用，子 Issue 继续承担工作责任。
 
 **制品契约（Artifact Contract）** 规定一次交付要提供的具名输出、版本或摘要、生产者以及消费者要求的检查。制品可获取、内容核验和业务接受分别记录。
 
