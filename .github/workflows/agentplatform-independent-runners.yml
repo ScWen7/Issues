@@ -20,22 +20,22 @@ jobs:
       - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py stop "$RUNNER_TEMP/private-A" "$RUNNER_TEMP/published"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: published-candidate
+          name: published-candidate-${{ github.run_attempt }}
           path: ${{ runner.temp }}/published/
           retention-days: 1
           if-no-files-found: error
       - name: Wait for B while the sender worker is stopped
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait receipt-from-B
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "receipt-from-B-${{ github.run_attempt }}"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: receipt-from-B
+          name: receipt-from-B-${{ github.run_attempt }}
           path: ${{ runner.temp }}/ack
       - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py reconnect "$RUNNER_TEMP/private-A" "$RUNNER_TEMP/ack/ack.json" "$RUNNER_TEMP/replayed"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: late-c1-from-A
+          name: late-c1-from-A-${{ github.run_attempt }}
           path: ${{ runner.temp }}/replayed/
           retention-days: 1
           if-no-files-found: error
@@ -49,25 +49,25 @@ jobs:
       - name: Wait for A's published candidate
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait published-candidate
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "published-candidate-${{ github.run_attempt }}"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: published-candidate
+          name: published-candidate-${{ github.run_attempt }}
           path: ${{ runner.temp }}/inbound
       - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py accept "$RUNNER_TEMP/inbound" "$RUNNER_TEMP/ack.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: receipt-from-B
+          name: receipt-from-B-${{ github.run_attempt }}
           path: ${{ runner.temp }}/ack.json
           retention-days: 1
           if-no-files-found: error
       - name: Receive A's original late report
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait late-c1-from-A
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "late-c1-from-A-${{ github.run_attempt }}"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: late-c1-from-A
+          name: late-c1-from-A-${{ github.run_attempt }}
           path: ${{ runner.temp }}/late
       - name: Verify original C1 and accepted C2 remain separate
         run: |

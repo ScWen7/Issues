@@ -1,0 +1,169 @@
+name: AgentPlatform native cross-VM handoff
+on:
+  push:
+    branches: [research/3a-independent-runners]
+    paths:
+      - .github/workflows/agentplatform-native-vm.yml
+      - prototypes/topic-03a/native-runner/**
+      - prototypes/topic-03a/two-runtime/**
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+env:
+  X: prototypes/topic-03a/native-runner/exchange.py
+jobs:
+  center:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: multica
+          POSTGRES_USER: multica
+          POSTGRES_PASSWORD: fixture-only
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U multica -d multica"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://multica:fixture-only@127.0.0.1:5432/multica?sslmode=disable
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare local fixture directory
+        run: |
+          mkdir -m 700 "$RUNNER_TEMP/native-stage"
+          echo "AP_NATIVE_STAGE=$RUNNER_TEMP/native-stage" >> "$GITHUB_ENV"
+          python3 -m venv "$RUNNER_TEMP/native-python"
+          echo "$RUNNER_TEMP/native-python/bin" >> "$GITHUB_PATH"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: multica-ai/multica
+          ref: fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc
+          path: .native-upstream
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.9'
+          cache-dependency-path: .native-upstream/server/go.sum
+      - name: Migrate the disposable PostgreSQL and generate native inputs
+        run: |
+          python3 -m pip install cryptography==46.0.3 XlsxWriter==3.2.9 openpyxl==3.1.5
+          (cd .native-upstream/server && go run ./cmd/migrate up)
+          python3 prototypes/topic-03a/order-export/run.py "$RUNNER_TEMP/orders"
+      - name: Wait for public-key
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$X" wait-artifact "native-public-key-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: native-public-key-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}
+      - name: Start the live fixture and wait until B has a task
+        run: |
+          log="$RUNNER_TEMP/native.log"
+          python3 prototypes/topic-03a/two-runtime/run.py .native-upstream "$RUNNER_TEMP/orders" --receiver prototypes/topic-03a/native-runner/center.py >"$log" 2>&1 &
+          echo "$!" > "$AP_NATIVE_STAGE/center.pid"
+          until test -f "$AP_NATIVE_STAGE/offer.json"; do
+            kill -0 "$(cat "$AP_NATIVE_STAGE/center.pid")" || { tail -30 "$log"; exit 1; }
+            sleep 2
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-offer-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}/offer.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Wait for reads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$X" wait-artifact "native-reads-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: native-reads-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}
+      - run: python3 "$X" wait-file "$AP_NATIVE_STAGE/responses.sealed"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-responses-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}/responses.sealed
+          retention-days: 1
+          if-no-files-found: error
+      - name: Wait for receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$X" wait-artifact "native-receipt-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: native-receipt-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}
+      - name: Verify the native B callback and late A replay
+        run: |
+          log="$RUNNER_TEMP/native.log"
+          for iteration in {1..90}; do
+            grep -qx PASS "$log" && break
+            if grep -qE '^FAIL|CalledProcessError' "$log"; then tail -30 "$log"; exit 1; fi
+            sleep 2
+          done
+          grep -qx PASS "$log"
+          grep -E 'exact C2 report from B|A offline with pending C1|new A daemon|share revoked|fixture grace|^PASS' "$log"
+      - name: Show fixture failure
+        if: failure()
+        run: if test -f "$RUNNER_TEMP/native.log"; then tail -30 "$RUNNER_TEMP/native.log"; fi
+  receiver:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare local fixture directory
+        run: |
+          mkdir -m 700 "$RUNNER_TEMP/native-stage"
+          echo "AP_NATIVE_STAGE=$RUNNER_TEMP/native-stage" >> "$GITHUB_ENV"
+          python3 -m venv "$RUNNER_TEMP/native-python"
+          echo "$RUNNER_TEMP/native-python/bin" >> "$GITHUB_PATH"
+      - name: Generate B's ephemeral key pair
+        run: |
+          python3 -m pip install cryptography==46.0.3
+          python3 "$X" key "$AP_NATIVE_STAGE"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-public-key-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}/public.pem
+          retention-days: 1
+          if-no-files-found: error
+      - name: Wait for offer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$X" wait-artifact "native-offer-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: native-offer-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}
+      - run: python3 "$X" reads "$AP_NATIVE_STAGE"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-reads-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}/reads.sealed
+          retention-days: 1
+          if-no-files-found: error
+      - name: Wait for responses
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$X" wait-artifact "native-responses-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: native-responses-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}
+      - run: python3 "$X" accept "$AP_NATIVE_STAGE"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-receipt-${{ github.run_attempt }}
+          path: ${{ env.AP_NATIVE_STAGE }}/receipt.sealed
+          retention-days: 1
+          if-no-files-found: error
