@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-当前为专题二「SOP 与研发工作流融合」V0.2。[设计稿](docs/architecture/02-sop-workflow.md)明确子 Issue 委托的创建、就绪、返工与交还，补齐节点自修正、Script 执行、代码工作副本接续和按本轮委托归集成本，并以职责图及订单导出时序图呈现局部、完整 SOP 两条路径。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
+当前为专题二「SOP 与研发工作流融合」V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留 V0.2 的节点自修正、Script 执行、代码工作副本接续和成本归集设计。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
 专题一 V0.3 的关键设计如下。
 
