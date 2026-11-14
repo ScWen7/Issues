@@ -122,20 +122,22 @@ def admit(path, principal, source_run, payload, expected_sha, start=None):
         prior = db.execute("SELECT sha256, placement FROM receipt WHERE run=? AND slot=?", (source_run, SLOT)).fetchone()
         if prior and prior["sha256"] != digest:
             return "conflicting report"
-        if prior and prior["placement"] != "pending":
-            return "duplicate"
         status, refs = qualify(db, dispatch, report)
         if status == "waiting for attachments" and not prior:
             db.execute("INSERT INTO receipt VALUES(?,?,?,?,?)", (source_run, SLOT, digest, payload, "pending"))
         if status != "qualified":
             return status
+        # A report replay may complete its declared evidence after node consumption.
+        db.executemany("INSERT INTO artifact VALUES(?,?,?,?) ON CONFLICT(run, name) DO NOTHING",
+                       [(source_run, name, size, h) for name, (size, h) in refs.items()])
+        if prior and prior["placement"] != "pending":
+            return "duplicate"
         current = db.execute("SELECT run FROM current_node WHERE issue=? AND node=?", (issue, node)).fetchone()
         placement = "current" if current and current["run"] == source_run else "historical"
         if prior:
             db.execute("UPDATE receipt SET placement=? WHERE run=? AND slot=?", (placement, source_run, SLOT))
         else:
             db.execute("INSERT INTO receipt VALUES(?,?,?,?,?)", (source_run, SLOT, digest, payload, placement))
-        db.executemany("INSERT INTO artifact VALUES(?,?,?,?)", [(source_run, name, size, h) for name, (size, h) in refs.items()])
         if placement == "current":
             db.execute("INSERT INTO consumed VALUES(?,?,?,?,?)", (issue, node, dispatch["attempt"], source_run, report["verdict"]))
         return placement
@@ -308,6 +310,53 @@ class ReportAdmission(unittest.TestCase):
         with closing(connect(self.db)) as db:
             self.assertEqual(db.execute("SELECT verdict FROM consumed").fetchone()[0], "rework")
             self.assertEqual(db.execute("SELECT payload FROM receipt").fetchone()[0], self.raw["C1"])
+
+    def test_current_rework_late_attachment_is_registered_without_consuming_again(self):
+        with closing(connect(self.db)) as db, db:
+            db.execute("DELETE FROM supplied WHERE run='verify-C1' AND name='east.xlsx'")
+            db.execute("UPDATE current_node SET run='verify-C1'")
+            db.execute("INSERT INTO artifact_reader VALUES('reviewer', 'verify-C1', 'east.xlsx')")
+        self.assertEqual(self.submit("C1"), "current")
+        self.assertEqual(self.snapshot(), (1, 1, 2))
+        self.assertIsNone(authorized_reference(self.db, "reviewer", "verify-C1", "east.xlsx"))
+        with closing(connect(self.db)) as db, db:
+            supply_file(db, "verify-C1", "east.xlsx", self.outputs / "C1/east.xlsx")
+        barrier = Barrier(2)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [pool.submit(self.submit, "C1", barrier) for _ in range(2)]
+            self.assertEqual([f.result() for f in futures], ["duplicate", "duplicate"])
+        self.assertEqual(self.snapshot(), (1, 1, 3))
+        self.assertEqual(authorized_reference(self.db, "reviewer", "verify-C1", "east.xlsx"),
+                         sha((self.outputs / "C1/east.xlsx").read_bytes()))
+        with closing(connect(self.db)) as db:
+            self.assertEqual(tuple(db.execute("SELECT payload, placement FROM receipt").fetchone()),
+                             (self.raw["C1"], "current"))
+            self.assertEqual(tuple(db.execute("SELECT run, verdict FROM consumed").fetchone()),
+                             ("verify-C1", "rework"))
+
+    def test_historical_rework_late_attachment_requires_matching_bytes(self):
+        with closing(connect(self.db)) as db, db:
+            db.execute("DELETE FROM supplied WHERE run='verify-C1' AND name='east.xlsx'")
+            db.execute("INSERT INTO artifact_reader VALUES('reviewer', 'verify-C1', 'east.xlsx')")
+        self.assertEqual(self.submit("C1"), "historical")
+        self.assertEqual(self.snapshot(), (1, 0, 2))
+        altered = self.db.parent / "altered.xlsx"
+        altered.write_bytes((self.outputs / "C1/east.xlsx").read_bytes() + b"x")
+        with closing(connect(self.db)) as db, db:
+            supply_file(db, "verify-C1", "east.xlsx", altered)
+        self.assertEqual(self.submit("C1"), "attachment mismatch")
+        self.assertEqual(self.snapshot(), (1, 0, 2))
+        self.assertIsNone(authorized_reference(self.db, "reviewer", "verify-C1", "east.xlsx"))
+        with closing(connect(self.db)) as db, db:
+            supply_file(db, "verify-C1", "east.xlsx", self.outputs / "C1/east.xlsx")
+        self.assertEqual(self.submit("C1"), "duplicate")
+        self.assertEqual(self.submit("C1"), "duplicate")
+        self.assertEqual(self.snapshot(), (1, 0, 3))
+        self.assertEqual(authorized_reference(self.db, "reviewer", "verify-C1", "east.xlsx"),
+                         sha((self.outputs / "C1/east.xlsx").read_bytes()))
+        with closing(connect(self.db)) as db:
+            self.assertEqual(tuple(db.execute("SELECT payload, placement FROM receipt").fetchone()),
+                             (self.raw["C1"], "historical"))
 
     def test_same_content_retains_delivery_specific_access(self):
         self.assertEqual(self.submit("C1"), "historical")

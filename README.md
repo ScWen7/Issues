@@ -32,6 +32,7 @@
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
 | [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
 | [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、三种宿主入口、任务身份、换机接续和迟到结果归属 |
+| [专题三 A：宿主能力与 3B 交接](docs/architecture/execution-capabilities.md) | 按入口和宿主查看能力证据、缺项处理及资产版本交接 |
 | [专题三 A：源码研究记录](docs/research/03a-source-evidence.md) | 查看固定版本的注册、授权、加载回执、任务凭据及宿主结果证据 |
 | [专题一：源码研究依据](docs/research/01-source-evidence.md) | 查看固定提交、代码事实与提示词约定对照、代表测试及设计推论 |
 

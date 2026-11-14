@@ -9,3 +9,5 @@ build/
 !.env.*.example
 .idea/
 .vscode/
+__pycache__/
+*.py[cod]

@@ -439,6 +439,8 @@ Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器
 | 同 Issue / Agent 串行与 SOP 并行 | 原生 Issue + Agent 活动互斥及每批按 Agent 去重已确认；比较并行 Script、同角色 DAG 节点的执行身份与目录策略，按实际开工情况确定互斥粒度 | Workspace / Script 与设计收敛 |
 | 共享 Runtime 的任务身份 | 已核对任务 token 的 UserID 取 Runtime Owner；继续跟踪服务端任务作用域、Issue 访问和 Grant 校验，分别判断资源所有者身份与实际平台操作权限。[签发身份](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4441-L4456) | 上下文与任务身份 |
 
+后续阶段进度：共享 Runtime 身份已由第三阶段验证；Issue / Agent 串行及旧准备的本地写入、目录隔离、Start 409 和清理由第四阶段验证。上表 Prepare 项中的旧续租、Waiting 和 Start 前失败回报三条服务端写入路径继续保留故障注入任务；[工作副本实验](topic-03a/workspace-continuity.md#两条新实验)记录各自的实际覆盖。
+
 本轮新增 Prepare 结论采用固定源码的静态路径核对，故障注入结果由后续原型取得。第一阶段源码研究已收口；下一项仍按计划研究宿主与本地交互入口。
 
 ## 11. 第二阶段：宿主协议与本地观察
@@ -596,3 +598,11 @@ TeamAI 交接的条件写入和分支前移检查可复用于可写副本；查�
 本轮设计交付见[执行平面](../architecture/03a-execution-plane.md)及[宿主能力与 3B 交接](../architecture/execution-capabilities.md)。3B 首个实验沿 D2 的规则、核验脚本及其发布版本检查选择和在途换版，通过 3A 的回执定位实际材料、调用、候选和验证结果。
 
 本次同步复跑 38 项工作流、观察与上下文状态模型测试，以及 13 项结果接收断言，全部通过。两套远端工作流的五个宿主与上游作业、两个原生双虚拟机作业均通过。[上游与宿主作业](https://github.com/ScWen7/Issues/actions/runs/43621807704) · [Multica 跨虚拟机验收](https://github.com/ScWen7/Issues/actions/runs/43621447364)
+
+### V0.6 交叉审查修订
+
+Prepare 的阶段结论已限定为本地写入、目录占用、Start 拒绝和清理；旧续租、Waiting、准备失败回报三条服务端路径保持待验证。恢复设计明确按原领取代次核验这些操作。上下文展示同步区分写入已确认但加载未知、投递状态未知和明确未投递。
+
+结果接收原型修复返工报告先到、附件后到时的提前去重返回。相同报告在当前授权下重新核对清单中的晚到文件，幂等补登记交付引用，原报告、归属和节点消费回执保持原值。新增两项回归先在旧逻辑上复现失败，再随修复通过：当前返工报告补件后并发重发只补一份引用；历史返工报告先拒绝错误字节，收到正确原件后补齐且保持历史归属。有权接收者均能查回补齐文件的摘要。
+
+本次本地复跑结果为结果接收原型 **15 / 15 通过**，工作流、观察与上下文模型 **38 / 38 通过**。运行命令沿用本页，设置 `PYTHONDONTWRITEBYTECODE=1` 避免生成 Python 缓存。以上为本轮修订验证；前述远端作业保留第五阶段的运行记录。
