@@ -4,22 +4,22 @@
 
 ## 版本、输入与结果
 
-固定宿主为 0.144.6（官方 npm 包，SHA-512 与 registry 发布值一致）和 0.167.0-alpha.4。前者与 Multica 固定版本登记的 Codex 加载探针版本一致。Multica 的元指令写在工作目录 AGENTS.md，Codex HOME 的用户级 AGENTS.md 是另一个投递通道；每个组合都使用独立临时目录和配置。项目文件这一列调用固定 Multica 的真实 InjectRuntimeConfig，将其生成的文件直接交给 Codex。[旧版源码](https://github.com/openai/codex/tree/5d1fbf26c43abc65a203928b2e31561cb039e06d) · [新版源码](https://github.com/openai/codex/tree/fb036d4ebd89f263d34a1f888c279ce85bb383c6) · [Multica 写入入口与实际路径](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/runtime_config.go#L161-L192) · [上游探针版本表](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L94-L120)
+固定宿主为 0.144.6（官方 npm 包，SHA-512 与 registry 发布值一致）和 0.167.0-alpha.4。前者与 Multica 固定版本登记的 Codex 加载探针版本一致。Multica 的元指令写在工作目录 AGENTS.md，Codex HOME 的用户级 AGENTS.md 是另一个投递通道；每个组合都使用独立临时目录和配置。0.144.6 项目文件列调用固定 Multica 的真实 InjectRuntimeConfig。第五阶段在独立虚拟机使用同一探针直接写入合成 AGENTS.md，验证 0.167.0-alpha.4 的项目文件列。[旧版源码](https://github.com/openai/codex/tree/5d1fbf26c43abc65a203928b2e31561cb039e06d) · [新版源码](https://github.com/openai/codex/tree/fb036d4ebd89f263d34a1f888c279ce85bb383c6) · [Multica 写入入口与实际路径](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/runtime_config.go#L161-L192) · [上游探针版本表](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L94-L120)
 
-| 同一组测试输入 | 0.144.6 项目 AGENTS.md | 0.144.6 HOME | 0.167.0-alpha.4 HOME |
-|---|---|---|---|
-| 新线程加载 D2 | 本轮模型请求含 D2 | D2 | D2 |
-| 新线程先加载 D1 | D1 | D1 | D1 |
-| 文件替换为 D2，在同一活动线程继续下一轮 | 仍仅 D1 | 仍仅 D1 | D1 历史后出现 D2 替换通知 |
-| 对已加载线程调用 thread/resume，再开新轮 | 仍仅 D1 | 仍仅 D1 | D1 历史后有 D2 替换通知 |
-| 关闭 App Server，起新进程恢复原线程，再开新轮 | D1 历史后有 D2 替换通知 | 同左 | 同左 |
-| 删除规则文件，再次跨进程恢复原线程 | D1、D2 历史后出现移除通知 | 同左 | 同左 |
-| 新线程，文件缺失 | 请求没有 D1、D2 | 同左 | 同左 |
-| 另一条热线程先加载 D1，磁盘更新 D2，下一轮调用者显式提交“本轮契约 D2” | 请求同时有 D1 历史与独立的 D2 输入，文件刷新证据缺失 | 同左 | D1 历史、D2 文件替换通知、显式 D2 输入三者均可定位 |
+| 同一组测试输入 | 0.144.6 项目 AGENTS.md | 0.144.6 HOME | 0.167.0-alpha.4 HOME | 0.167.0-alpha.4 项目 AGENTS.md |
+|---|---|---|---| --- |
+| 新线程加载 D2 | 本轮模型请求含 D2 | D2 | D2 | D2 |
+| 新线程先加载 D1 | D1 | D1 | D1 | D1 |
+| 文件替换为 D2，在同一活动线程继续下一轮 | 仍仅 D1 | 仍仅 D1 | D1 历史后出现 D2 替换通知 | 仍仅 D1 |
+| 对已加载线程调用 thread/resume，再开新轮 | 仍仅 D1 | 仍仅 D1 | D1 历史后有 D2 替换通知 | 仍仅 D1 |
+| 关闭 App Server，起新进程恢复原线程，再开新轮 | D1 历史后有 D2 替换通知 | 同左 | 同左 | D1 历史后有 D2 替换通知 |
+| 删除规则文件，再次跨进程恢复原线程 | D1、D2 历史后出现移除通知 | 同左 | 同左 | D1、D2 历史后有移除通知 |
+| 新线程，文件缺失 | 请求没有 D1、D2 | 同左 | 同左 | 请求没有 D1、D2 |
+| 另一条热线程先加载 D1，磁盘更新 D2，下一轮调用者显式提交“本轮契约 D2” | 请求同时有 D1 历史与独立的 D2 输入，文件刷新证据缺失 | 同左 | D1 历史、D2 文件替换通知、显式 D2 输入三者均可定位 | D1 历史和显式 D2 输入，文件刷新标记缺席 |
 
 0.144.6 的 AgentsMdManager 按执行环境选择缓存项目指令，选择未变时直接返回。渲染器在比较新旧快照后，按需发出替换或移除通知。0.167.0-alpha.4 的 HOME provider 会重新读用户指令；这一版项目文件另有读取权限分支。项目选择和信任级别都可能影响该通道。这里记录的是测试过的具体版本和通道。[旧版缓存条件](https://github.com/openai/codex/blob/5d1fbf26c43abc65a203928b2e31561cb039e06d/codex-rs/core/src/agents_md_manager.rs#L10-L46) · [旧版历史与新指令的差量](https://github.com/openai/codex/blob/5d1fbf26c43abc65a203928b2e31561cb039e06d/codex-rs/core/src/context/world_state/agents_md.rs#L42-L80) · [新版用户指令与项目缓存](https://github.com/openai/codex/blob/fb036d4ebd89f263d34a1f888c279ce85bb383c6/codex-rs/core/src/agents_md_manager.rs#L83-L144) · [新版 HOME 文件读取与警告](https://github.com/openai/codex/blob/fb036d4ebd89f263d34a1f888c279ce85bb383c6/codex-rs/codex-home/src/instructions/mod.rs#L40-L109) · [新版项目文件权限](https://github.com/openai/codex/blob/fb036d4ebd89f263d34a1f888c279ce85bb383c6/codex-rs/core/src/agents_md.rs#L58-L110)
 
-0.167.0-alpha.4 的项目文件通道在当前容器另测 read-only、workspace-write。两次均在 thread/start 读取工作区指令时由文件沙盒返回 NETLINK_ROUTE 操作受限，均未产生模型请求。三个成功组合分别执行 11 个 turn、12 个本地模型协议请求。目标机器上应复跑同一 project 模式，补齐这个版本的项目文件证据。0.144.6 的受限 read-only 模式已完成该项目路径的上下游贯通。
+先前容器的文件沙盒在创建 NETLINK_ROUTE socket 时返回受限，项目通道当时产生 0 个模型请求。第五阶段将同一官方二进制放到 Ubuntu 24.04 独立虚拟机，在正常 read-only 配置跑完 11 个宿主回合和 12 次回环模型请求，补齐表中第四列。该组合随后纳入严格回归并再次通过。项目文件热继续和同进程 resume 仍见 D1；重启进程后先见 D1 历史，再见 D2 替换通知。显式补发可在同一线程把 D2 放入当前输入。[远端原始日志](https://github.com/ScWen7/Issues/actions/runs/43620276448/job/132524209443) · [严格回归](https://github.com/ScWen7/Issues/actions/runs/43620893430/job/132526101232)
 
 **设计结论。** 把回执关联到 issue、run、实际 thread / turn、宿主版本、通道、期望材料版本及本轮证据。工作目录已写 D2、版本表命中 verified、本轮模型输入实际仍只有 D1，可以同时成立。重要契约换版后，在已受支持的入口显式提交当前差异并取得本轮可用证据，或在可恢复条件下创建新连接、重新装载同一工作上下文；仍缺当前材料时，等待补齐再判该轮结果。只允许上报可见记录时，如实保留“本轮加载未知”。本次抓取完整合成输入仅用于隔离实验；产品可用获授权的版本 / 摘要和通道回执核对，保留探针条件及覆盖差异。
 
@@ -39,4 +39,4 @@ AP_CONTEXT_MATERIALIZER=/absolute/path/to/materialize python3 prototypes/topic-0
 python3 prototypes/topic-03a/codex-context-probe.py home
 ```
 
-已测三组按精确的版本和通道运行回归断言。0.167.0-alpha.4 的项目通道及其他未测组合进入探索模式。热继续和同进程恢复分别打印本次请求里 D1、D2 和替换通知出现的次序；显式补发另行报告文件刷新标记是否出现。探索可接受保留旧版或已替换这两种结果，出现新的历史组合则记录待复核项并继续后续场景。协议成功、显式输入实际到达和工具回报仍有独立断言。模型输入中的原始文本可证明该请求包含材料；模型是否采用它、调用结果是否正确、成员是否接受交付，各自依据实际验证。
+四个已测版本与通道组合现有精确回归断言，包括热继续、同进程及跨进程恢复、文件移除与显式补发。其他版本或通道以探索模式报告实际观察。模型输入中的原始文本可证明该请求包含材料；模型是否采用它、调用结果是否正确、成员是否接受交付，各自依据实际验证。

@@ -1,0 +1,124 @@
+name: AgentPlatform independent runner handoff
+on:
+  push:
+    branches: [research/3a-independent-runners]
+    paths: ['.github/workflows/agentplatform-independent-runners.yml', 'prototypes/topic-03a/runner-handoff/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: python3 -m venv "$RUNNER_TEMP/venv" && "$RUNNER_TEMP/venv/bin/pip" install XlsxWriter==3.2.9 openpyxl==3.1.5
+      - run: '"$RUNNER_TEMP/venv/bin/python" prototypes/topic-03a/runner-handoff/transfer.py publish "$RUNNER_TEMP/published"'
+      - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py stop "$RUNNER_TEMP/private-A" "$RUNNER_TEMP/published"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: published-candidate-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/published/
+          retention-days: 1
+          if-no-files-found: error
+      - name: Wait for B while the sender worker is stopped
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "receipt-from-B-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: receipt-from-B-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ack
+      - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py reconnect "$RUNNER_TEMP/private-A" "$RUNNER_TEMP/ack/ack.json" "$RUNNER_TEMP/replayed"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: late-c1-from-A-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/replayed/
+          retention-days: 1
+          if-no-files-found: error
+  receive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Wait for A's published candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "published-candidate-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: published-candidate-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/inbound
+      - run: python3 prototypes/topic-03a/runner-handoff/reconnect.py accept "$RUNNER_TEMP/inbound" "$RUNNER_TEMP/ack.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: receipt-from-B-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ack.json
+          retention-days: 1
+          if-no-files-found: error
+      - name: Receive A's original late report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 prototypes/topic-03a/runner-handoff/reconnect.py wait "late-c1-from-A-${{ github.run_attempt }}"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: late-c1-from-A-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/late
+      - name: Verify original C1 and accepted C2 remain separate
+        run: |
+          cmp "$RUNNER_TEMP/late/late-c1.json" docs/research/topic-03a/fixtures/order-export-c1.json
+          cmp "$RUNNER_TEMP/inbound/report.json" docs/research/topic-03a/fixtures/order-export-c2.json
+  codex-project:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Probe the official Codex alpha in its normal read-only sandbox
+        run: |
+          url=https://github.com/openai/codex/releases/download/rust-v0.167.0-alpha.4/codex-x86_64-unknown-linux-musl.tar.gz
+          curl -fsSL "$url" -o "$RUNNER_TEMP/codex.tar.gz"
+          echo "c4fd6fdeedf0ae78cc4d1d9dde4282c57a4a67c38319e3575b9a1e4d46c9ccc6  $RUNNER_TEMP/codex.tar.gz" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/cli"
+          tar -xzf "$RUNNER_TEMP/codex.tar.gz" -C "$RUNNER_TEMP/cli"
+          mv "$RUNNER_TEMP/cli/codex-x86_64-unknown-linux-musl" "$RUNNER_TEMP/cli/codex"
+          export PATH="$RUNNER_TEMP/cli:$PATH"
+          python3 -u prototypes/topic-03a/codex-context-probe.py project
+  loopforge-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: Tencent/LoopForge
+          ref: 97b3cdc2f29a88e8767a8dc6c03bfb8865622653
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.11'
+          cache: false
+      - name: Test chunked checkpoint recovery and node attempt semantics
+        run: |
+          go test -count=1 -parallel 1 -v -run '^Test(ConversationWorkspaceChunkedWorkerTransportRoundTrip|ShouldCommitNodeOutcome)$' ./internal/engine
+  teamai-workspace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: Tencent/teamai-cli
+          ref: 1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Run complete handoff and workspace suites
+        run: |
+          npm ci
+          ./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 --no-file-parallelism src/__tests__/shell-command.test.ts src/__tests__/workflow-handoff-ends-and-workspaces.test.ts src/__tests__/workflow-place.test.ts

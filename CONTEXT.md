@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.5 阶段研究稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)及[专题三 A V0.6 设计评审稿](docs/architecture/03a-execution-plane.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -64,9 +64,9 @@
 
 **Execution Environment（执行环境）**：一次 Run 使用的工作目录、代码或文件输入、运行配置、临时目录、技能和工具配置等本地资源集合。
 
-**工作副本** 是本次 Run 或节点尝试获准使用的实际目录及其输入基准。执行、复用和回收均保留本地资源身份；可迁移的候选以提交和具名制品摘要识别。
+**工作副本** 是本次 Run 或节点尝试获准使用的实际目录及其输入基准。执行、复用和回收均保留本地资源身份；可迁移的候选以提交和具名制品摘要识别。接替者以自己的身份获取已发布输入，实际下载按对应交付或仓库授权。
 
-**Session（宿主会话）**：Agent 工具维护的对话 / 线程连续性资源，可被多个 Run 先后引用；其恢复能力受宿主、账号、机器和工作目录条件影响。
+**Session（宿主会话）**：Agent 工具维护的对话 / 线程连续性资源，可被多个 Run 先后引用；其恢复能力受宿主、账号、持久化历史、配置目录和工作目录条件影响。接替者可新建会话，显式取得自己获准读取的工作材料。
 
 **执行段** 表示同一次工作归属覆盖的一组可识别宿主活动，可由一个或多个回合组成。同一 Session 可以先后服务多个 Issue。平台通过宿主标识或已记录的调用关系把执行段关联到既有 Run 或外部执行来源，成员可在段内选择共享内容。
 

@@ -5,6 +5,7 @@
 第一阶段采用源码与测试断言阅读。第二阶段的四份固定源码、上游定向测试、真实 CLI 回环实验及设计模型见[第二阶段研究](#11-第二阶段宿主协议与本地观察)。  
 第三阶段用两个真实 CLI 和 Multica 服务端验证上下文换版、共享任务身份与报告归属。[第三阶段研究](#12-第三阶段上下文与任务身份)  
 第四阶段沿两个真实 Git 候选、XLSX、脚本与 Daemon 回报检查制品及结果归属。[第四阶段研究](#13-第四阶段工作副本受管脚本与结果交接)  
+第五阶段核对独立虚拟机、双身份权限、原机重连和本地会话恢复。[第五阶段研究](#14-第五阶段跨主机接续与设计收口)  
 平台设计入口：[专题三 A：执行平面与宿主适配](../architecture/03a-execution-plane.md)
 
 ## 1. 已追踪的底层路径
@@ -538,7 +539,7 @@ go test -count=1 -run '^Test(IssueReadCommandsUseInjectedTaskToken|IssueReadComm
 | 发出回报后断线、撤销或旧回复晚到，会改写哪次结果？ | 真实 Daemon 的 C2 回报在服务端落库后首次收到 503，待确认队列从 1 到 0，重复回调只留一条源评论。重放 C1 后两份原报告仍可分别读取。按 C1 留下的本机路径，则已读到 C2。撤销后服务端先取消，再观察到本机子进程退出与一次取消确认。另复跑 5 项原生终态队列测试 | [生产 Daemon / 服务端 / PostgreSQL 贯通](topic-03a/result-handoff.md) |
 | 平台何时允许 SOP 消费？ | 13 项 SQLite 设计原型测试通过。包含对照派发、Grant、核验器版本、候选提交、供应端文件摘要和验收值。首交并发与缺附件补齐后并发分别重复 50 次，两种情形均只消费一次。当前结果与旧尝试证据分别归档 | [接收原型与并发断言](../../prototypes/topic-03a/result-admission/test_admission.py) |
 
-**三个上游各能复用什么。** Multica 的领取、运行身份、终态重放和附件读写可作为执行底座。LoopForge 在 Script 节点运行前准备工作区、按运行范围启动命令，在自动检查前校验声明制品，并在成功提交节点结果时核对尝试和执行代次。其具名文件与节点尝试关联，适合追溯返工。TeamAI 的命令产生退出和结构化输出，后续节点可根据这些输出选择动作；其驱动和派发把尝试、修订及来源带回。这里借用命令与回报机制，平台的成员关系、分派和结果仍由中心工作模型维护。[LoopForge 的命令执行](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L597-L637) · [产物门禁与提交](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L1015-L1043) · [制品先于检查的测试](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/engine_test.go#L2521-L2553) · [TeamAI 命令到回报](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/protocol.ts#L1023-L1043)
+**三个上游各能复用什么。** Multica 的领取、运行身份、终态重放和附件读写可作为执行底座。LoopForge 在 Script 节点运行前准备工作区、按运行范围启动命令，在自动检查前校验声明制品，并在提交节点结果时核对 owner generation 和节点仍在执行。失败还须匹配 attempt；同代运行节点允许已通过门禁的成功跨 attempt 提交。AgentPlatform 对候选验收另核本次尝试与精确候选。[成功与失败的实际条件](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_outcome.go#L29-L48)其具名文件与节点尝试关联，适合追溯返工。TeamAI 的命令产生退出和结构化输出，后续节点可根据这些输出选择动作；其驱动和派发把尝试、修订及来源带回。这里借用命令与回报机制，平台的成员关系、分派和结果仍由中心工作模型维护。[LoopForge 的命令执行](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L597-L637) · [产物门禁与提交](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/node_execute.go#L1015-L1043) · [制品先于检查的测试](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/engine_test.go#L2521-L2553) · [TeamAI 命令到回报](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/protocol.ts#L1023-L1043)
 
 ### 原型与回归如何复跑
 
@@ -567,6 +568,31 @@ TeamAI 的业务贯穿采用专题二固定提交 `556b524`，C1 和 C2 都通�
 
 ### 第五阶段验收输入
 
+下列为第四阶段结束时的验收输入，实际完成结果见[第五阶段记录](#14-第五阶段跨主机接续与设计收口)。
+
 - 用两台独立主机与各自的成员身份跑一次跨机接续。原机离线、另一台按精确提交及具名附件恢复、原机重连后发送旧结果，把三次观察对到同一 Issue 和各自的 Run。记录接管时不可达的未提交文件和仍占用的资源。
 - 汇总中心派发、本地关联和事后补录三种入口在每个已测宿主上的能力。逐项注明证据由谁提供、缺失时用户看到什么、重要决定换版后怎样继续，并据此明确 3A 交给 3B 的资产加载回执。
 - 对 Codex 0.167.0-alpha.4 的项目 AGENTS.md 通道，本轮重跑仍在原生文件沙盒创建 NETLINK_ROUTE socket 时被宿主环境拒绝，模型请求数为零。保留正常文件沙盒的独立主机复跑项。真实部门订单服务、其余验收项和用户接受按专题一另行核验。
+
+## 14. 第五阶段：跨主机接续与设计收口
+
+同一个订单验证 Issue 有两份候选。C1 的东区工作簿多出一条西区订单，检查结论为返工；C2 修正了选区，A2、A3 通过。以“C1 卡在原机发送队列，接替者先处理 C2”为共同场景，分别观察机器中断、权限、会话和结果消费。下表给出每个结论对应的运行环境。
+
+| 验证对象 | 实际怎么跑 | 得到的证据 |
+|---|---|---|
+| 原机任务结束，接替者取回已发布内容 | 两个 GitHub 托管 Ubuntu 24.04 作业串行，A 作业结束后 B 才启动。每次以同一随机挑战对各自内核的启动标识计算摘要 | 两个启动标识不同；B 从发布的 bundle 检出 C2 完整提交，核对报告及真实东区工作簿的字节、摘要和 ZIP 结构。[两台独立 VM](https://github.com/ScWen7/Issues/actions/runs/43619920271) |
+| 接替者先完成，原机随后重连 | 新一轮使用并行的 A、B 作业。A 生成 C1/C2，单独进程将本轮实际生成的 C1 存在 A 本地后退出。A 的协调进程等待；独立 VM 上的 B 核对 C2 后回执，原 A VM 再起进程从本地出队 | 同一 A 内核在 B 确认后送出原 C1；B 逐字节核对 C1、C2 两份原报告。此处模拟工作进程停止，A 的协调进程持续在线。最初探索轮用仓库中的固定 C1 作对照，正式回归改用本次生成的 C1。[实际 C1 回归](https://github.com/ScWen7/Issues/actions/runs/43620893430) · [工作流](../../.github/workflows/agentplatform-independent-runners.yml) |
+| 进程中断、未发布材料和节点消费 | 同一内核，中心、A、B、恢复 A 的网络 / PID / 挂载命名空间各自独立。A 工作进程实收 SIGKILL，B 在独立副本重算；中心使用第四阶段事务接收原型 | A 退出 137。B 重算的东区工作簿字节与发布件相同，A 未提交的文件和会话草稿未进入 B。C2、C1 晚报、C1 重发依次为 current、historical、duplicate；仅消费一次 C2。[探针与复跑](topic-03a/machine-handoff.md) |
+| 谁可新开 Run，谁可下载或回报 | Multica 两套 Daemon / 成员身份、原生生产 handler、PostgreSQL 17.5 和独立 Python 接收进程 | B 初次领取为空，成员点名后 B 获得独立任务。目标 Issue、其附件和 B Runtime 用量均 200；私有 Issue、相同字节的私有附件、A Runtime 用量均 404。两任务各一条源评论。A 撤权后旧任务令牌 401，旧任务保持取消；长期离线对照为原 Agent 排入 deferred 重试。[逐项结果](topic-03a/two-runtime-identity.md) |
+| 双 VM 在一次运行中交接 B 的任务身份、成品与 C2 回报 | 第一台 VM 运行 Multica、PostgreSQL 及两套 Daemon 对象。第二台 VM 持 B 的临时任务凭据构造六个请求。两机以本次运行的密封制品转送固定请求和原生响应 | B 在另一内核读回并核对 5,494 字节工作簿；三项允许和三项拒绝与本机对照一致。B 送回的 C2 原文经 Daemon 入库后，A 两次投递 C1，两任务各留一条源评论。撤权和超宽限分支保留取消和失败。[同次远端运行](https://github.com/ScWen7/Issues/actions/runs/43621447364) · [拓扑及复跑](topic-03a/two-runtime-identity.md#两台-github-托管虚拟机上的原生授权与回放) |
+| 移交工作材料及恢复原宿主历史 | 单机、两个独立 HOME，分别使用真实 Codex 0.144.6、Claude Code 2.1.325，各测五步 | 两种宿主在 B 上恢复 A 的 ID 都于模型调用前拒绝。B 新会话的请求含 D2、C2 提交和报告摘要，A 私有标记均缺席；A 原 HOME 恢复成功。共 6 次真实宿主发出的回环模型请求。[独立配置与恢复对照](topic-03a/session-handoff.md) |
+| Codex 项目文件换版 | Ubuntu 24.04 VM，官方 0.167.0-alpha.4 release，经发布摘要核对。探针在受信项目直接写合成 AGENTS.md，使用原生 read-only 沙盒；先观察，再固定该组合的回归断言 | 11 回合、12 次回环模型请求。热继续和同进程 resume 仍只带 D1；冷恢复出现 D2 替换通知，显式提交能在当轮带入 D2。该组合与 HOME 文件热更新实测不同。[严格回归日志](https://github.com/ScWen7/Issues/actions/runs/43620893430/job/132526101232) · [四组合对照](topic-03a/codex-context.md) |
+| 各宿主的入口和停止、恢复、计量 | 固定 Multica 提交直接运行 17 项宿主适配器测试，运行真实适配器及协议夹具，并与既有 Codex、Claude、TeamAI 上游代码与宿主实测对照 | 对三种入口逐项列出可观察的原生事实、平台按版本补足的行为、成员独立 IDE 仍待现场实测的通道。[宿主能力表、3B 交接与复跑](../architecture/execution-capabilities.md) |
+
+Git 交付和工作簿下载有不同的可见范围。两机实验中完整仓库接收者可读 bundle 内 C2 的祖先 C1，也能读取合成订单库中的东、西区数据；C2 的东区 XLSX 只包含两个东区订单。平台据接收者权限选择“仓库及可达历史”或“具名附件”，分别校验。原生双身份实验另以两次相同内容、不同附件归属验证了下载权限。GitHub 运行仅使用本研究仓库和合成材料，工作流可以从仓库 Actions 手动运行；跨作业的制品名称带当前 run attempt，复跑时选择全部作业。
+
+TeamAI 交接的条件写入和分支前移检查可复用于可写副本；查验历史 C2 时仍按固定提交取回。LoopForge 在同代次内允许较早 attempt 的成功提交，并按生成时间挑同名子流程制品。AgentPlatform 对当前节点的消费同时核对尝试、候选和具名制品的来源。本轮在本地重新跑通 TeamAI 此前因资源退出的 54 项交接套件，连同其余定向用例共 65 项不同测试。在独立 runner 上完整串行执行 TeamAI 的三个工作区、交接与命令套件，139/139 通过。LoopForge 通过 11 项原生测试，其中 21 MiB 工作区经分块传输后清理、恢复，全部字节匹配；该用例在独立虚拟机也通过。[两库源码、复跑与设计取舍](topic-03a/upstream-handoff.md)
+
+本轮设计交付见[执行平面](../architecture/03a-execution-plane.md)及[宿主能力与 3B 交接](../architecture/execution-capabilities.md)。3B 首个实验沿 D2 的规则、核验脚本及其发布版本检查选择和在途换版，通过 3A 的回执定位实际材料、调用、候选和验证结果。
+
+本次同步复跑 38 项工作流、观察与上下文状态模型测试，以及 13 项结果接收断言，全部通过。两套远端工作流的五个宿主与上游作业、两个原生双虚拟机作业均通过。[上游与宿主作业](https://github.com/ScWen7/Issues/actions/runs/43621807704) · [Multica 跨虚拟机验收](https://github.com/ScWen7/Issues/actions/runs/43621447364)

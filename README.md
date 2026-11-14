@@ -4,9 +4,9 @@
 
 ## 当前交付
 
-当前交付为专题三 A「执行平面与宿主适配」V0.5 阶段研究稿。第四阶段用真实 Git 工作副本生成订单导出 XLSX，跑通 C1 返工、C2 通过、终态回报重发和文件下载，并验证共享 Runtime 撤销与本地进程停止的先后关系。[阶段设计](docs/architecture/03a-execution-plane.md#48-结构化节点结果与制品回报) · [第四阶段实验与源码](docs/research/03a-source-evidence.md#13-第四阶段工作副本受管脚本与结果交接)
+当前交付为专题三 A「执行平面与宿主适配」V0.6 设计评审稿。五个阶段围绕同一个问题收口：成员换机或离线后，谁有权接手，能拿到什么，迟到结果归哪一次执行。独立 Linux 虚拟机验证了候选与工作簿交接；原生 Multica 双身份验证了目标 Issue、附件和 Runtime 用量的授权；真实 Codex 与 Claude Code 验证了本地会话与可共享工作材料的区别。[完整设计](docs/architecture/03a-execution-plane.md) · [第五阶段实验](docs/research/03a-source-evidence.md#14-第五阶段跨主机接续与设计收口)
 
-下一阶段收敛专题三 A 的完整方案，重点补两台独立机器之间的执行接续，以及工作区、候选、会话和制品在原机离线时各自的恢复条件。[研究顺序](docs/architecture/03a-execution-plane.md#7-本轮研究顺序)
+下一阶段进入专题三 B「能力与知识治理」。首个案例是订单导出的规则和核验脚本换版：沿同一 Issue 决定 D2，追踪资产由谁发布、对哪些项目生效、在途节点选中哪一版，再从具体宿主回合核对加载与产出。[入口与宿主能力矩阵、3B 交接](docs/architecture/execution-capabilities.md)
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
@@ -31,7 +31,7 @@
 | [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | 审阅分工、图依赖、人工门禁、返工与接管规则以及实现前的验证条件 |
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
 | [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
-| [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、五条研究线、停止与恢复观察以及订单导出核对场景 |
+| [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、三种宿主入口、任务身份、换机接续和迟到结果归属 |
 | [专题三 A：源码研究记录](docs/research/03a-source-evidence.md) | 查看固定版本的注册、授权、加载回执、任务凭据及宿主结果证据 |
 | [专题一：源码研究依据](docs/research/01-source-evidence.md) | 查看固定提交、代码事实与提示词约定对照、代表测试及设计推论 |
 
@@ -42,6 +42,6 @@
 
 ## 研究与核验
 
-专题三 A 的四阶段分别验证 Runtime 与领取、本地会话与执行归属、上下文与任务身份、实际工作副本及交付。订单导出的第四阶段记录涵盖真实宿主协议适配、实际 Daemon、PostgreSQL、二进制附件与脚本。各项对照保留版本、输入和复跑命令。[研究记录](docs/research/03a-source-evidence.md)
+专题三 A 的五阶段分别验证 Runtime 与领取、本地会话与执行归属、上下文与任务身份、工作副本与交付、跨机接续和原机重连。订单导出的第四阶段记录涵盖真实宿主协议适配、实际 Daemon、PostgreSQL、二进制附件与脚本。各项对照保留版本、输入和复跑命令。[研究记录](docs/research/03a-source-evidence.md)
 
 参考仓库副本和阶段笔记存放于已忽略的 `.tmp/`；正式文档引用固定的上游源码链接，不依赖临时目录长期存在。
