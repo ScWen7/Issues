@@ -198,6 +198,60 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 
 ## 7. 新增追踪：上下文、凭据与会话结果
 
+以下核对沿用本记录的固定提交，证据为公开实现与测试断言阅读。代表路径用于补齐探索输入，各宿主的真实运行覆盖由下一轮能力矩阵验证。
+
+### 7.1 ContextReceipt 的生成时机与证据等级
+
+Daemon 在 Backend 执行前构造并上报 ContextReceipt，用于保留启动即失败时的材料与通道信息。回执描述本轮交付清单；当前宿主实际接收、读取和采用需对应实际观测。[生成时机](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9206-L9245)
+
+| 源码等级 | 记录的依据 |
+|---|---|
+| delivered | 本轮通过输入请求或内联内容提供材料的通道 |
+| verified | 文件投递方式有对应宿主版本的既有加载探测 |
+| verified_other_version | 当前运行版本与已探测版本不同，或当前运行版本未知 |
+| unverified | 材料已物化，加载发现尚缺探测依据 |
+| not_delivered | 本轮材料未交付，包括没有适用通道或文件写入失败 |
+
+文件型等级按探测表与版本匹配计算；自定义 Runtime 单独标记其观测等级。Skill 可用回执使用 file / unverified；MCP 回执列出配置名，连接和调用结果另行观察。回执上报失败记录日志，因此回执缺失也需作为采集覆盖状态保留。[等级定义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L37-L59)、[版本探测](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L93-L120)、[Skill 与 MCP 回执](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L231-L281)
+
+### 7.2 两个宿主的实际注入路径
+
+| 材料 | Claude | Codex |
+|---|---|---|
+| Agent 指令与仓库规则 | Agent 指令随 runtime brief 写入 CLAUDE.md 受管区块，既有仓库规则保留在区块外 | Agent 指令随 runtime brief 写入 AGENTS.md 受管区块，既有仓库规则保留在区块外 |
+| Skill | 写入工作目录下的 .claude/skills | 写入本次任务 CODEX_HOME 下的 skills |
+| MCP | 构造配置并通过 CLI 参数提供，受管配置采用对应限制选项 | 写入任务 CODEX_HOME/config.toml，受管配置按代码清理继承项 |
+
+对应入口：[指令受管区块](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/runtime_config.go#L161-L225)、[Claude Skill 物化](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/context.go#L161-L183)、[Skill 路径](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/context.go#L332-L341)、[Codex Skill 物化](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/execenv.go#L1087-L1125)、[Claude MCP](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/claude.go#L74-L88)、[Codex MCP](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codex.go#L619-L684)。
+
+这些是原生交付路径。平台独立的 Rule 资源选择、作用域和冲突治理由 3B 设计；3A 验证选定内容如何进入指定宿主以及实际回执的证据强度。
+
+### 7.3 任务令牌、CLI 配置根与 marker
+
+Daemon 检查并注入任务 token 和任务配置根。CLI 优先读取显式任务 token；识别到任务上下文而 token 缺失时，返回缺失结果。创建 API client 时进一步检查 `mat_` 前缀；服务端有效性、绑定和 scope 校验另行追踪。默认及命名 profile 路径可统一重定向到任务目录。[Daemon 身份注入](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L171-L197)、[CLI token 解析](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/cmd/multica/cmd_auth.go#L74-L87)、[任务客户端身份检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/cmd/multica/cmd_agent.go#L258-L287)、[任务配置根](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/cli/config.go#L235-L299)
+
+CLI 还从 cwd 向父目录查找受管 marker。根 marker 覆盖任务环境变量全部丢失、工作目录移到父级但仍在 workspaces tree 的路径；写入失败按现有实现记录警告并继续。所有任务信号都消失且 cwd 已离开 marker 祖先覆盖范围时，依据判定式会进入普通 profile 解析，这是后续需要验证的场景。[marker 查找](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/cmd/multica/cmd_agent.go#L449-L486)、[根 marker 建立](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/context.go#L33-L118)、[初始化失败的处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/execenv.go#L444-L452)、[移到父目录的测试断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/cmd/multica/cmd_agent_test.go#L246-L303)
+
+此机制保护 CLI 的平台身份解析。原生实现刻意保留 HOME / XDG，供其他工具使用 Daemon 所在操作系统用户的已有状态；平台成员、Runtime Owner 与 OS 用户分别识别。同 UID 文件访问、宿主 sandbox、外部工具凭据和平台任务授权分别研究。[环境保留说明](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L8895-L8899)
+
+### 7.4 TerminalObserved 与结果交接
+
+Backend 可在读取到单次宿主调用的权威终态后，通过 TerminalObserved 报告该事实；契约要求在可能阻塞的清理以及最终 Result 发送前发布，成功与失败都适用。该能力用于保留宿主结果与清理过程的区别。[Session 契约](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L228-L244)
+
+Cursor 在协议 result 事件后先标记已观察终态再关闭后台执行；Pi 保留已经读到的 provider error。Daemon 的 watchdog 检查终态观察；取消先到达时，对提供此能力的 Backend 给定 Result 交接时间，再判断实际结果。当前交接预算为 30 秒，未提供能力的 Backend 使用原有取消和 watchdog 路径。[Cursor 实现](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/cursor.go#L270-L298)、[Daemon 交接及结果分类](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L10379-L10546)、[watchdog 检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L10647-L10690)、[终态交接对照测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/cursor_terminal_boundary_test.go#L220-L293)
+
+平台探索需对照已读成功、已读失败、尚无终态、提供能力和未提供能力的路径。宿主调用结果、受管 Run 最终回报、业务验收和资源释放分别记录。
+
+### 7.5 恢复拒绝与新会话重试的真实条件
+
+原生区分永久恢复拒绝与暂时占用拒绝，二者对旧 Session 的后续资格处理不同。`shouldRetryWithFreshSession` 首先要求执行失败、存在 prior SessionID 且已观察到的 `tool-use` 次数为 0；再检查明确拒绝、共同错误识别或受限兼容分支。[拒绝类型](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L308-L343)、[重试判定](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9631-L9716)
+
+`resumeRejectionUndetectable` 列出缺少明确拒绝信号的兼容 Provider。显式拒绝及共同错误识别先行判断；剩余情况仅对表内 Provider、空结果 SessionID 和适用错误类型尝试兼容回退。未知 Provider 默认跳过猜测分支。该计数只统计已观察到的 `tool-use`，实际副作用仍需结合来源核实。[能力表](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L458-L485)、[错误类型筛选](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9814-L9844)
+
+fresh fallback 在该原生分支中执行一次，并重新构造冷启动上下文；永久拒绝退休旧会话，暂时拒绝保留旧会话资格，两次用量合并。本轮平台 Run 的最终报告发生在这段内部恢复之后。[执行与上下文重建](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9255-L9330)、[结果及用量合并](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9797-L9811)、[忙会话恢复断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/pi_busy_retry_unix_test.go#L24-L100)
+
+3A 的下一轮矩阵应分别覆盖明确拒绝与兼容判断、永久与暂时拒绝、有无工具事件、新旧会话 ID、原始失败和重试结果。具体重放策略结合宿主版本及工作副作用确定。
+
 ## 10. 第一阶段完成：Runtime / Daemon 注册、调度、领取与恢复
 
 本节沿固定上游提交 fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc，追踪 Daemon 注册、服务端授权、批量 Claim、SQL 原子领取、Start generation、心跳、Runtime liveness、失联收敛和数据库测试。此处为实现与测试断言阅读结果；本轮没有运行 Multica 上游 Go 测试。

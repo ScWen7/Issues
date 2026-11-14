@@ -239,12 +239,16 @@ Script 不需要模拟 Agent Session，也不需要伪造模型消息。它应�
 
 ## 7. 本轮研究顺序
 
-1. **Multica Runtime / Daemon 底层机制**：注册、心跳、Claim、Start、并发、权限、取消、终态回报和重启恢复。
-2. **宿主与本地交互入口**：比较中心派发、主动关联和事后补录，追踪 skill driver、会话观察、实际用量及选定共享；核对 TerminalObserved、恢复拒绝识别和新会话重试条件。
+1. **<text>已完成</text> Multica Runtime / Daemon 底层机制**：注册、心跳、Claim、Start、并发、权限、取消、终态回报和重启恢复。源码证据见[研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
+2. **当前推进：宿主与本地交互入口**：比较中心派发、主动关联和事后补录，追踪 skill driver、会话观察、实际用量及选定共享；核对 TerminalObserved、恢复拒绝识别和新会话重试条件。
 3. **上下文与任务身份**：追踪 ContextReceipt、资源注入和加载探测，核对任务令牌、marker、配置回退与执行环境的真实隔离能力。
 4. **工作区、Script 与结构化回报**：Prepare / Reuse、代码候选、制品采集、命令执行、节点结果解析、关联校验及停止回执。
 5. **形成专题设计判断**：根据上述事实收敛执行对象、能力矩阵、观察与收敛模型，以及 3A / 3B 的交接要求。
 6. **原型验收**：在[专题二状态模型](../research/topic-02/prototype-validation.md)之外，接入真实 Daemon、Runtime、宿主和工作区验证下列场景。
+
+## 7.1 第一阶段研究结论
+
+第一阶段源码追踪已完成。当前采用的研究结论是：Host / Daemon / Runtime Instance 分层；机器批量 Claim、数据库逐 Agent 原子领取；Daemon 本地槽、Agent 上限、Runtime 上限三层容量控制；Claim Generation 保护 Start 与重放；心跳租约、Runtime Sweeper、reconnect grace 和启动孤儿恢复分流不同故障。详细证据、SQL 与测试断言见[源码研究记录第 10 节](../research/03a-source-evidence.md#10-第一阶段完成runtime--daemon-注册调度领取与恢复)。
 
 ## 8. 订单导出与后续原型的核对场景
 
