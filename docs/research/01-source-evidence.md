@@ -26,15 +26,15 @@
 
 **专题一方案推论：** 当前候选方案参考 Multica 的 Issue 工作机制：父子 Issue 共用模型，具体分工优先表达为子 Issue，也允许在同一 Issue 内委派；Run 直接关联实际工作的 Issue，Leader 的父事项协调 Run 也挂在父 Issue 上。`AgentTaskQueue` 的内部名称与产品术语分别解释；当前方案优先复用现有工作与执行记录。
 
-### M2. 工作负责人与被邀请参与不同
+### M2. 工作负责人与被邀请参与不同，责任归属区分处理人与发起人
 
-**代码事实：** Issue 支持 Member、Agent、Squad 负责人及父子 Issue；`WillEnqueueRun` 按负责人、状态和可用性判断是否派发。Squad 主责会解析 Leader，但非主责 Squad 也可能经 `@squad` 进入 guest Leader 路径。
+**代码事实：** Issue 支持 Member、Agent、Squad 负责人及父子 Issue；`WillEnqueueRun` 按负责人、状态和可用性判断是否派发。Squad 主责会解析 Leader，但非主责 Squad 也可能经 `@squad` 进入 guest Leader 路径。在数据模型上，`Issue` 表具备 `AssigneeType`/`AssigneeID`、`CreatorType`/`CreatorID` 与 `RequesterUserID`；`issueToResponse` 将其分别序列化为 `AssigneeID`、`CreatorID` 与 `RequesterID`。Member 创建时 `CreatorID` 记录该成员；Agent 触发时 `RequesterUserID` 记录发起 Member。
 
-证据：[Issue 模型](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/pkg/db/generated/models.go#L931-L963)、[触发判断](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_trigger.go#L103-L212)、[Leader 派发](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad.go#L1234-L1291)。
+证据：[Issue 模型字段](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/pkg/db/generated/models.go#L931-L963)、[API 响应映射](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue.go#L485-L514)、[触发判断](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_trigger.go#L103-L212)、[Leader 派发](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad.go#L1234-L1291)。
 
 **提示词约定：** guest Leader 不得推进父 Issue 状态；拥有 Issue 的 Leader 有推进责任。[负责与 guest 边界](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L181-L191)。
 
-**设计推论：** “仅指定 Squad 主责才启动自动协调”是本平台输入要求，上游 guest 路径单独记录。一次咨询、参与和完整接管应分别表达。
+**设计推论：** “仅指定 Squad 主责才启动自动协调”是本平台输入要求，上游 guest 路径单独记录。在责任模型上，Multica 原生支持随步骤流转的当前处理人（Assignee）与发起线索（Creator/Requester），但缺少全局稳定的独立人工总责人概念。平台需在业务模型上扩展总责人角色，显式锚定人工最终责任，防止 Agent/Squad 协作时责任虚化。
 
 ### M3. Leader 是短轮次协调，规划质量主要依赖 Agent
 
@@ -46,11 +46,11 @@
 
 **设计推论：** 可借鉴按重要工作变化唤醒 Leader；目标、授权、依赖和验收边界仍需成为平台工作规则。
 
-**代码事实：** 父子 Issue 已有 `child_done` 系统唤醒规则：按子 Issue 的 stage 汇总进度，前序阶段均关闭且后续阶段仍等待时，以及全部子 Issue 关闭时，唤醒父 Issue 的当前负责人；Agent 进入执行、Squad 解析 Leader、Member 收到通知。规则复用已有唤醒收据与 Run 机制，默认开启，可按工作区或事项设置。`closed` 包含取消，触发事实保留取消计数。
+**代码事实：** 父子 Issue 已有 `child_done` 系统唤醒规则：按子 Issue 的 stage 汇总进度，前序阶段均关闭且后续阶段仍等待时，以及全部子 Issue 关闭时，唤醒父 Issue 的当前负责人；Agent 进入执行、Squad 解析 Leader、Member 收到通知。规则复用已有唤醒收据与 Run 机制，默认开启，可按工作区或事项设置。`closed` 包含取消，触发事实保留取消计数。当子 Issue 也指派给 Squad 时，子 Issue 自身的工作事件唤醒子 Squad Leader；当子 Issue 整体关闭触发 `child_done` 时，`resolveWakeTarget` 读取父 Issue 的 Assignee，精准唤醒父 Leader，层级天然解耦。
 
-证据：[系统规则与默认指令](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L24-L76)、[阶段条件实现](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_condition.go#L653-L710)、[父负责人解析](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L303-L350)、[单事项规则配置](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L726-L778)。
+证据：[系统规则与默认指令](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L24-L76)、[阶段条件实现](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_condition.go#L653-L710)、[父负责人与唤醒目标解析](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L303-L353)、[单事项规则配置](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L726-L778)。
 
-**提示词约定与边界：** 默认指令要求被唤醒者检查依赖、判断取消工作是否仍需要，再启动后续阶段或汇总；阶段关闭触发协调，业务成功、依赖结果和阶段验收由相应判断确认。**设计推论：** 优先复用该父子事项回收机制，补充本平台的结果判断和验收约束，不重建平行的分工状态体系。
+**提示词约定与边界：** 默认指令要求被唤醒者检查依赖、判断取消工作是否仍需要，再启动后续阶段或汇总；阶段关闭触发协调，业务成功、依赖结果和阶段验收由相应判断确认。**设计推论：** 优先复用该父子事项回收机制，补充本平台的结果判断和验收约束，不重建平行的分工状态体系。同时确立“子 Squad 限一层嵌套”的明确规则，防止递归发散引发额度失控。
 
 ### M4. 评论保存、派发、Agent 读取和工作验收是不同事实
 
@@ -62,13 +62,19 @@
 
 **设计推论：** Conversation、Decision、Run 结果、子 Issue 结果核验与父 Issue 验收需要各自明确效力，消息保存、执行结束和接受交付分别取证。验收是对应 Issue 上关联标准、制品和证据的 Decision / 记录，不必为了验收额外创建一个工作事项。
 
-### M5. Project Workflow 已直接参与工作权威
+### M5. Project Workflow 已直接参与工作权威，平台强制规则与约定需清晰切分
 
-**代码事实：** Multica 已有工作区共享 status 目录，包含七个内置状态和 unstarted / started / done / closed 四类生命周期；自定义状态只继承生命周期，不自动获得内置 parking、review 等行为。Project Workflow 从同一目录选择并排列状态，规定各状态 handler 和步骤指令；未单独配置的项目使用工作区 Default Workflow，其存储配置也约束项目外事项。进入状态可重新分配负责人，Agent 按该步指令启动。具有效步骤绑定的调用 Run 已落后于当前步骤时，服务端会拒绝它改变状态；未启用交接的 Default Workflow 保持既有行为，不套用该 guard。
+**代码事实：** Multica 已有工作区共享 status 目录，包含七个内置状态和 unstarted / started / done / closed 四类生命周期；自定义状态按类别参与生命周期判断。Project Workflow 从同一目录选择并排列状态，规定各状态 handler 和步骤指令；未单独配置的项目使用工作区 Default Workflow。具备步骤绑定的 Run 在命名工作流或启用交接的 Default Workflow 中接受过期步骤检查（`issue_workflow_entry.go#L80-L86`、`#L120-L123`）。未启用交接的 Default 有意保留原有工作方式，这是守卫的适用范围。
 
-证据：[status 目录与生命周期](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/issuestatus/issuestatus.go#L1-L56)、[Workflow 职责与默认值](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/issueworkflow/issueworkflow.go#L1-L19)、[Issue 更新调用](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue.go#L4235-L4258)、[过期步骤写入检查](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue_workflow_entry.go#L80-L86)、[检查适用范围](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue_workflow_entry.go#L118-L122)、[Leader 工作流约束](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L144-L171)。
+证据：[status 目录与生命周期](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/issuestatus/issuestatus.go#L1-L56)、[Workflow 职责与默认值](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/issueworkflow/issueworkflow.go#L1-L19)、[Issue 更新调用](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue.go#L4235-L4258)、[过期步骤写入检查](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue_workflow_entry.go#L80-L86)、[检查适用范围与默认工作流例外](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue_workflow_entry.go#L120-L123)、[Leader 工作流约束](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L144-L171)。
 
-**专题一方案推论：** 当前候选方案优先复用 status 目录与 Project Workflow，研究现有事项生命周期和交接机制的适用性。专题二比较 TeamAI / LoopForge 时，应把 SOP 作为必要增量接入此主干，明确流程进度如何形成 Issue 上的结果与交接，避免引入其他状态和分配权威。人工验收等规则需明确是本平台配置或约束，提示词责任与代码强制分别列明。
+**提示词约定：** 默认 Leader 指令要求在目标满足后移入 `in_review`，由人工或既有集成完成事项（[默认状态职责](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L114-L123)）；采用 Workflow 时遵循对应步骤（[Workflow 状态职责](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L152-L171)）。这些指令描述 Leader 的工作责任；人工验收决定的统一完成校验属于本平台的扩展要求。
+
+**代码事实：** PR 自动完成读取事项的关闭选项、关联 PR 状态和项目允许的目标状态；全部关联 PR 合并且条件满足时，系统直接推进 Issue，并以 `system` / `pr_automation` 记录来源。该入口按 PR 与状态条件执行，已读路径未校验指定验收人对候选的业务接受决定。平台已有单事项关闭 PR 自动完成的选项。自定义成功完成状态归入 done 生命周期，覆盖验收要求时应按类别识别。
+
+证据：[PR 自动完成判定与单事项开关](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/pr_auto_complete.go#L173-L242)、[系统状态推进与来源记录](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/pr_auto_complete.go#L280-L318)、[自定义终态与生命周期](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/issuestatus/issuestatus.go#L1-L9)。
+
+**专题一方案推论：** 当前方案以 Multica status 与 Project Workflow 为工作平面主干作为工作假设。人工验收要求统一覆盖成员、Agent、流程、PR 自动完成等集成入口，以及成功完成类别的全部状态，校验指定验收人对当前候选和标准的有效决定。人工验收事项默认关闭原生 PR 自动完成；自动入口接入统一校验后可依据有效决定推进。过期步骤守卫按原生适用范围复用，普通 Default 工作保留既有行为，新增流程需求交专题二评估。
 
 **代码事实与边界：** 普通改负责人和包括 `cancelled` 在内的状态变更不默认中断正在执行的 Run，新负责人的 Run 可以与既有 Run 并存。Workflow handoff 可显式请求停止前负责人的 Run；该操作保留同 handler 的 Run，也跳过 Agent 自身发起交接的 Run。另有独立收尾规则：Issue 进入 done / closed 时停用普通 wakeup 规则，并取消尚未启动的 wakeup Run；`child_done` 系统规则保持配置、在关闭期间静默，重开后可恢复，已经运行的工作仍使用 Stop 控制。状态收尾据此区分未启动的唤醒执行和正在进行的执行。
 
@@ -94,7 +100,7 @@
 
 **代码事实：** Runtime 已区分所有者、指定成员共享和工作区公开；工作区成员资格之外还检查机器所有者的使用同意。管理员角色不覆盖私有 Runtime 的使用同意，改变共享范围仅限所有者。共享不授予机器管理权。
 
-证据：[机器使用同意判断](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/runtime_access.go#L10-L14)、[使用与共享权限边界](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/runtime.go#L1070-L1086)。
+证据：[机器使用同意判断](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/runtime_access.go#L10-L15)、[使用与共享权限边界](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/runtime.go#L1070-L1086)。
 
 **设计推论与未验证项：** 复用既有会话、Run 归属和机器共享同意机制，按需补足正式决定、结果回传与 Execution Contract；不从零重做权限层。机器共享、目标仓库、业务数据及外部操作分别核对授权。后续验证重点是外部本地会话导入和跨成员、跨机器接续。
 
