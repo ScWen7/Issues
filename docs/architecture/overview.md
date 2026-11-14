@@ -47,12 +47,12 @@
 |---|---|---|
 | 一：统一工作生命周期 | V0.3 阶段方案、订单导出推演与用户评审修订 | 保留六项待验证事项，涵盖轻量工作单元 / Task、总责人、验收决定、Squad 嵌套、Leader 离线和项目级多 Issue 组织；结合后续专题持续验证 |
 | [二：SOP 与研发工作流融合](02-sop-workflow.md) | V0.3 设计：委托授权、派发控制绑定、工作流出口幂等交接、子项委托轮次；配套 17 项状态模型测试与三库研究 | 验证委托授权与撤销、三入口派发仲裁、子 Issue 委托轮次、SOP 出口幂等交接，以及人工门禁和跨机返工 |
-| 三 A：执行平面与宿主适配 | 先行线：Runtime/Daemon、worktree、恢复、本地交互接入、资源使用授权 | 核对 Multica 现有执行链与各本地宿主适配协议，提供 3B 生效的前提（加载确认与交互接入） |
+| [三 A：执行平面与宿主适配](03a-execution-plane.md) | 探索基线 V0.1：Daemon / Runtime、Provider Adapter、Execution Environment、Session、Script Executor 与恢复机制 | 完成 Multica 源码追踪、宿主协议能力矩阵、工作区与会话接续模型、取消与恢复边界，再形成平台设计和原型验收 |
 | 三 B：能力与知识治理 | 顺延线：资源来源、版本、审核发布、上下文组装、知识贡献 | 建立在 3A 宿主与加载确认基础上，处理团队能力和知识的版本分发与治理 |
 | 四：成本、质量与自改进 | 约定共享证据、执行事实和归集边界 | 统一成本口径、评价覆盖、后台活动、Benchmark 与改进效果验证 |
 | 五：统一工作台产品 | 约定围绕现有工作对象组织入口 | 复用既有产品路径，补齐交互视图，不创造平行状态权威 |
 
-阅读[专题一](01-unified-work-lifecycle.md)了解具体工作规则，[术语表](../../CONTEXT.md)用于核对概念，[源码研究依据](../research/01-source-evidence.md)区分上游事实、配置和设计扩展。专题二的工作选择及实现验证条件见[专题二设计](02-sop-workflow.md)，状态模型结果见[原型验证记录](../research/topic-02/prototype-validation.md)。
+阅读[专题一](01-unified-work-lifecycle.md)了解具体工作规则，阅读[专题三 A](03a-execution-plane.md)了解执行平面探索范围，[术语表](../../CONTEXT.md)用于核对概念，[源码研究依据](../research/01-source-evidence.md)区分上游事实、配置和设计扩展。专题二的工作选择及实现验证条件见[专题二设计](02-sop-workflow.md)，状态模型结果见[原型验证记录](../research/topic-02/prototype-validation.md)。
 
 ## 3. 专题一提出的工作主线
 

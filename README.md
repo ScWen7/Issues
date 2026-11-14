@@ -4,6 +4,9 @@
 
 ## 当前交付
 
+当前进入专题三 A「执行平面与宿主适配」探索阶段。研究从 Multica 的 Daemon / Runtime / Provider Adapter / Execution Environment / Session 实际代码路径展开，先建立执行生命周期、宿主适配和恢复机制的源码证据，再形成平台设计。入口：[专题三 A 探索基线](docs/architecture/03a-execution-plane.md)，[源码研究记录](docs/research/03a-source-evidence.md)。
+
+
 当前为专题二「SOP 与研发工作流融合」V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
 专题一 V0.3 的关键设计如下。
