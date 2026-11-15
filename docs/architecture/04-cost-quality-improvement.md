@@ -1,62 +1,192 @@
-# 专题四 · 成本、质量与自改进
+# 专题四：成本、质量评价与工程级 RSI
 
-V0.1 · 探索基线 · 2026-11-15
+版本：V1.0 · Multica Usage 融合与 TeamAI / LoopForge 进化机制 · 2026-11-15
+
+本专题沿用 Multica 的 Run、Trace、Result 和 Task Usage 作为事实来源与基础计量链路。融合 TeamAI Scorers 和 LoopForge Evaluator、Benchmark、Findings 与工程级 RSI，形成从真实执行到可验证改进的闭环。
+
+本专题不建立第二套 Run、执行事实库或 Cost Service。治理边界见[架构治理基线](governance-baseline.md)。
 
 ## 1. 目标
 
-让平台回答四个问题：一次工作实际消耗了什么；这些消耗应归到哪个 Run / Issue / SOP 节点；执行结果质量如何且评价依据是什么；哪些重复问题值得改进、改动是否真的改善结果。
+平台最终要回答四个问题：
 
-专题四不建立第二套工作状态或 Run。Issue、Run、Node Attempt、SOP 实例和资产版本沿用前序专题；专题四读取执行事实，产生计量、评价、Benchmark 和改进证据。
+1. 一次真实工作消耗了什么，哪些用量有宿主证据，哪些仍未知？
+2. 执行质量如何，评价依据是什么，哪些失败来自产品、流程、Agent 或环境？
+3. 哪些问题值得改进，应该修改 SOP、Role、Skill、Rule、Gate 还是执行配置？
+4. 改进是否真的让后续执行更好，而不是只生成了一份看起来合理的建议？
 
-## 2. 共同原则
+## 2. 复用 Multica 的成本与执行事实
 
-- 先保存原始观察，再形成计量结论。原生请求、宿主快照、工具调用、服务回执、账单行和人工说明保留来源、发生时间、接收时间、覆盖范围及摘要。
-- 事实、推断和未知分开。供应商报告的 Token、宿主估算、账单实付、仅知 Token、未知费用不能压成一个“真实成本”字段。
-- 多路观察不等于多次执行。同一原生请求可被 Hook、Daemon、OTel 和转录导入同时观察；观察可并存，计量单元只能结算一次。
-- 归属依赖实际执行身份。Run 是成本的原始归属单位。Issue、父子 Issue、SOP、节点尝试、Squad 和项目是引用及汇总视图，按底层计量单元去重。
-- 评价不改写执行事实。执行成功、质量评分、SOP 门禁和业务验收是不同结论。
-- 改进不自动改变在途工作。建议先形成候选改动，经回归和审核后由专题三发布新版本；新实例显式选择新版本。
+Multica 已有 Run / Task、Provider / Model、Trace / Result、Task Usage 与用量上报链路。专题四沿用它们作为事实底座。
 
-## 3. 成本账本
+| 已有能力 | 专题四使用方式 | 允许的增量 |
+|---|---|---|
+| Run / Task 身份 | 成本、质量和改进的原始执行归属 | 仅补充与 SOP 节点、评测对象和观察来源的关联 |
+| Task Usage | 计量结果和汇总入口 | 扩展 Qoder / CodeBuddy 等 Credits、单位、来源身份、覆盖和未知状态 |
+| Trace / Message / Tool Activity | 评价执行过程、控制流和工具行为 | 增加必要的结构化提取和原生事件身份 |
+| Result / Terminal | 执行终态事实 | 不由评价器或成本采集改写 |
+| ContextReceipt | 评价本轮实际获得的能力和知识输入 | 关联资产版本、投递证据和缺项 |
+| Asset 发布机制 | 接收改进后的 Skill / Rule / Role / SOP 版本 | 增加候选改进和 Benchmark 的关联 |
 
-### 3.1 两层记录
+不创建平行 Cost Ledger。若 Task Usage 现有字段无法表达某类原生计量，先扩展既有 Usage 模型和上报链路；Observation 可作为来源证据，但不成为另一份可独立结算的账本。
 
-**Observation（观察）**保存原始事实：来源系统、宿主与账号命名空间、Session / Thread / Turn / Prompt / Message / Tool Call 等原生标识、事件种类、阶段、模型 / Provider、指标、单位、区间、发生与接收时间、原始摘要和采集覆盖。
+## 3. 成本计量规则
 
-**Usage Entry（计量条目）**是经过归属、去重、口径判断后的结算记录：计量单元身份、生产 Run、执行成员、Provider / Model、指标与数量、计费口径、来源证据、覆盖状态、当前版本及更正链。
+### 3.1 原始观察与计量结果
 
-一条 Observation 可以不产生 Usage Entry；多个 Observation 可以共同证明一条 Usage Entry。禁止把“收到一个事件”直接等同于“新增一次费用”。
+可保留多路原始观察，例如 Multica Backend、ACP、Stream-JSON、Hook、OTel、宿主转录和成员补录。它们用于证明事件来源、覆盖范围和身份关系。
 
-### 3.2 原生计量单位与异构宿主
+真正进入 Task Usage 的计量必须：
+- 归属于真实 Multica Run / Task，或明确标记暂时无法归属；
+- 携带 Provider、Model（若有）、Metric、Unit、Value 和原生身份；
+- 区分单次增量、阶段快照、Turn 快照、Session 累计和账单结算；
+- 使用原生请求 / Stage / API Call / Event 身份去重；
+- 对更正采用覆盖或版本化更正，不把同一快照重复累加。
 
-账本统一的是记录结构和归属规则，不是强迫所有宿主使用同一种单位。每条计量都必须携带 `provider`、`metric`、`unit`、`value`、来源命名空间、原生事件身份和计量覆盖范围。单位至少区分：
+### 3.2 计量单位不能混算
 
-| 宿主 | 原生单位 | Runtime 可观测入口 | 归属边界 |
-|---|---|---|---|
-| Codex | input / output / cached tokens | App Server Thread / Turn / Usage；CLI JSON 投影 | 累计快照先确定基线和独占区间 |
-| Claude Code | tokens、请求级 usage | Hooks、SDK 消息、OTel request_id / message UUID | 按请求 / 消息身份去重，区分累计与增量 |
-| Qoder | Qoder Credits | 本地 Qoder Agent SDK Assistant 消息 `message.usage.credits`；Result 的 `total_credits` 仅作会话累计快照 | 受管 SDK Runtime 产生的请求用量可绑定 Run；缺字段保持 unknown。不能据此声称能读取任意已打开 IDE 会话 |
-| CodeBuddy Code | CodeBuddy Credits | 本地 CLI `--output-format stream-json` 的 `system/usage_update` | 以 `session_id + requestId + stage.id` upsert；snapshot 替代 stage 汇总，不能相加。IDE 未暴露则 unknown |
-| GitHub Copilot CLI | nano-AIU、Premium Request cost、tokens（各自独立） | CLI JSON 事件流的 `session.usage_checkpoint`；官方 SDK 另有 `assistant.usage` 与 `session.usage.getMetrics` | checkpoint 是 Session 累计快照；本次 CLI 实测未取得逐请求 nano-AIU。Turn ID 可能在恢复后重用，不能单独去重；以原生事件 ID / API Call ID 和显式 Run 启动绑定关联 |
+| 宿主 | 已观察或官方定义的计量 | 当前边界 |
+|---|---|---|
+| Codex | Input / Output / Cached Tokens | 按 Thread / Turn / 原生用量区间识别累计基线 |
+| Claude Code | Token、请求级 Usage、部分 OTel request_id | Hook、SDK、OTel 和转录多源重叠时按原生请求归并 |
+| Qoder | Qoder Credits；Assistant 消息请求用量与 Session total_credits 累计快照 | 当前 Mac CLI 1.1.88 / SDK 1.0.59 测试未取得 Assistant 消息、原生 request_id 和请求 Credits；Session total_credits=0 不是单次消耗 |
+| CodeBuddy Code | Credits Stage、requestId、stage.id、Turn / Result snapshot | 实测单 Stage 0.69 Credits；snapshot 是同一事实的副本，不能重复相加 |
+| GitHub Copilot CLI | nano-AIU、Premium Request cost、Tokens | Session checkpoint 是累计快照；两次 Run 的差值只是派生观察，不冒充原生单次用量 |
 
-### 3.3 Mac 真实 Runtime 回执核验（2026-11-15）
+Qoder / CodeBuddy Credits、Copilot nano-AIU、Premium Request cost、Token、USD 估价和账单实付均为不同指标。缺少原生字段时记录 unknown，不根据 Token、时长、订阅余额或累计快照推算。
 
-本机实测材料与逐字段核验见[专题四真实 Runtime 记录](../research/topic-04/runtime-validation-1.1.88-2.181.0.md#8-本机-mac-实测记录2026-11-15)。真实回执与进程状态见 [validation.json](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
+### 3.3 Run / Session / Turn 归属
 
-- **Qoder CLI 1.1.88 / Agent SDK 1.0.59：PARTIAL。** SDK 显式绑定本机 qodercli 1.1.88。提交 `85e9a49` 的 Mac 复测已等待 `q.close()` 和 `shutdownDaemon()`，主进程 16.835 秒自然退出，退出码 2 来自探针 incomplete；六个本轮已观察派生进程仍需额外定向清理，清理后归零。没有 Assistant message，原生 request_id 为 null；Result 的 Session 累计快照 `total_credits=0` 单独保留，请求级 Credits 继续 unknown。早期回执曾将消息 uuid 误写进 request_id，原归档保持原样；新探针已启用 `QODER_EXPOSE_REQUEST_ID=true` 并分别输出 request_id 与 event_id。退出、派生进程清理和用量覆盖分别留证。[最新实测](../research/topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15)。
-- **CodeBuddy CLI 2.181.0：PASS（受管 CLI 入口）。** 真实 stage 的 `stage.credits=0.69`，身份为 Session + requestId + stage.id；Turn snapshot 和 Result snapshot 均为 0.69，是同一事实的终态副本，不得再次相加。真实回执离线三次重放仍为 0.69；但本轮只观察到一个 stage，未实测真实 stage 修订事件。修订覆盖行为目前由 13 项离线协议回归支持。
-- **GitHub Copilot CLI 1.0.107：PARTIAL。** 两次独立 Runtime invocation 共享同一 Session，原生 `turnId` 均为 `0`；第二次观察到 `interactionId` 和 `apiCallId`，第一次的调用身份未被投影留存。两次 Session checkpoint 的 `totalNanoAiu` 从 7,324,050,000 增至 7,637,870,000，差值 313,820,000 是两个累计快照的派生差，不是 Runtime 直接提供的单次 Credits。逐请求 nano-AIU 保持 unknown；`totalPremiumRequestCost` 是另一种计量，不与 nano-AIU 或 Token 混用。
+- Run 是 Multica 的执行归属单位。
+- Session 是宿主连续性资源，可被多个 Run 先后引用。
+- Turn / Request / Stage / API Call 是宿主内部更细粒度身份。
+- 一个 Session 不等于一个 Run；不能按 Session ID 直接归集所有费用。
+- 只有启动绑定、原生事件身份或可验证的映射足以证明归属时，才将 Usage 计入 Run。
+- 无法证明时保留 Session 级或未归属观察，不伪分配到 Issue / Run。
 
-**Run / Session / Turn 关联规则由实测进一步明确：** Run ID 是平台启动时注入的执行绑定，不是这些宿主的原生 ID；Session ID 是宿主身份；Turn / Request / Stage / API Call 是 Session 内更细的执行身份。一个 Session 可以承载多个平台 Run，因此不能把 Session 与 Run 设为一对一。Copilot 的 turnId 重用证明 `session_id + turn_id` 仍不足以跨恢复唯一标识；应优先用原生 event ID、requestId / apiCallId / stage.id，并保留显式 Runtime invocation → Run 绑定。无法证明绑定时只保留 Session 范围 Observation，不归入具体 Run。
+### 3.4 Qoder 当前研究结论
 
-**重复上报边界：** CodeBuddy stage 以 `session_id + requestId + stage.id` upsert；同一终态 snapshot 与 result 内嵌 snapshot 是同一事实。Copilot checkpoint 以 Session + 原生 event ID 识别，离线重放三次后仍为两个 checkpoint；result 终态帧在本次投影中没有 event ID，不能用它充当计量身份。Qoder 没有请求级事件，不能宣称已验证请求重放幂等。
+Qoder CLI 1.1.88 / Agent SDK 1.0.59 的 Mac 实测保持 PARTIAL：
 
-官方协议核对：
-- [Qoder Agent SDK Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)：明确区分请求级 `message.message.usage.credits` 与 Session 累计 `result.total_credits`；字段可选、缺失不可视为 0；`request_id` 默认不暴露，可通过环境变量显式启用。
-- [CodeBuddy CLI v2.181.0 Release Notes](https://www.codebuddy.cn/docs/cli/release-notes/v2.181.0) · [Stream-JSON Per-Turn Usage Events](https://www.codebuddy.cn/docs/cli/stream-json-turn-usage)：目标版本明确包含逐轮用量与稳定 Stage identity；官方定义 frame UUID 是投递身份，计量去重使用 requestId + stage.id。
-- [GitHub Copilot SDK Usage and billing](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing) · [Streaming session events](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events)：官方区分逐 API 调用的 `assistant.usage` 与 Session 累计 `session.usage.getMetrics` / `session.usage_checkpoint`；`totalNanoAiu` 是 Session 累计量，不能直接当作本次 CLI invocation 消耗。
+- SDK Query 与共享 Daemon 的关闭已验证；Node 主进程自然退出，但本轮观察到的派生进程仍需定向清理。
+- Assistant 消息为 0，原生 request_id 为 null，请求 Credits 为 unknown。
+- Result 的 total_credits=0 是 Session 累计快照，不代表单次请求消耗为 0。
+- SDK 探针实验不是 Multica Qoder ACP Backend 的生产架构依据。下一步应优先核对 Multica ACP Backend 在目标 Qoder 版本中是否能取得真实 Credits；若 ACP 不暴露，再评估官方 CLI 其他原生入口。
+- 不使用企业 API、账户 Usage 页面或账单接口补数。
 
-本机归档材料：[Mac 真实回执与验证明细](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
+详细回执见[Runtime 真实验证记录](../research/topic-04/runtime-validation-1.1.88-2.181.0.md)。
 
+## 4. 质量评价：融合 TeamAI Scorers 与 LoopForge Evaluator
 
-**Qoder 当前现场结论（CLI 1.1.88 / SDK 1.0.59）：** `q.close()` + `shutdownDaemon()` 后主进程约 16.8 秒自然退出；退出码 2 是探针因 Assistant 消息缺失报告 incomplete。六个派生进程仍需按本轮 PID / 进程组清理。没有 Assistant message、原生 request_id 或请求级 Credits；`total_credits=0` 仅作为 Session 快照，不作为单次消耗。后续 Runtime 适配必须分别报告 API 关闭、主进程退出和派生进程清理，不合并成单一 success 状态。详见[真实验证记录 8.6–8.7](../research/topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15)。
+评价的对象可以是 Run、Issue 交付、Agent / Role、Squad、SOP、Skill / Rule 或 Workflow，但每份评价必须说明评价对象、证据范围、评价器版本和评价时间。
+
+### 4.1 评价器分层
+
+| 评价器类型 | 主要职责 | 证据来源 |
+|---|---|---|
+| Deterministic Scorer | 测试结果、退出码、制品完整性、门禁、工具调用和权限事实 | Multica Result、Script 输出、测试报告、服务回执 |
+| Trace Scorer | 控制流、步骤遵循、工具使用、重试、恢复、上下文和执行效率 | Multica Trace、Message、Tool Activity、ContextReceipt |
+| Model-based Evaluator | 目标达成度、推理过程质量、代码 / 文档质量、需求覆盖和风险 | 固定范围的 Trace、制品、工作约定和评价提示版本 |
+| Human Review | 业务判断、架构判断、用户体验和无法自动判定的质量 | Issue Decision、Review 记录和具名证据 |
+
+模型评价不能替代客观测试或人工验收。评价器本身也必须版本化，并记录输入证据范围，防止评价器版本变化导致历史分数不可解释。
+
+### 4.2 评价结果
+
+Evaluation 至少包括：
+- 被评价对象及其 Multica Run / Issue / Asset 引用；
+- 评价器类型、名称和版本；
+- 输入证据范围与缺失项；
+- 维度评分及权重（若有）；
+- 结构化 Findings：问题、严重度、位置、证据和置信度；
+- 建议动作及其适用范围；
+- 是否需要人工复核。
+
+Evaluation 是独立结论，不修改 Run 成功 / 失败、SOP 门禁或 Issue 最终验收状态。
+
+## 5. LoopForge 工程级 RSI 改进闭环
+
+LoopForge 的关键价值不仅是 SOP 执行，而是从真实 Trace 中发现问题，形成改进处方，再通过 Benchmark 验证改进效果。
+
+```mermaid
+flowchart TD
+    R["Multica Run / Trace / Result / Usage"] --> X["Trace 结构化提取"]
+    X --> E["TeamAI Scorers + LoopForge Evaluator"]
+    E --> F["结构化 Findings"]
+    F --> D["根因归类与改进处方"]
+    D --> P["Improvement Proposal"]
+    P --> H["人工审核 / 资产负责人批准"]
+    H --> V["发布新 SOP / Role / Skill / Rule / Gate 版本"]
+    V --> B["Benchmark：固定输入与评价标准"]
+    B --> C["对照旧版本与新版本"]
+    C -->|确实改善| A["批准推广 / 作为新默认"]
+    C -->|无改善或退化| Q["拒绝、修订或回滚候选"]
+    A --> R2["后续真实 Run 继续观察"]
+```
+
+### 5.1 从 Findings 到改进处方
+
+Findings 需要归因，而不是直接把“Agent 表现不好”转成修改 Prompt。
+
+根因类别至少区分：
+- 需求或输入不完整；
+- SOP 步骤、依赖或门禁设计不合理；
+- Role / Skill / Rule / Playbook 缺失或冲突；
+- Agent / Model 能力或配置不适合；
+- 工具、权限或 Runtime 环境问题；
+- 验证器自身错误或覆盖不足；
+- 外部服务、网络和资源故障。
+
+处方必须指出准备修改的资产、预期改善的指标、可能副作用和验证方法。
+
+### 5.2 Benchmark 对照
+
+Benchmark 固定：
+- 任务输入、代码 / 文件基准和工作约定；
+- SOP / Role / Skill / Rule / Gate 版本；
+- Agent / Model / Runtime 配置（在可固定范围内）；
+- 测试、Scorer、Evaluator 和评分权重；
+- 成功标准、失败标准和统计口径。
+
+比较候选版本时，至少观察：
+- 目标达成率与客观测试通过率；
+- 质量 Findings 数量和严重度；
+- 返工次数、重试次数和人工介入次数；
+- 执行耗时和工具调用；
+- Token / Credits / USD 等分单位消耗；
+- 失败、恢复和交付完整性。
+
+新版本只有在预先声明的成功标准下取得改善，且没有不可接受的质量或成本退化，才可推广。不能只用模型自评分数证明自身改进。
+
+### 5.3 改进发布边界
+
+- Improvement Proposal 是候选，不是自动发布。
+- 资产负责人审核影响范围、证据、兼容性和潜在回归。
+- 发布走专题三 B 的统一资产版本治理。
+- 新版本只对后续选择它的新 SOP 实例 / Run 生效。
+- 在途工作保留原版本，除非有权负责人明确决定迁移并完成影响分析。
+- 改进失败时保留 Benchmark 结果、拒绝理由和后续修订，不删除失败证据。
+
+## 6. 统一数据边界
+
+| 数据 | 权威来源 | 专题四的职责 |
+|---|---|---|
+| Issue / Run / Session | Multica | 只引用，不复制身份和生命周期 |
+| Trace / Tool Activity / Result | Multica Backend / Daemon | 结构化提取、补充观察来源和覆盖 |
+| Token / Credits / Cost | Multica Task Usage | 扩展指标与身份，提供去重和缺项证据 |
+| Evaluation / Findings | 专题四评价机制 | 新增评价结果，但不修改执行事实 |
+| Improvement Proposal | 专题四 | 形成候选和审核依据 |
+| SOP / Role / Skill / Rule 版本 | 专题三 B 资产治理 | 发布和分发仍归统一资产治理 |
+| Benchmark | 专题四 | 固定对照输入、版本和评价器，验证效果 |
+
+## 7. 实施顺序与验收
+
+1. **Usage 融合**：盘点 Multica Task Usage 对 Token、Credits、成本和来源身份的支持；优先扩展现有模型与 ReportTaskUsage 链路。
+2. **多源去重**：将 ACP、Stream-JSON、Hook、OTel、转录与 Multica Trace 对齐，验证重复上报不重复结算。
+3. **Qoder / CodeBuddy 覆盖**：先验证 Multica 现有 Backend 的真实字段，再决定是否需要补充采集入口。
+4. **最小评价闭环**：选一类真实 Run，组合确定性 Scorer 和 Trace Scorer，产出结构化 Findings。
+5. **改进处方**：从真实 Findings 生成一项 SOP / Skill / Rule 改进提案。
+6. **Benchmark 对照**：固定旧版和候选版，在相同输入和评价器下对比，形成推广或拒绝结论。
+7. **发布后观察**：只对新版本生效，持续比较真实 Run 的质量、返工和成本指标。
+
+验收要求：无第二成本账本；无第二 Run；原始用量单位不混算；评价不覆盖执行事实；改进必须经过审核和 Benchmark；所有未知值和证据缺口可见。
