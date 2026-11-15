@@ -124,3 +124,41 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 ## 9. 证据边界
 
 现有上游测试和 3A 回环探针证明部分协议与算法行为，不证明真实供应商账单完整性、所有宿主成本覆盖或生产团队中的改进收益。第一轮原型将使用可复现的合成 Observation 和已有真实宿主协议记录；账单对账与真实项目发布后观察另列现场验收。
+
+## 10. 三类 Runtime 的 Mac 真实回执与官方协议复核（2026-11-15）
+
+本节以远端归档提交 `2694789f8f02c2ae8213980bc24fb74153a6ef38` 为输入。真实环境、白名单 JSONL、进程状态、离线重放与 SHA-256 清单位于 [mac-20261115-0350 归档目录](../../artifacts/topic-04/mac-20261115-0350/)；汇总判定见 [validation.json](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
+
+### 10.1 字段存在性与单次 / 累计口径
+
+| Runtime / 版本 | 官方协议字段 | 本机实际观察 | 可计量结论 |
+|---|---|---|---|
+| Qoder CLI 1.1.88；SDK 1.0.59 | Assistant `message.message.usage.credits` 是单次模型请求；Result `total_credits` / `modelUsage[].credits` 是 Session 累计。字段可选。 | 没有 Assistant message；只有 Result `total_credits=0` Session snapshot。SDK 180 秒超时，退出码 -15。 | Session snapshot 的 0 只证明快照值为 0；单次请求 Credits = unknown。不能把 Session snapshot 当单次消耗。 |
+| CodeBuddy CLI 2.181.0 | `system/usage_update` 的 stage 带 `stage.id`、`stage.credits`；snapshot 与 Result 内 `turnUsage` 相同；`total` 是当前 Turn 快照。 | 一条真实 model stage = 0.69 Credits；Turn snapshot = 0.69；Result snapshot = 0.69。 | 该 Turn 的真实 Stage 消耗为 0.69；两份 snapshot 是同一事实的重复呈现，不相加。 |
+| GitHub Copilot CLI 1.0.107 | 官方 SDK 的 `assistant.usage` 提供单次调用 Token 与 premium multiplier；`session.usage_checkpoint.totalNanoAiu` / `session.usage.getMetrics` 提供 Session 累计 AI credit。 | 两次 invocation 共用一个 Session。累计 nano-AIU 为 7,324,050,000 → 7,637,870,000；premium request cost 为 1 → 2。 | 差值 313,820,000 nano-AIU 仅是连续 Session snapshot 的派生差；没有直接的逐请求 nano-AIU 事件，逐请求 Credits = unknown。 |
+
+Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent SDK 包为 1.0.59，SDK 默认声明管理的 CLI 版本为 1.1.83，但测试通过 `QODERCLI_PATH` 显式指定本机 1.1.88，因此不是 SDK 自动下载版本的验证。Qoder 官方文档说明顶层 `request_id` 默认不提供，需通过 `QODER_EXPOSE_REQUEST_ID=true` 启用。现有 Qoder 回执探针把 `message.uuid` 投影到 `request_id`，字段命名不准确：该值应解释为 SDK 消息事件 UUID；本次真实 request_id 未取得。不得将该投影误用为请求去重键。
+
+### 10.2 事件身份、重复上报与修订
+
+- **CodeBuddy：** 原生 requestId 表示用户 Turn；`stage.id` 表示模型或生成工具 Stage 的稳定身份；外层 frame `uuid` 是投递身份，不是计量身份。按 `(session_id, requestId, stage.id)` upsert。真实回执离线重放三次，仍归并为 0.69；Turn snapshot 和 Result 中相同的 snapshot 不得重复结算。本次没有真实 Stage 修订事件，Stage 更正覆盖由 13 项离线协议测试验证。
+- **Copilot：** 官方事件信封有 UUID event ID；本机两个 checkpoint 离线重放三次后仍只有两个唯一 checkpoint。两个 invocation 的 `turnId` 都是 `0`，说明 turnId 是会话内部序号，恢复 / 多入口下不能单独作为唯一键。第二次 invocation 有 `interactionId` 与 `apiCallId`，第一次的 API call ID 未被初始投影保留。result 终态帧在本次 JSONL 投影中没有 event ID，不能用于 checkpoint 去重。
+- **Qoder：** 本次没有 Assistant 请求用量事件，因此请求级重复上报行为未观察；Result Session snapshot 不进入请求消耗求和。当前探针把 event UUID 误标为 request_id，应在后续采集修正字段并启用 request_id 后再验证。
+
+### 10.3 Run / Session / Turn 的关联结论
+
+三类回执中的 `run_id` 均由探针 / 平台在启动时显式注入，是平台执行绑定，不是宿主原生 ID。Session ID 是宿主原生会话身份。CodeBuddy 的 requestId 关联一轮，stage.id 关联轮内实际计量阶段；Copilot 的 turnId 可重复，需叠加 event ID、interactionId / apiCallId 等原生身份；Qoder 本次只取得 Session ID 与 SDK 消息事件 UUID，没有真实 request_id。
+
+Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 Session 与 Run 不能建模为一对一。正确关系是：一个 Run 绑定一次平台发起的 Runtime invocation / 执行段；多个 invocation / Run 可以落在同一宿主 Session。归属需由启动绑定和原生事件共同证明，不能仅凭 Session ID 反推 Run。Run 绑定缺失时保留 Session 级 Observation，不伪分配给 Issue 或 Node Attempt。
+
+### 10.4 归档与边界
+
+- CodeBuddy 0.69 是本机 Runtime 明确上报的单次 Stage Credits；Qoder 请求级 Credits 与 Copilot 逐请求 nano-AIU 均保持 unknown。
+- 不调用企业 API、账户 Usage 页面或账单接口；不使用订阅余额、Token 或时长推算 Credits。
+- nano-AIU、Premium Request cost、Token、Qoder Credits、CodeBuddy Credits 是不同单位，不做无依据换算。
+- 真实 Runtime 入口通过不等于 IDE 任意会话可旁路观测；本轮只证明探针启动的受管本地 CLI / SDK 入口。
+
+官方协议来源：
+- [Qoder Agent SDK Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)
+- [CodeBuddy CLI v2.181.0 Release Notes](https://www.codebuddy.cn/docs/cli/release-notes/v2.181.0) · [CodeBuddy Stream-JSON Per-Turn Usage Events](https://www.codebuddy.cn/docs/cli/stream-json-turn-usage)
+- [GitHub Copilot SDK Usage and billing](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing) · [GitHub Copilot Streaming session events](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events)
