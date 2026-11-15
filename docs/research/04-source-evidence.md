@@ -176,3 +176,14 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 8.4 的真实 Mac 复测显示 `await q.close()` 已返回，但 Node 进程仍驻留至外部时限。进一步核对 SDK 1.0.59 官方 npm 包 Runtime Behavior：TypeScript `query()` 使用进程级共享 qodercli daemon，首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；宿主退出前必须调用 `shutdownDaemon()` 停止共享 daemon。`q.close()` 只关闭当前 Query / Session，不能替代 daemon shutdown。官方说明：[npm package](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk) · [How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
 
 因此，8.4 的进程驻留符合共享 Daemon 设计，不构成资源泄漏证据。探针已在 `653e6b1` 修正为先 `await q.close()`、再 `await shutdownDaemon()`。本次使用提交 `85e9a49` 完成 Mac 真实复测：16.458 秒收到 Result，16.794 秒出现两次 await 之后的 incomplete 诊断，16.835 秒主进程自然退出，退出码 2。主进程退出后仍观察到六个本轮派生进程，按已记录的 PID 与进程组限定范围进行额外清理，复查剩余为零。主进程退出已得到验证，派生进程自动清理仍有缺口。Assistant message 为零、request_id 为 null、请求级 Credits 为 unknown，Session 快照为 0，总判定仍为 PARTIAL。[最新复测记录](topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15) · [新验证明细](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json)。
+
+
+### 10.7 Qoder `shutdownDaemon()` 的真实 Mac 复测
+
+提交 `ef30618c04dd01853e16d16472ab5e6d5467de27` 归档了使用 Qoder CLI 1.1.88 / SDK 1.0.59 的新一轮真实 Mac 复测。探针在 `finally` 中依次等待 `q.close()` 与 `shutdownDaemon()`；Result 在 16.458 秒到达，16.794 秒出现 finally 后 incomplete 诊断，Node 主进程于 16.835 秒自然退出，未触发外部超时。退出码 2 对应探针检测到 Assistant 0 条、Result 1 条后主动报告 incomplete，不是运行时崩溃。
+
+**进程树边界：** 主进程退出后仍观察到六个本轮派生进程；按本轮探针 PID 父子关系及进程组清理，最终残留为零。由此分别确认 Query / Daemon 关闭 API 返回、Node 主进程自然退出、派生进程完全清理三个不同事实。当前前两项通过，派生进程仍需显式清理；不能把 `shutdownDaemon()` 解释为整个进程树自动退出。
+
+**用量结论未变化：** Assistant 事件 0 条，原生 `request_id` 为 null，请求 Credits 为 null / unknown；Result 的 `total_credits=0` 仅为 Session 累计快照。Result event_id 离线三次重放后保留一个观察，但这不是请求级计量幂等证明。总判定 PARTIAL。
+
+归档：[validation.json](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json) · [process-observation.json](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/process-observation.json) · [原始回执](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-receipt.jsonl) · [SHA-256](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/SHA256SUMS.txt)。
