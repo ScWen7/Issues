@@ -1,4 +1,6 @@
-# 专题三 A · 执行平面源码研究记录
+# 专题三 A · 执行底座源码研究记录
+
+> **架构治理说明（2026-11-15）：** 本文的源码、测试和多机实验是理解 Multica 执行底座的证据，不构成 TeamAI 自建执行平面的要求。当前设计以 Multica Daemon / Runtime / Backend / Run / Session / Process / Workspace / Usage 为执行事实权威；专题三 A V1.0 只审计覆盖并补真实缺口。历史原型和设计推论与当前架构冲突时，以[专题三 A V1.0](../architecture/03a-execution-plane.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
 
 更新日期：2026-11-15  
 第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
