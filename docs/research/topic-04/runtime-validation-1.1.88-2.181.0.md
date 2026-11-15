@@ -183,7 +183,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 ## 8. 本机 Mac 实测记录（2026-11-15）
 
-测试代码固定为研究分支提交 `2bf9322e721390b537d6a7ba5d617d0c169a6d7e`。环境为 macOS 15.3.2、arm64、Node 24.15.0、npm 11.12.1。Qoder SDK 实装版本为 1.0.59，通过 `QODERCLI_PATH` 显式指定已核对为 1.1.88 的本机 qodercli。Copilot 使用本机 CLI JSON 事件流及原生 `--usage-output-file`，未另装 SDK。
+测试代码固定为研究分支提交 `2bf9322e721390b537d6a7ba5d617d0c169a6d7e`。环境为 macOS 15.3.2，采集环境报告的 Darwin 架构为 x86_64，Node 24.15.0、npm 11.12.1。Qoder SDK 实装版本为 1.0.59，通过 `QODERCLI_PATH` 显式指定已核对为 1.1.88 的本机 qodercli。Copilot 使用本机 CLI JSON 事件流及原生 `--usage-output-file`，未另装 SDK。
 
 | Runtime | 判定 | 真实观察 |
 |---|---|---|
@@ -201,3 +201,17 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 - [验证明细](../../../artifacts/topic-04/mac-20261115-0350/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-20261115-0350/SHA256SUMS.txt)
 - [Qoder 回执](../../../artifacts/topic-04/mac-20261115-0350/qoder-receipt.jsonl) · [CodeBuddy 回执](../../../artifacts/topic-04/mac-20261115-0350/codebuddy-receipt.jsonl) · [Copilot 回执](../../../artifacts/topic-04/mac-20261115-0350/copilot-receipt.jsonl)
 
+
+### 8.1 官方协议字段复核与回执身份更正
+
+对照 2026-11-15 可访问的官方协议文档，补充以下结论：
+
+**Qoder。** 官方 TypeScript SDK 类型定义中，Assistant 消息的 `message.message.usage.credits`、`original_credits`、`billable` 是可选的单次模型请求字段；Result 的 `total_credits` 与 `modelUsage[model].credits` 是当前 CLI Session 累计值。顶层 `request_id` 默认不暴露，需在 SDK options.env 中设置 `QODER_EXPOSE_REQUEST_ID='true'`。本次探针没有启用该选项，并把 `message.uuid` 写入回执的 `request_id` 列；这是投影字段误命名，不是原生 request_id。本次应解释为：SDK 消息事件 UUID 已观察，原生 request_id 未观察，Assistant 请求级 Credits 未观察。现存 JSONL 作为原始归档保留，不追改原始回执或其 SHA-256；后续探针应分开输出 `event_id=message.uuid` 与 `request_id=message.request_id ?? null`，再重新执行验证。
+
+**CodeBuddy。** 官方 v2.181.0 Release Notes 明确说明 stream-JSON per-turn usage 完善并提供稳定 Stage identity。官方协议明确：frame `uuid` 是投递身份；`requestId` 是用户 Turn 身份；`stage.id` 是计量 Stage 稳定身份；同一 Stage 后续修订覆盖原值；Turn snapshot 与 Result 内 `turnUsage` 是同一份快照。真实 0.69 Stage 与两份 0.69 snapshot 一致，符合该口径。
+
+**GitHub Copilot。** 官方 SDK 文档将 `assistant.usage` 定义为单次 API 调用 Token 与 premium multiplier，将 `session.usage_checkpoint.totalNanoAiu` / `session.usage.getMetrics` 定义为 Session 累计 AI credit。当前 CLI 实测只取得累计 checkpoint，没有直接的逐请求 nano-AIU。两个独立 Run 在同一 Session 中都观察到 `turnId=0`，所以 turnId 不能单独作为全局 Turn 唯一键；第二次的 `interactionId` / `apiCallId` 可作更细关联，但第一次缺少这些投影字段。
+
+**归档环境差异。** 早先本节将架构写为 arm64，与归档 `environment.txt` 的 `Darwin 24.3.0 x86_64` 不一致；现按实际采集输出修正为 x86_64（仅陈述采集环境报告，不推断物理 CPU 架构）。
+
+官方资料：[Qoder Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript references](https://docs.qoder.com/cli/sdk/references-typescript) · [CodeBuddy v2.181.0 Release Notes](https://www.codebuddy.cn/docs/cli/release-notes/v2.181.0) · [CodeBuddy Stream-JSON usage_update](https://www.codebuddy.cn/docs/cli/stream-json-turn-usage) · [Copilot Usage and billing](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing) · [Copilot Streaming events](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events)。
