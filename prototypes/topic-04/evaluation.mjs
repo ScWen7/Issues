@@ -61,6 +61,8 @@ export function compareBenchmarkConfigs(left, right) {
   };
 }
 
+const rounded = (value) => Number.isFinite(value) ? Number(value.toFixed(6)) : value;
+
 export function assessImprovement(input) {
   const comparison = compareBenchmarkConfigs(input.baseline.config, input.candidate.config);
   if (!comparison.comparable) return { decision: "not_comparable", differences: comparison.differences };
@@ -69,10 +71,10 @@ export function assessImprovement(input) {
     ? (input.candidate.cost === 0 ? 0 : Infinity)
     : (input.candidate.cost - input.baseline.cost) / input.baseline.cost;
   if (qualityDelta < input.minimumQualityDelta) {
-    return { decision: "reject", reason: "quality_improvement_below_threshold", qualityDelta, costDelta };
+    return { decision: "reject", reason: "quality_improvement_below_threshold", qualityDelta: rounded(qualityDelta), costDelta: rounded(costDelta) };
   }
   if (costDelta > input.maximumCostIncrease) {
-    return { decision: "reject", reason: "cost_increase_above_threshold", qualityDelta, costDelta };
+    return { decision: "reject", reason: "cost_increase_above_threshold", qualityDelta: rounded(qualityDelta), costDelta: rounded(costDelta) };
   }
-  return { decision: "candidate_for_review", qualityDelta, costDelta };
+  return { decision: "candidate_for_review", qualityDelta: rounded(qualityDelta), costDelta: rounded(costDelta) };
 }
