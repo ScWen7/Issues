@@ -1,7 +1,7 @@
 name: AgentPlatform asset release research
 on:
   push:
-    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition]
+    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition, research/3b-host-handoff]
     paths:
       - .github/workflows/asset-release-research.yml
       - prototypes/topic-03b/**
@@ -11,7 +11,7 @@ permissions:
 jobs:
   order-release:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       PYTHONDONTWRITEBYTECODE: 1
     steps:
@@ -54,4 +54,17 @@ jobs:
         with:
           name: role-composition-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/role-composition/summary.json
+          retention-days: 7
+      - name: Prepare pinned Claude Code for the second member
+        run: |
+          "$RUNNER_TEMP/venv/bin/pip" install --only-binary=:all: --no-deps --target "$RUNNER_TEMP/claude-sdk" claude-agent-sdk==0.2.182
+          echo "0dc4f4a9a165fc60746d7ae8489712e5fc352f1e7ad4eb22e7141bd0812eb0cf  $RUNNER_TEMP/claude-sdk/claude_agent_sdk/_bundled/claude" | sha256sum -c -
+      - name: Verify live MCP calls and result admission across native hosts
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/cross-host/order_handoff.py "$RUNNER_TEMP/host-handoff" --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex" --claude "$RUNNER_TEMP/claude-sdk/claude_agent_sdk/_bundled/claude"
+      - name: Retain cross-host receipts and the accepted workbook results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cross-host-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/host-handoff/summary.json
           retention-days: 7

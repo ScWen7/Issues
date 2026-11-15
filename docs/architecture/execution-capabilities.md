@@ -49,3 +49,5 @@
 go test -count=1 -run '^Test(QoderBackendHappyPath|QoderBackendAttributesUsageToACPDefaultModel|QoderBackendClearsSessionIDWhenResumedSessionNotFoundAtPrompt|QoderDrainsNotificationsAfterPromptResponse|CodebuddyExecute_Success|CodebuddyExecuteResumeRejectedFromStderr|CodebuddyExecuteFallbackUsage|CodebuddyFallbackUsageIsScopedToExecution|CodebuddyExecuteErrorAfterResultDoesNotFlipOutcome|PiCleanupInspectionFailureIsNotSuccess|PiCleanupNormalCompletionDoesNotSignal|ClaudeExecuteKeepsCompletedTerminalReason|CodexExecuteDoesNotClaimResumeRejectedWhenOverflowIsNotAResume)$' ./pkg/agent
 go test -count=1 -run '^TestOpencode(ACPStreamsToolStartAndSumsTurnUsage|ProcessEventsTokenUsage|V2ExecuteRefusesMCPConfig|V2ExecuteExitIsTerminal)$' ./pkg/agent
 ```
+
+3B 的订单工具已在 Codex 0.144.6 App Server 和 Claude Code 2.1.325 受管入口实测。两端均核对项目来源、工具调用及结果回流。派发前缺项、模型请求个人同名工具、项目服务收到调用后拒绝三种结果有各自的回执。双向接续各自使用接替成员的新 Run，同一候选的报告只消费一次。[原生宿主与核验结果](../research/topic-03b/cross-host-handoff.md)

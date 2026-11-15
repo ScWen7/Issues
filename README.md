@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题三 B「能力与知识治理」已推进到 V0.3。订单开发与独立核验分别组合 Role、Skill、项目知识和 Playbook。预算紧时保留完整必需项，五列标准与四列旧方法冲突时暂停受影响节点。真实 Codex 回合、原生 Skill 装载和实际 XLSX 核验均有独立回执。下一阶段验证同一契约在不同成员宿主上的工具调用。[3B 设计](docs/architecture/03b-capability-governance.md) · [订单组合实测](docs/research/topic-03b/role-composition.md)
+专题三 B「能力与知识治理」已推进到 V0.4。同一订单核验契约已在 Codex 和 Claude Code 双向换人接续。项目与个人工具同名、接口变更和执行前撤权均有对照。宿主真实调用订单工具读取 XLSX，回执可追到原生调用、模型收到的结果以及节点的单次消费。[3B 设计](docs/architecture/03b-capability-governance.md) · [跨宿主订单实测](docs/research/topic-03b/cross-host-handoff.md)
 
 专题三 A「执行平面与宿主适配」V0.6 已完成设计收口。最新修订覆盖返工报告晚到附件、投递证据缺失及旧领取代次的恢复条件，53 项基础回归在本轮远端作业通过。[3A 设计](docs/architecture/03a-execution-plane.md) · [与 3B 的交接](docs/architecture/execution-capabilities.md)
 
@@ -32,6 +32,7 @@
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
 | [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
 | [专题三 B：能力与知识治理](docs/architecture/03b-capability-governance.md) | 查看规则和脚本如何发布、在项目中选用、换版和重验 |
+| [专题三 B：跨宿主工具与接续](docs/research/topic-03b/cross-host-handoff.md) | 从本机同名工具追到真实服务调用、候选核验和换人后结果归属 |
 | [专题三 B：Role、Skill 与 Playbook 组合](docs/research/topic-03b/role-composition.md) | 查看预算、权限或方法冲突怎样改变宿主输入和实际核验 |
 | [专题三 B：项目知识与经验发布](docs/research/topic-03b/project-knowledge.md) | 从权威文档修订查到角色搜索、实际宿主输入、撤权处置和返工经验发布 |
 | [专题三 B：源码与订单实验](docs/research/03b-source-evidence.md) | 从规则发布追到真实宿主回合、脚本摘要、工作簿和结果消费 |

@@ -1,5 +1,7 @@
 # 专题三 B · 发布、选用与执行实证
 
+第四阶段把相同订单工具交给 Codex、Claude Code 实际调用，验证同名来源、参数变更、调用前撤权和双向接续。核验链覆盖模型工具请求、真实 XLSX、模型收到的结果及节点单次消费。[跨宿主实验与源码记录](topic-03b/cross-host-handoff.md)
+
 第三阶段将 Role、Skill 和 Playbook 同时用于订单开发与核验，实测预算不足、指引冲突、派发时撤权，以及修订后重新装载和验收。[订单组合、三库源码与复跑](topic-03b/role-composition.md)
 
 第二阶段研究订单文档修订后两个角色实际收到什么、权限变化后如何继续，以及 C1 返工和 C2 修复怎样提炼成团队经验。真实 Codex 的四次请求覆盖两个角色、撤权后的旧线程和同进程的新线程。[第二阶段完整记录与复跑](topic-03b/project-knowledge.md) · [来源与可见性](topic-03b/knowledge-sources.md) · [贡献与复审](topic-03b/knowledge-contribution.md)

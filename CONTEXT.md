@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.3](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.4](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -79,6 +79,8 @@
 **资产发布版本** 是有权成员在指定范围发布的一份可复用内容及其来源修订、正文或包摘要和使用条件。例如项目发布者可将订单核验规则与独立脚本作为相互兼容的两个版本共同发布。
 
 **资产选择记录** 说明具体工作采用了哪项发布版本、为何适用、替代了哪个默认版本。这份记录跟随现有 SOP 实例或执行契约，实际加载与执行情况由 3A 的上下文与结果回执给出。
+
+**工具调用回执** 关联本次选定的能力发布、实际连接的服务、宿主原生调用与服务返回。接收方据此将具名报告归入签发的 Run 和节点尝试，再核对当前授权、候选版本与制品。
 
 **上下文材料预算** 是某次派发中分配给工作材料的额度，记录计量单位和计算范围。必需项要完整交付，可选项按本次任务取舍。宿主窗口与实际模型用量分别核对。
 
