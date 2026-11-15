@@ -9,7 +9,7 @@
 本项目建设的是**以 Multica 为平台基座，融合 TeamAI 团队能力治理与 LoopForge SOP / 工程级 RSI 能力的研发协作产品**。这不是三个系统并列集成，也不是重新设计一套协作平台后再接入 Multica。
 
 - **Multica 是产品底座**：承载工作组织、协作控制、任务派发、本地 Runtime 执行和基础执行记录。
-- **TeamAI 是能力来源**：提供团队 / 项目资源治理、Role / Skill / Rule / Playbook、知识检索、上下文选择与投递、AgentObservation、Scorers 和团队能力改进机制。
+- **TeamAI 提供可借鉴的机制**。团队与项目作用域、角色检索、版本和贡献审核用于补充原 Issue 的能力与资料缺口，执行观察和评价引用原 Run。具体工作沿平台已有协作和投递路径推进。
 - **LoopForge 是流程与工程进化来源**：提供可组合 SOP、DAG、Agent / Script / Human Gate、Trace 评测、结构化 Findings、改进处方、Benchmark 和 RSI 闭环。
 
 本项目的产品价值来自三者的融合，而不是复制三者各自已有的基础设施。
@@ -23,7 +23,7 @@
 | 执行与调度 | Multica Run、Daemon、Runtime、队列、Backend | TeamAI Skill Driver 以适配方式驱动既有执行；SOP 决定节点就绪 | 第二套 Run、Daemon、Runtime、Process Supervisor、派发队列 |
 | 宿主会话与进程 | Multica Provider Backend、Session、取消 / 恢复 / 进程管理 | 仅补充 Multica 缺失的宿主能力或证据 | 为同一宿主再建并行执行适配器，除非有明确兼容性缺口 |
 | 执行事实与基础用量 | Multica Run / Trace / Task Usage / ContextReceipt / 结果回执 | 原生回执之上的调用级加载证据、TeamAI Observation、来源身份、覆盖范围和计量扩展 | 与 Multica Usage 并行的第二套成本账本 |
-| 团队能力与知识 | 复用 Multica Agent / Skill / Plugin / Context 基础能力 | TeamAI 的作用域、版本、检索、发布、投递与加载核验 | 不经底座盘点就重建资产仓库、Agent 注册和分发系统 |
+| 团队能力与知识 | 复用 Multica Agent / Skill / Plugin / Context 基础能力 | 借鉴作用域、检索与贡献机制，正式能力由平台维护并沿原 Run 投递，补实际调用证据 | 不经底座盘点就重建资产仓库、Agent 注册和分发系统 |
 | SOP 与工程流程 | Multica Issue / Project Workflow / Run 是承载面 | LoopForge SOP 定义、DAG、节点执行逻辑、Sub-SOP、门禁与返工 | SOP 另建 Issue 状态、Run、Runtime 或独立派发权威 |
 | 质量评价与 RSI | Multica 提供被评价的真实 Run / Trace / Usage | LoopForge Evaluator、TeamAI Scorers、Benchmark、Findings、改进处方 | 让评价器改写执行事实或绕过资产发布治理自动生效 |
 
@@ -73,7 +73,7 @@ SOP 托管范围内，各派发入口采用相同的节点前置与当前执行�
 
 ## 5. TeamAI 能力治理与 Multica 的关系
 
-TeamAI 的能力不应被简化为“建一个 Skill 文件仓库”。应吸收其资源作用域、版本、来源、检索、选择、分发、驱动和实际加载核验机制，并尽可能复用 Multica 已有 Agent / Skill / Plugin / Context 设施。
+工作上下文沿用 Multica 的 Issue、父项、讨论、项目代码资源、Agent 和实际 Run。成员在团队或项目范围直接维护可复用能力。普通资料沿原来源读取，按本次工作缺项补资料引用、角色选用或加载证据。工程 Git 仓可提供代码基准，团队资料的管理、选用与贡献独立于 Git。[各类内容的维护与更新](03b-capability-governance.md#团队与项目怎样维护可复用内容)
 
 - Agent / Role：优先沿用 Multica Agent 及其配置；补充团队角色组合与治理元数据。
 - Skill / Plugin：优先沿用 Multica 已有加载与分发；补充作用域、版本、审核和实际加载证据。

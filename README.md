@@ -4,14 +4,14 @@
 
 ## 当前设计重点
 
-从[团队研发协作工作机制](docs/architecture/overview.md#3-工作主线)开始。用订单导出说明负责人怎样组织工作、不同成员如何取得依据、何时调用 SOP、结果如何回到 Issue，再用下一项相似需求研究经验复用。轻量修改用来检验协作手续。当前最值得补证的是一份真实项目资料如何被不同角色找到、怎样影响工作，以及资料改版或人员交接时谁需要重新判断。[团队与项目上下文](docs/architecture/overview.md#团队与项目上下文) · [本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
+从[团队研发协作工作机制](docs/architecture/overview.md#3-工作主线)开始。用订单导出说明负责人怎样组织工作、不同成员如何取得依据、何时调用 SOP、结果如何回到 Issue，再用下一项相似需求研究经验复用。先以轻量修改走通原 Issue，再查订单任务确实缺哪段资料或哪项能力。团队与项目在平台维护可复用配置，资料可沿用原有来源，成员无需维护团队 Git 仓。当前优先核验补充依据对角色判断和人员交接的实际影响。[团队与项目上下文](docs/architecture/overview.md#团队与项目上下文) · [本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
 
 ## 当前架构基线
 
 **V1.1 · Multica 基座融合架构 · 交叉审查修订**
 
 - **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、上下文准备 / 投递回执及 Task Usage 等工作与执行底座。
-- **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
+- **TeamAI 机制参考**。平台借鉴能力作用域、角色检索、版本、经验贡献和评价机制，在原生 Issue、Agent / Skill 和 Run 上使用。
 - **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
 
 专题一至四已有设计与分项证据，真实 Multica 融合验收按各专题追踪。专题五已把十二类工作映射到现有入口，其[离线交互原型](prototypes/topic-05/workbench.html)用于核对订单验收、轻量工作和资源等待的具体判断。脚本托管、调用级证据、本地 Credits 上报等工程缺口见[治理盘点](docs/architecture/governance-baseline.md#固定版本的底座盘点)。
