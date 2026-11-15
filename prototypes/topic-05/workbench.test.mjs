@@ -43,7 +43,13 @@ function openWorkbench() {
     role("lin");
   }
   function reset() { node("reset").listeners.click(); }
-  return {body, tag, can, click, replay, role, reason, reset};
+  function attach(checked) {
+    document.listeners.change({target:{id:"handoff-include-patch",checked}});
+  }
+  function shareNote(checked) {
+    document.listeners.change({target:{id:"handoff-include-note",checked}});
+  }
+  return {body, tag, can, click, replay, role, reason, reset, attach, shareNote};
 }
 
 function loadC2(work) {
@@ -180,4 +186,119 @@ test("the static fallback identifies the acceptance gap when scripts cannot run"
   assert.match(fallback, /A2 权限失败/);
   assert.match(fallback, /A2 与 A3 内容检查均通过/);
   assert.match(fallback, /A6 候选关联的 UAT/);
+});
+
+test("a private draft becomes the member's shared attachment only after submission", () => {
+  const w = openWorkbench();
+  w.click("handoff");
+  w.replay("handoff-submit");
+  w.role("jia");
+  w.click("handoff-local");
+  assert.match(w.body(), /甲的本地提交预览/);
+  w.click("handoff-cancel");
+  w.role("yi");
+  assert.doesNotMatch(w.body(), /71c2a90|last-page.patch|补交说明|last-page-run/);
+  w.role("jia");
+  w.click("handoff-local");
+  w.role("yi");
+  w.replay("handoff-submit");
+  assert.doesNotMatch(w.body(), /71c2a90|last-page.patch|补交说明/);
+  w.role("jia");
+  w.click("handoff-submit");
+  w.click("handoff-invite");
+  assert.match(w.body(), /当前负责人<\/dt><dd>甲/);
+  w.role("yi");
+  w.click("project");
+  w.click("notice-last-page-mentioned");
+  assert.match(w.body(), /导出结果缺少末页订单/);
+  assert.match(w.body(), /对应基准 <code>orders@71c2a90/);
+  assert.match(w.body(), /last-page.patch · v1/);
+  assert.match(w.body(), /甲 · 在 Issue 评论中上传/);
+  assert.doesNotMatch(w.body(), /last-page-run-01|本地提交预览/);
+  assert.match(w.body(), /尚未交回的改动由甲补交/);
+  assert.match(w.body(), /download="last-page.patch"/);
+  w.replay("handoff-assign");
+  assert.match(w.body(), /当前负责人<\/dt><dd>甲/);
+  w.click("handoff-access");
+  assert.match(w.body(), /乙可读取已共享的补丁/);
+  assert.equal(w.can("handoff-review"), false);
+  w.replay("handoff-review");
+  assert.doesNotMatch(w.body(), /乙已在自己的工作副本取得/);
+  w.click("handoff-access");
+  w.click("handoff-review");
+  assert.match(w.body(), /乙已在自己的工作副本取得/);
+  w.role("jia");
+  w.click("handoff-assign");
+  w.role("yi");
+  w.click("project");
+  w.click("notice-last-page-assigned");
+  assert.match(w.body(), /当前负责人<\/dt><dd>乙/);
+  assert.match(w.body(), /待补交人<\/dt><dd>甲/);
+});
+
+test("an unchecked patch stays private; reselecting the Issue allows the author to attach it", () => {
+  const w = openWorkbench();
+  w.role("jia");
+  w.click("handoff");
+  w.click("handoff-local");
+  w.attach(false);
+  assert.doesNotMatch(w.body(), /查看 v1 补丁/);
+  w.click("handoff-submit");
+  w.role("yi");
+  w.replay("handoff-receipt");
+  w.replay("handoff-attach");
+  assert.match(w.body(), /交付区尚未收到补丁/);
+  assert.doesNotMatch(w.body(), /orders@71c2a90|last-page.patch|last-page-run-01/);
+  w.role("jia");
+  w.click("project");
+  w.click("handoff");
+  w.click("handoff-attach");
+  w.role("yi");
+  assert.match(w.body(), /甲 · 在 Issue 评论中上传/);
+  assert.match(w.body(), /orders@71c2a90/);
+});
+
+test("agent assistance returns the patch on the original Issue with a distinct source and no implicit local disclosure", () => {
+  const w = openWorkbench();
+  w.role("jia");
+  w.click("handoff");
+  w.click("handoff-agent");
+  w.role("yi");
+  w.replay("handoff-receipt");
+  assert.doesNotMatch(w.body(), /orders@71c2a90|last-page-run-01/);
+  w.role("jia");
+  w.click("handoff-receipt");
+  w.role("yi");
+  assert.match(w.body(), /last-page.patch · v1/);
+  assert.match(w.body(), /orders@71c2a90/);
+  assert.match(w.body(), /受管 Run · last-page-run-01/);
+  assert.match(w.body(), /该 Run 的交付回执未附检查报告。末页是否完整仍待核对/);
+  assert.doesNotMatch(w.body(), /待我补交|待补交人|甲的补交说明|甲准备说明/);
+  w.role("jia");
+  w.click("handoff-note");
+  w.click("handoff-assign");
+  w.role("yi");
+  w.click("project");
+  w.click("notice-last-page-assigned");
+  assert.match(w.body(), /当前负责人<\/dt><dd>乙/);
+  assert.match(w.body(), /待补交人<\/dt><dd>甲/);
+  assert.doesNotMatch(w.body(), /甲在评论中 @乙|验收人/);
+});
+
+test("the author may share a patch alone, and an empty selection cannot be published", () => {
+  const w = openWorkbench();
+  w.role("jia");
+  w.click("handoff");
+  w.click("handoff-local");
+  w.shareNote(false);
+  w.attach(false);
+  assert.equal(w.can("handoff-submit"), false);
+  w.replay("handoff-submit");
+  assert.match(w.body(), /甲的本地提交预览/);
+  w.attach(true);
+  w.click("handoff-submit");
+  w.role("yi");
+  assert.match(w.body(), /甲提交补丁时未附检查记录。末页是否完整仍待核对/);
+  assert.match(w.body(), /甲 · 在 Issue 评论中上传/);
+  assert.doesNotMatch(w.body(), /待我补交|待补交人|甲的补交说明|甲准备说明/);
 });

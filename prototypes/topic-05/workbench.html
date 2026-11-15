@@ -13,7 +13,7 @@ header{background:#fff;border-bottom:1px solid var(--line)}.top{max-width:1180px
 </style>
 </head>
 <body>
-<header><div class="top"><div class="brand"><span aria-hidden="true">协</span>协作工作台</div><div class="switcher"><label for="role">演练身份</label><select id="role"><option value="lin">林 · 产品与验收</option><option value="jia">甲 · 后端开发</option><option value="bing">丙 · 独立验证</option></select><button id="reset" type="button">重置演练</button></div></div></header>
+<header><div class="top"><div class="brand"><span aria-hidden="true">协</span>协作工作台</div><div class="switcher"><label for="role">演练身份</label><select id="role"><option value="lin">林 · 产品与验收</option><option value="jia">甲 · 后端开发</option><option value="yi">乙 · 项目开发</option><option value="bing">丙 · 独立验证</option></select><button id="reset" type="button">重置演练</button></div></div></header>
 <noscript><style>.layout,.top .switcher{display:none}</style><section class="panel" style="max-width:780px;margin:32px auto"><h1>订单批量导出</h1><p>工作约定 D2 要求导出当前筛选下的可见订单，付款时间按上海时区展示。C1 的东区工作簿混入西区订单 B-201，A2 权限失败。C2 在同一 D2 下修复，A2 与 A3 内容检查均通过。</p><p>当前资料还缺 A1 范围、A4 边界、A5 交互和 A6 候选关联的 UAT。当前负责人是交付 Squad，指定验收人是林。</p><p>下载 HTML 后在启用 JavaScript 的浏览器打开，可切换角色、查通知及演练接受或退回。</p></section></noscript>
 <div id="notification" class="sr" role="status" aria-live="polite"></div>
 <div class="layout"><main id="main"></main><aside id="aside" aria-label="工作属性"></aside></div>
@@ -22,13 +22,13 @@ header{background:#fff;border-bottom:1px solid var(--line)}.top{max-width:1180px
 "use strict";
 const main = document.getElementById("main");
 const aside = document.getElementById("aside");
-const people = {lin:"林",jia:"甲",bing:"丙"};
+const people = {lin:"林",jia:"甲",yi:"乙",bing:"丙"};
 const recordsBase = "https://github.com/ScWen7/Issues/blob/fca5dced21af6ed2525184a45ff14148866df35d/";
 const reports = {
   C1:{run:"verify-C1",commit:"6880625de52ceb834e3e60b07cd8748c4ad79058",hash:"da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1"},
   C2:{run:"verify-C2",commit:"005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",hash:"e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514"}
 };
-function initial(){return {page:"project",role:"lin",repaired:false,full:false,accepted:false,returned:null,reason:"",read:{},openedNotice:null,selected:"C1",lightOwner:null,lightDone:false};}
+function initial(){return {page:"project",role:"lin",repaired:false,full:false,accepted:false,returned:null,reason:"",read:{},openedNotice:null,selected:"C1",lightOwner:null,lightDone:false,handoff:initialHandoff()};}
 let state=initial();
 const pill=(text,tone="")=>'<span class="status '+tone+'">'+text+'</span>';
 const panel=(title,body)=>'<section class="panel"><h2>'+title+'</h2>'+body+'</section>';
@@ -42,6 +42,13 @@ function notices(){
   const items=[{id:"failure",candidate:"C1",title:"C1 区域核验未通过",detail:"查看独立验证结果与后端返工依据。"}];
   if(state.full&&state.role==="lin")items.unshift({id:"review",candidate:"C2",title:"C2 交付验收",detail:state.returned?"已退回，本轮决定已记录。":state.accepted?"已由林接受交付。":"交付 Squad 已向林提交当前候选。"});
   if(state.returned&&state.role==="jia")items.unshift({id:"returned",candidate:"C2",title:"C2 已退回交付 Squad",detail:state.returned.reason});
+  const handoff = state.handoff;
+  if (state.role === "yi" && (handoff.owner === "yi" || handoff.invited)) {
+    const assigned = handoff.owner === "yi";
+    items.unshift({id:assigned ? "last-page-assigned" : "last-page-mentioned", page:"handoff",
+      title:assigned ? "甲已将末页问题指派给你" : "甲请你查看末页问题",
+      detail:"打开原 Issue，查看共享交付与甲的说明。"});
+  }
   return items;
 }
 function visibleNotice(id){return notices().find(item=>item.id===id);}
@@ -58,6 +65,7 @@ function project(){
   const small=state.lightOwner?row("修改导出按钮文案",state.lightDone?"已接受":"待接受","当前候选显示“批量导出”；由 "+people[state.lightOwner]+" 核对。","light",state.lightDone?"ok":"warn"):"";
   main.innerHTML=intro("订单项目","工作事项、当前负责人和下一步。")+'<section class="panel"><div class="bar"><h2>项目工作</h2>'+button(state.lightOwner?"打开轻量事项":"创建轻量事项","light","primary")+'</div>'+
     row("订单批量导出",orderStatus(),orderDesc,"order",state.accepted?"ok":state.repaired?"warn":"bad")+small+
+    row(handoffTitle,handoffStatus(),"负责人 · "+people[state.handoff.owner]+"。打开原 Issue 查看已交付的修改。","handoff")+
     row("导出兼容性调查","资源排队","独立资源情景：订单协调占用共享 Leader Runtime 的唯一槽位。","capacity","warn")+'</section>'+inbox();
   aside.innerHTML='<h2>工作范围</h2>'+dl([["项目","订单系统"],["当前查看人",people[state.role]],["业务验收","订单批量导出 → 林"]])+'<hr><p>打开事项查看当前的工作约定、候选及下一步。</p>';
 }
@@ -128,6 +136,131 @@ function order(){
   aside.innerHTML='<h2>工作属性</h2>'+dl([["当前负责人",actor],["人工总责人","林"],["指定验收人","林"],["独立验证","丙"],["本次检查候选",state.selected],["当前交付轮次",state.returned?"C2 本轮已退回":state.repaired?"C2":"C1"]])+
   (move?'<hr><h2>演练控制</h2><p>'+hint+'</p>'+move:"");
 }
+const handoffTitle = "导出结果缺少末页订单";
+const patchName = "last-page.patch";
+const patchBase = "orders@71c2a90";
+const patchText = [
+  "diff --git a/src/export.js b/src/export.js",
+  "--- a/src/export.js",
+  "+++ b/src/export.js",
+  "@@ -1,5 +1,5 @@",
+  " export async function exportOrders(lastPage, readPage, rows) {",
+  "-  for (let page = 1; page < lastPage; page++) {",
+  "+  for (let page = 1; page <= lastPage; page++) {",
+  "     rows.push(...await readPage(page));",
+  "   }",
+  " }", ""
+].join("\n");
+function initialHandoff() {
+  return {entry:null, includePatch:true, includeNote:true, note:false, patchSource:null, owner:"jia",
+    invited:false, receiverCanReadBase:true, reviewed:false};
+}
+function handoffStatus() {
+  const h = state.handoff;
+  if (h.patchSource) return "已交 v1";
+  if (h.note) return "待甲交补丁";
+  if (h.entry === "managed") return "已请求 Agent 协助";
+  return "待交付";
+}
+function patchPreview() {
+  return '<details class="record"><summary>查看 v1 补丁</summary><pre style="overflow:auto"><code>'+
+    patchText.replaceAll("&","&amp;").replaceAll("<","&lt;")+'</code></pre>'+
+    '<a href="data:text/plain;charset=utf-8,'+encodeURIComponent(patchText)+'" download="'+patchName+'">下载 '+patchName+' · v1</a></details>';
+}
+function handoffIssue() {
+  const h = state.handoff;
+  const author = state.role === "jia", receiver = state.role === "yi";
+  const pathOpen = !h.patchSource && !h.note;
+  const sections = [];
+  if (pathOpen && !h.entry && author) {
+    sections.push(panel("交回调查",button("从本地提交","handoff-local","primary")+" "+button("在评论中请 Agent 协助","handoff-agent")));
+  }
+  if (pathOpen && h.entry === "local" && author) {
+    const toggle = '<label><input id="handoff-include-patch" type="checkbox"'+(h.includePatch?" checked":"")+'> 附上 '+patchName+' · v1</label>';
+    sections.push(panel("甲的本地提交预览",'<p>提交到订单项目的「'+handoffTitle+'」。同事可以在原 Issue 读取本次选中的内容。</p>'+
+      '<p><label><input id="handoff-include-note" type="checkbox"'+(h.includeNote?" checked":"")+'> 附上署名说明「我本机还有一处改动，待我补交。」</label></p>'+toggle+
+      (h.includePatch?'<p>补丁基准 <code>'+patchBase+'</code> · 甲提供，未附检查记录。</p>'+patchPreview():"")+
+      (!h.includePatch && !h.includeNote?'<p>请选择至少一项共享内容。</p>':"")+
+      '<div class="tabs">'+button("提交到原 Issue","handoff-submit","primary",!h.includeNote && !h.includePatch)+button("取消预览","handoff-cancel")+'</div>'));
+  }
+  if (pathOpen && h.entry === "managed") {
+    sections.push(panel("Issue 评论",'<p>甲　@项目 Agent，请调查导出为什么缺少末页，并把修改交回这里。</p>'+
+      '<p>当前负责人为甲。等待本次执行交回成果。</p>'));
+  }
+  if (h.patchSource) {
+    const managed = h.patchSource === "managed";
+    const source = managed ? "受管 Run · last-page-run-01（演练）" : "甲 · 在 Issue 评论中上传";
+    sections.push(panel("当前可用交付",'<p><strong>'+patchName+' · v1</strong></p>'+
+      '<p>对应基准 <code>'+patchBase+'</code></p><p>来源　'+source+'</p><p>'+
+      (managed?"该 Run 的交付回执未附检查报告。":"甲提交补丁时未附检查记录。")+
+      '末页是否完整仍待核对。</p>'+patchPreview()+
+      (managed?'<details class="record"><summary>查看来源 Run</summary><p>项目 Agent · last-page-run-01 · 已结束。结果回执引用本 Issue、该基准与 v1 附件。</p></details>':"")));
+  }
+  if (h.note) {
+    sections.push(panel("甲的补交说明",'<p>“我本机还有一处改动，待我补交。” ——甲</p>'+
+      (h.patchSource?'<p>v1 可用于接续。尚未交回的改动由甲补交。</p>':'<p>交付区尚未收到补丁。甲可以继续在本条 Issue 补交文件和基准。</p>')+
+      (!h.patchSource && author?button("补交 "+patchName+" · v1","handoff-attach"):"")));
+  } else if (h.patchSource && author) {
+    sections.push(panel("追加评论",'<p>甲准备说明“我本机还有一处改动，待我补交”。发送后同事可在本 Issue 查看。</p>'+
+      button("发送补交说明","handoff-note")));
+  }
+  if (h.invited || h.owner === "yi" || h.reviewed) {
+    const events = [h.invited?"<li>甲在评论中 @乙，请乙帮忙核对 v1。</li>":"",
+      h.owner === "yi"?"<li>甲通过负责人选择器将本项改派给乙。</li>":"",
+      h.reviewed?"<li>乙已在自己的工作副本取得基准和 v1，并在原 Issue 告知甲。</li>":""].join("");
+    sections.push(panel("讨论与指派",'<ul>'+events+'</ul>'));
+  }
+  if (h.patchSource && h.owner === "jia" && author) {
+    sections.push(panel("请乙接着处理",'<p>请乙查看时，甲继续负责。整项交给乙时，乙成为当前负责人。</p>'+
+      (h.invited?"":button("评论 @乙 查看","handoff-invite")+" ")+button("将 Issue 改派给乙","handoff-assign")));
+  }
+  if (h.patchSource && receiver) {
+    const access = h.receiverCanReadBase ? '乙可在自己的工作副本取用 <code>'+patchBase+'</code>，下载 v1 后核对修改。' :
+      '乙可读取已共享的补丁。取得对应代码基准还需仓库读权，请项目维护者处理。';
+    sections.push(panel("乙的接续",'<p>'+access+'</p>'+
+      (h.reviewed?"":button("在评论中回报已取得基准和 v1","handoff-review","",!h.receiverCanReadBase))));
+  }
+  if (!sections.length) sections.push(panel("交付区","<p>尚无共享交付。</p>"));
+  main.innerHTML = intro(handoffTitle,"检查末页订单为何遗漏，将可接续的修改交回此 Issue。")+sections.join("");
+  const attrs=[["当前负责人",people[h.owner]],["交付状态",handoffStatus()]];
+  if (h.note) attrs.push(["待补交人","甲"]);
+  aside.innerHTML = '<h2>工作属性</h2>'+dl(attrs)+'<hr><h2>演练条件</h2><p>示例仓库、补丁和运行回执用于比较两种交付入口。用顶部身份切换查看同事的视角。</p>'+
+    (pathOpen && h.entry==="managed" && author ? button("载入 Agent 的执行回报","handoff-receipt"):"")+
+    (receiver && h.patchSource ? button(h.receiverCanReadBase?"查看乙缺少仓库读权的情景":"恢复乙的仓库读权情景","handoff-access"):"");
+}
+function updateHandoff(action) {
+  if (state.page !== "handoff") return "";
+  const h = state.handoff;
+  if (state.role === "yi" && h.patchSource) {
+    if (action === "handoff-access") h.receiverCanReadBase = !h.receiverCanReadBase;
+    if (action === "handoff-review" && h.receiverCanReadBase && !h.reviewed) {
+      h.reviewed = true;
+      return "乙已在原 Issue 回复。";
+    }
+  }
+  if (state.role !== "jia") return "";
+  if (!h.patchSource && !h.note) {
+    if (!h.entry && action === "handoff-local") { h.entry = "local"; h.includePatch = true; h.includeNote = true; }
+    if (!h.entry && action === "handoff-agent") h.entry = "managed";
+    if (h.entry === "local" && action === "handoff-cancel") h.entry = null;
+    if (h.entry === "local" && action === "handoff-submit" && (h.includeNote || h.includePatch)) {
+      h.note = h.includeNote;
+      if (h.includePatch) h.patchSource = "local";
+      return "甲选定的内容已提交到此 Issue。";
+    }
+    if (h.entry === "managed" && action === "handoff-receipt") {
+      h.patchSource = "managed";
+      return "已载入模拟 Run 的结果。";
+    }
+  }
+  if (action === "handoff-attach" && h.note && !h.patchSource) h.patchSource = "local";
+  if (action === "handoff-note" && h.patchSource) h.note = true;
+  if (h.patchSource && h.owner === "jia") {
+    if (action === "handoff-invite") h.invited = true;
+    if (action === "handoff-assign") h.owner = "yi";
+  }
+  return "";
+}
 function light(){
   const existing=state.lightOwner!==null;
   const owner=people[state.lightOwner]||people[state.role];
@@ -151,16 +284,18 @@ function render(focus=false){
   if(state.page==="project")project();
   else if(state.page==="order")order();
   else if(state.page==="light")light();
+  else if(state.page==="handoff")handoffIssue();
   else condition();
   if(focus)document.getElementById("heading").focus({preventScroll:true});
 }
 function update(action){
   let message="",navigate=false;
-  if(["project","order","light","capacity","offline"].includes(action)){state.openedNotice=null;state.page=action;navigate=true;if(action==="order")state.selected=state.repaired?"C2":"C1";}
+  if(["project","order","light","capacity","offline","handoff"].includes(action)){state.openedNotice=null;state.page=action;navigate=true;if(action==="order")state.selected=state.repaired?"C2":"C1";}
+  else if(action.startsWith("handoff-")){message=updateHandoff(action);}
   else if(action.startsWith("notice-")){
     const item=visibleNotice(action.slice(7));
     if(!item)return;
-    state.read[state.role+"-"+item.id]=true;state.openedNotice=item.id;state.page="order";state.selected=item.candidate;navigate=true;message="通知已读。";
+    state.read[state.role+"-"+item.id]=true;state.openedNotice=item.id;state.page=item.page||"order";if(item.candidate)state.selected=item.candidate;navigate=true;message="通知已读。";
   }
   else if(action==="C1"||(action==="C2"&&state.repaired)){state.openedNotice=null;state.selected=action;}
   else if(action==="repair"&&!state.repaired){state.repaired=true;state.selected="C2";message="已切换到 C2 重验情景。";}
@@ -180,12 +315,19 @@ document.addEventListener("click",event=>{
   if(target&&!target.disabled)update(target.dataset.action);
 });
 document.addEventListener("change",event=>{
+  if (["handoff-include-patch","handoff-include-note"].includes(event.target.id) && state.page==="handoff" &&
+      state.role==="jia" && state.handoff.entry==="local" && !state.handoff.note && !state.handoff.patchSource) {
+    if (event.target.id==="handoff-include-patch") state.handoff.includePatch=event.target.checked;
+    else state.handoff.includeNote=event.target.checked;
+    render();
+    document.getElementById(event.target.id).focus();
+  }
   if(event.target.id==="return-reason"&&allowedToAccept()){
     state.reason=Object.hasOwn(returnReasons,event.target.value)?event.target.value:"";
     document.querySelector('[data-action="return"]').disabled=!state.reason;
   }
 });
-document.getElementById("role").addEventListener("change",event=>{state.role=event.target.value;state.openedNotice=null;render();});
+document.getElementById("role").addEventListener("change",event=>{state.role=event.target.value;state.openedNotice=null;document.getElementById("notification").textContent="";render();});
 document.getElementById("reset").addEventListener("click",()=>{state=initial();document.getElementById("role").value="lin";render(true);document.getElementById("notification").textContent="演练已重置。";});
 render();
 </script>
