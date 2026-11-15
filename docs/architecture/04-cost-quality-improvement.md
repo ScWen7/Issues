@@ -57,3 +57,6 @@ V0.1 · 探索基线 · 2026-11-15
 - [GitHub Copilot SDK Usage and billing](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing) · [Streaming session events](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events)：官方区分逐 API 调用的 `assistant.usage` 与 Session 累计 `session.usage.getMetrics` / `session.usage_checkpoint`；`totalNanoAiu` 是 Session 累计量，不能直接当作本次 CLI invocation 消耗。
 
 本机归档材料：[Mac 真实回执与验证明细](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
+
+
+**Qoder 当前现场结论（CLI 1.1.88 / SDK 1.0.59）：** `q.close()` + `shutdownDaemon()` 后主进程约 16.8 秒自然退出；退出码 2 是探针因 Assistant 消息缺失报告 incomplete。六个派生进程仍需按本轮 PID / 进程组清理。没有 Assistant message、原生 request_id 或请求级 Credits；`total_credits=0` 仅作为 Session 快照，不作为单次消耗。后续 Runtime 适配必须分别报告 API 关闭、主进程退出和派生进程清理，不合并成单一 success 状态。详见[真实验证记录 8.6–8.7](../research/topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15)。
