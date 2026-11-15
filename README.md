@@ -1,55 +1,58 @@
 # Team Agent Collaboration Platform
 
-本项目维护面向研发团队的人机协作工作台产品架构设计，采用中心协作、本地分布式执行的方向。
+本项目建设面向研发团队的人机协作产品，**以 Multica 为协作与执行基座，融合 TeamAI 团队能力治理与 LoopForge SOP / 工程级 RSI 能力**。本仓库维护产品架构、源码研究、原型验证和真实宿主实验；不把专题设计误解为必须自建所有底层能力。
 
-## 当前交付
+## 当前架构基线
 
-专题四「成本、质量与自改进」V0.1 已建立 Codex / Claude Token 与 Qoder / CodeBuddy Credits 的 Runtime-only 计量原型。Qoder CLI 1.1.88 的最新 Mac 复测已完成 Query 与共享 Daemon 两阶段关闭：主进程 16.835 秒自然退出，退出码 2 对应 incomplete；六个本轮已观察派生进程经额外定向清理后归零。原生 request_id 与请求 Credits 仍为 unknown，Session 快照为 0，总判定 PARTIAL。CodeBuddy CLI 2.181.0 为 PASS，Copilot CLI 1.0.107 为 PARTIAL。[最新 Qoder 退出与清理记录](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15) · [专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
+<badge>V1.0 · Multica 基座融合架构</badge>
 
-专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
+- **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、ContextReceipt、Task Usage 等工作与执行底座。
+- **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
+- **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
 
-专题三 A「执行平面与宿主适配」V0.6 已完成设计收口。最新修订覆盖返工报告晚到附件、投递证据缺失及旧领取代次的恢复条件，53 项基础回归在本轮远端作业通过。[3A 设计](docs/architecture/03a-execution-plane.md) · [与 3B 的交接](docs/architecture/execution-capabilities.md)
+先复用 Multica 已有能力，再对真实缺口做最小扩展。不得建设第二套 Issue、Run、Runtime、派发控制、权限或成本账本。
 
-专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
+## 架构入口
 
-专题一 V0.3 的关键设计如下。
-
-1. **确立底座工作假设决策：** 明确以 Multica 作为平台工作平面主干（Issue/子 Issue 共模、status 目录、Project Workflow、Run、Runtime 共享授权与 child_done 唤醒）作为后续专题展开的设计前提，并明确其推翻条件与重审范围（详见[架构总览 1.1 节](docs/architecture/overview.md#11-底座工作假设决策)）。
-2. **建立设计基线表：** 在架构总览中设立【用户已确认】/【当前工作假设】/【待定】三栏基线（详见[架构总览 1.2 节](docs/architecture/overview.md#12-设计基线表)），统一界定决策效力，消除冗余限定词。
-3. **明确与设计输入 V1 的对应与偏离：** 明确具体分工由子 Issue 或同 Issue 委派承担，不建独立 Task 层，待用户确认偏离（详见[架构总览 1.3 节](docs/architecture/overview.md#13-与设计输入-v1-的对应与偏离)）。
-4. **深化专题一核心规则：** 制定平台强制规则最小清单，人工验收覆盖所有完成入口及成功完成类别；区分稳定人工总责人与流转的当前负责人，将核验主体、方法、证据类型和结果分别记录。保留子 Squad 一层限制与事后关联路径，并通过贯穿案例推演。
-5. **明确专题二与专题三演进路径：** 明确专题二首要问题为分工组织双轨矛盾（Leader 子 Issue 分工 vs SOP 节点调度；线性 stage vs DAG 依赖）；将专题三拆解为 3A（执行平面先行线）与 3B（能力治理顺延线）。
-
-专题一保留六项待验证事项，包括轻量工作单元 / Task 边界、总责人适用范围、验收决定与候选及标准版本绑定、Squad 嵌套深度、Leader 离线后的协调接续，以及多 Issue 的项目级优先级、结果依赖与 Runtime 容量。它们作为后续专题的验证输入，不改变当前工作主线。
-
-专题一收口了人工验收覆盖、核验分类、Default Workflow 守卫适用范围和离线访问表述四项问题。项目目标继续保持中心协作、本地分布式执行；Runtime 离线期间，在线成员仍可访问中心协作数据。
-
-| 文档 | 何时阅读 |
+| 文档 | 用途 |
 |---|---|
-| [产品架构设计输入 V1](Team%20Agent%20Collaboration%20Platform.md) | 了解用户给定的方向、五个专题与研究要求（只读输入） |
-| [统一架构总览](docs/architecture/overview.md) | 查看底座工作假设、设计基线表、跨专题职责与双轨矛盾 |
-| [专题一：统一工作生命周期](docs/architecture/01-unified-work-lifecycle.md) | 审阅平台强制规则、总责人、父子分工、结果核验、以及订单导出完整推演 |
-| [统一术语](CONTEXT.md) | 核对总责人、当前负责人、平台强制规则、结果核验方式等统一概念 |
-| [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | 审阅分工、图依赖、人工门禁、返工与接管规则以及实现前的验证条件 |
-| [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
-| [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
-| [专题三 B：能力与知识治理](docs/architecture/03b-capability-governance.md) | 查看规则和脚本如何发布、在项目中选用、换版和重验 |
-| [专题三 B：跨宿主工具与接续](docs/research/topic-03b/cross-host-handoff.md) | 从本机同名工具追到真实服务调用、候选核验和换人后结果归属 |
-| [专题三 B：Role、Skill 与 Playbook 组合](docs/research/topic-03b/role-composition.md) | 查看预算、权限或方法冲突怎样改变宿主输入和实际核验 |
-| [专题三 B：项目知识与经验发布](docs/research/topic-03b/project-knowledge.md) | 从权威文档修订查到角色搜索、实际宿主输入、撤权处置和返工经验发布 |
-| [专题三 B：源码与订单实验](docs/research/03b-source-evidence.md) | 从规则发布追到真实宿主回合、脚本摘要、工作簿和结果消费 |
-| [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、三种宿主入口、任务身份、换机接续和迟到结果归属 |
-| [专题三 A：宿主能力与 3B 交接](docs/architecture/execution-capabilities.md) | 按入口和宿主查看能力证据、缺项处理及资产版本交接 |
-| [专题三 A：源码研究记录](docs/research/03a-source-evidence.md) | 查看固定版本的注册、授权、加载回执、任务凭据及宿主结果证据 |
-| [专题一：源码研究依据](docs/research/01-source-evidence.md) | 查看固定提交、代码事实与提示词约定对照、代表测试及设计推论 |
+| [架构治理基线](docs/architecture/governance-baseline.md) | 最高层架构所有权、复用原则和禁止重复建设的约束 |
+| [统一架构总览](docs/architecture/overview.md) | V1.0 产品定位、能力边界和专题职责 |
+| [专题一：统一工作生命周期](docs/architecture/01-unified-work-lifecycle.md) | Issue First、Human / Agent / Squad 责任、工作约定和验收 |
+| [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | LoopForge SOP 如何附着于 Issue，并通过 Multica Run 执行 |
+| [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
+| [专题三 A：宿主能力证据矩阵](docs/architecture/execution-capabilities.md) | 不同宿主和入口的能力、证据与缺项 |
+| [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
+| [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
+| [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
 
-后续专题完成后同步更新架构总览、相关术语和贯穿案例；不在各专题另建一套工作状态、上下文或执行证据。
+## 研究与验证证据
 
-> [!NOTE]
-> `docs/review/topic-01/recipe.json` 是此前为窗口和手机展示生成的配方文件，本轮评审修订未同步更新该展示副本，当前内容已过期；正式设计维护源以上表中的 Markdown 文档为准，展示配方将在后续里程碑中统一重建。
+专题一至四的源码研究、原始回执、订单案例和原型测试全部保留。它们用于证明上游实际能力、目标宿主行为和设计缺口，不自动构成新增平行系统的实现要求。
 
-## 研究与核验
+- [专题一源码研究](docs/research/01-source-evidence.md)
+- [专题二三库源码与测试](docs/research/02-source-evidence.md)
+- [专题三 A 执行底座研究](docs/research/03a-source-evidence.md)
+- [专题三 B 能力治理研究](docs/research/03b-source-evidence.md)
+- [专题四真实 Runtime 用量研究](docs/research/04-source-evidence.md)
+- [Qoder / CodeBuddy / Copilot 真实回执与验证](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md)
+- [专题二状态模型原型验证](docs/research/topic-02/prototype-validation.md)
 
-专题三 A 的五阶段分别验证 Runtime 与领取、本地会话与执行归属、上下文与任务身份、工作副本与交付、跨机接续和原机重连。订单导出的第四阶段记录涵盖真实宿主协议适配、实际 Daemon、PostgreSQL、二进制附件与脚本。各项对照保留版本、输入和复跑命令。[研究记录](docs/research/03a-source-evidence.md)
+## 当前专题四真实用量状态
 
-参考仓库副本和阶段笔记存放于已忽略的 `.tmp/`；正式文档引用固定的上游源码链接，不依赖临时目录长期存在。
+- Qoder CLI 1.1.88 / SDK 1.0.59：PARTIAL。Query / Daemon 关闭与进程清理边界已实测；Assistant 请求事件、原生 request_id 和请求级 Credits 仍 unknown。Session total_credits=0 不作为单次消耗。
+- CodeBuddy CLI 2.181.0：PASS（受管 CLI 入口）。单 Stage 0.69 Credits 已取得；真实 Stage 修订覆盖仍待进一步验证。
+- GitHub Copilot CLI 1.0.107：PARTIAL。取得 Session 累计 nano-AIU checkpoint，逐请求 nano-AIU 仍 unknown。
+
+这些证据用于扩展 Multica Task Usage，不另建成本账本。未知值保持 unknown。
+
+## 设计与实现审查要求
+
+任何新增对象、服务或控制机制，必须先说明：
+1. Multica 对应源码 / 数据对象 / 接口 / 事件是什么；
+2. 当前能力在哪个具体场景下不足；
+3. 为什么不能通过配置或现有扩展点解决；
+4. 新增事实归属哪个既有 Issue / Run / Session / Usage / Asset；
+5. 如何验证重放、撤权、恢复、迟到事件和重复观察。
+
+若形成第二套工作状态、Run、Runtime、派发、权限或成本账本，设计不得进入实现。
