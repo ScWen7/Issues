@@ -49,7 +49,7 @@
 | [二：SOP 与研发工作流融合](02-sop-workflow.md) | V0.3 设计：委托授权、派发控制绑定、工作流出口幂等交接、子项委托轮次；配套 17 项状态模型测试与三库研究 | 验证委托授权与撤销、三入口派发仲裁、子 Issue 委托轮次、SOP 出口幂等交接，以及人工门禁和跨机返工 |
 | [三 A：执行平面与宿主适配](03a-execution-plane.md) | V0.6 设计评审稿。已验证双机候选交接、双成员访问、原机重连和迟到回报。[实验记录](../research/03a-source-evidence.md#14-第五阶段跨主机接续与设计收口) | [宿主能力与版本回执](execution-capabilities.md)交 3B 使用；成员日常 IDE、实际订单服务及人工接受由现场验证 |
 | [三 B：能力与知识治理](03b-capability-governance.md) | V0.5 设计收口。规则与知识发布、角色组合、跨宿主调用与已有会话接管已按订单场景验证。并发输入与 Hook 改写各有独立反例。[成员会话验证](../research/topic-03b/existing-session.md) | 向专题四交付原生请求、服务调用、重试与结果归属。企业 IDE 的控制入口、真实账号与现场代码图接入按部署验证 |
-| [四：成本、质量与自改进](04-cost-quality-improvement.md) | V0.1 探索基线；成本账本支持 Token / Qoder Credits / CodeBuddy Credits 异构计量，独立评价与 Benchmark 原型已建立，24 项 Node 24 远端回归通过 | 下一步验证 Qoder / CodeBuddy Runtime 是否能提供原生 Credits 观察；未上报则保持 unknown，不通过企业 API、账户页面或账单接口补数 |
+| [四：成本、质量与自改进](04-cost-quality-improvement.md) | V0.1 探索基线；成本账本支持 Token / Qoder Credits / CodeBuddy Credits 异构计量，独立评价与 Benchmark 原型已建立，24 项 Node 24 远端回归通过 | 已找到并实现 Qoder Agent SDK / CodeBuddy stream-json 本地 Credits 解析；下一步在成员实际 CLI Runtime 版本上做真机验证，IDE 未暴露用量则保持 unknown |
 | 五：统一工作台产品 | 约定围绕现有工作对象组织入口 | 复用既有产品路径，补齐交互视图，不创造平行状态权威 |
 
 阅读[专题一](01-unified-work-lifecycle.md)了解具体工作规则，阅读[专题三 A](03a-execution-plane.md)了解执行平面探索范围，[术语表](../../CONTEXT.md)用于核对概念，[源码研究依据](../research/01-source-evidence.md)区分上游事实、配置和设计扩展。专题二的工作选择及实现验证条件见[专题二设计](02-sop-workflow.md)，状态模型结果见[原型验证记录](../research/topic-02/prototype-validation.md)。
