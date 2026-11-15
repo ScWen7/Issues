@@ -4,7 +4,18 @@
 验证阶段：4.1.2 · 本机真实进程回环  
 采集边界：只读取本机 Runtime stdout / SDK message stream；不调用企业 API、账户 Usage 页面或账单接口。
 
-## 0. 验证原则
+## 0. 获取验证包
+
+在成员机器上：
+
+```bash
+git clone --branch research/topic-04-cost-quality-improvement https://github.com/ScWen7/Issues.git
+cd Issues
+```
+
+如果已经有仓库副本，切换到该研究分支并拉取最新提交。
+
+## 1. 验证原则
 
 本轮不修改成员现有 IDE / CLI 配置，不注入 API Key，不读取账号额度，不采集 Prompt、模型回复正文、源代码、工具参数或工具结果正文。
 
@@ -12,7 +23,7 @@
 
 若本机 Runtime 没有输出 Credits 字段，结果为 `unknown`，这是有效的能力验证结果，不是测试失败，也不能用 Token、运行时长、余额差或模型档位补算。
 
-## 1. 环境确认
+## 2. 环境确认
 
 在 macOS / Linux 终端执行：
 
@@ -39,7 +50,7 @@ cd /tmp/teamai-topic04-runtime
 - 不要为了测试升级或覆盖现有 CLI。
 - Qoder SDK 通过 `pathToQoderCLIExecutable` 指向被测 qodercli，避免 SDK 自动下载 / 选择另一个 CLI。若本机找不到独立 qodercli 可执行文件，不要猜测路径；先提交环境回执，SDK 自动管理的版本必须单独标注。
 
-## 2. Qoder 1.1.88：Agent SDK 本地消息流
+## 3. Qoder 1.1.88：Agent SDK 本地消息流
 
 ### 2.1 准备独立探针
 
@@ -55,7 +66,7 @@ npm install @qoder-ai/qoder-agent-sdk
 npm ls @qoder-ai/qoder-agent-sdk --depth=0
 ```
 
-将仓库中的 `qoder-sdk-runtime-probe.mjs` 复制到当前目录。若本机有独立 qodercli，指定其真实绝对路径：
+运行仓库中的 `prototypes/topic-04/qoder-sdk-runtime-probe.mjs`。若本机有独立 qodercli，指定其真实绝对路径：
 
 ```bash
 export QODERCLI_PATH="$(command -v qodercli)"
@@ -64,7 +75,7 @@ export QODERCLI_PATH="$(command -v qodercli)"
 运行：
 
 ```bash
-node qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
+node prototypes/topic-04/qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
 ```
 
 探针使用现有 Qoder CLI 登录态，通过 `qodercliAuth()` 认证；不读取账号配额。提示内容为只需返回 OK 的无工具任务。探针将请求级 Assistant usage 与 Result session snapshot 分开输出，并记录 SDK 实际使用的 CLI 路径和版本。
@@ -87,7 +98,7 @@ node qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
 - **UNKNOWN**：SDK 无法启动、鉴权失败、字段不存在或消息流无法取得。
 - **NOT_TARGET_VERSION**：SDK 启动了其他版本 CLI。保留数据，但不作为 1.1.88 结论。
 
-## 3. CodeBuddy 2.181.0：Stream-JSON 本地 stdout
+## 4. CodeBuddy 2.181.0：Stream-JSON 本地 stdout
 
 ### 3.1 运行探针
 
@@ -96,7 +107,7 @@ node qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
 ```bash
 mkdir -p /tmp/teamai-topic04-codebuddy
 cd /tmp/teamai-topic04-codebuddy
-node /path/to/codebuddy-stream-runtime-probe.mjs
+node prototypes/topic-04/codebuddy-stream-runtime-probe.mjs
 ```
 
 探针执行：
@@ -125,7 +136,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 - **UNKNOWN**：没有 usage_update、Credits 字段缺失或 CLI 无法启动。
 - **NOT_TARGET_VERSION**：实际 CLI 不是 2.181.0。
 
-## 4. IDE 与受管 CLI 的边界验证
+## 5. IDE 与受管 CLI 的边界验证
 
 本轮探针启动的是受管 CLI Runtime，不代表已经能旁路观察成员任意打开的 IDE 会话。
 
@@ -136,7 +147,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 4. 不读取账户 Usage 页面，不抓取网络请求，不分析本地账号数据库或私有缓存。
 5. 记录 IDE 版本、Host 入口、事件类型和缺失字段名；不记录业务 Prompt 或代码内容。
 
-## 5. 回执格式
+## 6. 回执格式
 
 每个宿主单独提交一份 JSONL。至少包含：
 
@@ -159,7 +170,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 另提交 `environment.txt`、`npm ls` 输出（Qoder）和回执文件 SHA-256。不要提交 access token、API Key、账号邮箱、完整 CLI 环境变量、Prompt、回复正文、工具参数或源代码。
 
-## 6. 通过标准与下一步
+## 7. 通过标准与下一步
 
 4.1.2 不以“命令运行成功”为通过。必须拿到真实 Runtime stdout / SDK 消息、原生身份、Credits 字段及其 scope。
 
