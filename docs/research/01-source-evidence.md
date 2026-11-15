@@ -28,13 +28,13 @@
 
 ### M2. 工作负责人与被邀请参与不同，责任归属区分处理人与发起人
 
-**代码事实：** Issue 支持 Member、Agent、Squad 负责人及父子 Issue；`WillEnqueueRun` 按负责人、状态和可用性判断是否派发。Squad 主责会解析 Leader，但非主责 Squad 也可能经 `@squad` 进入 guest Leader 路径。在数据模型上，`Issue` 表具备 `AssigneeType`/`AssigneeID`、`CreatorType`/`CreatorID` 与 `RequesterUserID`；`issueToResponse` 将其分别序列化为 `AssigneeID`、`CreatorID` 与 `RequesterID`。Member 创建时 `CreatorID` 记录该成员；Agent 触发时 `RequesterUserID` 记录发起 Member。
+**代码事实：** Issue 支持 Member、Agent、Squad 负责人及父子 Issue；`WillEnqueueRun` 按负责人、状态和可用性判断是否派发。Squad 主责会解析 Leader，但非主责 Squad 也可能经 `@squad` 进入 guest Leader 路径。在数据模型上，`Issue` 表具备 `AssigneeType`/`AssigneeID`、`CreatorType`/`CreatorID` 与 `RequesterUserID`；`issueToResponse` 将其分别序列化为 `AssigneeID`、`CreatorID` 与 `RequesterID`。Member 创建时 `CreatorID` 记录该成员。部分 Agent 代建路径可解析出发起成员，适用条件见[现行复核](05-source-evidence.md#指派评论协助与交接)。
 
 证据：[Issue 模型字段](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/pkg/db/generated/models.go#L931-L963)、[API 响应映射](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/issue.go#L485-L514)、[触发判断](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_trigger.go#L103-L212)、[Leader 派发](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad.go#L1234-L1291)。
 
 **提示词约定：** guest Leader 不得推进父 Issue 状态；拥有 Issue 的 Leader 有推进责任。[负责与 guest 边界](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/handler/squad_briefing.go#L181-L191)。
 
-**设计推论：** “仅指定 Squad 主责才启动自动协调”是本平台输入要求，上游 guest 路径单独记录。在责任模型上，Multica 原生支持随步骤流转的当前处理人（Assignee）与发起线索（Creator/Requester），但缺少全局稳定的独立人工总责人概念。平台需在业务模型上扩展总责人角色，显式锚定人工最终责任，防止 Agent/Squad 协作时责任虚化。
+**设计推论：** “仅指定 Squad 主责才启动自动协调”是本平台输入要求，上游 guest 路径单独记录。在责任模型上，Multica 原生支持随步骤流转的当前处理人（Assignee）与发起线索（Creator/Requester），但缺少全局稳定的独立人工总责人概念。现行方案沿用工作约定和已有成员引用来表达业务责任。单值成员属性的适用范围及与 Run 归因的区别见[现行复核](05-source-evidence.md#指派评论协助与交接)。
 
 ### M3. Leader 是短轮次协调，规划质量主要依赖 Agent
 

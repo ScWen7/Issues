@@ -24,7 +24,7 @@
 
 **Runtime（本地执行环境）**：成员提供、可承载 Agent 或 Script 执行的本地环境。使用时分别核对环境可用性、项目访问和操作授权。
 
-**当前负责人（Assignee / 当前处理人）**：Issue 在当前阶段被指派的处理主体，可为 Human、Agent 或 Squad；同一时点仅有一个，允许通过明确分配或项目工作流交接发生流转。
+**当前负责人（Assignee / 当前处理人）**：Issue 在当前阶段被指派的处理主体，可为 Human、Agent 或 Squad；待指派时可为空，同一时点至多一个，随显式指派或项目工作流交接而变化。
 
 **总责人（Accountable Member）**：在整个 Issue 生命周期保持稳定的真实人员（Member），对 Agent 或 Squad 主导工作的目标、范围、重大业务取舍与交付质量负最终责任。不可为 Agent 或 Squad。可与提出人（Requester）或验收人（Acceptor）为同一人；原“人工责任成员”统一并入此概念。Multica Run 的 `AccountableUserID` 是该次执行的审计 / 成本归因字段；它与 Issue 总责人的映射按具体工作关系核对，不提供额外授权。
 
