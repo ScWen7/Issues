@@ -1,5 +1,7 @@
 # 专题三 B · 发布、选用与执行实证
 
+第三阶段将 Role、Skill 和 Playbook 同时用于订单开发与核验，实测预算不足、指引冲突、派发时撤权，以及修订后重新装载和验收。[订单组合、三库源码与复跑](topic-03b/role-composition.md)
+
 第二阶段研究订单文档修订后两个角色实际收到什么、权限变化后如何继续，以及 C1 返工和 C2 修复怎样提炼成团队经验。真实 Codex 的四次请求覆盖两个角色、撤权后的旧线程和同进程的新线程。[第二阶段完整记录与复跑](topic-03b/project-knowledge.md) · [来源与可见性](topic-03b/knowledge-sources.md) · [贡献与复审](topic-03b/knowledge-contribution.md)
 
 第一阶段 · 2026-11-15。案例沿用订单导出的 D1、D2 和 3A 的真实工作簿。D1、D2 是 Issue 的两项模拟业务决定，R1、R2 是表达相应要求的规则，S1、S2 是实际运行的核验脚本。三者各有来源与责任人。[设计](../architecture/03b-capability-governance.md) · [一次完整本地运行的结构化记录](topic-03b/fixtures/order-release.json)

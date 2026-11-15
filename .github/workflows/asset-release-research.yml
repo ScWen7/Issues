@@ -1,7 +1,7 @@
 name: AgentPlatform asset release research
 on:
   push:
-    branches: [research/3b-asset-release, research/3b-knowledge-context]
+    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition]
     paths:
       - .github/workflows/asset-release-research.yml
       - prototypes/topic-03b/**
@@ -45,4 +45,13 @@ jobs:
         with:
           name: project-knowledge-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/project-knowledge/summary.json
+          retention-days: 7
+      - name: Verify role, native skills, playbook, budget and resulting workbooks
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/composition/order_composition.py "$RUNNER_TEMP/role-composition" --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex"
+      - name: Retain the composition scenarios and independent workbook checks
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: role-composition-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/role-composition/summary.json
           retention-days: 7

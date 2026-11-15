@@ -1,0 +1,1836 @@
+{
+  "C1_control": {
+    "A2": false,
+    "A3": true,
+    "candidate": "C1",
+    "commit": "6880625de52ceb834e3e60b07cd8748c4ad79058",
+    "run": "control-recheck-C1",
+    "verdict": "rework"
+  },
+  "changed_after_queue": [
+    {
+      "final": "blocked",
+      "id": "developer-source-revoked",
+      "queued": "ready",
+      "queued_refs": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "build-playbook"
+      ],
+      "reason": "source selection no longer available"
+    },
+    {
+      "final": "blocked",
+      "id": "verifier-tool-revoked",
+      "queued": "ready",
+      "queued_refs": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "check-playbook"
+      ],
+      "reason": "required capability or material unavailable"
+    }
+  ],
+  "dispatched_cases": [
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-full"
+      },
+      "budget_bytes": 707,
+      "id": "developer-full",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 604,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "build-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 707
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-minimum"
+      },
+      "budget_bytes": 604,
+      "id": "developer-minimum",
+      "omitted": {
+        "build-playbook": "optional material exceeds remaining budget"
+      },
+      "reason": "ready",
+      "required_bytes": 604,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 604
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-too-small"
+      },
+      "budget_bytes": 603,
+      "id": "developer-too-small",
+      "omitted": {},
+      "reason": "required material exceeds budget",
+      "required_bytes": 604,
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-required-conflict"
+      },
+      "budget_bytes": 786,
+      "conflict": {
+        "refs": [
+          "build-orders",
+          "fast-export-v1"
+        ],
+        "subject": "payment-column"
+      },
+      "id": "developer-required-conflict",
+      "omitted": {},
+      "reason": "incompatible required instructions",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-corrected"
+      },
+      "budget_bytes": 798,
+      "id": "developer-corrected",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 695,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "fast-export-v2",
+        "build-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 798
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-full"
+      },
+      "budget_bytes": 731,
+      "id": "verifier-full",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 619,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "check-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 731
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-minimum"
+      },
+      "budget_bytes": 619,
+      "id": "verifier-minimum",
+      "omitted": {
+        "check-playbook": "optional material exceeds remaining budget"
+      },
+      "reason": "ready",
+      "required_bytes": 619,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 619
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-too-small"
+      },
+      "budget_bytes": 618,
+      "id": "verifier-too-small",
+      "omitted": {},
+      "reason": "required material exceeds budget",
+      "required_bytes": 619,
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-required-conflict"
+      },
+      "budget_bytes": 810,
+      "conflict": {
+        "refs": [
+          "inspect-orders",
+          "fast-export-v1"
+        ],
+        "subject": "payment-column"
+      },
+      "id": "verifier-required-conflict",
+      "omitted": {},
+      "reason": "incompatible required instructions",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-corrected"
+      },
+      "budget_bytes": 822,
+      "id": "verifier-corrected",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 710,
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "fast-export-v2",
+        "check-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 822
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-developer",
+        "node": "implement-order-export",
+        "project": "orders",
+        "role": "developer",
+        "run": "study-developer-source-revoked"
+      },
+      "budget_bytes": 707,
+      "id": "developer-source-revoked",
+      "omitted": {},
+      "reason": "source selection no longer available",
+      "required_bytes": 604,
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "binding": {
+        "attempt": 2,
+        "candidate": "C2",
+        "decision": "D2",
+        "issue": "order-export-verification",
+        "member": "order-verifier",
+        "node": "verify-order-export",
+        "project": "orders",
+        "role": "verifier",
+        "run": "study-verifier-tool-revoked"
+      },
+      "budget_bytes": 731,
+      "id": "verifier-tool-revoked",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "required_bytes": 619,
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    }
+  ],
+  "host": {
+    "cases": [
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-full"
+        },
+        "called_tools": [],
+        "id": "developer-full",
+        "native_skill_catalog": {
+          "build-orders": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "developer-section",
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "developer-role",
+            "sha256": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "build-orders",
+            "sha256": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "playbook",
+            "path": "input[2].content[0].text",
+            "ref": "build-playbook",
+            "sha256": "f73fce9cb9c49516cd4e9caca34f53855cbea370e4c3cd814aba971d7558b9c0"
+          }
+        ],
+        "observed_sha256": {
+          "build-orders": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465",
+          "build-playbook": "f73fce9cb9c49516cd4e9caca34f53855cbea370e4c3cd814aba971d7558b9c0",
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "developer-role": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551",
+          "developer-section": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 2,
+        "requests_before": 1,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "developer-section",
+          "developer-role",
+          "build-orders",
+          "build-playbook"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-07bc-7823-af81-4161a0340722",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-07d6-7a80-9a4f-1c6dcce37283",
+        "wire_request_bytes": 52230,
+        "wire_request_sha256": "40e3b398d26995fab450683419e7c494c9ca3500bc7f1f987dfa7049475dfb98"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-minimum"
+        },
+        "called_tools": [],
+        "id": "developer-minimum",
+        "native_skill_catalog": {
+          "build-orders": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "developer-section",
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "developer-role",
+            "sha256": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "build-orders",
+            "sha256": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465"
+          }
+        ],
+        "observed_sha256": {
+          "build-orders": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465",
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "developer-role": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551",
+          "developer-section": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 3,
+        "requests_before": 2,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "developer-section",
+          "developer-role",
+          "build-orders"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-0882-7711-94f8-239aea2b4e51",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-089c-7c42-9e98-d5e98f052cc8",
+        "wire_request_bytes": 52123,
+        "wire_request_sha256": "a7436375dfe47bc14ad80234a5ed2165aa367306f8f9b4944554e7cb88f3e723"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-too-small"
+        },
+        "id": "developer-too-small",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "required material exceeds budget",
+        "requests_after": 3,
+        "requests_before": 3,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-required-conflict"
+        },
+        "id": "developer-required-conflict",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "incompatible required instructions",
+        "requests_after": 3,
+        "requests_before": 3,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-corrected"
+        },
+        "called_tools": [],
+        "id": "developer-corrected",
+        "native_skill_catalog": {
+          "build-orders": [
+            "input[0].content[1].text"
+          ],
+          "fast-export-v2": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "developer-section",
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "developer-role",
+            "sha256": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "build-orders",
+            "sha256": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[4].content[0].text",
+            "ref": "fast-export-v2",
+            "sha256": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "playbook",
+            "path": "input[2].content[0].text",
+            "ref": "build-playbook",
+            "sha256": "f73fce9cb9c49516cd4e9caca34f53855cbea370e4c3cd814aba971d7558b9c0"
+          }
+        ],
+        "observed_sha256": {
+          "build-orders": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465",
+          "build-playbook": "f73fce9cb9c49516cd4e9caca34f53855cbea370e4c3cd814aba971d7558b9c0",
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "developer-role": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551",
+          "developer-section": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+          "fast-export-v2": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 4,
+        "requests_before": 3,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "developer-section",
+          "developer-role",
+          "build-orders",
+          "fast-export-v2",
+          "build-playbook"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-0958-7302-a180-a8add7425e29",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-0970-72f3-a755-2dba6c236918",
+        "wire_request_bytes": 52797,
+        "wire_request_sha256": "a2485f40c79b61c690c594be7245c1082f8998808a4f0f8bad00414af64fcd2d"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-full"
+        },
+        "called_tools": [],
+        "id": "verifier-full",
+        "native_skill_catalog": {
+          "inspect-orders": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-section",
+            "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-role",
+            "sha256": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "inspect-orders",
+            "sha256": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "playbook",
+            "path": "input[2].content[0].text",
+            "ref": "check-playbook",
+            "sha256": "ec7ffdbad9064fca7e1543be2ce2de7b919970d52bf2d90b6805dd09686fe1f2"
+          }
+        ],
+        "observed_sha256": {
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "check-playbook": "ec7ffdbad9064fca7e1543be2ce2de7b919970d52bf2d90b6805dd09686fe1f2",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "inspect-orders": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2",
+          "verifier-role": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57",
+          "verifier-section": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 5,
+        "requests_before": 4,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "verifier-section",
+          "verifier-role",
+          "inspect-orders",
+          "check-playbook"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-0a1c-7651-adb9-0343d739404e",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-0a3b-7780-b5d0-6518bd540f75",
+        "wire_request_bytes": 52264,
+        "wire_request_sha256": "17caecd794b3352ac5e32c066cbb8847a33760ffe832599a0687a2ab185a7178"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-minimum"
+        },
+        "called_tools": [],
+        "id": "verifier-minimum",
+        "native_skill_catalog": {
+          "inspect-orders": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-section",
+            "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-role",
+            "sha256": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "inspect-orders",
+            "sha256": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2"
+          }
+        ],
+        "observed_sha256": {
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "inspect-orders": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2",
+          "verifier-role": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57",
+          "verifier-section": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 6,
+        "requests_before": 5,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "verifier-section",
+          "verifier-role",
+          "inspect-orders"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-0b05-7a43-9db3-7ae8585144c1",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-0b20-7131-9184-679dc83c5996",
+        "wire_request_bytes": 52148,
+        "wire_request_sha256": "3fc49f66581fff254c6d2237b4bb605e5b383b630b11454f7d63b87db4794089"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-too-small"
+        },
+        "id": "verifier-too-small",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "required material exceeds budget",
+        "requests_after": 6,
+        "requests_before": 6,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-required-conflict"
+        },
+        "id": "verifier-required-conflict",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "incompatible required instructions",
+        "requests_after": 6,
+        "requests_before": 6,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-corrected"
+        },
+        "called_tools": [],
+        "id": "verifier-corrected",
+        "native_skill_catalog": {
+          "fast-export-v2": [
+            "input[0].content[1].text"
+          ],
+          "inspect-orders": [
+            "input[0].content[1].text"
+          ]
+        },
+        "observations": [
+          {
+            "channel": "explicit_text",
+            "kind": "rule",
+            "path": "input[2].content[0].text",
+            "ref": "d2-rule",
+            "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "business-section",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "knowledge",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-section",
+            "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "role",
+            "path": "input[2].content[0].text",
+            "ref": "verifier-role",
+            "sha256": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[3].content[0].text",
+            "ref": "inspect-orders",
+            "sha256": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2"
+          },
+          {
+            "channel": "native_skill",
+            "kind": "skill",
+            "path": "input[4].content[0].text",
+            "ref": "fast-export-v2",
+            "sha256": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded"
+          },
+          {
+            "channel": "explicit_text",
+            "kind": "playbook",
+            "path": "input[2].content[0].text",
+            "ref": "check-playbook",
+            "sha256": "ec7ffdbad9064fca7e1543be2ce2de7b919970d52bf2d90b6805dd09686fe1f2"
+          }
+        ],
+        "observed_sha256": {
+          "business-section": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+          "check-playbook": "ec7ffdbad9064fca7e1543be2ce2de7b919970d52bf2d90b6805dd09686fe1f2",
+          "d2-rule": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+          "fast-export-v2": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded",
+          "inspect-orders": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2",
+          "verifier-role": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57",
+          "verifier-section": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+        },
+        "offered_tools": [
+          "exec_command",
+          "write_stdin",
+          "update_plan",
+          "request_user_input",
+          "view_image",
+          "multi_agent_v1",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "web_search"
+        ],
+        "reason": "ready",
+        "requests_after": 7,
+        "requests_before": 6,
+        "selected": [
+          "d2-rule",
+          "business-section",
+          "verifier-section",
+          "verifier-role",
+          "inspect-orders",
+          "fast-export-v2",
+          "check-playbook"
+        ],
+        "status": "ready",
+        "thread_id": "01a1dcab-0beb-77f3-a8c6-074056091232",
+        "thread_read_item_types": [
+          "userMessage",
+          "agentMessage"
+        ],
+        "turn_id": "01a1dcab-0c0a-7780-8927-e1b6230632c9",
+        "wire_request_bytes": 52831,
+        "wire_request_sha256": "88fff7eb393fa878a7653e546655cda6de959fa5216321b83ef98322e157ecef"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "study-developer-source-revoked"
+        },
+        "id": "developer-source-revoked",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "source selection no longer available",
+        "requests_after": 7,
+        "requests_before": 7,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "study-verifier-tool-revoked"
+        },
+        "id": "verifier-tool-revoked",
+        "observations": [],
+        "observed_sha256": {},
+        "reason": "required capability or material unavailable",
+        "requests_after": 7,
+        "requests_before": 7,
+        "selected": [],
+        "status": "blocked",
+        "thread_id": null,
+        "turn_id": null
+      }
+    ],
+    "catalog_control": {
+      "called_tools": [],
+      "native_skill_catalog": {
+        "catalog-calibration": [
+          "input[0].content[1].text"
+        ]
+      },
+      "observations": [],
+      "observed_sha256": {},
+      "offered_tools": [
+        "exec_command",
+        "write_stdin",
+        "update_plan",
+        "request_user_input",
+        "view_image",
+        "multi_agent_v1",
+        "get_goal",
+        "create_goal",
+        "update_goal",
+        "web_search"
+      ],
+      "requests_after": 1,
+      "requests_before": 0,
+      "thread_id": "01a1dcab-06f2-7461-ae33-c8a7554d4db6",
+      "thread_read_item_types": [
+        "userMessage",
+        "agentMessage"
+      ],
+      "turn_id": "01a1dcab-0710-7b91-91e7-d91bb28a0b6b",
+      "wire_request_bytes": 51286,
+      "wire_request_sha256": "e26cf1bdf5274261aba6d18e71fe986264d56e104008005bd9269e7dc338e8df"
+    },
+    "host": "codex-cli 0.144.6",
+    "mode": "pre_dispatch_recheck",
+    "observer": "local Responses endpoint",
+    "requests": 7
+  },
+  "material_versions": {
+    "build-orders": {
+      "body_bytes": 116,
+      "claims": [
+        [
+          "payment-column",
+          "include"
+        ]
+      ],
+      "kind": "skill",
+      "publication_sha256": "373a321e80b5b3c6e91e4fd6b6722944d7725cc6bbf24a2c5aa731cf0811e5ff",
+      "sha256": "f4a1d516c926d4cd8ea5e5ecd1040fc26924e8399ef4ff0813bc968213e42465",
+      "source": "orders/build-workbook@2"
+    },
+    "build-playbook": {
+      "body_bytes": 103,
+      "claims": [],
+      "kind": "playbook",
+      "publication_sha256": "aef735283fe1d78839207e50198b36b4346b6988aa57ba39b6367a24adca7210",
+      "sha256": "f73fce9cb9c49516cd4e9caca34f53855cbea370e4c3cd814aba971d7558b9c0",
+      "source": "team/export-method@1"
+    },
+    "business-section": {
+      "body_bytes": 102,
+      "claims": [],
+      "kind": "knowledge",
+      "publication_sha256": "9033be5c746fb4d6f25457855ce93aa7b89e3afe39008ee92de6fa2bd12156b5",
+      "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+      "source": "order-prd@2#required"
+    },
+    "check-playbook": {
+      "body_bytes": 112,
+      "claims": [],
+      "kind": "playbook",
+      "publication_sha256": "15a062ea23aafaeef12d002467a5d35601e7f13a0352ac107d008f7ef3eaff90",
+      "sha256": "ec7ffdbad9064fca7e1543be2ce2de7b919970d52bf2d90b6805dd09686fe1f2",
+      "source": "team/check-method@1"
+    },
+    "d2-rule": {
+      "body_bytes": 199,
+      "claims": [
+        [
+          "payment-column",
+          "include"
+        ]
+      ],
+      "kind": "rule",
+      "publication_sha256": "7780286f9b62bb7da612d8fb9912769ac63141b50611b278c2ce379cc6badddf",
+      "sha256": "c94cddce3aaec4ed31287ca54f32e1d285dd8047b3db29be0a00b2ffe6bb6644",
+      "source": "orders/order-export@2"
+    },
+    "developer-role": {
+      "body_bytes": 98,
+      "claims": [],
+      "kind": "role",
+      "publication_sha256": "c862208f76e8879b92f1a0f79d3bd4fe1b4321d217cae52d0395760ecfc8c341",
+      "sha256": "74ae616c3b010bf371212d006caecdcd120f73407a087df29fce1894e8787551",
+      "source": "orders/developer@1"
+    },
+    "developer-section": {
+      "body_bytes": 89,
+      "claims": [],
+      "kind": "knowledge",
+      "publication_sha256": "39494ceab9c198d73a2b45271aeaed0c4cb5b94cff9f0109e809ec99805a5bd4",
+      "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+      "source": "order-prd@2#implementation"
+    },
+    "fast-export-v1": {
+      "body_bytes": 79,
+      "claims": [
+        [
+          "payment-column",
+          "omit"
+        ]
+      ],
+      "kind": "skill",
+      "publication_sha256": "b3966c6ba823b0a1a242d42b6174c1e2700085960e3f3a284e3d1c105551dff4",
+      "sha256": "76866cc81c211d0b584dab38dff799ba2f1418aad8f757b3cf3ddc7a2b809f08",
+      "source": "orders/fast-export@1"
+    },
+    "fast-export-v2": {
+      "body_bytes": 91,
+      "claims": [
+        [
+          "payment-column",
+          "include"
+        ]
+      ],
+      "kind": "skill",
+      "publication_sha256": "054d1fc08658f2e9c721446742fef3a1d77050a4ccb385925acfd8dfa51b96c9",
+      "sha256": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded",
+      "source": "orders/fast-export@2"
+    },
+    "inspect-orders": {
+      "body_bytes": 114,
+      "claims": [
+        [
+          "payment-column",
+          "include"
+        ]
+      ],
+      "kind": "skill",
+      "publication_sha256": "61a408a7b8797df6178f0d9c4233135468016d502a666a202981ed92bfc48877",
+      "sha256": "4fa77e2f388cb423544f92c76e79edb91a45c266619d713046fe5a0b893307c2",
+      "source": "orders/inspect-workbook@2"
+    },
+    "verifier-role": {
+      "body_bytes": 110,
+      "claims": [],
+      "kind": "role",
+      "publication_sha256": "4e9490741feca7059d0392712078e1b3324f8562fb64bd061bf9f96d2e16cd89",
+      "sha256": "0c95b5bfeb2f9b58c48e8f0abb8cdcf33d109f3b1b86b835546fc27def07aa57",
+      "source": "orders/verifier@1"
+    },
+    "verifier-section": {
+      "body_bytes": 94,
+      "claims": [],
+      "kind": "knowledge",
+      "publication_sha256": "5f603b9fa93e1786d7393726bc0bca7c765c6fb3d51c65145fd24bcee07b0f56",
+      "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+      "source": "validation-notes@1#acceptance"
+    }
+  },
+  "project_repairs": [
+    {
+      "by": "orders-maintainer",
+      "decision": "D2",
+      "disposition": "replace incompatible project Skill",
+      "new_sha256": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded",
+      "old_sha256": "76866cc81c211d0b584dab38dff799ba2f1418aad8f757b3cf3ddc7a2b809f08",
+      "prior": "orders/fast-export@1",
+      "replacement": "orders/fast-export@2",
+      "role": "developer"
+    },
+    {
+      "by": "orders-maintainer",
+      "decision": "D2",
+      "disposition": "replace incompatible project Skill",
+      "new_sha256": "ddbab4eebeb8e70d766554c558c7ec81a64c254d18fd3dbc338503f7a336aded",
+      "old_sha256": "76866cc81c211d0b584dab38dff799ba2f1418aad8f757b3cf3ddc7a2b809f08",
+      "prior": "orders/fast-export@1",
+      "replacement": "orders/fast-export@2",
+      "role": "verifier"
+    }
+  ],
+  "selection_controls": [
+    {
+      "case": "unknown-run",
+      "reason": "dispatch access unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "case": "changed-dispatch",
+      "reason": "dispatch access unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "conflict-manifest-altered",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "operation-manifest-altered",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "case": "wrong-principal",
+      "reason": "dispatch access unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "no-execution-grant",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-source-lost",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-pin-mismatch",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "role-does-not-grant-other-operation",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 604,
+      "role": "developer",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "build-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 707
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "optional-no-read",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 604,
+      "role": "developer",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 604
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "duplicate-source-reference",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 604,
+      "role": "developer",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "build-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 707
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "optional-conflicts-with-D2",
+      "omitted": {
+        "fast-export-v1": "conflicts with selected instruction"
+      },
+      "reason": "ready",
+      "required_bytes": 604,
+      "role": "developer",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "developer-section",
+        "developer-role",
+        "build-orders",
+        "build-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 707
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-conflict-reversed",
+      "conflict": {
+        "refs": [
+          "fast-export-v1",
+          "build-orders"
+        ],
+        "subject": "payment-column"
+      },
+      "omitted": {},
+      "reason": "incompatible required instructions",
+      "role": "developer",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "case": "worker-cannot-change-pin",
+      "role": "developer",
+      "status": "denied"
+    },
+    {
+      "case": "unknown-run",
+      "reason": "dispatch access unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "case": "changed-dispatch",
+      "reason": "dispatch access unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "conflict-manifest-altered",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "operation-manifest-altered",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "case": "wrong-principal",
+      "reason": "dispatch access unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked"
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "no-execution-grant",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-source-lost",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-pin-mismatch",
+      "omitted": {},
+      "reason": "required capability or material unavailable",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "role-does-not-grant-other-operation",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 619,
+      "role": "verifier",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "check-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 731
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "optional-no-read",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 619,
+      "role": "verifier",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 619
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "duplicate-source-reference",
+      "omitted": {},
+      "reason": "ready",
+      "required_bytes": 619,
+      "role": "verifier",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "check-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 731
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "optional-conflicts-with-D2",
+      "omitted": {
+        "fast-export-v1": "conflicts with selected instruction"
+      },
+      "reason": "ready",
+      "required_bytes": 619,
+      "role": "verifier",
+      "selected": [
+        "d2-rule",
+        "business-section",
+        "verifier-section",
+        "verifier-role",
+        "inspect-orders",
+        "check-playbook"
+      ],
+      "status": "ready",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 731
+    },
+    {
+      "budget_bytes": 4096,
+      "case": "required-conflict-reversed",
+      "conflict": {
+        "refs": [
+          "fast-export-v1",
+          "inspect-orders"
+        ],
+        "subject": "payment-column"
+      },
+      "omitted": {},
+      "reason": "incompatible required instructions",
+      "role": "verifier",
+      "selected": [],
+      "status": "blocked",
+      "unit": "UTF-8 material body bytes",
+      "used_bytes": 0
+    },
+    {
+      "case": "worker-cannot-change-pin",
+      "role": "verifier",
+      "status": "denied"
+    },
+    {
+      "case": "internally-inconsistent-release",
+      "status": "denied"
+    }
+  ],
+  "source_sections": {
+    "developer": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "implementation-p"
+        ],
+        "heading": "implementation",
+        "revision": 2,
+        "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+        "source": "order-prd"
+      }
+    ],
+    "verifier": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "acceptance-p"
+        ],
+        "heading": "acceptance",
+        "revision": 1,
+        "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+        "source": "validation-notes"
+      }
+    ]
+  },
+  "verified_candidates": {
+    "corrected": {
+      "A2": true,
+      "A3": true,
+      "artifacts": [
+        {
+          "bytes": 5494,
+          "name": "east.xlsx",
+          "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+        },
+        {
+          "bytes": 5444,
+          "name": "west.xlsx",
+          "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+        },
+        {
+          "bytes": 5534,
+          "name": "cross.xlsx",
+          "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+        }
+      ],
+      "candidate_commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+      "developer_dispatch": "study-developer-corrected",
+      "developer_turn": "01a1dcab-0970-72f3-a755-2dba6c236918",
+      "execution_source": "research harness, separate Python processes",
+      "exits": {
+        "cross": 0,
+        "east": 0,
+        "viewer": 3,
+        "west": 0
+      },
+      "producer_run": "script-export-corrected",
+      "producer_sha256": "b8276285975bff371b819434581d903a94904bec79d12e889692ead488bc646f",
+      "report_sha256": "ecad4e2312900b924ba3f83336eb09c95d6aafc1b03709231c8d9eae6bff6b6a",
+      "verdict": "pass",
+      "verification_run": "script-verify-corrected",
+      "verifier_dispatch": "study-verifier-corrected",
+      "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c",
+      "verifier_turn": "01a1dcab-0c0a-7780-8927-e1b6230632c9"
+    },
+    "full": {
+      "A2": true,
+      "A3": true,
+      "artifacts": [
+        {
+          "bytes": 5494,
+          "name": "east.xlsx",
+          "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+        },
+        {
+          "bytes": 5444,
+          "name": "west.xlsx",
+          "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+        },
+        {
+          "bytes": 5534,
+          "name": "cross.xlsx",
+          "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+        }
+      ],
+      "candidate_commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+      "developer_dispatch": "study-developer-full",
+      "developer_turn": "01a1dcab-07d6-7a80-9a4f-1c6dcce37283",
+      "execution_source": "research harness, separate Python processes",
+      "exits": {
+        "cross": 0,
+        "east": 0,
+        "viewer": 3,
+        "west": 0
+      },
+      "producer_run": "script-export-full",
+      "producer_sha256": "b8276285975bff371b819434581d903a94904bec79d12e889692ead488bc646f",
+      "report_sha256": "ac330498d3db87a7489d1b6c7693eeab44537a18bd4577edce31a495870172fc",
+      "verdict": "pass",
+      "verification_run": "script-verify-full",
+      "verifier_dispatch": "study-verifier-full",
+      "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c",
+      "verifier_turn": "01a1dcab-0a3b-7780-b5d0-6518bd540f75"
+    },
+    "minimum": {
+      "A2": true,
+      "A3": true,
+      "artifacts": [
+        {
+          "bytes": 5494,
+          "name": "east.xlsx",
+          "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+        },
+        {
+          "bytes": 5444,
+          "name": "west.xlsx",
+          "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+        },
+        {
+          "bytes": 5534,
+          "name": "cross.xlsx",
+          "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+        }
+      ],
+      "candidate_commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+      "developer_dispatch": "study-developer-minimum",
+      "developer_turn": "01a1dcab-089c-7c42-9e98-d5e98f052cc8",
+      "execution_source": "research harness, separate Python processes",
+      "exits": {
+        "cross": 0,
+        "east": 0,
+        "viewer": 3,
+        "west": 0
+      },
+      "producer_run": "script-export-minimum",
+      "producer_sha256": "b8276285975bff371b819434581d903a94904bec79d12e889692ead488bc646f",
+      "report_sha256": "d3e89025b3e310e8b66f1005ed0449270a4f3048a8496b1f10c996eadf6b3a86",
+      "verdict": "pass",
+      "verification_run": "script-verify-minimum",
+      "verifier_dispatch": "study-verifier-minimum",
+      "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c",
+      "verifier_turn": "01a1dcab-0b20-7131-9184-679dc83c5996"
+    }
+  }
+}
