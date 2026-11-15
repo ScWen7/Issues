@@ -137,7 +137,7 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 | CodeBuddy CLI 2.181.0 | `system/usage_update` 的 stage 带 `stage.id`、`stage.credits`；snapshot 与 Result 内 `turnUsage` 相同；`total` 是当前 Turn 快照。 | 一条真实 model stage = 0.69 Credits；Turn snapshot = 0.69；Result snapshot = 0.69。 | 该 Turn 的真实 Stage 消耗为 0.69；两份 snapshot 是同一事实的重复呈现，不相加。 |
 | GitHub Copilot CLI 1.0.107 | 官方 SDK 的 `assistant.usage` 提供单次调用 Token 与 premium multiplier；`session.usage_checkpoint.totalNanoAiu` / `session.usage.getMetrics` 提供 Session 累计 AI credit。 | 两次 invocation 共用一个 Session。累计 nano-AIU 为 7,324,050,000 → 7,637,870,000；premium request cost 为 1 → 2。 | 差值 313,820,000 nano-AIU 仅是连续 Session snapshot 的派生差；没有直接的逐请求 nano-AIU 事件，逐请求 Credits = unknown。 |
 
-Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent SDK 包为 1.0.59，SDK 默认声明管理的 CLI 版本为 1.1.83，但测试通过 `QODERCLI_PATH` 显式指定本机 1.1.88，因此不是 SDK 自动下载版本的验证。Qoder 官方文档说明顶层 `request_id` 默认不提供，需通过 `QODER_EXPOSE_REQUEST_ID=true` 启用。现有 Qoder 回执探针把 `message.uuid` 投影到 `request_id`，字段命名不准确：该值应解释为 SDK 消息事件 UUID；本次真实 request_id 未取得。不得将该投影误用为请求去重键。
+Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent SDK 包为 1.0.59，SDK 默认声明管理的 CLI 版本为 1.1.83，但测试通过 `QODERCLI_PATH` 显式指定本机 1.1.88，因此不是 SDK 自动下载版本的验证。Qoder 官方文档说明顶层 `request_id` 默认不提供，需通过 `QODER_EXPOSE_REQUEST_ID=true` 启用。现有 Qoder 回执探针曾把 `message.uuid` 投影到 `request_id`，字段命名不准确：该值应解释为 SDK 消息事件 UUID；本次真实 request_id 未取得。已在提交 `6c5b34a` 修正探针：显式启用 `QODER_EXPOSE_REQUEST_ID=true`，分别输出 `request_id` 与 `event_id`。该代码修复尚未经过目标 Mac 上的真实重跑，不能回填为已验证事实。不得将旧回执中的 event UUID 误用为请求去重键。
 
 ### 10.2 事件身份、重复上报与修订
 
