@@ -266,6 +266,7 @@ rm -f qoder-stderr.tmp
 printf 'run_id=%s\nexit_code=%s\nstderr_seen=%s\n' "$TEAMAI_RUN_ID" "$exit_code" "$stderr_seen" > qoder-process-summary.txt
 cat qoder-receipt.jsonl
 cat qoder-process-summary.txt
+shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 ```
 
 将 `qoder-receipt.jsonl`、`qoder-process-summary.txt`、环境版本和两份文件的 SHA-256 回传；不要回传原始 stderr、账号信息、Prompt 或回复正文。预期首先确认 Result 后进程能否快速正常退出；只有出现 Assistant 行时才继续核验 request_id / event_id / credits。
