@@ -108,7 +108,7 @@ node "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" > qoder-receip
 ```bash
 mkdir -p /tmp/teamai-topic04-codebuddy
 cd /tmp/teamai-topic04-codebuddy
-REPO_ROOT="/path/to/Issues" node "$REPO_ROOT/prototypes/topic-04/codebuddy-stream-runtime-probe.mjs"
+node "$REPO_ROOT/prototypes/topic-04/codebuddy-stream-runtime-probe.mjs"
 ```
 
 探针执行：
