@@ -52,6 +52,8 @@ GitHub Actions 的 `codex-sender` 与 `claude-receiver` 两个作业顺序运行
 2. 发送方交付三份 C2 工作簿和一个检查点。检查点含本次导出的退出码、已撤销的派发、核验所需的账本行、原生调用和工具返回。交接包排除了成员配置和可用凭证。工作流单独传递检查点摘要与制品 ID。
 3. 接收方核对工作流轮次、检查点摘要、原节点归属和工作簿字节，在本机恢复该实验账本。控制者对同一节点尝试签发新 Run 和成员凭证。Claude Code 重新调用项目工具。接收器核对旧报告的迟到投递、新报告的首次接收及重投，并读回三份已关联制品。
 
+远端作业 43663665353 的发送和接收使用了两个不同的内核启动标识。发送端的第一次调用有有效报告，撤权后的第二次调用返回拒绝。接收端 Claude Code 的原生调用 `toolu_476845bd255341bb9433e6cc5facb97b`、项目工具回执 `2e837130581445629935d8f2ffd422f1` 和第二次模型请求中的工具返回一致。两台机器记录的契约摘要相同。最终消费记录指向 `verify-order-export` 的尝试 2 和接替 Run，三份制品各有名称、字节数与 SHA-256。[留存的远端回执](fixtures/cross-runner-handoff.json) · [发送作业](https://github.com/ScWen7/Issues/actions/runs/43663665353/job/132658238480) · [接收作业](https://github.com/ScWen7/Issues/actions/runs/43663665353/job/132658310864)
+
 本项覆盖停机后的顺序交接。实验把节点账本通过检查点迁移，现场共用的在线控制服务、两名真人的组织登录和日常已打开的 IDE 会话仍需单独验证。[跨机复验入口](../../../prototypes/topic-03b/cross-host/runner_handoff.py) · [工作流](../../../.github/workflows/asset-release-research.yml)
 
 ## 复跑与证据范围
