@@ -10,6 +10,7 @@ test("deduplicates multiple observers of one native request but retains evidence
   assert.equal(result.entries.length, 1);
   assert.equal(result.entries[0].value, 120);
   assert.equal(result.entries[0].evidence.length, 2);
+  assert.equal(result.entries[0].selectedSource, "daemon");
 });
 
 test("same native ID in different namespaces is not merged", () => {
@@ -20,13 +21,32 @@ test("same native ID in different namespaces is not merged", () => {
   assert.equal(result.entries.length, 2);
 });
 
-test("conflicting observations remain unresolved rather than selecting arrival winner", () => {
+test("equal-rank conflicting observations remain unresolved", () => {
   const result = reconcileObservations([
-    { source: "daemon", sourceNamespace: "codex:A", nativeRequestId: "req-2", metric: "output_tokens", unit: "token", value: 30, trustRank: 2 },
-    { source: "otel", sourceNamespace: "codex:A", nativeRequestId: "req-2", metric: "output_tokens", unit: "token", value: 31, trustRank: 2 }
+    { source: "daemon", sourceNamespace: "codex:A", nativeRequestId: "req-2", metric: "output_tokens", unit: "token", value: 30, runId: "run-1", trustRank: 2 },
+    { source: "otel", sourceNamespace: "codex:A", nativeRequestId: "req-2", metric: "output_tokens", unit: "token", value: 31, runId: "run-1", trustRank: 2 }
   ]);
   assert.equal(result.entries[0].status, "needs_review");
   assert.equal(result.entries[0].value, null);
+});
+
+test("highest-ranked evidence supersedes lower-ranked disagreement but preserves it", () => {
+  const result = reconcileObservations([
+    { source: "transcript", sourceNamespace: "claude:A", nativeRequestId: "msg-1", metric: "input_tokens", unit: "token", value: 10, runId: "run-1", trustRank: 1 },
+    { source: "provider", sourceNamespace: "claude:A", nativeRequestId: "msg-1", metric: "input_tokens", unit: "token", value: 12, runId: "run-1", trustRank: 3 }
+  ]);
+  assert.equal(result.entries[0].status, "reconciled");
+  assert.equal(result.entries[0].value, 12);
+  assert.equal(result.entries[0].evidence.length, 2);
+});
+
+test("equal-rank disagreement about Run ownership is not attributed", () => {
+  const result = reconcileObservations([
+    { source: "a", sourceNamespace: "codex:A", nativeRequestId: "req-3", metric: "cost", unit: "usd", value: 0.1, runId: "run-a", trustRank: 2 },
+    { source: "b", sourceNamespace: "codex:A", nativeRequestId: "req-3", metric: "cost", unit: "usd", value: 0.1, runId: "run-b", trustRank: 2 }
+  ]);
+  assert.equal(result.entries[0].status, "needs_review");
+  assert.equal(result.entries[0].runId, null);
 });
 
 test("missing native identity is left unlinked", () => {
@@ -52,20 +72,22 @@ test("missing baseline, model change, reset and out-of-order snapshots remain un
   assert.equal(deltaFromCumulative({ model: "m1", metric: "input", unit: "token", value: 3, sequence: 2 }, { model: "m1", metric: "input", unit: "token", value: 5, sequence: 1 }).reason, "out_of_order");
 });
 
-test("Run aggregation deduplicates reused entries across parent and child references", () => {
+test("Run aggregation deduplicates identical references", () => {
   const entries = [
-    { key: "request-1", runId: "run-a", status: "reconciled", amount: 0.04 },
-    { key: "request-2", runId: "run-b", status: "reconciled", amount: 0.02 },
-    { key: "request-1", runId: "run-a", status: "reconciled", amount: 0.04 }
+    { key: "request-1", runId: "run-a", status: "reconciled", amount: 0.04, currency: "USD" },
+    { key: "request-2", runId: "run-b", status: "reconciled", amount: 0.02, currency: "USD" },
+    { key: "request-1", runId: "run-a", status: "reconciled", amount: 0.04, currency: "USD" }
   ];
   assert.equal(aggregateRunCosts(entries, ["run-a", "run-b", "run-a"]), 0.06);
 });
 
-test("unknown and conflicting entries do not silently enter money totals", () => {
+test("unknown, conflicting and ownership-conflicted entries do not enter money totals", () => {
   const entries = [
-    { key: "ok", runId: "run-a", status: "reconciled", amount: 0.04 },
-    { key: "unknown", runId: "run-a", status: "unknown", amount: 99 },
-    { key: "review", runId: "run-a", status: "needs_review", amount: 88 }
+    { key: "ok", runId: "run-a", status: "reconciled", amount: 0.04, currency: "USD" },
+    { key: "unknown", runId: "run-a", status: "unknown", amount: 99, currency: "USD" },
+    { key: "review", runId: "run-a", status: "needs_review", amount: 88, currency: "USD" },
+    { key: "collision", runId: "run-a", status: "reconciled", amount: 0.1, currency: "USD" },
+    { key: "collision", runId: "run-b", status: "reconciled", amount: 0.1, currency: "USD" }
   ];
-  assert.equal(aggregateRunCosts(entries, ["run-a"]), 0.04);
+  assert.equal(aggregateRunCosts(entries, ["run-a", "run-b"]), 0.04);
 });
