@@ -28,6 +28,7 @@ cd Issues
 在 macOS / Linux 终端执行：
 
 ```bash
+REPO_ROOT="$PWD"
 mkdir -p /tmp/teamai-topic04-runtime
 cd /tmp/teamai-topic04-runtime
 
@@ -75,7 +76,7 @@ export QODERCLI_PATH="$(command -v qodercli)"
 运行：
 
 ```bash
-node prototypes/topic-04/qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
+node "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" > qoder-receipt.jsonl
 ```
 
 探针使用现有 Qoder CLI 登录态，通过 `qodercliAuth()` 认证；不读取账号配额。提示内容为只需返回 OK 的无工具任务。探针将请求级 Assistant usage 与 Result session snapshot 分开输出，并记录 SDK 实际使用的 CLI 路径和版本。
@@ -107,7 +108,7 @@ node prototypes/topic-04/qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
 ```bash
 mkdir -p /tmp/teamai-topic04-codebuddy
 cd /tmp/teamai-topic04-codebuddy
-node prototypes/topic-04/codebuddy-stream-runtime-probe.mjs
+REPO_ROOT="/path/to/Issues" node "$REPO_ROOT/prototypes/topic-04/codebuddy-stream-runtime-probe.mjs"
 ```
 
 探针执行：
