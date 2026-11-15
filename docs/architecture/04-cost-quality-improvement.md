@@ -35,14 +35,12 @@ V0.1 · 探索基线 · 2026-11-15
 |---|---|---|---|
 | Codex | input / output / cached tokens | App Server 的 Thread / Turn / Usage 快照；部分 CLI 投影 | 累计快照必须先确定基线和独占区间 |
 | Claude Code | tokens、请求级 usage、SDK 估价 | Hooks、SDK 消息、OTel request_id / message UUID | 多轮累计与子代理覆盖要按请求 / 消息身份核对 |
-| Qoder | Qoder Credits | 企业 Usage API 的 eventId、成员、source、operation、modelTier、credits、billing-adjusted credits；额度包 API | eventId 是稳定的聚合用量事件身份；finishAt 可更新。成员事件不自动等于某个 Run，需显式关联 |
-| CodeBuddy | CodeBuddy Credits | 官方 Usage 页面可查看账户 / 团队额度与使用历史 | 当前已查公开文档未发现逐事件公开 API；先按成员 / 周期对账，不能虚构逐请求明细 |
+| Qoder | Qoder Credits | 仅接受成员本机 Runtime / Host Adapter 实际观察并上报的 Credits 计量事件 | Runtime 未提供用量时保持 unknown；不得调用企业 Usage API、账户页面或账单接口补数 |
+| CodeBuddy | CodeBuddy Credits | 仅接受成员本机 Runtime / Host Adapter 实际观察并上报的 Credits 计量事件 | Runtime 未提供用量时保持 unknown；不得从订阅档位、团队额度变化或周期余额反推 |
 
-Qoder 的企业 API 可查询成员和组织用量事件、7 天以内汇总、共享资源包和服务账号资源包。API 返回的 `credits` 与 `cost` 都是 Credits 口径，其中 `cost` 是 Billing Factor 调整后的 Credits，不是现金金额。资源包的额度、已用、剩余、来源和有效期属于 **Quota Snapshot**，不是 Run Usage，不能加进执行成本。API 还可能返回负 Credits 的退款 / 冲正事件，必须保留符号并按事件 ID 更新 / 对账。
+Qoder 与 CodeBuddy 的 Credits 都作为宿主原生计量单位保留。平台不通过企业 API、账户 Usage 页面、供应商账单或其他外部账户接口采集这些 Credits；也不以账号余额差、套餐额度、模型档位或任务时长估算执行消耗。Runtime 如果能从宿主公开事件、CLI 输出、Hook 或本机可观察协议中取得明确 Credits 值，就连同宿主事件身份、成员、Session / Turn、Run 绑定和观察时间上报；无法取得时记录 `unknown`，不得补猜。
 
-CodeBuddy 官方说明 Credits 会受模型档位、任务复杂度和上下文长度影响，Team 版使用共享团队池。已公开的 Usage 指引说明通过账户页面查看余额与使用历史；本轮没有找到等价的公开逐事件 Usage API。接入先保留成员、团队池、周期、Credits 和证据来源；如只有周期汇总，就只归集到成员 / 团队周期，不能用时间窗口猜分摊到具体 Run。
-
-不同厂商的 Credit 不是同一货币。Qoder Credit 与 CodeBuddy Credit 使用不同单位标识，禁止相加或直接比较。只有取得对应订阅 / 资源包 / 发票的有效换算依据，才可生成带币种、有效期、版本和来源的估算金额；否则只显示原生 Credits。
+Qoder Credit 与 CodeBuddy Credit 是不同单位，禁止相加或直接比较。当前专题只比较各自原生 Credits；除非未来明确批准并提供可信换算规则，否则不换算现金金额。
 
 ### 3.3 成本类别与可信度
 
@@ -60,13 +58,13 @@ CodeBuddy 官方说明 Credits 会受模型档位、任务复杂度和上下文�
 
 优先使用宿主原生请求 / 响应 / 消息 / Tool Call ID，并结合来源命名空间、事件种类、阶段及分块位置建立计量身份。跨采集器重叠时保留所有来源，选取覆盖完整且可信的计量口径。缺少稳定身份时只做候选关联，不以时间相近、文本相似或相同金额自动合并。
 
-请求级增量按唯一请求结算。Credits 宿主事件按供应商稳定事件 ID upsert，重复拉取和 finishAt 更新不新增消费；退款 / 冲正保留负数及原事件关系。订阅额度、共享池、购买包和赠送额度作为独立的额度快照与来源记录。会话累计快照只作为检查点；只有同一模型、指标、单位、计量周期且区间独占目标执行时才可求差。首个基线缺失、重置、乱序、切换模型、多 Issue 交错或仅有会话总额时，保留未分摊量和原因。已确认零与未知分开。
+请求级增量按唯一请求结算。Runtime 上报的 Credits 事件按宿主原生事件 ID upsert；若宿主未提供稳定 ID，则只保留观察记录，不假设可安全去重。不得采集供应商订阅额度、共享池、购买包或账户余额快照作为执行用量。会话累计快照只作为检查点；只有同一模型、指标、单位、计量周期且区间独占目标执行时才可求差。首个基线缺失、重置、乱序、切换模型、多 Issue 交错或仅有会话总额时，保留未分摊量和原因。已确认零与未知分开。
 
 更高可信度的后到证据可以更正当前计量，但必须保留旧值、证据、理由和修订次序。两个同等可信来源冲突时进入待核对，不按到达先后决定。
 
 ### 3.5 归属与汇总
 
-- 一次真实模型请求只归一个生产 Run；同一 Run 的多个宿主回合、工具调用和重连观察不重复计费。宿主 Credits 事件只有在存在明确原生关联或成员确认的证据绑定时才归入 Run；仅有成员 / 周期汇总时停留在未分摊层，不按时间相近自动分配。
+- 一次真实模型请求只归一个生产 Run；同一 Run 的多个宿主回合、工具调用和重连观察不重复计费。宿主 Credits 事件只有在 Runtime 明确提供 Run / Session / Turn 关联时才归入 Run；若 Runtime 只上报成员级用量，保留成员级观察且不分配到 Issue；若 Runtime 没有上报，保持 unknown。
 - 一次节点尝试可以包含多个 Run（实施、自测、修正、独立核验）；分别记录实际消耗。
 - SOP、父 Issue、Squad、项目的汇总均从底层 Run / Usage Entry 计算，不重复累加子级已经包含的金额。
 - 子 Issue 引用父级或其他 Run 的历史制品时，只显示来源成本，不把历史费用算作本次新增。
@@ -103,7 +101,7 @@ LoopForge 的 Run 评测与建议应用、TeamAI 的独立评分 Run / Benchmark
 
 ## 6. 第一轮验证顺序
 
-1. **成本归属与去重：** 用专题 3A 已有 Codex / Claude 观察数据，并接入 Qoder Credits 事件与 CodeBuddy 成员 / 周期对账，覆盖重复回放、跨采集器重叠、累计快照、退款 / 冲正、额度包快照、未分摊用量和父子汇总。
+1. **成本归属与去重：** 用专题 3A 已有 Codex / Claude 观察数据，并验证 Qoder / CodeBuddy Runtime Credits 上报路径，覆盖重复回放、宿主事件更新、无事件 ID、无 Run 关联、并行 Issue、Runtime 未上报时保持 unknown 和父子汇总。
 2. **评价隔离：** 同一业务 Run 产生独立评分 Run，验证原执行终态、业务验收和门禁不被事后评分改写。
 3. **Benchmark 可比性：** 固定 C1 / C2 工作簿样本与 D2 核验标准，验证 rubric、工具、模型或样本变化时的比较资格。
 4. **改进闭环：** 从失败样本形成提案，新增回归题，产出候选资产，跑基线 / 候选对比，经审核发布新版本，再用新实例验证效果。
