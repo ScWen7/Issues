@@ -1,0 +1,19 @@
+{
+  "after_result": {
+    "observed_at": "2026-11-15T04:49:02.168912+00:00",
+    "scope": "probe root identified by its exact working directory, plus descendants",
+    "root_process_count": 1,
+    "total_process_count": 5,
+    "descendant_process_count": 4,
+    "process_kinds": {
+      "node": 4,
+      "npm": 1
+    }
+  },
+  "after_timeout": {
+    "observed_at": "2026-11-15T04:51:19.147305+00:00",
+    "remaining_owned_processes": 0,
+    "additional_terminations": 0,
+    "remaining_after_cleanup": 0
+  }
+}

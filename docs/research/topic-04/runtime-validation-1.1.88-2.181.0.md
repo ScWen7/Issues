@@ -235,9 +235,9 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 ### 8.3 Qoder Query 生命周期修正与下一轮验证
 
-官方 SDK 的 Cost and usage 示例在读取完用量后显式调用 `q.close()`；TypeScript References 说明 `query()` 返回可控制的 Query，且 `options.abortController` 可主动结束 Session。8.2 回执在 Result 已到达后仍运行至外部 180 秒超时，当前探针没有关闭 Query，因此进程超时不能作为 Qoder CLI 任务执行失败的证据。官方文档：[Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
+官方 SDK 的 Cost and usage 示例在读取完用量后显式调用 `q.close()`；TypeScript References 说明 `query()` 返回可控制的 Query，且 `options.abortController` 可主动结束 Session。8.2 回执在 Result 已到达后仍运行至外部 180 秒超时，该轮探针没有关闭 Query，因此进程超时不能作为 Qoder CLI 任务执行失败的证据。官方文档：[Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
 
-已在提交 `d338cf57cac36f60b9985965f38f36a5c598d3ec` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中调用 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正尚未在 Mac 真实执行，因此 8.2 的 PARTIAL 结论仍有效，但超时原因暂定为 `probe_lifecycle_unverified`，不得宣称为 CLI / SDK Runtime 故障。
+已在提交 `d338cf57cac36f60b9985965f38f36a5c598d3ec` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中等待 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正已完成第 8.4 节的 Mac 真实复测：关闭调用返回后进程仍驻留，请求身份与请求 Credits 仍未取得。8.2 的原始记录保持原样。
 
 下一次真实复验只需运行该修正版，不更改 CLI / SDK 版本，不扩大任务权限。判定分支：
 - Result 后正常退出，且出现 Assistant message：核对请求级 `usage.credits`、顶层 `request_id`、`event_id`，再做请求回执三次离线重放。
@@ -270,3 +270,22 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 ```
 
 将 `qoder-receipt.jsonl`、`qoder-process-summary.txt`、环境版本和两份文件的 SHA-256 回传；不要回传原始 stderr、账号信息、Prompt 或回复正文。预期首先确认 Result 后进程能否快速正常退出；只有出现 Assistant 行时才继续核验 request_id / event_id / credits。
+
+### 8.4 等待 Query 关闭后的 Mac 真实复测（2026-11-15）
+
+使用提交 `03c8cab045884abd0733241b0bf82058a1950713` 的探针副本，通过语法检查并与源文件逐字节核对。CLI 保持 1.1.88，SDK 保持 1.0.59；采用独立目录、Run 与 Session，只执行一次原有无工具提示。副本与既有锁定 SDK 在同一依赖解析路径下运行，保留显式 CLI 路径、request_id 曝光设置和 `await q.close()`。
+
+| 观察点 | 相对进程启动的时间与结果 |
+|---|---|
+| Result 到达 | 15.736 秒，Session 累计快照为 0；event_id 有值，request_id 为 null |
+| 关闭调用完成证据 | 15.743 秒，出现位于 `await q.close()` 之后的 incomplete 诊断，assistantCount=0、resultCount=1 |
+| Result 后进程采样 | 探针根进程与四个派生进程仍存活；按本轮精确工作目录及其父子关系限定采样对象 |
+| 进程结束 | 180.042 秒到达外部时限，采集器终止探针，退出码 -15；终止后本轮已观察进程均已退出 |
+| 用量与身份 | 请求级 Credits 和原生 request_id 保持 unknown；Session 快照单独保存，总判定 PARTIAL |
+
+本次将“关闭调用已返回”与“进程自然退出”分别取证，进程驻留的根因仍为 unresolved。归档只保留进程种类与数量、时间和白名单诊断，不包含命令参数或原始 stderr。新快照按 event_id 离线重放三次后保留一个事件；请求级用量重放仍为未观察。前两次回执已与原归档逐字节核对，未改写原文件。
+
+- 新回执 SHA-256：`39edbde4104799b98fba6f6b43aa267020b0e74e72ced8e7ef717f6d3e469892`
+- 进程摘要 SHA-256：`656974c6037bd3160d7433c134c0b4705cd0f886bae9abfe506363c5cb915da5`
+
+[完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-close-20261115-0446.zip) · [回执](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-process-summary.txt) · [生命周期观测](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/SHA256SUMS.txt)

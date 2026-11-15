@@ -165,6 +165,8 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 
 ### 10.5 Qoder SDK Query 生命周期复核
 
-8.2 的 Qoder 修正版探针收到 Result 后仍等待异步流自然结束，180 秒后被采集器终止；该探针没有显式调用 Query 的 `q.close()`。Qoder 官方 Cost and usage 示例在完成用量读取后调用 `q.close()`，TypeScript SDK Reference 也提供 Query Session 的主动结束能力。因此，先前的超时不能直接归因为 CLI / SDK 执行失败。已在 `d338cf5` 修正探针：Result 到达后结束迭代，并在 `finally` 显式 `q.close()`。此修正等待 Mac 真实重跑，现阶段只将超时原因标为 `probe_lifecycle_unverified`；请求 Credits 仍为 unknown。
+8.2 的 Qoder 修正版探针收到 Result 后仍等待异步流自然结束，180 秒后被采集器终止；该轮探针没有显式调用 Query 的 `q.close()`。Qoder 官方 Cost and usage 示例在完成用量读取后调用 `q.close()`，TypeScript SDK Reference 也提供 Query Session 的主动结束能力。因此，先前的超时不能直接归因为 CLI / SDK 执行失败。已在 `d338cf5` 修正探针：Result 到达后结束迭代，并在 `finally` 显式等待 `q.close()`。
+
+该修正已在 Mac 上使用提交 `03c8cab` 真实复测。Qoder CLI 1.1.88、SDK 1.0.59 保持原版本：15.736 秒收到 Result，15.743 秒出现位于 `await q.close()` 之后的 incomplete 诊断，确认关闭调用已返回；Node 进程仍运行至 180.042 秒，由采集器终止。Result 后采样时，本轮探针及四个派生进程仍存活，外部终止后已全部退出。当前确认的是“Query 关闭返回后进程仍驻留”，根因保持 unresolved。新回执的 event_id 有值、request_id 为 null，无 Assistant 用量事件，Session 累计快照为 0；请求 Credits 继续 unknown，总判定 PARTIAL。前两次回执与其 SHA-256 均保持原值。[生命周期真实复测](topic-04/runtime-validation-1.1.88-2.181.0.md#84-等待-query-关闭后的-mac-真实复测2026-11-15) · [本轮验证明细](../../artifacts/topic-04/mac-qoder-close-20261115-0446/validation.json)。
 
 官方依据：[Qoder Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
