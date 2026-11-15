@@ -1,3 +1,5 @@
+> **架构治理说明（2026-11-15）：** 本文记录 TeamAI、Multica 与 LoopForge 的源码和订单实验事实。当前专题三 B V1.0 已明确复用 Multica Agent / Skill / Plugin / Context / Run 基础设施，TeamAI 机制作为治理增量接入。文中出现的独立 Driver、资产存储或投递机制属于上游实现研究，不代表本项目需要复制其完整系统。以[专题三 B V1.0](../architecture/03b-capability-governance.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
+
 # 专题三 B · 发布、选用与执行实证
 
 第五阶段验证原会话与新受管会话的选择。Codex 真实终端由第二客户端接续，Claude Code 已开放的控制流在收到订单后可以接入新工具。双写入与 Hook 改写的实测给出了原线程和结果证据的适用边界。[原会话、Hook 与核验结果](topic-03b/existing-session.md) · [固定源码与收口评审](topic-03b/existing-session-sources.md)
