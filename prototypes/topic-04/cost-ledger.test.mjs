@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   reconcileObservations, deltaFromCumulative, aggregateRunCosts,
-  normalizeRuntimeCreditObservation, creditsUnavailable
+  normalizeRuntimeCreditObservation, creditsUnavailable,
+  normalizeQoderSdkMessage, normalizeCodeBuddyUsageUpdate, reconcileCodeBuddyTurn
 } from "./cost-ledger.mjs";
 
 test("deduplicates multiple observers of one native request but retains evidence", () => {
