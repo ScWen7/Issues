@@ -48,15 +48,15 @@ V0.1 · 探索基线 · 2026-11-15
 
 证据：[3B Hook 复验归属修订](topic-03b/existing-session.md#hook-复验的-run-归属修订) · [后继 Run 原始回执](topic-03b/fixtures/hook-reverification.json)。
 
-### 2.5 Qoder 与 CodeBuddy Credits 官方计量机制
+### 2.5 Qoder 与 CodeBuddy Credits 的 Runtime 上报边界
 
-**Qoder：** 官方企业 Usage API 提供成员级和组织级 Credits 事件。稳定 `eventId`、`beginAt`、可更新的 `finishAt`、成员、来源、操作、模型档位、`credits` 和 Billing Factor 调整后的 `cost` 均可读取；事件列表支持分页，查询时间范围最多 7 天。组织资源包 API 返回包 ID、来源（购买 / 赠送 / 试用等）、状态、额度、累计使用、剩余额度和到期时间。API 还允许负 Credits 退款 / 冲正。该接口要求组织 API Key，不能假设个人订阅账号也有同样 API 权限。
+本项目不通过 Qoder / CodeBuddy 企业 API、供应商账户 Usage 页面、账单接口或账号额度快照获取 Credits。该约束是产品接入边界，不因供应商提供企业 API 而改变。
 
-**CodeBuddy：** 官方文档确认 Credits 是 AI 操作统一计量单位，受模型档位、任务复杂度和上下文长度影响；Team 成员从共享池扣减，余额及使用历史通过 Profile → Usage 查看。本轮检索到的公开文档没有给出逐事件 Usage API 或稳定事件 ID，因此先设计为成员 / 团队 / 周期级账单对账导入，不假定可实时逐 Run 归因。
+Runtime / Host Adapter 只在本机宿主实际暴露 Credits 用量时采集：优先保留宿主原生事件 ID、成员、Session / Thread / Turn、模型档位、操作、Credits 数值与观察时间，并绑定当前 Run。若宿主只提供成员级而没有 Run 关联，则保留成员级观察，不分配到具体 Issue。若 Runtime 未提供 Credits 值，则记录 unknown 和原因，不根据余额差、套餐额度、运行时长、Token 数或模型档位推算。
 
-**本轮接入原则：** Qoder Credit 与 CodeBuddy Credit 使用独立 unit；Credits 数值不是美元。Qoder API 的 `cost` 仍是 Credits 调整值。只有有明确套餐 / 发票 / 购买包金额和有效期时才换算成估算货币金额；免费、赠送、团队共享额度和付费购买额度要保留不同来源，不能把用掉的 Credits 统一视作现金支出。
+Qoder Credit 与 CodeBuddy Credit 使用独立 unit，禁止混加。除非未来明确批准额外的可信货币换算规则，本项目不将 Credits 换算成现金成本。
 
-官方依据：[Qoder Enterprise Usage APIs](https://docs.qoder.cn/en/enterprise/usage-api) · [Qoder Credits](https://docs.qoder.com/Credits) · [CodeBuddy Credits](https://www.codebuddy.ai/docs/ide/Account/credits) · [CodeBuddy Usage](https://www.codebuddy.ai/docs/ide/Account/usage)。
+之前关于 Qoder 企业 Usage API、CodeBuddy Usage 页面和账单周期导入的研究只作为外部能力背景，不属于本平台采集方案，也不作为运行时缺失时的补数渠道。
 
 ## 3. 第一批关键验证假设
 
@@ -66,9 +66,9 @@ V0.1 · 探索基线 · 2026-11-15
 | C2 | Codex 累计快照与 Claude 按消息累计用量可以统一映射为带区间的 Usage Entry，同时保留宿主原口径 | 无法证明独占区间时，保留 Token-only / partial，不做差额猜测 |
 | C3 | 迟到的更可信证据能更正当前计量，同时完整保留旧值及更正链 | 使用 append-only 修订，不覆盖原始 Observation |
 | C4 | SOP 节点、父子 Issue、Squad、项目汇总可由 Run 去重得到，不需要各层独立记账 | 若 Run 归属不完整，先补归属回执，不在汇总层补猜 |
-| C5 | Qoder 同一 eventId 的重复拉取 / finishAt 更新执行 upsert；负 Credits 退款 / 冲正不丢失 | 若无法确认事件修订关系，保留原始快照并标记待核对 |
-| C6 | CodeBuddy 只有成员 / 周期 Credits 汇总时，不将其伪分配给具体 Run | 先显示未分摊团队 / 成员成本，等待更细粒度的官方记录 |
-| C7 | 不同宿主 Credits 只有在有来源、币种、有效期和版本的换算依据时才可换算金额 | 保留原生 Credits，不输出虚假的统一成本 |
+| C5 | Qoder / CodeBuddy Runtime 原生 Credits 事件可按宿主事件身份去重并关联 Run | 无稳定事件身份时保留原始观察，不推断幂等身份 |
+| C6 | Runtime 只上报成员级 Credits 时，不将其伪分配给具体 Run；Runtime 不上报时保持 unknown | 仅保留可证明的观察范围，禁止通过账户 API 或周期余额补数 |
+| C7 | 不同宿主 Credits 保持独立单位，不通过外部账户接口补数或换算现金 | 只展示原生 Credits 与 unknown，不输出推测金额 |
 | Q1 | 事后评分使用独立评价执行记录，不能改写原 Run 的状态和业务验收 | 评分只能作为独立反馈，不接入门禁 |
 | Q2 | Benchmark 只有在样本、标准、模型 / 工具和评分配置可比时才给出胜负结论 | 显示不可比及原因，不产出误导性排名 |
 | I1 | 改进提案可以从失败事实追到候选资产修改、回归题和发布版本 | 无证据闭环的建议只保留为人工笔记 |
@@ -87,9 +87,9 @@ V0.1 · 探索基线 · 2026-11-15
 
 ## 5. 异构 Credits 适配与验证
 
-原型增加 Qoder Usage 事件归一化、CodeBuddy 成员 / 周期用量归一化、Qoder 额度包快照、显式 Run 关联和按版本换算货币金额。Qoder 的事件归一化保留 eventId、beginAt、finishAt、memberId、source、operation、modelTier、credits 与 billing-adjusted credits；没有显式 Run 绑定时状态保持 member_event_unallocated。CodeBuddy 在缺少事件 ID 时保持 member_period_statement，Run 为空。两者单位分别为 qoder_credit 与 codebuddy_credit，不可混加。
+原型只保留 Runtime 上报入口：Qoder 上报映射为 `qoder_credit`，CodeBuddy 上报映射为 `codebuddy_credit`。记录保留宿主事件 ID、成员、Session / Turn、Run、Credits 数值与观察时间。显式 Run 绑定才归入 Run；只有成员级证据时保留成员级观察；未取得 Credits 数值时生成 `unknown`，不读取企业 API、账户 Usage 页面或账单补数。
 
-测试覆盖事件更新身份、负 Credits、额度快照不作为执行用量、无显式绑定不归 Run、无换算依据不生成金额，以及不同厂商 Credits 隔离。Qoder 的 Usage API 事件是供应商聚合用量记录，不应擅自解释成一条模型请求；eventId 用于事件幂等更新，成员 / source / operation / modelTier 是可审计维度。该层仅是归一化与归属原型，不代表已连接成员真实账户；Qoder 企业 API 实际接入仍需组织 API Key，CodeBuddy 真实账单需取得成员提供的 Usage 明细。
+测试覆盖两类 Runtime Credits 的单位隔离、显式 Run 绑定、无用量上报时保持 unknown，以及不从订阅额度、账户余额或 Token 数推算 Credits。该原型不连接真实成员宿主，也不代表 Qoder / CodeBuddy 当前版本一定会向 Runtime 暴露 Credits；宿主不暴露就保持 unknown。
 
 ## 6. 成本账本原型首轮结果
 
