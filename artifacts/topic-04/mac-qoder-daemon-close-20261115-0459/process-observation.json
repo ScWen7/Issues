@@ -1,0 +1,59 @@
+{
+  "scope": "only the probe PID and descendants observed through parent PID traversal",
+  "samples": [
+    {
+      "label": "during_query",
+      "elapsed_seconds": 1.216,
+      "process_count": 2,
+      "root_alive": true,
+      "descendant_count": 1,
+      "process_kinds": {
+        "node": 2
+      }
+    },
+    {
+      "label": "during_query",
+      "elapsed_seconds": 5.604,
+      "process_count": 4,
+      "root_alive": true,
+      "descendant_count": 3,
+      "process_kinds": {
+        "node": 3,
+        "npm": 1
+      }
+    },
+    {
+      "label": "during_query",
+      "elapsed_seconds": 10.86,
+      "process_count": 16,
+      "root_alive": true,
+      "descendant_count": 15,
+      "process_kinds": {
+        "node": 3,
+        "npm": 1,
+        "zsh": 4,
+        "runtime-info-darwin-arm64-6153434d1073ca6f": 1,
+        "sh": 2,
+        "route": 2,
+        "grep": 2,
+        "tail": 1
+      }
+    },
+    {
+      "label": "after_result",
+      "elapsed_seconds": 16.768,
+      "process_count": 5,
+      "root_alive": true,
+      "descendant_count": 4,
+      "process_kinds": {
+        "node": 1,
+        "(node)": 4
+      }
+    }
+  ],
+  "remaining_after_probe_exit": 6,
+  "active_after_probe_exit": 6,
+  "additional_terminations": 6,
+  "remaining_after_cleanup": 0,
+  "active_after_cleanup": 0
+}

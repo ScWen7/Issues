@@ -294,7 +294,7 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 
 第三轮回执（8.4）证明 `await q.close()` 已返回，但宿主 Node 进程仍存活。进一步核对 `@qoder-ai/qoder-agent-sdk` 1.0.59 官方 npm 包说明发现：TypeScript `query()` 使用进程级共享 qodercli daemon；首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；`q.close()` 只关闭当前 Query / Session，宿主进程退出前还必须调用 `shutdownDaemon()` 停止共享 daemon。官方说明：[npm package Runtime Behavior](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk)；[SDK How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
 
-因此，8.4 的进程驻留与官方共享 Daemon 设计一致，不能据此判定资源泄漏。前一轮探针只调用 `q.close()`，未调用 `shutdownDaemon()`，生命周期收尾不完整。已在提交 `653e6b1` 修正探针：在 `finally` 中先 `await q.close()`，再 `await shutdownDaemon()`。该改动尚未经过 Mac 真实复测。
+因此，8.4 的进程驻留与官方共享 Daemon 设计一致，不能据此判定资源泄漏。前一轮探针只调用 `q.close()`，未调用 `shutdownDaemon()`，生命周期收尾不完整。已在提交 `653e6b1` 修正探针：在 `finally` 中先 `await q.close()`，再 `await shutdownDaemon()`。该改动已完成第 8.6 节的 Mac 真实复测：主进程自然退出，派生进程仍有额外清理需求。
 
 本轮仍未解决 Assistant 消息缺失、原生 request_id 为 null、请求级 Credits unknown；这些是独立于 Daemon 退出的问题，不能因为修复进程收尾而视为解决。
 
@@ -328,3 +328,23 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 ```
 
 回传环境版本、两份回执和 SHA-256；如需进程树诊断，只记录本次运行 PID 及其子进程的数量、进程类型和退出时间，不保留命令参数或环境变量。
+
+### 8.6 Qoder Daemon 关闭后的 Mac 复测（2026-11-15）
+
+使用提交 `85e9a49505e26072155ad6f29847abc9c7b6d543` 的探针副本，语法检查及源码逐字节核对通过。CLI 保持 1.1.88，SDK 保持 1.0.59；独立目录、新 Run 和新 Session 中仅执行一次原有无工具提示。采样只沿本轮已知探针 PID 的父子关系追踪，归档保留数量、进程种类与时间。
+
+| 观察点 | 结果 |
+|---|---|
+| Result 到达 | 16.458 秒；event_id 有值，request_id 为 null，Session 累计快照为 0 |
+| 两阶段关闭返回 | 16.794 秒出现 finally 之后的 incomplete 诊断，确认 `q.close()` 与 `shutdownDaemon()` 均已返回 |
+| 主进程退出 | 16.835 秒自然退出，Result 后 0.378 秒；退出码 2 对应 assistantCount=0、resultCount=1 的 incomplete 判定，未触发外部超时终止 |
+| 派生进程清理 | 主进程退出后仍观察到六个本轮派生进程；只向已记录且进程组匹配的本轮 PID 发送终止信号，复查剩余为零 |
+| 用量与身份 | 无 Assistant 请求用量；原生 request_id 与请求 Credits 仍为 unknown；Session 快照单独保存 |
+| 总判定 | PARTIAL：主进程自然退出已验证，派生进程清理与请求级用量仍分别保留缺项 |
+
+新快照按 event_id 离线重放三次后保留一个事件；请求级重放仍为未观察。前三次原始回执与 SHA-256 均已核对保持原值。本轮没有将自然退出、用量完整和派生进程清理合并为一个成功标志。
+
+- 新回执 SHA-256：`a04b1ed8c8ebfe931abb71a17a1afc798c33461fa1710bc9f8d79c24768228d1`
+- 进程摘要 SHA-256：`2840814df5f8903a90f3eb57388562df59f9a0e34472a313be9bf81e8a830e26`
+
+[完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459.zip) · [回执](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-process-summary.txt) · [进程观测](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/SHA256SUMS.txt)

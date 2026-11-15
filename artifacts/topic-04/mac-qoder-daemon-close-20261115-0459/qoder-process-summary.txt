@@ -1,0 +1,5 @@
+run_id=topic04-qoder-daemon-close-20261115-0459
+exit_code=2
+stderr_seen=true
+timed_out=false
+elapsed_seconds=16.835

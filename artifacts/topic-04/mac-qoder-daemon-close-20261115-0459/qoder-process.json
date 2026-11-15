@@ -1,0 +1,36 @@
+{
+  "provider": "qoder",
+  "sdk_version": "1.0.59",
+  "runtime_version": "1.1.88",
+  "run_id": "topic04-qoder-daemon-close-20261115-0459",
+  "source_commit": "85e9a49505e26072155ad6f29847abc9c7b6d543",
+  "request_id_exposure_enabled": true,
+  "await_query_close_in_source": true,
+  "await_shutdown_daemon_in_source": true,
+  "started_at": "2026-11-15T05:01:14.416578+00:00",
+  "finished_at": "2026-11-15T05:01:35.581903+00:00",
+  "exit_code": 2,
+  "timed_out": false,
+  "elapsed_seconds": 16.835,
+  "result_received_elapsed_seconds": [
+    16.458
+  ],
+  "result_to_process_exit_seconds": 0.378,
+  "post_shutdown_probe_diagnostic_elapsed_seconds": [
+    16.794
+  ],
+  "shutdown_completion_evidence": "post_finally_incomplete_diagnostic",
+  "stderr_seen": true,
+  "unrecognized_stdout_lines": 0,
+  "safe_probe_diagnostics": [
+    {
+      "provider": "qoder",
+      "status": "incomplete",
+      "assistantCount": 0,
+      "resultCount": 1
+    }
+  ],
+  "diagnostic_categories": [],
+  "request_rows": 0,
+  "session_snapshot_rows": 1
+}

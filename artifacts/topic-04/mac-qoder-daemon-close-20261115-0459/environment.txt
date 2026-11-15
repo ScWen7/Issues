@@ -1,0 +1,18 @@
+collected_at_utc=2026-11-15T05:01:53.583544+00:00
+test_host=local Mac
+os_version=15.3.2
+collector_uname=Darwin 24.3.0 x86_64
+node=v24.15.0
+node_arch=arm64
+npm=11.12.1
+qoder=1.1.88
+qodercli=1.1.88
+qodercli_path=/Users/scwen/.local/bin/qodercli
+qoder_sdk=1.0.59
+sdk_declared_managed_cli_version=1.1.83
+runtime_selection=explicit QODERCLI_PATH
+request_id_exposure=QODER_EXPOSE_REQUEST_ID=true in SDK options.env
+query_lifecycle=break after Result; await q.close(); await shutdownDaemon() in finally
+source_commit=85e9a49505e26072155ad6f29847abc9c7b6d543
+probe_sha256=fd7ec17c8d47db7f70949a9a70a26bd7d5b90b6f71a6bc5e07812ed78e0911ea
+run_id=topic04-qoder-daemon-close-20261115-0459

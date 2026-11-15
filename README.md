@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题四「成本、质量与自改进」V0.1 已建立 Codex / Claude Token 与 Qoder / CodeBuddy Credits 的 Runtime-only 计量原型。本机 Mac 实测已归档：Qoder CLI 1.1.88 当前为 PARTIAL（无 Assistant 用量事件、request_id 与请求 Credits；Session 快照为 0）。进一步确认 Qoder SDK 1.0.59 使用进程级共享 Daemon，`q.close()` 不等于 `shutdownDaemon()`；修正版探针已增加两阶段关闭，等待下一轮 Mac 复测。CodeBuddy CLI 2.181.0 为 PASS，Copilot CLI 1.0.107 为 PARTIAL。所有缺失值保持 unknown。[三类 Runtime 实测与 Qoder 生命周期复核](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md#84-等待-query-关闭后的-mac-真实复测2026-11-15) · [专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
+专题四「成本、质量与自改进」V0.1 已建立 Codex / Claude Token 与 Qoder / CodeBuddy Credits 的 Runtime-only 计量原型。Qoder CLI 1.1.88 的最新 Mac 复测已完成 Query 与共享 Daemon 两阶段关闭：主进程 16.835 秒自然退出，退出码 2 对应 incomplete；六个本轮已观察派生进程经额外定向清理后归零。原生 request_id 与请求 Credits 仍为 unknown，Session 快照为 0，总判定 PARTIAL。CodeBuddy CLI 2.181.0 为 PASS，Copilot CLI 1.0.107 为 PARTIAL。[最新 Qoder 退出与清理记录](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15) · [专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
 
 专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
 
