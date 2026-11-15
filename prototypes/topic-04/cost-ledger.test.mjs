@@ -141,3 +141,112 @@ test("Qoder and CodeBuddy Credits cannot be mixed", () => {
   assert.notEqual(qoder.unit, codebuddy.unit);
   assert.notEqual(qoder.provider, codebuddy.provider);
 });
+
+test("Qoder SDK request-level Credits are taken from Assistant message usage", () => {
+  const event = normalizeQoderSdkMessage({
+    type: "assistant", uuid: "assistant-req-1", session_id: "q-session",
+    message: { model: "qoder-model", usage: { credits: 4.25, original_credits: 5, billable: true } }
+  }, { runId: "run-q", memberId: "member-1" });
+  assert.equal(event.value, 4.25);
+  assert.equal(event.originalCredits, 5);
+  assert.equal(event.billable, true);
+  assert.equal(event.unit, "qoder_credit");
+  assert.equal(event.runId, "run-q");
+  assert.equal(event.scope, "model_request");
+});
+
+test("Qoder SDK missing request Credits remain unknown and are not zero", () => {
+  const event = normalizeQoderSdkMessage({
+    type: "assistant", uuid: "assistant-no-credits",
+    message: { usage: { input_tokens: 120 } }
+  });
+  assert.equal(event.status, "unknown");
+  assert.equal(event.value, null);
+});
+
+test("Qoder SDK Result total is a session snapshot, not an additive request", () => {
+  const event = normalizeQoderSdkMessage({
+    type: "result", uuid: "result-1", session_id: "q-session",
+    total_credits: 9.5, modelUsage: { "q-model": { credits: 9.5 } }
+  }, { runId: "run-q" });
+  assert.equal(event.metric, "session_total_credits");
+  assert.equal(event.scope, "session_snapshot");
+  assert.equal(event.value, 9.5);
+});
+
+test("CodeBuddy usage_update stage events are keyed by session, request and stage", () => {
+  const event = normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", uuid: "frame-1",
+    session_id: "cb-session", _requestId: "request-1",
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "stage", requestId: "request-1",
+      stage: { id: "model:message-1", source: "model", messageId: "message-1", model: "model-x", credits: 2.5 }
+    } }
+  }, { runId: "run-cb" });
+  assert.equal(event.nativeRequestId, "model:message-1");
+  assert.equal(event.value, 2.5);
+  assert.equal(event.unit, "codebuddy_credit");
+  assert.equal(event.runId, "run-cb");
+});
+
+test("CodeBuddy same stage corrections overwrite instead of double-counting", () => {
+  const mk = (credits, frame) => normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", uuid: frame, session_id: "s", _requestId: "r",
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "stage", requestId: "r",
+      stage: { id: "model:m1", source: "model", credits }
+    } }
+  });
+  const result = reconcileCodeBuddyTurn([mk(2.5, "f1"), mk(3, "f2")]);
+  assert.equal(result.stages.length, 1);
+  assert.equal(result.totalCredits, 3);
+  assert.equal(result.totalSource, "stage_sum_provisional");
+});
+
+test("CodeBuddy terminal snapshot replaces stage accumulation and is not added twice", () => {
+  const stage = normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", session_id: "s", _requestId: "r",
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "stage", requestId: "r",
+      stage: { id: "model:m1", source: "model", credits: 2.5 }
+    } }
+  });
+  const snapshot = normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", session_id: "s", _requestId: "r",
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "snapshot", requestId: "r",
+      total: { credits: 2.5, creditStatus: "known" },
+      stages: [{ id: "model:m1", source: "model", credits: 2.5 }]
+    } }
+  });
+  const result = reconcileCodeBuddyTurn([stage, snapshot]);
+  assert.equal(result.totalCredits, 2.5);
+  assert.equal(result.totalSource, "terminal_snapshot");
+});
+
+test("CodeBuddy stage without Credits remains unknown even when tokens exist", () => {
+  const event = normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", session_id: "s", _requestId: "r",
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "stage", requestId: "r",
+      stage: { id: "model:m1", usage: { input_tokens: 100 }, source: "model" }
+    } }
+  });
+  assert.equal(event.status, "unknown");
+  assert.equal(event.value, null);
+  assert.equal(reconcileCodeBuddyTurn([event]).status, "unknown");
+});
+
+test("CodeBuddy different requests in the same session remain separate turns", () => {
+  const make = (requestId, stageId, credits) => normalizeCodeBuddyUsageUpdate({
+    type: "system", subtype: "usage_update", session_id: "s", _requestId: requestId,
+    _meta: { "codebuddy.ai/turnUsage": {
+      version: 1, scope: "turn", kind: "stage", requestId,
+      stage: { id: stageId, credits, source: "model" }
+    } }
+  });
+  const first = reconcileCodeBuddyTurn([make("r1", "m1", 2)]);
+  const second = reconcileCodeBuddyTurn([make("r2", "m2", 3)]);
+  assert.equal(first.totalCredits, 2);
+  assert.equal(second.totalCredits, 3);
+});
