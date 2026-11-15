@@ -48,15 +48,18 @@ V0.1 · 探索基线 · 2026-11-15
 
 证据：[3B Hook 复验归属修订](topic-03b/existing-session.md#hook-复验的-run-归属修订) · [后继 Run 原始回执](topic-03b/fixtures/hook-reverification.json)。
 
-### 2.5 Qoder 与 CodeBuddy Credits 的 Runtime 上报边界
+### 2.5 Qoder 与 CodeBuddy Credits 的本地 Runtime 协议
 
-本项目不通过 Qoder / CodeBuddy 企业 API、供应商账户 Usage 页面、账单接口或账号额度快照获取 Credits。该约束是产品接入边界，不因供应商提供企业 API 而改变。
+**Qoder Agent SDK：** 官方 TypeScript / Python SDK 的本地 CLI message stream 暴露请求级 Credits。每条 Assistant message 的 `message.usage.credits` 是该模型请求实际扣除优惠后的 Credits；`original_credits` 和 `billable` 可选。Result 的 `total_credits` 与按模型 `modelUsage[].credits` 是从当前 CLI Session 开始的累计值，不能与请求级 Credits 再相加。Credits 字段是可选的，旧版 CLI / SDK 或服务不可用时缺失不能解释为 0。Java SDK 当前没有这些 Credits 类型字段。
 
-Runtime / Host Adapter 只在本机宿主实际暴露 Credits 用量时采集：优先保留宿主原生事件 ID、成员、Session / Thread / Turn、模型档位、操作、Credits 数值与观察时间，并绑定当前 Run。若宿主只提供成员级而没有 Run 关联，则保留成员级观察，不分配到具体 Issue。若 Runtime 未提供 Credits 值，则记录 unknown 和原因，不根据余额差、套餐额度、运行时长、Token 数或模型档位推算。
+**重要运行边界：** Qoder Agent SDK 的 `query()` 会启动并驱动本地 qodercli 子进程；它适用于由平台 Runtime 通过 SDK 托管启动的本地 Qoder CLI。它不等于能旁路读取成员任意已打开的 Qoder IDE / 终端会话。若不能经 SDK 接管，也没有其他实际暴露 Credits 的宿主事件，则保持 unknown。只读取 `/usage` 的账号额度快照不算执行消耗。
 
-Qoder Credit 与 CodeBuddy Credit 使用独立 unit，禁止混加。除非未来明确批准额外的可信货币换算规则，本项目不将 Credits 换算成现金成本。
+**CodeBuddy Code：** 官方 CLI 的 `--output-format stream-json` 提供逐轮 `system/usage_update`。每次模型调用或受支持的生成工具完成后可产生 stage 事件；轮次结束前会产生 snapshot，随后 result 的 `_meta["codebuddy.ai/turnUsage"]` 与 snapshot 相同。按 `session_id + requestId + stage.id` upsert 同一 stage；stage 修正覆盖旧值，不能累计 `delta`、`total` 和 snapshot。优先使用终态 snapshot；`stage.credits` 未出现时保持 unknown，不用 token 数填补。该能力适用于平台通过 stream-json 驱动的 CodeBuddy CLI；若成员只使用 IDE 且未向 Runtime 暴露这些字段，则保持 unknown。
 
-之前关于 Qoder 企业 Usage API、CodeBuddy Usage 页面和账单周期导入的研究只作为外部能力背景，不属于本平台采集方案，也不作为运行时缺失时的补数渠道。
+**项目边界：** 不调用企业 API、账户 Usage 页面或账单接口；不抓取账号余额或扣费页面。平台只消费本地 Runtime 原生消息流，Credits 单位按宿主分开。Run 绑定由平台启动时的执行上下文提供；若只拿到 session / request / stage 但无法绑定 Run，则保留宿主范围观察，不猜 Issue 归属。
+
+官方依据：[Qoder Agent SDK Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder SDK TypeScript references](https://docs.qoder.com/cli/sdk/references-typescript) · [CodeBuddy Stream-JSON Per-Turn Usage Events](https://www.codebuddy.ai/docs/cli/stream-json-turn-usage) · [Qoder Hooks](https://docs.qoder.com/cli/hooks) · [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)。
+
 
 ## 3. 第一批关键验证假设
 
@@ -87,7 +90,7 @@ Qoder Credit 与 CodeBuddy Credit 使用独立 unit，禁止混加。除非未�
 
 ## 5. 异构 Credits 适配与验证
 
-原型只保留 Runtime 上报入口：Qoder 上报映射为 `qoder_credit`，CodeBuddy 上报映射为 `codebuddy_credit`。记录保留宿主事件 ID、成员、Session / Turn、Run、Credits 数值与观察时间。显式 Run 绑定才归入 Run；只有成员级证据时保留成员级观察；未取得 Credits 数值时生成 `unknown`，不读取企业 API、账户 Usage 页面或账单补数。
+原型实现两种本地 Runtime 解析器：Qoder Agent SDK Assistant message 读取请求级 `usage.credits`，Result `total_credits` 单独作为会话累计快照；CodeBuddy `usage_update` 解析 stage 与 terminal snapshot，按 `session_id + requestId + stage.id` 覆盖更新。记录保留宿主事件 ID、成员、Session / Turn、Run、Credits 数值与观察时间。显式 Run 绑定才归入 Run；没有 Credits 字段生成 `unknown`，不读取企业 API、账户 Usage 页面或账单补数。
 
 测试覆盖两类 Runtime Credits 的单位隔离、显式 Run 绑定、无用量上报时保持 unknown，以及不从订阅额度、账户余额或 Token 数推算 Credits。该原型不连接真实成员宿主，也不代表 Qoder / CodeBuddy 当前版本一定会向 Runtime 暴露 Credits；宿主不暴露就保持 unknown。
 
