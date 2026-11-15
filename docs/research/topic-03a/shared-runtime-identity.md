@@ -8,10 +8,10 @@
 |---|---|---|
 | 谁提供机器 | 乙持有私有 Runtime 并将它共享给丙。任务交付重新读取并锁定 Runtime，核对 Agent 绑定、共享对象与当前所有者后签发任务令牌。本次令牌记录的 user_id 是乙 | 记录机器所有人和共享同意，发起工作、执行和验收各自保留主体。[交付复核](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L2464-L2520) · [签发字段](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4409-L4452) |
 | 谁在回报 | 认证中间件查数据库内哈希及有效期，绑定 workspace、Agent、任务和用户。业务层把任务请求的行为者认作该 Agent，评论另记 source_task_id。Run 中的 originator 是发起工作的丙 | Issue 展示“验证 Agent 在乙的 Runtime 上为丙执行”，并保留回报的真实 Run。[凭据查找](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_token.sql#L1-L14) · [认证中间件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/middleware/auth.go#L100-L145) · [行为者解析](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/handler.go#L891-L898) |
-| 谁能看哪个 Issue | 详情和评论先定位当前 workspace 内的目标 Issue，再检查私有项目可见性。任务请求的项目权限取发起人（无值时取 accountable）和 Agent 所有人的共同可见范围。原生允许在另一可见 Issue 中协作，并沿用原 Run 来源 | 同工作区另一可见 Issue 可以收到一般协作评论。本项目受托报告还要匹配专题二 Grant、目标 Issue、节点尝试和候选。原生 201 表示评论获准落库，业务回执另行校验 C2 和验收契约。[定位目标](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/handler.go#L1076-L1129) · [项目权限](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/projectaccess/projectaccess.go#L129-L177) · [任务请求的项目主体](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/project_access.go#L18-L69) · [跨 Issue 评论来源](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L1741-L1775) |
+| 谁能看哪个 Issue | 详情和评论先定位当前 workspace 内的目标 Issue，再检查私有项目可见性。任务请求的项目权限取发起人（无值时取 accountable）和 Agent 所有人的共同可见范围。原生允许在另一可见 Issue 中协作，并沿用原 Run 来源 | 同工作区另一可见 Issue 可以收到一般协作评论。若该回报来自 SOP 节点，融合层还需关联目标 Issue、当前 SOP 版本、节点结果和候选；优先复用 Multica 原生任务身份、Issue 权限与 Run 回执，不预设额外 Grant。原生 201 表示评论获准落库，业务回执另行校验 C2 和验收契约。[定位目标](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/handler.go#L1076-L1129) · [项目权限](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/projectaccess/projectaccess.go#L129-L177) · [任务请求的项目主体](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/project_access.go#L18-L69) · [跨 Issue 评论来源](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L1741-L1775) |
 | 撤销共享或令牌过期如何收敛 | 收回共享后，受影响的 Agent 解绑定，活动任务取消。任务取消处理负责清理对应令牌。原生令牌有独立有效期，鉴权时同时校验。数据库任务状态、资源访问和操作认证是三项可分别观察的事实 | 中心回执记录各动作结果。宿主进程是否已经停止以及本机产物是否清理，另取 Daemon 回报。[共享撤销](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime.go#L1153-L1208) · [取消时清理令牌](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L888-L902) |
 
-上游任务令牌在此路径绑定了工作区、Agent、运行任务、用户和到期时间。签发与普通评论接收链没有本项目的 Delegation Grant 版本、SOP 节点尝试及候选校验。平台应在受托报告进入 SOP 之前读取当前 Grant，校验该 Run 对指定 Issue、节点、候选和操作的权限，并把结果写入回执。普通跨 Issue 讨论继续使用原生协作权限。
+上游任务令牌在此路径绑定了工作区、Agent、运行任务、用户和到期时间。它与普通评论接收链已经提供任务身份和目标 Issue 权限校验。当前融合设计应先将 SOP 节点、候选和交付结果关联到这条原生任务链，并验证现有权限是否足够；只有发现具体越权或误消费场景无法被原生机制阻止，才设计最小附属授权信息。普通跨 Issue 讨论继续使用原生协作权限。
 
 ## 实验结果
 
@@ -49,3 +49,6 @@ go test -p=1 -count=1 -v "$probe_dir"
 # 可选，使用本轮或新一轮宿主实验保存的 JSON。
 AP_CANDIDATE_REPORT=/absolute/path/to/claude-results.json go test -p=1 -count=1 -v "$probe_dir"
 ```
+
+
+> **架构治理说明（2026-11-15）：** 本实验中的“需要 Grant”是旧版 SOP 设计推论，现已降级为待验证假设。当前架构优先沿用 Multica 的任务令牌、Issue 权限、Runtime 共享授权和 Run 身份；本实验验证的是这些原生身份与权限事实，不证明必须新增 Delegation Grant 对象。
