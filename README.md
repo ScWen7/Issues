@@ -4,20 +4,22 @@
 
 ## 当前架构基线
 
-**V1.0 · Multica 基座融合架构**
+**V1.1 · Multica 基座融合架构 · 交叉审查修订**
 
-- **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、ContextReceipt、Task Usage 等工作与执行底座。
+- **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、上下文准备 / 投递回执及 Task Usage 等工作与执行底座。
 - **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
 - **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
 
 先复用 Multica 已有能力，再对真实缺口做最小扩展。不得建设第二套 Issue、Run、Runtime、派发控制、权限或成本账本。
+
+本轮保留 Multica 的所有权边界，并补回受托范围的派发前置、本轮激活、结果消费、不可变验收资产和撤权后的历史处置。Script 托管、本地 Credits 上报及调用级证据按固定源码列为扩展项。改进流程统一为候选、Benchmark、审核发布和后续观察；订单案例与六问审查表随各专题维护。
 
 ## 架构入口
 
 | 文档 | 用途 |
 |---|---|
 | [架构治理基线](docs/architecture/governance-baseline.md) | 最高层架构所有权、复用原则和禁止重复建设的约束 |
-| [统一架构总览](docs/architecture/overview.md) | V1.0 产品定位、能力边界和专题职责 |
+| [统一架构总览](docs/architecture/overview.md) | V1.1 产品定位、决策效力、共享契约、专题职责与订单贯穿案例 |
 | [专题一：统一工作生命周期](docs/architecture/01-unified-work-lifecycle.md) | Issue First、Human / Agent / Squad 责任、工作约定和验收 |
 | [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | LoopForge SOP 如何附着于 Issue，并通过 Multica Run 执行 |
 | [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
@@ -25,6 +27,7 @@
 | [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
 | [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
 | [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
+| [本轮交叉审查修订记录](docs/review/governance-v1.1.md) | 查看审查发现、对应修订与本轮文档核验结果 |
 
 ## 研究与验证证据
 
@@ -48,11 +51,11 @@
 
 ## 设计与实现审查要求
 
-任何新增对象、服务或控制机制，必须先说明：
+各专题及改变对象、权威归属或控制机制的实现方案，按[治理基线六问表](docs/architecture/governance-baseline.md#7-设计与实现的强制审查表)复用已有证据，说明：
 1. Multica 对应源码 / 数据对象 / 接口 / 事件是什么；
 2. 当前能力在哪个具体场景下不足；
 3. 为什么不能通过配置或现有扩展点解决；
 4. 新增事实归属哪个既有 Issue / Run / Session / Usage / Asset；
-5. 如何验证重放、撤权、恢复、迟到事件和重复观察。
+5. 如何验证适用的重放、撤权、恢复、迟到事件和重复观察，以及哪些场景仍待融合验证。
 
 若形成第二套工作状态、Run、Runtime、派发、权限或成本账本，设计不得进入实现。

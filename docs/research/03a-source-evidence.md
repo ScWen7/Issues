@@ -1,6 +1,6 @@
 # 专题三 A · 执行底座源码研究记录
 
-> **架构治理说明（2026-11-15）：** 本文的源码、测试和多机实验是理解 Multica 执行底座的证据，不构成 TeamAI 自建执行平面的要求。当前设计以 Multica Daemon / Runtime / Backend / Run / Session / Process / Workspace / Usage 为执行事实权威；专题三 A V1.0 只审计覆盖并补真实缺口。历史原型和设计推论与当前架构冲突时，以[专题三 A V1.0](../architecture/03a-execution-plane.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
+> **架构治理说明（2026-11-15）：** 本文的源码、测试和多机实验是理解 Multica 执行底座的证据。当前设计以 Multica Daemon / Runtime / Backend / Run / Session / Process / Workspace / Usage 为事实权威；专题三 A V1.1 已将 Script 托管、本地 Credits 通路和调用级证据列为明确扩展项，并保留会话、进程和结果消费的具体规则。历史实验结果保持原来源与范围；融合机制以[专题三 A V1.1](../architecture/03a-execution-plane.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
 
 更新日期：2026-11-15  
 第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
@@ -447,7 +447,7 @@ Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器
 
 ## 11. 第二阶段：宿主协议与本地观察
 
-这一阶段固定四份源码，沿“本地开始工作、宿主产生事件、重读历史、多路结算、成员选择共享”追到协议、适配器和记账实现。实验使用临时配置与合成输入，真实 CLI 执行协议和本地操作，模型响应由回环服务提供。[项目接入规则](../architecture/03a-execution-plane.md#46-本地交互式执行的接入)
+这一阶段固定四份源码，沿“本地开始工作、宿主产生事件、重读历史、多路结算、成员选择共享”追到协议、适配器和记账实现。实验使用临时配置与合成输入，真实 CLI 执行协议和本地操作，模型响应由回环服务提供。[项目接入规则](../architecture/03a-execution-plane.md#5-本地主动会话与-agentobservation)
 
 | 对象 | 读到哪一层 | 可复核结果 |
 |---|---|---|
@@ -532,7 +532,7 @@ go test -count=1 -run '^Test(IssueReadCommandsUseInjectedTaskToken|IssueReadComm
 
 ## 13. 第四阶段：工作副本、受管脚本与结果交接
 
-本轮从同一订单导出规则 D2 出发，把两个真实 Git 提交、导出的 XLSX、核验器、结构化报告和控制平面回执对到同一次节点尝试。实验分段使用同一批报告或文件字节衔接。业务数据取自四类角色和三个合成订单，宿主使用协议夹具，Daemon 与 PostgreSQL 使用 Multica 的真实实现。专题一保留其完整验收规则。[阶段设计](../architecture/03a-execution-plane.md#48-结构化节点结果与制品回报)
+本轮从同一订单导出规则 D2 出发，把两个真实 Git 提交、导出的 XLSX、核验器、结构化报告和控制平面回执对到同一次节点尝试。实验分段使用同一批报告或文件字节衔接。业务数据取自四类角色和三个合成订单，宿主使用协议夹具，Daemon 与 PostgreSQL 使用 Multica 的真实实现。专题一保留其完整验收规则。[阶段设计](../architecture/03a-execution-plane.md#回报消费与接续)
 
 | 要回答的问题 | 实际测到的结果 | 复跑与固定源码 |
 |---|---|---|

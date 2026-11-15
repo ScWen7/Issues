@@ -1,4 +1,4 @@
-> **架构治理说明（2026-11-15）：** 本文保留 Qoder、CodeBuddy、Copilot 等真实 Runtime 回执和官方协议核验。当前专题四 V1.0 以 Multica Task Usage / Run / Trace 为计量事实底座；本研究用于识别 Provider 计量扩展缺口，不要求另建成本账本。Qoder SDK 探针实验也不代表默认生产执行入口；应优先核对 Multica Qoder ACP Backend 的实际用量覆盖。以[专题四 V1.0](../architecture/04-cost-quality-improvement.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
+> **架构治理说明（2026-11-15）：** 本文保留 Qoder、CodeBuddy、Copilot 等真实 Runtime 回执和官方协议核验。当前专题四 V1.1 以 Multica Task Usage / Run / Trace 为计量事实底座；本地 Credits 上报链和请求 / Stage 去重的缺项已有固定源码依据，目标 Qoder ACP 是否暴露请求 Credits 仍待对应入口实测。SDK 探针保持其协议实验用途。业务与后台成本分类、候选 Benchmark 先于发布的机制见[专题四 V1.1](../architecture/04-cost-quality-improvement.md)和[架构治理基线](../architecture/governance-baseline.md)。
 
 # 专题四 · 成本、质量与自改进研究记录
 
