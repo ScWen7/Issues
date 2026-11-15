@@ -14,6 +14,7 @@ class Release:
     decision: str
     source: str
     published_by: str
+    replaces: tuple[str, str] | None
     rule_sha: str
     script_sha: str
 
@@ -28,9 +29,10 @@ class Selection:
 
 class Catalog:
     """Single-process fixture. The caller supplies the authenticated member."""
-    def __init__(self, publishers, projects):
+    def __init__(self, publishers, projects, project_readers):
         self.publishers = publishers
         self.projects = projects  # project -> team
+        self.project_readers = project_readers
         self.releases = {}
         self.content = {}
         self.active = {}
@@ -43,16 +45,20 @@ class Catalog:
         if actor not in self.publishers.get(scope, ()):
             raise PermissionError("publish scope")
 
-    def publish(self, actor, scope, version, decision, source, rule, script, expected):
+    def publish(self, actor, scope, version, decision, source, rule, script, expected, replaces=None):
         self.check_publisher(actor, scope)
-        release = Release(scope, version, decision, source, actor, digest(rule), digest(script))
+        release = Release(scope, version, decision, source, actor, replaces, digest(rule), digest(script))
         key = (scope, version)
         if key in self.releases:
             prior = self.releases[key]
-            if (prior.decision, prior.source, prior.rule_sha, prior.script_sha) != (
-                    decision, source, release.rule_sha, release.script_sha):
+            if (prior.decision, prior.source, prior.replaces, prior.rule_sha, prior.script_sha) != (
+                    decision, source, replaces, release.rule_sha, release.script_sha):
                 raise ValueError("version content or provenance changed")
             return prior  # replay returns the original publication, never reactivates it
+        if scope in self.projects:
+            team = self.projects[scope]
+            if replaces is None or replaces != (team, self.active.get(team)) or replaces not in self.releases:
+                raise ValueError("unresolved project replacement")
         if self.active.get(scope) != expected:
             raise ValueError("publication head changed")
         self.content[release.rule_sha], self.content[release.script_sha] = rule, script
@@ -66,7 +72,9 @@ class Catalog:
             raise KeyError("unknown release")
         self.withdrawn.setdefault((scope, version), actor)
 
-    def select(self, project, instance, decision):
+    def select(self, project, instance, decision, actor):
+        if actor not in self.project_readers.get(project, ()):
+            raise PermissionError("project access withdrawn")
         team = self.projects[project]
         key = (project, instance)
         if key in self.pins:
@@ -78,13 +86,17 @@ class Catalog:
         scope = project if project in self.active else team
         version = self.active[scope]
         release = self.releases[scope, version]
+        if scope == project and release.replaces != (team, self.active.get(team)):
+            raise ValueError("project replacement needs review")
         if (scope, version) in self.withdrawn or release.decision != decision:
             raise ValueError("required release unavailable for this decision")
         result = Selection(project, instance, release, "project replacement" if scope == project else "team default")
         self.pins[key] = result
         return result
 
-    def prepare(self, selected):
+    def prepare(self, selected, actor):
+        if actor not in self.project_readers.get(selected.project, ()):
+            raise PermissionError("project access withdrawn")
         if self.pins.get((selected.project, selected.instance)) != selected:
             raise ValueError("unknown selection")
         r = selected.release

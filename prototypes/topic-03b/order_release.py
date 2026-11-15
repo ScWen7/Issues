@@ -1,6 +1,7 @@
 """Replay two scoped releases against real XLSX candidates and one actual Codex thread."""
 import argparse
 from contextlib import closing
+from copy import deepcopy
 from dataclasses import asdict
 import importlib.util
 import json
@@ -18,6 +19,7 @@ HERE = Path(__file__).resolve().parent
 PREVIOUS = HERE.parent / "topic-03a"
 ISSUE = "order-export-verification"
 NODE = "verify-order-export"
+ORDER_READER = "order-verifier"
 
 
 def load_admission():
@@ -36,7 +38,7 @@ def read_json(path):
 
 
 def materialize(catalog, selection, target):
-    rule, script = catalog.prepare(selection)
+    rule, script = catalog.prepare(selection, ORDER_READER)
     target.mkdir()
     (target / "rule.md").write_bytes(rule)
     (target / "verify.py").write_bytes(script)
@@ -44,7 +46,7 @@ def materialize(catalog, selection, target):
 
 
 def verify(workspace, material, selection, catalog):
-    catalog.prepare(selection)  # Recheck the pin and withdrawal at this fixture’s launch point.
+    catalog.prepare(selection, ORDER_READER)  # Recheck the pin and withdrawal at this fixture’s launch point.
     script = material / "verify.py"
     if digest((material / "rule.md").read_bytes()) != selection.release.rule_sha:
         raise ValueError("prepared Rule changed before start")
@@ -72,17 +74,20 @@ def test_rejection(action, exc, message):
 def exercise(out, codex):
     out.mkdir(exist_ok=False)
     catalog = Catalog({"team": {"standards"}, "orders": {"order-owner", "project-maintainer"}},
-                      {"orders": "team", "inventory": "team"})
+                      {"orders": "team", "inventory": "team"},
+                      {"orders": {ORDER_READER}, "inventory": {"inventory-verifier"}})
     r1, r2 = [(HERE / "rules" / f"v{n}.md").read_bytes() for n in (1, 2)]
     s1 = (HERE / "verify_d1.py").read_bytes()
     s2 = (PREVIOUS / "order-export/verify.py").read_bytes()
     def publish_team():
         return catalog.publish("standards", "team", "v1", "D1", "team/order-export@1", r1, s1, None)
-    def publish_project(actor="order-owner", version="v2", rule=r2, expected=None):
-        return catalog.publish(actor, "orders", version, "D2", "orders/order-export@2", rule, s2, expected)
+    def publish_project(actor="order-owner", version="v2", rule=r2, expected=None, replaces=("team", "v1")):
+        return catalog.publish(actor, "orders", version, "D2", "orders/order-export@2", rule, s2, expected, replaces)
     publish_team()
-    old = catalog.select("orders", "sop-before-D2", "D1")
+    old = catalog.select("orders", "sop-before-D2", "D1", ORDER_READER)
     checks = {"unauthorized_publish": test_rejection(lambda: publish_project("author"), PermissionError, "publish scope")}
+    checks["unapproved_replacement"] = test_rejection(lambda: publish_project(replaces=None), ValueError,
+                                                    "unresolved project replacement")
     release = publish_project()
     if publish_project(actor="project-maintainer") != release or release.published_by != "order-owner":
         raise AssertionError("publication replay changed the release")
@@ -90,15 +95,17 @@ def exercise(out, codex):
                                                     "version content or provenance changed")
     checks["stale_pointer"] = test_rejection(lambda: publish_project(version="v3"), ValueError,
                                              "publication head changed")
-    if catalog.select("orders", old.instance, "D1") != old:
+    if catalog.select("orders", old.instance, "D1", ORDER_READER) != old:
         raise AssertionError("an active instance lost its original selection")
-    checks["in_flight_change"] = test_rejection(lambda: catalog.select("orders", old.instance, "D2"), ValueError,
+    checks["in_flight_change"] = test_rejection(lambda: catalog.select("orders", old.instance, "D2", ORDER_READER), ValueError,
                                                "successor instance required")
-    new = catalog.select("orders", "sop-after-D2", "D2")
-    other = catalog.select("inventory", "other-project", "D1")
+    new = catalog.select("orders", "sop-after-D2", "D2", ORDER_READER)
+    other = catalog.select("inventory", "other-project", "D1", "inventory-verifier")
     assert new.release == release and old.release == other.release and other.reason == "team default"
-    checks["cross_project"] = test_rejection(lambda: catalog.select("inventory", "outside-D2", "D2"), ValueError,
+    checks["cross_project"] = test_rejection(lambda: catalog.select("inventory", "outside-D2", "D2", "inventory-verifier"), ValueError,
                                              "required release unavailable for this decision")
+    checks["outside_reader"] = test_rejection(lambda: catalog.select("orders", new.instance, "D2", "inventory-verifier"),
+                                              PermissionError, "project access withdrawn")
     materialize(catalog, old, out / "R1")
     materialize(catalog, new, out / "R2")
     # Produce the unchanged 3A candidates and the independent reference report.
@@ -179,11 +186,19 @@ def exercise(out, codex):
 
     saved = catalog.content[new.release.script_sha]
     catalog.content[new.release.script_sha] = s1
-    checks["damaged_material"] = test_rejection(lambda: catalog.prepare(new), ValueError, "material digest mismatch")
+    checks["damaged_material"] = test_rejection(lambda: catalog.prepare(new, ORDER_READER), ValueError, "material digest mismatch")
     catalog.content[new.release.script_sha] = saved
+    catalog.project_readers["orders"].remove(ORDER_READER)
+    checks["lost_read_access"] = test_rejection(lambda: catalog.prepare(new, ORDER_READER), PermissionError,
+                                               "project access withdrawn")
+    catalog.project_readers["orders"].add(ORDER_READER)
+    parent_change = deepcopy(catalog)
+    parent_change.publish("standards", "team", "vNext", "D2", "team/order-export@next", r2, s2, "v1")
+    checks["changed_parent"] = test_rejection(lambda: parent_change.select("orders", "after-team-update", "D2", ORDER_READER),
+                                             ValueError, "project replacement needs review")
     catalog.withdraw("order-owner", "orders", "v2")
     checks["withdrawn_pin"] = test_rejection(lambda: verify(live, out / "R2", new, catalog), PermissionError, "withdrawn before execution")
-    checks["no_implicit_downgrade"] = test_rejection(lambda: catalog.select("orders", "after-withdrawal", "D2"),
+    checks["no_implicit_downgrade"] = test_rejection(lambda: catalog.select("orders", "after-withdrawal", "D2", ORDER_READER),
                                                     ValueError, "required release unavailable for this decision")
     assert catalog.withdrawn["orders", "v2"] == "order-owner"
     summary = {"withdrawn_by": catalog.withdrawn["orders", "v2"], "selections": [asdict(old), asdict(new), asdict(other)], "host": observations["host"],
