@@ -348,3 +348,18 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 - 进程摘要 SHA-256：`2840814df5f8903a90f3eb57388562df59f9a0e34472a313be9bf81e8a830e26`
 
 [完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459.zip) · [回执](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-process-summary.txt) · [进程观测](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/SHA256SUMS.txt)
+
+
+### 8.7 本轮结论与后续验证边界
+
+8.6 已证明 `q.close()` + `shutdownDaemon()` 可使探针 Node 主进程在约 16.8 秒内自然退出，不再触发 180 秒外部超时。退出码 2 是探针因 Assistant 事件缺失而主动设置的 incomplete 状态，不是 Runtime 进程崩溃。与此同时，主进程退出后仍观察到六个本轮派生进程，采集器按已记录 PID 关系和本轮进程组清理后归零。因此必须拆分三个状态：Query/Daemon API 关闭完成、Node 主进程自然退出、所有本轮派生进程清理完成。当前前两项已验证，第三项仍需显式清理；不能将 `shutdownDaemon()` 宣称为完整进程树清理保证。
+
+Qoder 用量能力仍为 PARTIAL：Assistant message 为 0，`request_id=null`，请求 Credits 为 null / unknown；Session `total_credits=0` 是已观察到的累计快照，不代表本次请求消耗为 0。event_id 可用于该 Result 观察的离线幂等重放（三次输入归并为一条），但不替代 Request ID，也不证明请求级用量幂等。
+
+**下一阶段执行顺序：**
+1. 在受控独立进程组中复验派生进程清理，记录 SDK / CLI 子进程类型、PID 父子关系与退出时间；仅清理本轮进程组，不按进程名称全局 kill，避免影响成员其他 Qoder 会话。
+2. 研究 Qoder SDK 1.0.59 的实际事件流：Assistant message 缺失时，检查 SDK 初始化 / CLI 子进程输出适配及官方支持的 CLI JSON / SDK 入口，确定 `total_credits=0` 的含义；在取得独立证据前保持 unknown。
+3. 单独验证 `QODER_EXPOSE_REQUEST_ID=true` 是否在当前 SDK / CLI 版本组合中传入 CLI 子进程并生效；不能只因设置了环境变量就认定字段受支持。
+4. 如果受管 SDK 仍无 Assistant 消息，评估 Qoder 官方 CLI 原生结构化输出作为另一条 Runtime 入口；先核对 1.1.88 官方协议，再做真实 Mac 试验，不从账户 Usage 或企业 API 补数。
+
+本轮材料：[mac-qoder-daemon-close-20261115-0459](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/)。
