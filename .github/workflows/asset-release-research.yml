@@ -1,7 +1,7 @@
 name: AgentPlatform asset release research
 on:
   push:
-    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition, research/3b-host-handoff]
+    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition, research/3b-host-handoff, research/3b-existing-session]
     paths:
       - .github/workflows/asset-release-research.yml
       - prototypes/topic-03b/**
@@ -67,6 +67,17 @@ jobs:
         with:
           name: cross-host-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/host-handoff/summary.json
+          retention-days: 7
+      - name: Verify the member session before sending an order turn
+        run: |
+          "$RUNNER_TEMP/venv/bin/pip" install websockets==16.0 pexpect==4.9.0
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/cross-host/order_existing.py "$RUNNER_TEMP/existing-session" --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex" --claude "$RUNNER_TEMP/claude-sdk/claude_agent_sdk/_bundled/claude"
+      - name: Retain existing session decisions and admitted results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: existing-session-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/existing-session/summary.json
+          if-no-files-found: error
           retention-days: 7
   codex-sender:
     runs-on: ubuntu-24.04

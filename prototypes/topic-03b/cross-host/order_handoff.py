@@ -135,7 +135,8 @@ class Study:
         assert hello["id"] == 1 and catalog["id"] == 2
         return hello["result"]["serverInfo"]["name"], catalog["result"]["tools"]
 
-    def invoke(self, record, host, label, *, missing=False, revoke_in_flight=False, collision=False, schema_drift=False, personal_request=False):
+    def invoke(self, record, host, label, *, missing=False, revoke_in_flight=False, collision=False, schema_drift=False, personal_request=False,
+               adapter_override=None):
         from codex_tool import run_codex
         from claude_tool import run_claude
         assert record.runtime == "member-runtime-" + host
@@ -174,7 +175,7 @@ class Study:
         with sqlite3.connect(self.db) as conn:
             start = conn.execute("SELECT COALESCE(MAX(seq),0) FROM events").fetchone()[0]
         hook = (lambda: self.revoke(record)) if revoke_in_flight else None
-        adapter = run_codex if host == "codex" else run_claude
+        adapter = adapter_override or (run_codex if host == "codex" else run_claude)
         actual = adapter(self.binaries[host], case, before_call=hook)
         with sqlite3.connect(self.db) as conn:
             events = conn.execute("SELECT receipt,service,run,outcome,result_hash FROM events WHERE seq>? ORDER BY seq",
@@ -189,7 +190,8 @@ class Study:
             assert actual["arguments"] == case["arguments"] and actual["selected_tool"] and len(events) == 1
             digest_on_wire = actual.get("result_sha256", actual.get("result_text_sha256"))
             assert digest_on_wire == sha(encoded(value))
-            assert events[0] == (value["receipt"], PROJECT, record.run, value["status"], digest_on_wire)
+            if events[0] != (value["receipt"], PROJECT, record.run, value["status"], digest_on_wire):
+                raise ValueError("service receipt differs from native tool result")
             if revoke_in_flight:
                 assert value.keys() == {"receipt", "status"} and value["status"] == "denied"
             else:

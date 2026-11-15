@@ -1,5 +1,7 @@
 # 专题三 B · 发布、选用与执行实证
 
+第五阶段验证原会话与新受管会话的选择。Codex 真实终端由第二客户端接续，Claude Code 已开放的控制流在收到订单后可以接入新工具。双写入与 Hook 改写的实测给出了原线程和结果证据的适用边界。[原会话、Hook 与核验结果](topic-03b/existing-session.md) · [固定源码与收口评审](topic-03b/existing-session-sources.md)
+
 第四阶段把相同订单工具交给 Codex、Claude Code 实际调用，验证同名来源、参数变更、调用前撤权和双向接续。核验链覆盖模型工具请求、真实 XLSX、模型收到的结果及节点单次消费。[跨宿主实验与源码记录](topic-03b/cross-host-handoff.md)
 
 第三阶段将 Role、Skill 和 Playbook 同时用于订单开发与核验，实测预算不足、指引冲突、派发时撤权，以及修订后重新装载和验收。[订单组合、三库源码与复跑](topic-03b/role-composition.md)

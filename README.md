@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题三 B「能力与知识治理」已推进到 V0.4。在受管 Codex 与 Claude Code 中，订单 D2 已完成双向换人核验。缺少项目工具、项目别名误绑个人服务、执行前撤权分别验证了原节点接续。每次成功接续均可从原生调用追到工具返回、三份工作簿和同一次尝试的消费记录。[3B 设计](docs/architecture/03b-capability-governance.md) · [跨宿主订单实测](docs/research/topic-03b/cross-host-handoff.md)
+专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
 
 专题三 A「执行平面与宿主适配」V0.6 已完成设计收口。最新修订覆盖返工报告晚到附件、投递证据缺失及旧领取代次的恢复条件，53 项基础回归在本轮远端作业通过。[3A 设计](docs/architecture/03a-execution-plane.md) · [与 3B 的交接](docs/architecture/execution-capabilities.md)
 

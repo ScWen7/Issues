@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.4](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.5](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
