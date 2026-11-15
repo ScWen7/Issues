@@ -170,3 +170,9 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 该修正已在 Mac 上使用提交 `03c8cab` 真实复测。Qoder CLI 1.1.88、SDK 1.0.59 保持原版本：15.736 秒收到 Result，15.743 秒出现位于 `await q.close()` 之后的 incomplete 诊断，确认关闭调用已返回；Node 进程仍运行至 180.042 秒，由采集器终止。Result 后采样时，本轮探针及四个派生进程仍存活，外部终止后已全部退出。当前确认的是“Query 关闭返回后进程仍驻留”，根因保持 unresolved。新回执的 event_id 有值、request_id 为 null，无 Assistant 用量事件，Session 累计快照为 0；请求 Credits 继续 unknown，总判定 PARTIAL。前两次回执与其 SHA-256 均保持原值。[生命周期真实复测](topic-04/runtime-validation-1.1.88-2.181.0.md#84-等待-query-关闭后的-mac-真实复测2026-11-15) · [本轮验证明细](../../artifacts/topic-04/mac-qoder-close-20261115-0446/validation.json)。
 
 官方依据：[Qoder Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
+
+### 10.6 Qoder 进程级共享 Daemon 生命周期
+
+8.4 的真实 Mac 复测显示 `await q.close()` 已返回，但 Node 进程仍驻留至外部时限。进一步核对 SDK 1.0.59 官方 npm 包 Runtime Behavior：TypeScript `query()` 使用进程级共享 qodercli daemon，首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；宿主退出前必须调用 `shutdownDaemon()` 停止共享 daemon。`q.close()` 只关闭当前 Query / Session，不能替代 daemon shutdown。官方说明：[npm package](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk) · [How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
+
+因此，8.4 的进程驻留符合共享 Daemon 设计，不构成资源泄漏证据。探针已在 `653e6b1` 修正为先 `await q.close()`、再 `await shutdownDaemon()`；等待下一轮真实 Mac 复测。Assistant message 缺失、request_id null 和请求级 Credits unknown 仍是独立问题，当前结论不变。
