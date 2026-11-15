@@ -4,7 +4,7 @@
 
 ## 当前架构基线
 
-<badge>V1.0 · Multica 基座融合架构</badge>
+**V1.0 · Multica 基座融合架构**
 
 - **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、ContextReceipt、Task Usage 等工作与执行底座。
 - **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
