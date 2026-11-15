@@ -4,12 +4,11 @@
 
 ## 当前设计重点
 
-当前处于产品设计阶段。[协作主线](docs/architecture/overview.md#3-工作主线)用两项工作说明团队怎样从提出需求走到完成。
+[整体产品设计与首期范围](docs/architecture/overview.md#当前设计重点)说明团队如何在同一个项目中推进多项研发工作。成员可在平台建 Issue，由自己、Agent 或 Squad 负责，也可以先用本机工具调查，再把愿意共享的结论、变更或制品交回相应 Issue。接手的人能看到由谁推进、已有何种交付、接下来要做什么。
 
-- **改按钮文案。** 一名成员可以在原 Issue 完成修改并留下显示结果，也可以交给 Agent。开工时就能知道这次按项目既定检查完成，还是要交给指定成员看过后接受。[轻量工作的两种完成约定](docs/architecture/01-unified-work-lifecycle.md#125-最小路径修改导出按钮文案)
-- **跨成员交付订单导出。** 前端、后端、集成和验证各自交付，权限检查在验证子项内调用 SOP。第一次导出越过区域边界时，后端修正，集成和验证等新候选，其他有效成果保留。需要补证、调序或接管时，工作台指出涉及哪项工作、谁能处理。[订单与工作台](docs/architecture/05-unified-workbench.md)
+日常协作沿用 Multica 的项目、Issue、评论、交接和本地执行。独立分工用子 Issue，省去独立业务 Task 层。一次受管执行记为 Run。稳定环节可调用 SOP。有证据可复用的方法经审核后供下一项工作选用。团队 Wiki 与项目资料、项目代码 Wiki 均可单独接入。
 
-平台采用 Issue 与子 Issue 表达工作和独立分工，省去独立业务 Task 层。[设计基线与决策效力](docs/architecture/overview.md#设计基线与决策效力)
+五个专题的分工及进度见[统一架构总览](docs/architecture/overview.md#4-跨专题职责)。[工作台使用路径](docs/architecture/05-unified-workbench.md#一入口与工作位置)说明成员如何从两个入口协作。[轻量改动](docs/architecture/01-unified-work-lifecycle.md#125-最小路径修改导出按钮文案)和[跨成员交付](docs/architecture/overview.md#订单贯穿案例)展示工作变复杂时如何分工。
 
 ## 当前架构基线
 
