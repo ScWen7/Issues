@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.5](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录当前 Multica 基座融合架构使用的业务含义。以[架构治理基线](docs/architecture/governance-baseline.md)和[统一架构总览](docs/architecture/overview.md)为准；专题一至四设计分别见对应文档。Multica 原生对象优先沿用其自身语义，本词汇表不定义平行状态、Run 或 Runtime。
 
 ## 工作与责任
 
@@ -10,7 +10,7 @@
 
 **Task（任务）**：对具体工作的普通称呼，本平台不建立与 Issue 并列的独立业务 Task 层。外部源码中的同名对象按原项目语义解释。
 
-**Run（执行记录）**：沿用 Multica 的受管理执行记录语义，记录执行者、环境、输入、过程和结果。业务 Run 直接关联所服务的 Issue；SOP 实例管理流程进度，宿主会话管理对话连续性。
+**Run（执行记录）**：沿用 Multica 的受管理执行记录语义，记录执行者、环境、输入、过程和结果。业务 Run 直接关联所服务的 Issue；SOP 实例仅管理流程定义和节点依赖，并引用 Multica Run；宿主会话管理对话连续性。
 
 **Member（成员）**：团队中的真实人员，可承担工作责任、提供执行资源、参与决策和验收。
 
@@ -88,27 +88,23 @@
 
 **SOP（标准作业流程）**：将稳定工作步骤、依赖和结果要求固化为可执行、可核验流程的版本化定义。
 
-**Project Workflow（项目工作流程）**：Multica 的 Issue 状态、步骤指令与负责人交接机制；专题一将其作为工作推进的复用候选。
+**Project Workflow（项目工作流程）**：Multica 的 Issue 状态、步骤指令与负责人交接机制，是本项目工作状态与交接的基座权威。
 
-**Workflow（工作流）**：对有组织工作过程的统称；TeamAI、LoopForge 的同名执行机制需要与 Project Workflow 分层衔接，Issue 状态统一由现有工作机制管理。
+**Workflow（工作流）**：对有组织工作过程的统称。Multica Project Workflow 管理 Issue 状态和负责人交接；LoopForge SOP 管理被调用范围内的专业步骤依赖。两者衔接但不形成双重 Issue 状态权威。
 
-**SOP Execution（流程执行实例）**：某个 SOP 版本在 Issue 或其明确工作范围内的一次调用及进度，关联实际执行、决定和制品。
+**SOP Execution（流程执行实例）**：某个 SOP 版本在 Issue 工作范围内的一次调用及流程进度，引用实际 Multica Run、Issue Decision 和制品；不拥有独立 Run、Runtime、Issue 状态或成员权限。
 
-**节点尝试（Node Attempt）**：某个 SOP 节点在固定定义、当前委托与输入基准下的一次履行，记录结果及其证据。一次尝试可关联多次实际 Run，例如实施、后置检查与自修正；已结束尝试后的重试、返工使用新尝试。
+**节点尝试（Node Attempt）**：可选的 SOP 附属记录，用于区分某节点在固定 SOP 版本、输入和候选下的履行、重试或返工。只有当 Multica Run 与现有 SOP 关联不足以区分这些情况时才增加；它不是业务工作对象，也不替代 Run。一次尝试可引用多次实际 Run。
 
 **节点内自修正**：针对当前节点产物的检查反馈，在同一工作目标、定义和授权内修复并重验。仍在运行的执行记入原 Run，重新启动的实际执行使用新 Run；两者都沿用本轮节点尝试并消耗其修正预算。
 
-**Delegation Round（委托轮次）**：一个 SOP 节点激活对子 Issue 的一次受托交付周期，绑定节点激活 ID、Node Attempt、Grant 版本、输入 / 候选基准和交付契约。子 Issue 重开后的新交付使用新轮次；旧轮次的完成和迟到回报只保留历史效力。
+**Delegation Round（委托轮次）**：旧版 SOP 设计中的候选关联概念，用于区分节点对同一子 Issue 的多轮交付。目前不是已确认的独立平台对象；若真实场景需要，优先以现有 Issue / Run / 结果身份和最小附属标识表达。
 
-**Delivery Record（交付记录）**：子 Issue 在特定委托轮次提交的结果集合，引用实际 Run、制品、候选、核验和结论。父 SOP 按轮次和候选消费交付记录；child_done 仅是唤醒信号。
+**Delivery Record（交付记录）**：子 Issue 或节点提交的结果引用集合，引用实际 Multica Run、制品、候选、核验和结论。它是交付证据，不是第二套 Run 或 Issue 完成状态；Multica 的 child_done / 通知仅作为工作变化信号。
 
-**SOP Result ID（流程出口结果标识）**：一次 SOP 出口结算的稳定标识，用于 Project Workflow 交接幂等。结果绑定实例版本、出口、候选和期望的 Workflow revision；重复提交返回同一交接回执。
+**SOP Result ID（流程出口结果标识）**：可选的出口幂等标识。优先复用 Multica 现有结果 / 请求身份；只有实测证明无法区分重复出口或迟到结果时才增加，不创建独立交接服务。
 
-**Delegation Grant（委托授权）**：有权 Member 针对一个父 Issue 和 SOP Execution 授予的范围化操作许可，绑定受托范围、允许创建 / 绑定的子项、执行者与 Runtime 范围、状态和返工动作、预算、交还对象及有效期。SOP 依据 Grant 提出操作请求，Issue 工作机制校验调用者、授权版本和操作范围后执行；Grant 不授予业务决策和最终验收权。
-
-**Dispatch Control Binding（派发控制绑定）**：某个明确工作范围当前唯一有效的派发控制关系，记录自主协作、SOP 托管或外部结果引用模式及控制者、授权、节点激活和控制代次。它用于统一仲裁与幂等，不是业务工作对象。
-
-**子 Issue 委托关联**：SOP 节点本轮尝试与子 Issue 本轮交付之间的关联，明确可创建、指派、启动、返工和交还的工作范围。节点依此消费结果、关联实际 Run 与费用，子 Issue 继续承担工作责任。
+**Delegation Grant / Dispatch Control Binding**：旧版设计提出的候选扩展术语，目前不属于已确认架构。其目标是表达 SOP 操作范围和单一派发控制，但必须先验证 Multica 现有成员权限、Issue 负责人、Project Workflow 和 Run 派发是否存在无法覆盖的缺口；未完成该证明前不作为独立对象实现。
 
 **制品契约（Artifact Contract）** 规定一次交付要提供的具名输出、版本或摘要、生产者以及消费者要求的检查。制品可获取、内容核验和业务接受分别记录。
 
@@ -120,8 +116,15 @@
 
 **派生使用授权** 记录来源管理者允许哪些受众使用由项目证据提炼出的哪一版文案，关联提案修订和当前受审证据。团队成员按发布范围阅读获准正文，原报告沿用项目的源读权。
 
-**Evaluation（评价）**：基于执行事实、验证结果或人工反馈，对某个明确对象作出的质量判断。
+**Evaluation（评价）**：基于 Multica 执行事实、验证结果或人工反馈，对某个明确对象作出的独立质量判断；不得改写 Run 终态或 Issue 验收。
 
 **Improvement Proposal（改进提案）**：基于已发生工作证据，对知识、能力或流程提出的可审查变更建议。经验证、审核和发布形成正式资产版本。
 
 **Benchmark（回归基准）**：以固定输入和成功标准比较候选版本效果的验证任务集合，其结果用于改进对照，业务验收针对具体交付。
+
+
+## 架构治理原则
+
+**Multica 基座**：Issue、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、ContextReceipt 和 Task Usage 优先沿用 Multica。TeamAI 与 LoopForge 能力通过配置、现有接口、事件或最小扩展接入，不建设平行事实权威。
+
+**融合扩展**：新增对象必须说明 Multica 对应源码、实际缺口、最小扩展方式、事实归属和恢复策略。无法证明缺口时只保留引用或附属元数据。
