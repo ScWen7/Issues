@@ -1,4 +1,4 @@
-# 专题四 · 成本、质量与自改进
+Qoder Credit 与 CodeBuddy Credit 是不同单位，禁止相加或直接比较。只接受本地 Runtime 实际上报的原生 Credits，不通过企业 API、账户 Usage 页面或账单接口补数；没有可用的本地 Credits 字段时记录 unknown，不以 Token、余额、订阅额度或时长推算。# 专题四 · 成本、质量与自改进
 
 V0.1 · 探索基线 · 2026-11-15
 
@@ -35,75 +35,9 @@ V0.1 · 探索基线 · 2026-11-15
 |---|---|---|---|
 | Codex | input / output / cached tokens | App Server 的 Thread / Turn / Usage 快照；部分 CLI 投影 | 累计快照必须先确定基线和独占区间 |
 | Claude Code | tokens、请求级 usage、SDK 估价 | Hooks、SDK 消息、OTel request_id / message UUID | 多轮累计与子代理覆盖要按请求 / 消息身份核对 |
-| Qoder | Qoder Credits | 仅接受成员本机 Runtime / Host Adapter 实际观察并上报的 Credits 计量事件 | Runtime 未提供用量时保持 unknown；不得调用企业 Usage API、账户页面或账单接口补数 |
-| CodeBuddy | CodeBuddy Credits | 仅接受成员本机 Runtime / Host Adapter 实际观察并上报的 Credits 计量事件 | Runtime 未提供用量时保持 unknown；不得从订阅档位、团队额度变化或周期余额反推 |
-
-Qoder 与 CodeBuddy 的 Credits 都作为宿主原生计量单位保留。平台不通过企业 API、账户 Usage 页面、供应商账单或其他外部账户接口采集这些 Credits；也不以账号余额差、套餐额度、模型档位或任务时长估算执行消耗。Runtime 如果能从宿主公开事件、CLI 输出、Hook 或本机可观察协议中取得明确 Credits 值，就连同宿主事件身份、成员、Session / Turn、Run 绑定和观察时间上报；无法取得时记录 `unknown`，不得补猜。
-
-Qoder Credit 与 CodeBuddy Credit 是不同单位，禁止相加或直接比较。当前专题只比较各自原生 Credits；除非未来明确批准并提供可信换算规则，否则不换算现金金额。
-
-### 3.3 成本类别与可信度
-
-| 类别 | 含义 | 展示方式 |
-|---|---|---|
-| Provider-reported usage | 宿主或供应商返回的请求级 Token / 用量 | 原始指标与覆盖区间 |
-| Estimated cost | 按费率表、SDK 或宿主口径换算 | 同时显示费率版本、币种、估算方法 |
-| Billed cost | 账单或供应商结算记录 | 账单周期、账户、币种及对账状态 |
-| Token-only | 有用量但缺费率或计价信息 | 不伪造金额 |
-| Unknown / partial | 采集缺失、累计基线不明、无法分摊 | 显示未知范围和原因 |
-
-模型请求、工具 / 命令执行、Runner 资源、评测模型调用及索引等后台工作应分类型记录。不能把 Token 费用当作全部执行成本。
-
-### 3.4 去重与累计量
-
-优先使用宿主原生请求 / 响应 / 消息 / Tool Call ID，并结合来源命名空间、事件种类、阶段及分块位置建立计量身份。跨采集器重叠时保留所有来源，选取覆盖完整且可信的计量口径。缺少稳定身份时只做候选关联，不以时间相近、文本相似或相同金额自动合并。
-
-请求级增量按唯一请求结算。Runtime 上报的 Credits 事件按宿主原生事件 ID upsert；若宿主未提供稳定 ID，则只保留观察记录，不假设可安全去重。不得采集供应商订阅额度、共享池、购买包或账户余额快照作为执行用量。会话累计快照只作为检查点；只有同一模型、指标、单位、计量周期且区间独占目标执行时才可求差。首个基线缺失、重置、乱序、切换模型、多 Issue 交错或仅有会话总额时，保留未分摊量和原因。已确认零与未知分开。
-
-更高可信度的后到证据可以更正当前计量，但必须保留旧值、证据、理由和修订次序。两个同等可信来源冲突时进入待核对，不按到达先后决定。
-
-### 3.5 归属与汇总
-
-- 一次真实模型请求只归一个生产 Run；同一 Run 的多个宿主回合、工具调用和重连观察不重复计费。宿主 Credits 事件只有在 Runtime 明确提供 Run / Session / Turn 关联时才归入 Run；若 Runtime 只上报成员级用量，保留成员级观察且不分配到 Issue；若 Runtime 没有上报，保持 unknown。
-- 一次节点尝试可以包含多个 Run（实施、自测、修正、独立核验）；分别记录实际消耗。
-- SOP、父 Issue、Squad、项目的汇总均从底层 Run / Usage Entry 计算，不重复累加子级已经包含的金额。
-- 子 Issue 引用父级或其他 Run 的历史制品时，只显示来源成本，不把历史费用算作本次新增。
-- 后台评分、Benchmark、知识索引和改进任务保留自己的执行身份与成本，同时引用触发它的业务 Run / 样本集。业务成本与平台质量运营成本分开呈现，可按明确口径计算全生命周期成本。
-
-## 4. 质量评价
-
-评价输入是可追溯的执行事实：目标与验收约定版本、候选 / Commit、节点尝试、Run、失败分类、工具调用、制品摘要、验证结果、实际加载的 Rule / Skill / Script 版本和采集覆盖。
-
-评价输出至少包含：评价任务与版本、评价者（规则 / 脚本 / 模型 / 人）、维度分、证据指针、置信 / 缺失说明、失败分类和建议。模型给出的分数必须由固定的维度与聚合规则计算；模型自由生成的总分不能直接作为质量事实。
-
-评价分三类：
-- **执行内阻塞门禁：** 只有 SOP 明确声明且已验证的检查才阻止下一节点。
-- **事后质量评价：** 独立评价 Run，不回写原 Run 的成功 / 失败，也不替代 Issue 验收。
-- **业务验收：** 由 Issue 上有权的人针对指定候选、标准版本和证据作出决定。
-
-工具自身不可用、评测超时、证据缺失、业务断言失败必须区分，避免把评测基础设施故障记为产品质量失败。
-
-## 5. Benchmark 与自改进
-
-Benchmark 先固定样本集、样本摘要、任务输入、目标版本、工具、模型、effort、rubric、评分器版本、运行次数和聚合方式。比较双方必须在可比条件下执行；样本、rubric 或环境发生变化时，标记不可直接比较。保留每次运行结果，不只保留平均分。
-
-改进回路：
-
-1. 从可复现的失败、返工、工具风暴、超预算、人工接管或低质量评价中形成问题候选。
-2. 去重并筛选已有 Benchmark 未覆盖的失败样本，保留来源 Run、证据和发生频率。
-3. 生成改进提案：问题、适用范围、拟修改资产、预期收益、风险、回归样本和成本影响。
-4. 在隔离分支 / 资产草稿中实施变更，新增或修正回归题。
-5. 用固定 Benchmark 比较基线与候选，检查质量、成本、耗时、失败率和副作用。
-6. 由有权人员审核；通过后交专题三发布新资产版本。
-7. 新实例显式选用，观察发布后的真实样本；效果不足时提出回退或新修订，不改写旧执行证据。
-
-LoopForge 的 Run 评测与建议应用、TeamAI 的独立评分 Run / Benchmark / 自改进 PR 是机制参考，不直接复制其自动写回边界。平台建议应用不等于资产发布，改进 Agent 不拥有发布权。
-
-## 6. 第一轮验证顺序
-
-1. **成本归属与去重：** 用专题 3A 已有 Codex / Claude 观察数据，并验证 Qoder / CodeBuddy Runtime Credits 上报路径，覆盖重复回放、宿主事件更新、无事件 ID、无 Run 关联、并行 Issue、Runtime 未上报时保持 unknown 和父子汇总。
-2. **评价隔离：** 同一业务 Run 产生独立评分 Run，验证原执行终态、业务验收和门禁不被事后评分改写。
-3. **Benchmark 可比性：** 固定 C1 / C2 工作簿样本与 D2 核验标准，验证 rubric、工具、模型或样本变化时的比较资格。
-4. **改进闭环：** 从失败样本形成提案，新增回归题，产出候选资产，跑基线 / 候选对比，经审核发布新版本，再用新实例验证效果。
-
-第一轮先完成可审计的数据模型和确定性原型，不建设完整计费中心或自动发布系统。
+| 宿主 | 原生单位 | Runtime 可观测入口 | 归属边界 |
+|---|---|---|---|
+| Codex | input / output / cached tokens | App Server Thread / Turn / Usage；CLI JSON 投影 | 累计快照先确定基线和独占区间 |
+| Claude Code | tokens、请求级 usage | Hooks、SDK 消息、OTel request_id / message UUID | 按请求 / 消息身份去重，区分累计与增量 |
+| Qoder | Qoder Credits | 本地 Qoder Agent SDK Assistant 消息 `message.usage.credits`；Result 的 `total_credits` 仅作会话累计快照 | SDK 本地 Runtime 产生的请求用量可绑定 Run；缺字段保持 unknown。SDK 方式需要平台通过 Qoder Agent SDK 驱动本地 CLI，不能据此声称能读取任意已打开 IDE 会话 |
+| CodeBuddy Code | CodeBuddy Credits | 本地 CLI `--output-format stream-json` 的 `system/usage_update` | 以 `session_id + requestId + stage.id` upsert；snapshot 替代 stage 汇总，不能相加。仅能采集经该 Runtime 输出的 CLI 流；IDE 未暴露则 unknown |
