@@ -46,7 +46,7 @@
 
 **设计推论：** 可借鉴按重要工作变化唤醒 Leader；目标、授权、依赖和验收边界仍需成为平台工作规则。
 
-**代码事实：** 父子 Issue 已有 `child_done` 系统唤醒规则：按子 Issue 的 stage 汇总进度，前序阶段均关闭且后续阶段仍等待时，以及全部子 Issue 关闭时，唤醒父 Issue 的当前负责人；Agent 进入执行、Squad 解析 Leader、Member 收到通知。规则复用已有唤醒收据与 Run 机制，默认开启，可按工作区或事项设置。`closed` 包含取消，触发事实保留取消计数。当子 Issue 也指派给 Squad 时，子 Issue 自身的工作事件唤醒子 Squad Leader；当子 Issue 整体关闭触发 `child_done` 时，`resolveWakeTarget` 读取父 Issue 的 Assignee，精准唤醒父 Leader，层级天然解耦。
+**代码事实：** 父子 Issue 已有 `child_done` 系统唤醒规则：按子 Issue 的 stage 汇总进度，前序阶段均关闭且后续阶段仍等待时，以及全部子 Issue 关闭时，唤醒父 Issue 的当前负责人；Agent 进入执行、Squad 解析 Leader、Member 收到通知。规则复用已有唤醒收据与 Run 机制，默认开启，可按工作区或事项设置。`closed` 包含取消，触发事实保留取消计数。子 Issue 指派给 Squad 时，针对该负责人的工作唤醒交给子 Squad Leader。满足前述父级唤醒条件时，`resolveWakeTarget` 读取父 Issue 当时的 Assignee；父项由 Squad 主责时才唤醒其 Leader。
 
 证据：[系统规则与默认指令](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L24-L76)、[阶段条件实现](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_condition.go#L653-L710)、[父负责人与唤醒目标解析](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L303-L353)、[单事项规则配置](https://github.com/multica-ai/multica/blob/dfcc633dda2e8ee865b2feb23a1778ce20f93988/server/internal/service/issue_wakeup_system.go#L726-L778)。
 

@@ -49,7 +49,7 @@
 | 能力 | 已有事实与缺口 | 最小融合方向 |
 |---|---|---|
 | Script 托管 | [Backend 工厂](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L502-L564)提供编码 Agent 协议；当前订单脚本实测走 TeamAI 命令驱动，见[能力矩阵](execution-capabilities.md)。任意确定性脚本经 Multica Run 执行尚缺对应承载 | 在现有 Run / Daemon 链中适配受管命令，复用 Runtime、工作目录、取消与结果通道；具体扩展点由 3A 核对 |
-| 本地 Credits 与请求去重 | 服务端 Task Usage 已支持 `credits_micros`；[Daemon 用量结构](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L309-L322)尚无 Credits；[当前写入](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L1-L20)按 task / provider / model 覆盖，尚缺请求 / Stage 身份和多源合并规则 | 补齐 Backend → Daemon → Usage 的计量身份、单位、覆盖与更正；云端 `qoder_cloud` 支持与本地 Qoder 分开记录 |
+| 本地 Credits 与请求去重 | 服务端 Task Usage 已支持 `credits_micros`；[Daemon 用量结构](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L309-L322)尚无 Credits；[当前写入](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L1-L20)按 task / provider / model 覆盖，尚缺请求 / Stage 身份和多源合并规则 | 补齐 Backend → Daemon → Usage 的计量身份、分指标合并与更正。Run 明细已有 Credits，[Issue 摘要与每日看板](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L84-L165)仍需按原生单位汇总并展示覆盖。云端 `qoder_cloud` 支持与本地 Qoder 分开记录 |
 | ContextReceipt | 原生准备与投递回执存在；恢复会话还会携带[回执列表之外的历史](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L61-L77)。准备证据和每次模型调用的实际输入分别核验 | 沿原 Run 关联调用、材料版本及原生证据；保留换版前后记录，缺实际观察时标缺项 |
 | 验收资产固定版本 | 普通 Skill 缓存缺失时可接受服务端新版，原生删除会清除版本历史，见[固定源码与原生实验](../research/topic-03b/native-assets.md#multica) | 验收 Rule / Script 固定不可变内容引用并核对实际摘要；退役保留获准的历史内容或不变引用 |
 | 工作流重入与 SOP 前置 | [步骤守卫](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_workflow_entry.go#L118-L123)仅比较步骤名；早期[派发与 child_done 研究](../research/topic-02/multica.md)已记录多入口、阶段关闭和业务结果的差异 | 在 Multica 既有写入 / 派发链落实本轮激活、前置条件和结果消费检查；验证 A→B→A、取消子项及旧候选晚到 |
@@ -69,7 +69,7 @@ SOP 是可被 Issue / Project Workflow 调用的研发执行方法，不是另�
 - Agent 节点复用 Multica 现有 Backend；Script 节点沿现有 Run / Daemon 补齐受管命令承载。Human Gate 引用 Issue 上有权成员对具体候选和问题的决定，复用评论与权限，并补齐默认等待、版本匹配和结果消费校验。
 - 是否需要 Node Attempt、Delegation Round、额外幂等键等扩展，必须由 LoopForge 原生语义与 Multica 现有能力的差异证明；不得先验地全部建成新控制平面。
 
-SOP 托管范围内，各派发入口采用相同的节点前置与当前执行轮次检查；普通自由协作继续沿用原工作机制。`child_done` 是协调信号，成功交付由本轮候选、必需制品和核验决定证明。Issue 写入权限与 SOP 接收某份报告的资格分别核对，详见[专题二](02-sop-workflow.md)。
+SOP 托管范围内，各派发入口采用相同的节点前置与当前执行轮次检查；普通自由协作继续沿用原工作机制。`child_done` 是协调信号，成功交付由本轮候选、必需制品和核验决定证明。消费结果时核对当前有效尝试与接收节点。出口交接提交后，须能按持久记录恢复仍有效的下一项执行或成员通知。Issue 写入权限与 SOP 接收某份报告的资格分别核对，详见[专题二](02-sop-workflow.md)。
 
 ## 5. TeamAI 能力治理与 Multica 的关系
 
@@ -92,7 +92,7 @@ TeamAI 的能力不应被简化为“建一个 Skill 文件仓库”。应吸收
 - Issue、父子工作、SOP、Agent、Squad、项目与团队从同一计量事实去重汇总。业务执行、评价、Benchmark、知识抽取等活动分别分类；后台活动按实际项目 / 团队归属，历史制品复用成本与本次新增消耗分别展示。
 - LoopForge Evaluator 与 TeamAI Scorers 对 Multica Run / Trace 进行评价，产出独立 Evaluation / Findings；不得覆盖 Run 终态或 Issue 验收。
 - RSI 改进采用“Findings → 候选变更 → 固定输入 Benchmark → 审核 → 正式发布 → 后续真实工作观察”。Benchmark 在明确的实验范围使用候选版本，正式工作选择已发布版本；回归失败的版本保持候选并保留失败证据。不得自动修改在途 Run 或静默改变已发布版本。
-- 单次工作内的修正遵循当前目标、授权、版本与预算；跨次知识、能力及流程改进走上述候选发布链。一次验收规则变更还需对应 Issue 的工作约定确认。
+- 单次工作内的修正遵循当前目标、授权、版本与预算。跨次改进按实际采用的版本及依赖组合验证。知识、能力与 SOP 资产通过审核后发布。Project Workflow 配置和人员分工由有权成员在 Multica 原项目或 Issue 上采用并记录生效范围。验收规则变更还需对应 Issue 的工作约定确认。
 
 ## 7. 设计与实现的强制审查表
 

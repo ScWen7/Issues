@@ -21,7 +21,7 @@
 
 源码核对覆盖 Backend 工厂、Daemon 用量结构、Task Usage 写入与 Issue 汇总、工作流步骤守卫、ContextReceipt、原生 Skill 行为和 Run 谱系。研究中的源码事实、原型结果、真实宿主回执继续按原版本和来源引用。
 
-本轮文档核验结果：
+首次修订（`69af2c3`）的文档核验结果：
 
 - 56 份 Markdown 的 431 个相对文件 / 章节链接检查通过，未发现悬空目标。
 - `git diff --check` 通过；新增审查记录另作差异空白检查。
@@ -33,3 +33,22 @@
 ## 保留的决策事项
 
 Multica 底座方向继续作为当前架构基线。省去独立业务 Task 层沿用原待确认记录；本轮文档换版不新增用户业务决定。已有字段的具体存储映射、Script 的 Backend / 受管命令承载方式及部署选型进入后续实现设计，按本轮明确的行为验收。
+
+## 复核 V1.1 后的补正
+
+本次从 [V1.0 到 V1.1 的 15 份文件差异](https://github.com/ScWen7/Issues/compare/73b73fda61bc0078cfc65299f74c2fa57c13c274...69af2c3cf3bf5be29361abff147be2ddc6739797)出发，将上表八项修订与用户设计输入、固定源码、历史反例和各专题现行正文交叉核对。该提交收录了合并修订表，分支中未见两份原始审查稿，逐项结论以可查材料为限。
+
+| 复核中发现的遗漏 | 采用的规则及验收落点 |
+|---|---|
+| 同一节点的多个 Run、同一候选的旧尝试、制品被多个后继引用 | 每次执行安排去重。核对生产尝试、接收节点和所需输入，旧尝试晚到留在历史，合法后继分别消费。[节点消费](../architecture/02-sop-workflow.md#6-实际候选制品与报告消费) |
+| 子项关闭条件及交接后的漏派窗口 | `child_done` 依父项配置与阶段条件通知当前负责人。状态和负责人已交接、下步动作尚未投递时，从原交接恢复仍有效的执行或成员通知。[出口交接](../architecture/02-sop-workflow.md#9-版本与-project-workflow-出口) |
+| 把一次宿主进程退出等同于 Run 结束 | 活跃 Run 内的原生恢复可有两次宿主调用。原任务已终结后另派复验，才签发后继 Run。[固定版本恢复判据](../research/03a-source-evidence.md#75-恢复拒绝与新会话重试的真实条件) |
+| 已有 Usage 行被当作 Credits 全覆盖，迟到报告可擦除已知值 | 按计量单位及来源更正。已有 Run 明细、Issue 摘要与每日看板的实际字段分别核对。纳入显式零、缺项、重放、缓存与推理 Token、工具和 Runtime 资源口径。[专题四计量反例](../architecture/04-cost-quality-improvement.md#8-交叉审查反例与验收) |
+| 陈旧基准仍可发布，可选方法冲突会停整个节点 | 重放核对原发布内容及来源，基准已变则重审。可选方法冲突时省略并记录，必需要求冲突才阻塞。厘清工作区 Skill 与 Plugin 的版本能力，补回代码知识图谱的来源及读权。[资产治理](../architecture/03b-capability-governance.md) |
+| 部分采用后沿用原组合的 Benchmark，工作流改进一律按 SOP 发布 | 按拟采用的实际依赖组合复用匹配证据，缺项补受影响回归。SOP 沿资产链发布，项目工作流和团队分工回到有权的 Multica 项目或 Issue 采用。[根因与三层改进](../architecture/04-cost-quality-improvement.md#52-根因与三层改进) |
+
+[项目说明](../../AGENTS.md)、[审查入口](../../README.md)、术语及研究索引同步到本次复核状态。专题一至四已有设计，专题五仍仅界定范围。是否省去独立业务 Task 层继续保留为用户待决事项。
+
+本次从审查提交重跑 17 项 [SOP 状态模型用例](../../prototypes/topic-02/state-model.test.mjs)、32 项 [成本](../../prototypes/topic-04/cost-ledger.test.mjs)与[评价](../../prototypes/topic-04/evaluation.test.mjs)用例，以及 5 项[单来源撤权回归](../../prototypes/topic-03b/knowledge/test_contribution.py)，合计 54 项通过。上述用例覆盖已有原型。新增的中断窗口、迟到回报、Credits 全链、真实组织权限与发布并发仍在对应专题的集成验收中。Qoder、CodeBuddy 和 Copilot 的宿主状态沿用各自的原始回执。
+
+本次核验覆盖分支全部 56 份 Markdown 的 471 个相对链接，其中 112 个指向具体章节。目标路径、章节及本次变更的空白检查均通过。

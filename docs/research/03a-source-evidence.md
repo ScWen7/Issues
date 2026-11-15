@@ -474,7 +474,7 @@ Codex 收到 turn/completed，Claude 收到 result，两者都能表明一次宿
 go test -count=1 -v -run '^(TestCodexRawTurnCompletedDeduplication|TestCodexRawTurnCompletedWithoutIDDeduplicatesLifecycleAndUsage|TestCodexThreadTokenUsageUpdatedDropsResumeReplay|TestCodexThreadTokenUsageUpdatedDeduplicatesSnapshot|TestCodexTokenUsageArrivingAfterTurnCompleted|TestCodexThreadTokenUsageUpdatedAccumulatesCurrentTurnResponses|TestClaudeResultUsageSinceCumulativeTurns|TestClaudeExecuteReportsResumeRejectedOnAccountBinding|TestCodexResumeOverflowError)$' ./pkg/agent
 ```
 
-本仓库的两个回环探针和一组设计模型可以分别运行。回环探针使用真实宿主二进制、临时工作区和标准库实现的模拟服务；模型测试使用合成的归一化观察。用量数值是可复现的协议输入，供应商实付数据留待账单核对。
+本仓库的两个回环探针和一组设计模型可以分别运行。回环探针使用真实宿主二进制、临时工作区和标准库实现的模拟服务；模型测试使用合成的归一化观察。用量数值是可复现的协议输入。供应商实付在这一采集范围内保持未知。
 
 ```bash
 python3 prototypes/topic-03a/codex_observation_probe.py

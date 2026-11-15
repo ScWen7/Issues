@@ -107,13 +107,13 @@ V0.1 · 探索基线 · 2026-11-15
 
 探针只执行无工具的只读提示，按白名单保存 Credits、Session / Request / Stage 身份、版本和状态，不保存 Prompt / 回复正文、源代码、工具参数、账号凭据或账户额度。Qoder 探针显式支持 `QODERCLI_PATH`，以便将 SDK 绑定到成员声明的 qodercli 二进制；若无独立 qodercli，SDK 自动管理版本必须单独记录。CodeBuddy 探针启动 `--output-format stream-json`，只留存 `usage_update` 与终态摘要。
 
-当前状态：**2026-11-15 本机 Mac 实测已归档**。Qoder 1.1.88 仅取得 Session 累计快照且 SDK 超时，判为 PARTIAL；CodeBuddy 2.181.0 取得 Stage 和一致的终态快照，判为 PASS；新增 Copilot 1.0.107 取得两轮累计用量及恢复后的标识对照，逐请求 Credits 保持 unknown，判为 PARTIAL。真实回执、离线重放、缺失字段对照分别记录。[实测结果](topic-04/runtime-validation-1.1.88-2.181.0.md#8-本机-mac-实测记录2026-11-15) · [白名单回执与验证明细](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
+当前状态：**2026-11-15 本机 Mac 实测已归档**。Qoder 1.1.88 首轮 SDK 超时；后续显式关闭 Query 和共享 Daemon，主进程自然退出，六个派生进程经定向清理。各轮仅取得 Session 累计快照，请求 Credits 仍为 unknown，判为 PARTIAL，见[最终复测](topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15)；CodeBuddy 2.181.0 取得 Stage 和一致的终态快照，判为 PASS；新增 Copilot 1.0.107 取得两轮累计用量及恢复后的标识对照，逐请求 Credits 保持 unknown，判为 PARTIAL。真实回执、离线重放、缺失字段对照分别记录。[实测结果](topic-04/runtime-validation-1.1.88-2.181.0.md#8-本机-mac-实测记录2026-11-15) · [白名单回执与验证明细](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
 
 ## 7. 成本账本原型首轮结果
 
 已在分支中加入确定性 Node 原型，覆盖多观察源去重、命名空间隔离、同等可信来源冲突、较高可信来源优先、Run 归属冲突、缺失原生标识、累计快照差额、基线缺失 / 模型变化 / 计数重置 / 乱序，以及 Run 汇总排重。成本账本 11 项用例通过；随后与评价原型合并运行的远端 Node 24 CI 共 20 项用例全部通过。[成本账本独立 CI #4](https://github.com/ScWen7/Issues/actions/runs/43670463148) · [成本 + 评价 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。
 
-该原型仅验证确定性归集规则，不代表最终账本 Schema。后续还需增加 Observation 更正链、跨采集器身份映射、计量覆盖区间、供应商费率 / 账单对账和平台后台成本类型。
+该原型仅验证确定性归集规则，不代表最终账本 Schema。后续还需增加 Observation 更正链、跨采集器身份映射、计量覆盖区间、估算所用费率版本和平台后台成本类型。
 
 ## 8. 评价与 Benchmark 原型首轮结果
 
@@ -125,7 +125,7 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 
 ## 9. 证据边界
 
-现有上游测试和 3A 回环探针证明部分协议与算法行为，不证明真实供应商账单完整性、所有宿主成本覆盖或生产团队中的改进收益。第一轮原型将使用可复现的合成 Observation 和已有真实宿主协议记录；账单对账与真实项目发布后观察另列现场验收。
+现有上游测试和 3A 回环探针证明部分协议与算法行为，不证明真实供应商账单完整性、所有宿主成本覆盖或生产团队中的改进收益。第一轮原型将使用可复现的合成 Observation 和已有真实宿主协议记录。真实项目发布后观察另列现场验收，费用只按获准的本地 Runtime 原生字段和另列的估算验证。
 
 ## 10. 三类 Runtime 的 Mac 真实回执与官方协议复核（2026-11-15）
 
@@ -151,7 +151,7 @@ Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent 
 
 三类回执中的 `run_id` 均由探针 / 平台在启动时显式注入，是平台执行绑定，不是宿主原生 ID。Session ID 是宿主原生会话身份。CodeBuddy 的 requestId 关联一轮，stage.id 关联轮内实际计量阶段；Copilot 的 turnId 可重复，需叠加 event ID、interactionId / apiCallId 等原生身份；Qoder 本次只取得 Session ID 与 SDK 消息事件 UUID，没有真实 request_id。
 
-Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 Session 与 Run 不能建模为一对一。正确关系是：一个 Run 绑定一次平台发起的 Runtime invocation / 执行段；多个 invocation / Run 可以落在同一宿主 Session。归属需由启动绑定和原生事件共同证明，不能仅凭 Session ID 反推 Run。Run 绑定缺失时保留 Session 级 Observation，不伪分配给 Issue 或 Node Attempt。
+Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 Session 与 Run 不能建模为一对一。该探针为每次 invocation 显式绑定一个 Run，同一 Session 可承载多次 Run。Multica Daemon 也可在一个未结束的 Run 内因恢复拒绝发起后继宿主调用，两次用量合并到原 Run，见[固定版本恢复判据](03a-source-evidence.md#75-恢复拒绝与新会话重试的真实条件)。归属需由启动绑定和原生事件共同证明，不能仅凭 Session ID 反推 Run。Run 绑定缺失时保留 Session 级 Observation，不伪分配给 Issue 或 Node Attempt。
 
 ### 10.4 归档与边界
 

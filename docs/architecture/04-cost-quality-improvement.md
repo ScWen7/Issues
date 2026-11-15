@@ -29,7 +29,7 @@
 | [服务端用量载荷](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5490-L5507)已有 `credits_micros`，[云端 Qoder 写入](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/qoderruntime/usage.go#L68-L96)已使用此字段 | 复用 Credits 与 Token 分列、未知与真实零值分开的能力 | 本地 [TokenUsage](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L273-L293)及 [Daemon TaskUsageEntry](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L309-L322)尚无 Credits；本地 Backend → Daemon → Usage 链需要扩展 |
 | Codex / Claude 已处理部分重复消息、累计基线和终态后用量 | 保留各适配器已验证的身份与区间处理 | 增加跨采集源匹配与来源冲突规则，原始观察保留在同一执行事实链上 |
 | ContextReceipt 提供准备和投递证据 | 关联资产选择、投递版本及缺项 | 按调用核对实际输入；恢复会话还含[列表之外的历史](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L61-L77)，以宿主证据说明覆盖 |
-| [Issue 用量汇总](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L84-L122)覆盖该 Issue 的 Run | 复用原生查询及汇总关系 | 增加业务执行、评价、Benchmark、知识活动分类，分别展示费用和覆盖 |
+| [单 Issue 执行明细](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L27-L53)已有分 Provider / Model 的 Credits，[子树读取用例](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/task_runs_scope_test.go#L136-L181)也保留后代 Run 的用量 | 复用获准的直属 / 子树执行明细。原生 [Issue 摘要](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L84-L122)与[看板每日用量查询](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L124-L161)汇总 Token / USD，均未汇总 Credits | 从同一 Usage 按 Provider、原生单位和活动用途归集 Credits，呈现逐指标覆盖；需要时扩展相应查询 |
 | Skill / Plugin 等资产设施 | 由 3B 承载候选、审核与发布 | 验收资产固定版本、候选实验授权和历史留存由 3B 补齐，见[原生资产研究](../research/topic-03b/native-assets.md) |
 
 现有 [AgentTaskQueue 谱系](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/generated/models.go#L124-L185)优先复用，并保留字段原义：`RetryOfTaskID` 表示系统暂态失败重试，`RerunOfTaskID` 表示成员人工重跑；`DelegatedFromTaskID` 记录归因继承来源，`ParentTaskID` 记录已有执行关系，`TriggerEvidenceKind / RefID` 定位直接触发证据。SOP 激活、候选轮次、改进实验组与被评 Run 的关系逐项核对已有写入和读取路径，再补最少附属引用。`RuleVersionID` 是原生自动化规则快照，通用 SOP / Skill 版本另按资产引用表达；`AccountableUserID`、`OriginatorSource` 用于归因和审计，授权沿现有权限路径检查。
@@ -51,6 +51,8 @@
 5. 明确进入 Usage 的指标、单位、数值、覆盖范围与证据。请求合计、Turn snapshot 和 Session total 的覆盖重叠时选择同一范围的计量依据，其他值作为核对证据。
 6. 更正保留原观察及前后结论的来源。较晚到达与较高可信度分别判断；同等可信来源冲突时记录待核对，受影响范围暂缓确定计量，已证实的其他范围照常汇总。
 
+固定版本的 [Usage 写入](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L10-L20)覆盖同一 task / provider / model 的整行累计值。若已写入 Credits，晚到的仅 Token 报告可将其覆盖为空；单独写入 Credits 也可能覆盖已知 Token。接入多来源后，应按各指标的覆盖、修订与来源先行归并，再更新同一 Usage。省略字段或重放旧快照均保留已确认的值；有效修订须可追溯。
+
 同一事件重放仅增加接收记录。Run 结束后到达的有效用量可以更正该 Run 的计量，原执行终态与验收决定保持其事实含义。
 
 ### 3.2 原生单位与宿主覆盖
@@ -63,6 +65,8 @@
 | CodeBuddy Code | Credits Stage、requestId、stage.id、Turn / Result snapshot | CLI 2.181.0 实测一个 Stage 为 0.69 Credits；[现有 Backend](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codebuddy.go#L655-L724)尚缺对应 Stage 解析与本地上报，见[协议研究](../research/04-source-evidence.md) |
 | GitHub Copilot CLI | nano-AIU、Premium Request cost、Tokens | Session checkpoint 为累计值；CLI 1.0.107 两次 invocation 的差额仅作派生观察，逐请求 nano-AIU 保持 unknown |
 
+固定版本 [Task Usage](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L10-L20)保存输入、输出、缓存读、缓存写四类 Token。目标宿主若报告推理 Token，记录原生值、单位及其与输出或总量的包含关系。缓存与推理明细已包含在总量时仅作拆分展示；字段缺失则标 unknown，关系不明时保留原值并标明不可相加。
+
 各宿主 Credits、nano-AIU、Premium Request cost、Token、USD 估价分别汇总。Runtime 未上报的 Credits 保持 unknown；Token、时长和订阅余额均不补作 Credits。当前采集范围为获准的本地 Runtime 消息流，企业 API、账户 Usage 页面、账单接口和余额抓取均不在本专题采集路径中。
 
 ### 3.3 Run / Session / Turn 与结果归属
@@ -71,7 +75,7 @@ Run 是实际执行的归属单位；Session 是连续性资源，可由多个 R
 
 每个计量结论关联生产 Run；Run 通过原生 Issue 归属、执行者、Runtime、资产选择及 SOP 附属引用提供汇总维度。接收报告时核对生产 Run、目标 Issue、当前输入 / 候选和消费资格。跨项目制品引用沿原生产归属展示来源与成本，本次下载、复核或重新执行另记新增消耗。
 
-仍在运行的回合内自修正记入原 Run。宿主已返回且退出后再次执行签发新 Run，并关联原失败或拒收证据；同一节点尝试可引用这些 Run，各次消耗均保留。派发前尚未开工的会话切换按原有效派发处理。[Hook 复验的已验证归属](../research/topic-03b/existing-session.md#hook-复验的-run-归属修订)
+仍在运行的回合内自修正记入原 Run。Daemon 在原 Run 内处理恢复拒绝并改用新 Session 时，两次宿主调用的用量仍归原 Run。原执行结束后另行派发复验，使用后继 Run 并关联被拒报告；同一节点尝试可引用两个 Run，各次消耗均保留。派发前尚未开工的会话切换按原有效派发处理。[Hook 复验的已验证归属](../research/topic-03b/existing-session.md#hook-复验的-run-归属修订)
 
 ### 3.4 四类费用状态与覆盖
 
@@ -84,7 +88,9 @@ Run 是实际执行的归属单位；Session 是连续性资源，可由多个 R
 | 仅有 Token | 已取得 Token，但模型 / 费率不明或当前范围不进行估价 | 只汇总 Token 与覆盖；其他计费指标继续标 unknown |
 | 未知费用 | 未上报费用或缺少可证明归属、计费量、单位、基线 | 记录缺失原因与范围，展示未计量执行数量或未覆盖区间 |
 
-实际费用、估算、仅 Token 和未知在同一周期分别列示。总计同时带已覆盖执行数与应覆盖执行数；已知部分的合计标为部分总量。真实零值须由明确上报与覆盖证明，字段缺失保留 unknown。原生服务端已支持 Credits 的零值与缺失区分；USD 的现有零值处理及展示沿固定源码核对，新增指标按其语义补齐。
+实际费用、估算、仅 Token 和未知在同一周期分别列示。总计同时带已覆盖执行数与应覆盖执行数；已知部分的合计标为部分总量。真实零值须由明确上报与覆盖证明，字段缺失保留 unknown。固定[上报入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5509-L5527)保留显式零 Credits，缺失或负值写为空；USD 仅正数被认作原生报价。旧记录的空 USD 无法区分免费与未上报，有费率依据时可另列估算。
+
+原生 Issue 摘要只在已开始且有结束时间的终态 Run 中统计上报覆盖：只要有一行 Usage，就计入 `metered_task_count`。分指标展示时按该单位适用的 Run 和实际覆盖区间计算分子与分母；只报 Token 的 Run 仍可能缺 Credits。
 
 ### 3.5 十维归集与重复引用
 
@@ -122,6 +128,8 @@ Run 是实际执行的归属单位；Session 是连续性资源，可由多个 R
 | 已验收交付平均成本 | 可另按验收群组追踪每项交付的全部生命周期业务消耗（含跨期失败与返工）/ 该群组交付数量，标明统计截止时点。最终未交付工作的消耗在单位有效交付口径及失败 / 取消分析中保留 |
 | 失败和返工成本 | 分别标记执行故障、候选质量失败、证据拒收及业务变更后的重做，再按 Run 集合并集汇总；一个 Run 可有多种原因标签，合计只计一次 |
 | Agent / Model 对比 | 预先声明所比较的 Agent / Model 等实验变量，其余输入、标准、版本、执行配置和覆盖保持可比，比较质量与分单位消耗；其他样本按分组事实展示 |
+| Runtime 与计算资源 | 按获准且可归属本 Run 的开始、结束及资源计量记录执行时长与可得的资源单位。排队或等待单列；CPU 时间、资源量、费用缺少对应依据时各自标 unknown |
+| Agent / Tool 使用与开销 | 按 Run 与原生调用记录统计已观测的工具调用、失败、重试及耗时，标明覆盖。只有独立计费证据或明确费率时才列费用或估算；已计入模型 Stage 的工具消耗仅展示归属 |
 | 人工介入次数与时间 | 用具名审批、澄清、接管等决定去重计数；主动投入时长取明确记录，等待时长从请求到决定计算并单列 |
 | 趋势与异常增长 | 使用相同单位、用途、时间口径与覆盖对照，分别说明工作量变化、单次消耗变化、返工变化和新增采集覆盖 |
 
@@ -146,7 +154,7 @@ Qoder CLI 1.1.88 / Agent SDK 1.0.59 的 Mac 实测保持 PARTIAL：Query 与共�
 | Model-based Evaluator | 目标覆盖、代码 / 文档质量及有证据支持的问题归因 | 获准的 Trace、制品、工作约定和固定评价提示版本 |
 | Human Review | 业务、架构、体验与其他需人工判断的质量 | Issue Decision、Review 和具名证据 |
 
-对象可为 Run、Issue 交付、Agent / Role、Squad、SOP 或资产，评价须固定具体对象和版本。终态业务 Run 可发起事后评价，等待中的门禁检查按 SOP 预先声明的核验契约运行。评价器取得证据时复核当前读权及允许共享范围，来源撤回时按受影响证据标记待复核。
+对象可为 Run、Issue 交付、Agent / Role、Squad、SOP、Skill / Rule 或 Project Workflow。评价项目工作流时固定项目、当时配置和生效范围，引用相应步骤的等待、责任交接、返工及验收事实。终态业务 Run 可发起事后评价，等待中的门禁检查按 SOP 预先声明的核验契约运行。评价器取得证据时复核当前读权及允许共享范围，来源撤回时按受影响证据标记待复核。
 
 缺少必需证据时给出“待核验 / 证据不足”及具体缺项。执行过程能观察到的消息、动作和产物是评价依据，未采集的宿主内部过程保持未知。评价器独立版本化；重新评分产生新结论，旧评价及其输入范围继续可追溯。
 
@@ -164,7 +172,7 @@ Evaluation 记录被评对象和 Run / Issue / Asset 引用、工作约定及候
 
 **单次执行内环：** 当前目标与输入 → 执行 → 契约 / 门禁核验 → 缺陷反馈 → 授权范围内修正与复验 → 当前候选交付。SOP 管理重试、返工和预算，新的实际执行遵循 Run 生命周期。改动完成标准或扩大权限由有权成员明确决定。
 
-**跨次执行外环：** 终态执行与真实反馈 → Findings → 根因归类 → 改进提案与候选变更 → 固定 Benchmark → 审核发布 → 后续真实工作观察。
+**跨次执行外环：** 终态执行与真实反馈 → Findings → 根因归类 → 改进提案与候选变更 → 固定 Benchmark → 有权成员审核、发布资产或采用项目配置 → 后续真实工作观察。下图以资产候选为例。
 
 ```mermaid
 flowchart TD
@@ -189,16 +197,16 @@ flowchart TD
 | 改进层 | 典型变更 | 发布与有效性要求 |
 |---|---|---|
 | Knowledge Improvement | 项目文档、来源章节、可共享经验 | 固定检索问题、来源与正确性标准验证候选，再核对实际投递；实验前确认当前读取 / 使用许可，正式发布时复核精确派生文案与受众授权 |
-| Capability Improvement | Role、Skill、Rule、Playbook、Harness / 执行配置 | 固定候选内容与依赖版本，核对职责、工具、投递及实际产物；验收规则变更同步工作约定 |
-| Process Improvement | SOP 依赖、Gate、检查次序、重试与返工路径 | 检查流程可执行性、拒绝 / 超时 / 恢复和其他任务回归，再形成新 SOP 版本 |
+| Capability Improvement | Role、Skill、Rule / Principles、Playbook、Harness / 执行配置 | 固定候选内容与依赖版本，核对职责、工具、投递及实际产物；验收规则变更同步工作约定 |
+| Process Improvement | SOP 依赖与门禁、Project Workflow 交接、Agent / Human 分工与 Squad 协作 | 按实际变更检验责任交接、拒绝、超时、恢复及既有任务回归。SOP 变更走资产发布；项目工作流或分工变更由相应有权成员沿 Multica 原有配置或 Issue 决定采用，记录生效范围与在途安排 |
 
-一份提案可涉及多个资产，但逐项记录采用、拒绝或部分采用的修订和依赖，说明组合是否仍满足原成功标准。对正式知识来源的单个许可撤回、源修订及同字节恢复，沿 3B 的来源授权与重新审核规则处理。
+一份提案可涉及多个资产。部分采用时，逐项记录实际采用的修订、依赖和决定，核对该组合是否已有满足原成功标准的验证证据。匹配的结果可复用；组合发生变化且证据不足时，仅补受影响的回归，通过后才发布该组合。对正式知识来源的单个许可撤回、源修订及同字节恢复，沿 3B 的来源授权与重新审核规则处理。
 
 ### 5.3 提案与候选轮次
 
 提案引用源 Run / Issue / Findings、根因假设、拟修改资产及原版、候选修订和摘要、预期改善、潜在退化、Benchmark 样本与成功标准、来源授权及审核记录。重复投递同一候选沿原提案；内容修改形成新修订，绑定对应的实验与评价结果。
 
-候选仅在明确授权的 Benchmark 范围内使用。每次实验绑定候选实物、依赖资产与配置，走现有 Multica 执行路径并标记实验用途；普通业务继续选择已发布版本。候选改动、样本或标准发生变化时重新确定可比范围，旧通过记录继续指向旧修订。
+候选仅在明确授权的 Benchmark 范围内试用。工作流或分工实验使用隔离的项目范围，避开在途业务 Issue。每次实验绑定候选实物、依赖资产与配置，走现有 Multica 执行路径并标记实验用途；普通业务继续选择已发布版本。候选改动、样本或标准发生变化时重新确定可比范围，旧通过记录继续指向旧修订。
 
 ### 5.4 Benchmark 对照
 
@@ -206,7 +214,7 @@ flowchart TD
 
 观察目标达成率、客观测试、Findings 严重度、返工 / 重试 / 人工介入、执行耗时、工具调用、分单位用量、覆盖及恢复和制品完整性。未知费用单列；仅在覆盖与计量可比范围内比较成本。只在相同实验定义的可比组给出改善结论，其余结果附差异说明。回归集既包含提案所针对的失败，也包含其他代表工作，分别保留每项结果和总体聚合。
 
-达到预先声明的标准后进入审核。资产负责人核对候选实物、Benchmark、权限、兼容和适用范围，再按 3B 发布不可变版本。验证不通过或证据不足的修订保留候选及拒绝理由；基于模型自评分的单一改善仅作评价证据。
+达到预先声明的标准后进入审核。对资产候选，资产负责人核对候选实物、Benchmark、权限、兼容和适用范围，再按 3B 发布不可变版本。验证不通过或证据不足的修订保留候选及拒绝理由；基于模型自评分的单一改善仅作评价证据。
 
 ### 5.5 发布后观察
 
@@ -251,7 +259,7 @@ flowchart TD
 
 已验证的知识提案首版包含项目订单号而被退回，修订版只公开测试方法；单个来源许可撤回会暂停组合经验新投递，恢复时重新授权及复审，详见[贡献记录](../research/topic-03b/project-knowledge.md#一次返工成为团队经验)。专题四保留被拒提案与审核成本，候选修订引用原始 Findings；已撤回内容从后续评价输入和实验上下文移除，缺必需依据时相应评价待复核。
 
-若团队仅采用知识经验而拒绝 Rule / SOP 改动，记录部分采用及各自决定。业务验收标准继续依据 Issue 的有效决定。新 Rule 候选若在 Benchmark 误拒合法跨区账号，保留该失败并修订候选；若通过离线实验但新工作仍反复返工，记录真实观察并重开改进。上述评分与 Benchmark 接入分支属于验收方案，原始宿主与贡献实验的已执行结果各按其记录引用。
+若团队仅采用知识经验而拒绝 Rule / SOP 改动，记录部分采用及各自决定。若验证只覆盖新 Rule 与新 SOP 同时启用，而项目决定新 Rule 与旧 SOP 搭配，先查该搭配的既有结果。证据不足时，用实际选定的旧 SOP 补验受影响的规则、门禁与角色样例，通过后再发布。业务验收标准继续依据 Issue 的有效决定。新 Rule 候选若在 Benchmark 误拒合法跨区账号，保留该失败并修订候选；若通过离线实验但新工作仍反复返工，记录真实观察并重开改进。上述评分与 Benchmark 接入分支属于验收方案，原始宿主与贡献实验的已执行结果各按其记录引用。
 
 ## 8. 交叉审查反例与验收
 
@@ -265,7 +273,8 @@ flowchart TD
 | Session 首快照缺基线、计数重置或混入另一 Issue | 原快照与缺口保留，受影响区间标未归属 / 未覆盖 |
 | Session 恢复后 turnId 重用，或同 Session 服务两个 Run | 以启动绑定及原生 event / request / API call 等范围定位，保持 Run 分开 |
 | Run 终态后用量晚到或更可信来源纠正 | 更正原计量及派生汇总，原执行与验收事实继续留存 |
-| Credits 0、Credits 缺失、Token-only 和估价同时出现 | 按指标与覆盖分别标状态；同范围实际费用与估算采用明确优先依据 |
+| 同一 CodeBuddy Issue 下三次已起止的终态 Run 分别仅报 Token、完整上报 0 Credits、完全无上报 | 原生任一 Usage 行覆盖为 2/3，CodeBuddy Credits 已知为 0、覆盖 1/3，另两次未知。若三次均未报 Credits，该指标全量未知 |
+| 同一 task / provider / model 分别先报 Credits、先报 Token，再收到另一指标及旧快照重放 | 原生写入会整行覆盖。归并后的累计值同时保留已确认的 Token 与 Credits，旧重放不回退；有依据的更正更新同一明细和受影响小计 |
 | 一个 Run 同时出现在父 Issue、子 Issue、SOP、Squad | 从唯一计量集合求并集；可展开来源关系 |
 | 本期多项工作失败或取消，只有一项正式交付 | 单位有效交付成本计入同范围本期全部业务消耗；无交付时展示消耗及零交付数 |
 | 复用历史工作簿、Hook 拒收后同节点尝试重跑 | 历史生产成本另列；本次重跑是新 Run，原失败与后继消耗都保留 |
@@ -282,7 +291,7 @@ flowchart TD
 
 | 问题 | 本专题答案 |
 |---|---|
-| Multica 已有什么？ | 第 2 节固定源码：Run 谱系、Session、Trace / Result、ContextReceipt、Task Usage 服务端 Credits 与 task / provider / model 覆盖写入、Issue 汇总 |
+| Multica 已有什么？ | 第 2 节固定源码：Run 谱系、Session、Trace / Result、ContextReceipt、Task Usage 服务端 Credits、按 task / provider / model 的累计写入和明细；Issue 摘要已有 Token / USD 和任一用量行覆盖 |
 | 我们缺什么？ | 本地 Backend / Daemon Credits 与 Stage 解析、多源请求身份和更正、调用级输入证据、活动用途分类和跨视图去重；质量 / 候选 / Benchmark 与资产发布的关联 |
 | 选择哪种扩展方式？ | 复用现有 Backend、Daemon、ReportTaskUsage、查询和资产扩展点；评价与实验用原 Run，必要来源与业务轮次保存附属引用。Script 承载由 3A 补齐 |
 | 谁拥有事实？ | Multica 拥有执行与 Usage；SOP 拥有节点依赖和结果引用；专题四产出评价、候选与实验结论；3B 拥有正式资产发布；Issue 保有最终验收 |
@@ -291,7 +300,7 @@ flowchart TD
 
 ## 10. 实施顺序与证据
 
-1. **Usage 最短链**：沿固定 CodeBuddy Backend 补齐一条真实 Stage → Daemon → 原 Usage 的来源、单位和 Run 绑定；回放重复及修订事件，核对现有任务汇总与终态处理。
+1. **Usage 最短链**：沿固定 CodeBuddy Backend 补齐一条真实 Stage → Daemon → 原 Usage 的来源、单位和 Run 绑定；将单 Stage 真实样本 0.69 Credits（690,000 micros）与两份重叠快照重放，核对 Run 明细、Issue 按单位小计和看板在同一范围内均只计 0.69。Stage 修订另用合成事件检验覆盖更新。另用第 8 节的零值、缺项及旧快照检验逐指标覆盖与更正。
 2. **Qoder 与其他宿主**：复用既有 Backend，实测目标入口实际可得字段，记录缺项；补本地上报链后验证原生单位、unknown、Session 基线和恢复归属。
 3. **归集与分类**：以订单多 Run 验证父子 / SOP / Squad / 项目并集，以及业务、评价和公共知识活动小计，保留覆盖和更正。
 4. **最小评价**：对终态订单 Run 运行固定确定性与 Trace Scorer，实际执行走 Multica；核对来源读权、证据不足、旧候选拒收和评价费用。
