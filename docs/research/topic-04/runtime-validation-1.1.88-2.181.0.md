@@ -289,3 +289,42 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 - 进程摘要 SHA-256：`656974c6037bd3160d7433c134c0b4705cd0f886bae9abfe506363c5cb915da5`
 
 [完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-close-20261115-0446.zip) · [回执](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-process-summary.txt) · [生命周期观测](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/SHA256SUMS.txt)
+
+### 8.5 Qoder 共享 Daemon 生命周期修正与下一轮复测
+
+第三轮回执（8.4）证明 `await q.close()` 已返回，但宿主 Node 进程仍存活。进一步核对 `@qoder-ai/qoder-agent-sdk` 1.0.59 官方 npm 包说明发现：TypeScript `query()` 使用进程级共享 qodercli daemon；首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；`q.close()` 只关闭当前 Query / Session，宿主进程退出前还必须调用 `shutdownDaemon()` 停止共享 daemon。官方说明：[npm package Runtime Behavior](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk)；[SDK How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
+
+因此，8.4 的进程驻留与官方共享 Daemon 设计一致，不能据此判定资源泄漏。前一轮探针只调用 `q.close()`，未调用 `shutdownDaemon()`，生命周期收尾不完整。已在提交 `653e6b1` 修正探针：在 `finally` 中先 `await q.close()`，再 `await shutdownDaemon()`。该改动尚未经过 Mac 真实复测。
+
+本轮仍未解决 Assistant 消息缺失、原生 request_id 为 null、请求级 Credits unknown；这些是独立于 Daemon 退出的问题，不能因为修复进程收尾而视为解决。
+
+下一轮只验证两个边界：
+- `q.close()` 后 `shutdownDaemon()` 能否使本轮 Runtime 派生进程正常退出；进程树采样必须限定到本次探针的精确工作目录 / PID，不能把其他 Qoder 会话或宿主进程算入。
+- 正常退出与否不影响用量判定：仍需观察 Assistant message、原生 `request_id` 和 `message.message.usage.credits`；缺失继续为 unknown。
+
+**Mac 复测命令：**
+
+```bash
+git fetch origin
+git checkout research/topic-04-cost-quality-improvement
+git pull --ff-only origin research/topic-04-cost-quality-improvement
+export REPO_ROOT="$PWD"
+mkdir -p /tmp/teamai-topic04-qoder-daemon-close && cd /tmp/teamai-topic04-qoder-daemon-close
+npm init -y
+npm install @qoder-ai/qoder-agent-sdk@1.0.59
+export QODERCLI_PATH="$(command -v qodercli)"
+test -n "$QODERCLI_PATH" && "$QODERCLI_PATH" --version
+export TEAMAI_RUN_ID="topic04-qoder-daemon-close-$(date -u +%Y%m%dT%H%M%SZ)"
+node --check "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs"
+set +e
+node "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" > qoder-receipt.jsonl 2> qoder-stderr.tmp
+exit_code=$?
+stderr_seen=false; test -s qoder-stderr.tmp && stderr_seen=true
+rm -f qoder-stderr.tmp
+printf 'run_id=%s\nexit_code=%s\nstderr_seen=%s\n' "$TEAMAI_RUN_ID" "$exit_code" "$stderr_seen" > qoder-process-summary.txt
+cat qoder-receipt.jsonl
+cat qoder-process-summary.txt
+shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
+```
+
+回传环境版本、两份回执和 SHA-256；如需进程树诊断，只记录本次运行 PID 及其子进程的数量、进程类型和退出时间，不保留命令参数或环境变量。
