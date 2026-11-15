@@ -244,3 +244,28 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 - Result 后正常退出，但仍无 Assistant message：记录为 SDK / CLI 消息流字段缺失或协议兼容问题；请求 Credits 继续 unknown。
 - 仍超时：检查 q.close() 是否执行、CLI 子进程是否退出，并保留安全诊断分类；不得只凭外层超时判 Runtime 失败。
 - 没有 Result：单独检查初始化、鉴权、请求执行和错误类别；不得将缺失 Credits 解释为 0。
+**Mac 重跑命令（只执行一次无工具只读提示）：**
+
+```bash
+git fetch origin
+git checkout research/topic-04-cost-quality-improvement
+git pull --ff-only origin research/topic-04-cost-quality-improvement
+export REPO_ROOT="$PWD"
+mkdir -p /tmp/teamai-topic04-qoder-close && cd /tmp/teamai-topic04-qoder-close
+npm init -y
+npm install @qoder-ai/qoder-agent-sdk@1.0.59
+export QODERCLI_PATH="$(command -v qodercli)"
+test -n "$QODERCLI_PATH" && "$QODERCLI_PATH" --version
+export TEAMAI_RUN_ID="topic04-qoder-close-$(date -u +%Y%m%dT%H%M%SZ)"
+node --check "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs"
+set +e
+node "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" > qoder-receipt.jsonl 2> qoder-stderr.tmp
+exit_code=$?
+stderr_seen=false; test -s qoder-stderr.tmp && stderr_seen=true
+rm -f qoder-stderr.tmp
+printf 'run_id=%s\nexit_code=%s\nstderr_seen=%s\n' "$TEAMAI_RUN_ID" "$exit_code" "$stderr_seen" > qoder-process-summary.txt
+cat qoder-receipt.jsonl
+cat qoder-process-summary.txt
+```
+
+将 `qoder-receipt.jsonl`、`qoder-process-summary.txt`、环境版本和两份文件的 SHA-256 回传；不要回传原始 stderr、账号信息、Prompt 或回复正文。预期首先确认 Result 后进程能否快速正常退出；只有出现 Assistant 行时才继续核验 request_id / event_id / credits。
