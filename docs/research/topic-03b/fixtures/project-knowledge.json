@@ -1,0 +1,745 @@
+{
+  "changed_section_dependents": [
+    [
+      "dev",
+      "before-change"
+    ]
+  ],
+  "contribution": {
+    "checks": [
+      "same_execution_and_claim_deduplicated",
+      "rejected_revision_cannot_publish",
+      "rejected_revision_not_overwritten_by_retry",
+      "stale_review_revision",
+      "team_publisher_without_source_access",
+      "one_of_two_source_grants_insufficient",
+      "team_release_requires_source_steward",
+      "project_grant_not_valid_for_team",
+      "team_author_cannot_self_publish",
+      "project_steward_lacks_team_publish",
+      "repeated_dispatch_pins_one_version",
+      "team_projection_contains_only_approved_copy",
+      "team_reader_cannot_export_project_ledger",
+      "ordinary_team_reader_cannot_open_evidence",
+      "outside_team_cannot_fetch",
+      "project_reviewer_resolves_original_evidence",
+      "revoked_individual_source_access",
+      "reader_revocation_keeps_separately_licensed_derivative",
+      "withdrawn_derivative_grant_stops_new_dispatch",
+      "regrant_without_reopening_review",
+      "regrant_alone_cannot_restore_distribution",
+      "source_steward_cannot_reaffirm_after_regrant",
+      "repeated_source_head_preserves_live_review",
+      "amended_duplicate_head_deduplicated",
+      "amended_restored_digest_has_new_generation",
+      "amended_then_restored_does_not_reactivate",
+      "amended_then_restored_requires_fresh_grant",
+      "amended_then_restored_requires_independent_review",
+      "amended_then_restored_reaffirmed_at_same_version",
+      "withdrawn_duplicate_head_deduplicated",
+      "withdrawn_restored_digest_has_new_generation",
+      "withdrawn_then_restored_does_not_reactivate",
+      "withdrawn_then_restored_requires_fresh_grant",
+      "withdrawn_then_restored_requires_independent_review",
+      "withdrawn_then_restored_reaffirmed_at_same_version",
+      "amended_evidence_stops_new_dispatch",
+      "previously_delivered_digest_unchanged",
+      "old_derivative_grant_cannot_reaffirm_changed_evidence",
+      "same_asset_version_reaffirmed_with_new_evidence",
+      "contradictory_evidence_blocks_reaffirmation",
+      "withdrawn_source_blocks_historical_raw_read",
+      "withdrawn_source_blocks_new_dispatch",
+      "restoration_does_not_resurrect_retired_asset",
+      "retired_asset_cannot_be_dispatched",
+      "audit_preserves_rejection_and_initial_evidence"
+    ],
+    "final_status": "retired",
+    "previous_dispatch_receipt": {
+      "asset": "export-scope-regression",
+      "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+      "dispatch": "study-run-before-source-change",
+      "version": 1
+    },
+    "project_audit": {
+      "inputs": [
+        {
+          "generation": 1,
+          "pointer": "/checks/east/A2",
+          "report": "order-export-c1.json",
+          "run": "verify-C1",
+          "sha256": "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1"
+        },
+        {
+          "generation": 1,
+          "pointer": "/checks/east/A2",
+          "report": "order-export-c2.json",
+          "run": "verify-C2",
+          "sha256": "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514"
+        }
+      ],
+      "ledger": [
+        {
+          "actor": "reviewer",
+          "body_sha256": "b2ff977a4e3ae10ffebfd062420505d3f5ba7b4a544302b6df231c809b40a063",
+          "decision": "rejected",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "草稿含项目订单标识",
+          "revision": 1
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "project:orders",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "published",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorization_revoked",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "来源管理人撤回团队提炼稿授权",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "reaffirmed",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              1
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              3
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "reaffirmed",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              3
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              5
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "reaffirmed",
+          "evidence": [
+            [
+              "C1",
+              "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+              5
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "steward",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "authorized",
+          "evidence": [
+            [
+              "C1",
+              "1fefee83ba63dd417692a488b4083a8a74cbd43fed09dc8c488307c739f2ec05",
+              6
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "reaffirmed",
+          "evidence": [
+            [
+              "C1",
+              "1fefee83ba63dd417692a488b4083a8a74cbd43fed09dc8c488307c739f2ec05",
+              6
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "team:quality",
+          "revision": 2
+        },
+        {
+          "actor": "reviewer",
+          "body_sha256": "8887d2f444c5c70f1eb45f2a496cccb6024f8057e90f7715e9e6f1587f5a54ee",
+          "decision": "retired",
+          "evidence": [
+            [
+              "C1",
+              "1fefee83ba63dd417692a488b4083a8a74cbd43fed09dc8c488307c739f2ec05",
+              6
+            ],
+            [
+              "C2",
+              "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514",
+              1
+            ]
+          ],
+          "proposal": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5",
+          "reason": "来源撤回，证据对已失效",
+          "revision": 2
+        }
+      ],
+      "proposal_id": "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5"
+    },
+    "team_projection_at_first_publication": {
+      "key": "export-scope-regression",
+      "scope": "team:quality",
+      "text": "验证区域订单导出时，用普通区域账号和跨区账号分别导出。核对每份工作簿的订单集合，并单独验证付款时间列。",
+      "version": 1
+    }
+  },
+  "controls": {
+    "ambiguous_handoff_alias": "ambiguous section alias",
+    "changed_while_paging": "source advanced while reading",
+    "cross_project_search": "required input unavailable",
+    "deleted_section": "required input unavailable",
+    "latest_changed_before_sync": "required input unavailable",
+    "new_bundle_after_revocation": "required input unavailable",
+    "old_delivery_after_revision": "selected source changed",
+    "old_verifier_queue_needs_new_document_revision": "selected source changed",
+    "partial_fetch": "interrupted before next page",
+    "permission_check_unavailable": "required input unavailable",
+    "project_member_removed_before_delivery": "required input unavailable",
+    "project_member_removed_before_search": "required input unavailable",
+    "recheck_queued_after_loss": "required input unavailable",
+    "source_grant_expired_while_queued": "required input unavailable",
+    "unknown_run": "required input unavailable",
+    "unreachable_source": "mock source temporarily unreachable",
+    "withdrawn_cached_input": "required input unavailable",
+    "withdrawn_source": "validation-notes",
+    "wrong_member_run": "required input unavailable"
+  },
+  "deleted_section_dependents": [
+    [
+      "check",
+      "after-developer-loss"
+    ],
+    [
+      "check",
+      "before-change"
+    ],
+    [
+      "check",
+      "verifier"
+    ]
+  ],
+  "host": {
+    "host": "codex-cli 0.144.6",
+    "observer": "localhost Responses fixture",
+    "requests": 4,
+    "turns": [
+      {
+        "binding": {
+          "attempt": 1,
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "dev"
+        },
+        "current_citations": [
+          {
+            "blocks": [
+              "required-p"
+            ],
+            "heading": "required",
+            "revision": 2,
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+            "source": "order-prd"
+          },
+          {
+            "blocks": [
+              "implementation-p"
+            ],
+            "heading": "implementation",
+            "revision": 2,
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+            "source": "order-prd"
+          }
+        ],
+        "observations": [
+          {
+            "location": "current",
+            "path": "input[2].content[0].text",
+            "ref": "implementation",
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+          },
+          {
+            "location": "current",
+            "path": "input[2].content[0].text",
+            "ref": "required",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          }
+        ],
+        "prompt_sha256": "64cc9c8b00ce8b32c333cad6cdec75e15ee11911b4e3676b7282f31b6fffaa53",
+        "selection": [
+          "required",
+          "implementation"
+        ],
+        "step": "developer",
+        "thread_id": "01a1dc9f-0fdb-7203-88c9-15f41d912944",
+        "turn_id": "01a1dc9f-0ffc-7013-8326-eaa34a538590",
+        "wire_request_sha256": "b18ff2ec90cb79b1901204a1053a91abd9c912eaa1b89767fbb27705c9c3c01e"
+      },
+      {
+        "binding": {
+          "attempt": 2,
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-verifier",
+          "node": "verify-order-export",
+          "project": "orders",
+          "role": "verifier",
+          "run": "check"
+        },
+        "current_citations": [
+          {
+            "blocks": [
+              "required-p"
+            ],
+            "heading": "required",
+            "revision": 2,
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+            "source": "order-prd"
+          },
+          {
+            "blocks": [
+              "acceptance-p"
+            ],
+            "heading": "acceptance",
+            "revision": 1,
+            "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+            "source": "validation-notes"
+          }
+        ],
+        "observations": [
+          {
+            "location": "current",
+            "path": "input[2].content[0].text",
+            "ref": "acceptance",
+            "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88"
+          },
+          {
+            "location": "current",
+            "path": "input[2].content[0].text",
+            "ref": "required",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          }
+        ],
+        "prompt_sha256": "f82df1daa16f30ddc0b54ca198166062012603de24183c523a83c826cfc10114",
+        "selection": [
+          "required",
+          "acceptance"
+        ],
+        "step": "verifier",
+        "thread_id": "01a1dc9f-1031-7bf1-a1b0-4613db31217a",
+        "turn_id": "01a1dc9f-1056-74d2-a05c-90a22b300977",
+        "wire_request_sha256": "39a2e6852a441a15a0f3ef7513d71b52377546b33fec0c5566b90a219da154dd"
+      },
+      {
+        "binding": {
+          "attempt": 1,
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "dev"
+        },
+        "current_citations": [],
+        "observations": [
+          {
+            "location": "history",
+            "path": "input[2].content[0].text",
+            "ref": "implementation",
+            "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c"
+          },
+          {
+            "location": "history",
+            "path": "input[2].content[0].text",
+            "ref": "required",
+            "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16"
+          }
+        ],
+        "prompt_sha256": "fdded01cabb589d1eaae0f6b2f6a9cadd93519885d552951f45b0cf3bd88b910",
+        "selection": [],
+        "step": "old_thread_after_revoke",
+        "thread_id": "01a1dc9f-0fdb-7203-88c9-15f41d912944",
+        "turn_id": "01a1dc9f-1080-7eb0-a463-3fc4880d6abf",
+        "wire_request_sha256": "512669454434aa98ffeb66570e2e276d95a093338ad21c5102819b7847d879a5"
+      },
+      {
+        "binding": {
+          "attempt": 1,
+          "decision": "D2",
+          "issue": "order-export-verification",
+          "member": "order-developer",
+          "node": "implement-order-export",
+          "project": "orders",
+          "role": "developer",
+          "run": "dev"
+        },
+        "current_citations": [],
+        "observations": [],
+        "prompt_sha256": "fdded01cabb589d1eaae0f6b2f6a9cadd93519885d552951f45b0cf3bd88b910",
+        "selection": [],
+        "step": "new_thread_after_revoke",
+        "thread_id": "01a1dc9f-10a4-71e3-be60-a33b6514f98e",
+        "turn_id": "01a1dc9f-10c3-7c91-ae0d-42123786d73a",
+        "wire_request_sha256": "b4da0d57988aabe69431e1d6652e450e515e4f09ae77aeb2daf73a6c8eba3a64"
+      }
+    ]
+  },
+  "initial_citations": {
+    "dev": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 1,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "implementation-p"
+        ],
+        "heading": "implementation",
+        "revision": 1,
+        "sha256": "b22cd95dcc97a70c5accf3a9dff0e28f25d8fec96c8123171d0cb71d684f04ce",
+        "source": "order-prd"
+      }
+    ],
+    "qa": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 1,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "acceptance-p"
+        ],
+        "heading": "acceptance",
+        "revision": 1,
+        "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+        "source": "validation-notes"
+      }
+    ]
+  },
+  "issue": "order-export-verification",
+  "last_checked": {
+    "finance-private": "09:00",
+    "order-prd": "10:17",
+    "validation-notes": "10:00"
+  },
+  "search_results": {
+    "no_snippet_after_read_revoked": [],
+    "old_body_after_refresh": [],
+    "only_other_document_after_grant_expired": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      }
+    ],
+    "optional_outside_plan": [],
+    "other_member_keeps_access": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      }
+    ],
+    "private_source_not_discoverable": [],
+    "remaining_source_after_qa_withdrawal": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      }
+    ],
+    "removed_qa_section_no_snippet": [],
+    "renamed_developer_section": [
+      {
+        "blocks": [
+          "implementation-p"
+        ],
+        "heading": "implementation",
+        "revision": 2,
+        "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+        "source": "order-prd"
+      }
+    ],
+    "uncertain_source_no_snippet": [],
+    "verifier_cannot_search_developer_only_text": [],
+    "verifier_order_query": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "acceptance-p"
+        ],
+        "heading": "acceptance",
+        "revision": 1,
+        "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+        "source": "validation-notes"
+      }
+    ]
+  },
+  "selected_citations": {
+    "dev": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "implementation-p"
+        ],
+        "heading": "implementation",
+        "revision": 2,
+        "sha256": "80edc047f671b8cc8e85302789be65c8ffed5946a72caf31300cfd94a4db563c",
+        "source": "order-prd"
+      }
+    ],
+    "qa": [
+      {
+        "blocks": [
+          "required-p"
+        ],
+        "heading": "required",
+        "revision": 2,
+        "sha256": "5563f820de86fd2a13c14fcb4edd2f7a9f597c8475e78afc34e5493567dbbd16",
+        "source": "order-prd"
+      },
+      {
+        "blocks": [
+          "acceptance-p"
+        ],
+        "heading": "acceptance",
+        "revision": 1,
+        "sha256": "1dc2673026ef4913afd1c548d7d46c0858b1001d61e9c2d61e2a835485310e88",
+        "source": "validation-notes"
+      }
+    ]
+  },
+  "source_states": {
+    "finance-private": "current",
+    "order-prd": "current",
+    "validation-notes": "withdrawn"
+  },
+  "subject": "synthetic authority and actors"
+}

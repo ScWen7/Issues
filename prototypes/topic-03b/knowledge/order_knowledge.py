@@ -108,6 +108,9 @@ def run(out, codex):
     search("verifier_order_query", TEST, "check", "订单", ["required", "acceptance"])
     reject("old_delivery_after_revision", Pending, "selected source changed",
            lambda: assembly.deliver(DEV, "dev", dev_old, "new-turn"))
+    reject("old_verifier_queue_needs_new_document_revision", Pending, "selected source changed",
+           lambda: assembly.deliver(TEST, "check", qa_old, "reused-qa-queue"))
+    assert [c["sha256"] for c in qa] == [c["sha256"] for c in qa_old] and qa[0]["revision"] != qa_old[0]["revision"]
     changed_history = assembly.affected(MAIN, "implementation", dev_old[1]["sha256"])
     assert changed_history == [["dev", "before-change"]]
     developer = assembly.deliver(DEV, "dev", dev, "developer")
@@ -142,6 +145,20 @@ def run(out, codex):
         received = {(o["ref"], o["sha256"]) for o in observed["observations"] if o["location"] == "current"}
         assert (selection["step"], selection["binding"], expected) == (observed["step"], observed["binding"], received)
         observed["current_citations"] = selection["citations"]
+
+    # A cached queue also binds current project membership and time-limited access.
+    assembly.members["orders"].remove(TEST)
+    reject("project_member_removed_before_delivery", Pending, missing,
+           lambda: assembly.deliver(TEST, "check", qa, "after-project-loss"))
+    reject("project_member_removed_before_search", Pending, missing, lambda: assembly.lookup(TEST, "check", "订单"))
+    assembly.members["orders"].add(TEST)
+    origin.read_until[TEST, QA] = 20
+    origin.minute = 19
+    assert assembly.queue(TEST, "check") == qa
+    origin.minute = 20
+    reject("source_grant_expired_while_queued", Pending, missing, lambda: assembly.deliver(TEST, "check", qa, "expired"))
+    search("only_other_document_after_grant_expired", TEST, "check", "订单", ["required"])
+    del origin.read_until[TEST, QA]  # the fixture source restores the verifier's ongoing read right
 
     # Removing a block from a still-readable document differs from revoking document access.
     before_removal = index.snapshots[QA]["acceptance"]

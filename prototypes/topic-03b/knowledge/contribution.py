@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import NamedTuple
 
 
 REPORTS = {
@@ -31,10 +32,16 @@ def fingerprint(value):
     return digest(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode())
 
 
+class SourcePin(NamedTuple):
+    source: str
+    sha256: str | None
+    generation: int
+
+
 class Evidence:
     def __init__(self, directory):
         self.blobs = {}
-        self.head = {}
+        self.revisions = {key: [] for key in REPORTS}
         self.readers = {key: {"steward", "author", "reviewer"} for key in REPORTS}
         self.stewards = {"C1": {"steward", "author"}, "C2": {"steward"}}
         for key, (filename, expected) in REPORTS.items():
@@ -45,25 +52,33 @@ class Evidence:
 
     def replace(self, actor, key, raw):
         require(actor in self.stewards[key], "source management permission required")
-        if raw is None:
-            self.head[key] = None
-            return
-        report = json.loads(raw)
-        require(report["candidate"] == key and report["run"] == f"verify-{key}", "different run")
-        self.head[key] = digest(raw)
-        self.blobs[self.head[key]] = raw
+        sha = None
+        if raw is not None:
+            report = json.loads(raw)
+            require(report["candidate"] == key and report["run"] == f"verify-{key}", "different run")
+            sha = digest(raw)
+            self.blobs[sha] = raw
+        revisions = self.revisions[key]
+        if not revisions or revisions[-1] != sha:
+            revisions.append(sha)
+
+    def heads(self):
+        return tuple(SourcePin(key, self.revisions[key][-1], len(self.revisions[key])) for key in sorted(REPORTS))
 
     def pins(self):
-        require(all(self.head.values()), "source withdrawn")
-        return tuple((key, self.head[key]) for key in sorted(REPORTS))
+        heads = self.heads()
+        require(all(pin.sha256 for pin in heads), "source withdrawn")
+        return heads
 
-    def read(self, actor, key, sha):
-        require(actor in self.readers[key] and self.head[key] is not None, "source read denied")
-        require(sha in self.blobs and json.loads(self.blobs[sha])["candidate"] == key, "unknown reference")
-        return json.loads(self.blobs[sha])
+    def read(self, actor, pin):
+        revisions = self.revisions[pin.source]
+        require(actor in self.readers[pin.source] and revisions[-1] is not None, "source read denied")
+        require(pin.sha256 and 1 <= pin.generation <= len(revisions)
+                and revisions[pin.generation - 1] == pin.sha256, "unknown reference")
+        return json.loads(self.blobs[pin.sha256])
 
     def verify_pair(self, actor, pins):
-        c1, c2 = [self.read(actor, key, sha) for key, sha in pins]
+        c1, c2 = [self.read(actor, pin) for pin in pins]
         require(all(c1[k] == c2[k] for k in ("issue", "node", "rule", "verifier_sha256")), "different control")
         require(c1["commit"] != c2["commit"] and [c1["attempt"], c2["attempt"]] == [1, 2], "different attempts required")
         for report, a2, verdict in [(c1, False, "rework"), (c2, True, "pass")]:
@@ -93,7 +108,7 @@ class Review:
         self.evidence.verify_pair(actor, pins)
         # Run identity and test locator remain stable through retries or refreshed report metadata.
         identity = fingerprint([TEAM, TOPIC, "order-export-verification", "verify-order-export",
-                                [(f"verify-{key}", POINTER) for key, _ in pins]])
+                                [(f"verify-{pin.source}", POINTER) for pin in pins]])
         proposal = self.proposals.get(identity)
         if proposal is None:
             proposal = {"id": identity, "author": actor, "text": text, "revision": 1, "status": "draft",
@@ -126,18 +141,20 @@ class Review:
         return p["id"], p["revision"], digest(p["text"].encode()), audience, p["pins"]
 
     def authorize(self, actor, p, audience=TEAM):
-        for key, _ in p["pins"]:
-            require(actor in self.evidence.stewards[key], "derivative grant required on each source")
+        for pin in p["pins"]:
+            require(actor in self.evidence.stewards[pin.source], "derivative grant required on each source")
         self.evidence.verify_pair(actor, p["pins"])
         require(p["pins"] == self.evidence.pins() and p["status"] in ("draft", "rechecking"), "current evidence required")
         self.grants.add(self.grant_key(p, audience))
         self.record(actor, p, "authorized", audience)
 
     def revoke(self, actor, p, audience, reason):
-        require(all(actor in self.evidence.stewards[key] for key, _ in p["pins"]), "source stewardship required")
+        require(all(actor in self.evidence.stewards[pin.source] for pin in p["pins"]), "source stewardship required")
         key = self.grant_key(p, audience)
         require(key in self.grants and reason.strip(), "current derivative grant and reason required")
         self.grants.remove(key)
+        if audience == TEAM and p["status"] == "released":
+            p["status"] = "review_required"
         self.record(actor, p, "authorization_revoked", reason)
 
     def release(self, actor, p, revision):
@@ -159,7 +176,7 @@ class Review:
             return "retired"
         if p["asset"] is None:
             return p["status"]
-        if (p["status"] != "released" or any(self.evidence.head[k] != sha for k, sha in p["pins"])
+        if (p["status"] != "released" or self.evidence.heads() != p["pins"]
                 or self.grant_key(p, TEAM) not in self.grants):
             return "review_required"
         return "active"
@@ -214,7 +231,7 @@ def run(directory):
     e = Evidence(directory)
     r = Review(e)
     original = e.pins()
-    private = e.read("author", "C1", dict(original)["C1"])
+    private = e.read("author", original[0])
     sample = private["checks"]["west"]["ids"][0]
     p = r.submit("author", "验证失败的订单为 " + sample)
     identity = p["id"]
@@ -241,19 +258,47 @@ def run(directory):
     check("team_projection_contains_only_approved_copy", delivered == {
         "scope": TEAM, "key": TOPIC, "version": 1, "text": clean} and sample not in clean)
     denied("team_reader_cannot_export_project_ledger", lambda: r.audit("team_reader", p))
-    denied("ordinary_team_reader_cannot_open_evidence", lambda: e.read("team_reader", *original[0]))
+    denied("ordinary_team_reader_cannot_open_evidence", lambda: e.read("team_reader", original[0]))
     denied("outside_team_cannot_fetch", lambda: r.fetch("outsider", p))
-    check("project_reviewer_resolves_original_evidence", e.read("reviewer", *original[0]) == private)
+    check("project_reviewer_resolves_original_evidence", e.read("reviewer", original[0]) == private)
     e.readers["C1"].remove("author")
-    denied("revoked_individual_source_access", lambda: e.read("author", *original[0]))
+    denied("revoked_individual_source_access", lambda: e.read("author", original[0]))
     check("reader_revocation_keeps_separately_licensed_derivative", r.fetch("team_reader", p) == delivered)
     r.revoke("steward", p, TEAM, "来源管理人撤回团队提炼稿授权")
     denied("withdrawn_derivative_grant_stops_new_dispatch", lambda: r.fetch("team_reader", p))
+    denied("regrant_without_reopening_review", lambda: r.authorize("steward", p))
     r.reopen("reviewer", p)
     r.authorize("steward", p)
+    denied("regrant_alone_cannot_restore_distribution", lambda: r.fetch("team_reader", p))
+    denied("source_steward_cannot_reaffirm_after_regrant", lambda: r.release("steward", p, 2))
     r.release("reviewer", p, 2)
+
+    raw = e.blobs[original[0].sha256]
+    e.replace("steward", "C1", raw)
+    check("repeated_source_head_preserves_live_review", e.pins() == original and r.fetch("team_reader", p) == delivered)
+    for change, replacement in (("amended", raw + b" "), ("withdrawn", None)):
+        before = e.pins()
+        e.replace("steward", "C1", replacement)
+        changed = e.heads()
+        e.replace("steward", "C1", replacement)
+        check(f"{change}_duplicate_head_deduplicated", e.heads() == changed)
+        # Restore before any reviewer sees the intermediate state.
+        e.replace("steward", "C1", raw)
+        restored = e.pins()
+        check(f"{change}_restored_digest_has_new_generation",
+              restored[0].sha256 == before[0].sha256 and restored[0].generation == before[0].generation + 2
+              and restored[1] == before[1])
+        denied(f"{change}_then_restored_does_not_reactivate", lambda: r.fetch("team_reader", p))
+        r.reopen("reviewer", p)
+        denied(f"{change}_then_restored_requires_fresh_grant", lambda: r.release("reviewer", p, 2))
+        r.authorize("steward", p)
+        denied(f"{change}_then_restored_requires_independent_review", lambda: r.fetch("team_reader", p))
+        r.release("reviewer", p, 2)
+        check(f"{change}_then_restored_reaffirmed_at_same_version",
+              r.fetch("team_reader", p) == delivered and r.decisions[-1]["evidence"] == list(restored))
+
     # This metadata-only amendment is an experiment. The checked-in 3A report stays immutable.
-    e.replace("steward", "C1", e.blobs[original[0][1]] + b"\n")
+    e.replace("steward", "C1", e.blobs[original[0].sha256] + b"\n")
     denied("amended_evidence_stops_new_dispatch", lambda: r.fetch("team_reader", p))
     check("previously_delivered_digest_unchanged", r.dispatches[(issued["dispatch"], TOPIC)] == issued
           and issued["body_sha256"] == digest(delivered["text"].encode()))
@@ -267,10 +312,10 @@ def run(directory):
     e.replace("steward", "C1", json.dumps(contradicted).encode())
     denied("contradictory_evidence_blocks_reaffirmation", lambda: r.reopen("reviewer", p))
     e.replace("steward", "C1", None)
-    denied("withdrawn_source_blocks_historical_raw_read", lambda: e.read("reviewer", *original[0]))
+    denied("withdrawn_source_blocks_historical_raw_read", lambda: e.read("reviewer", original[0]))
     denied("withdrawn_source_blocks_new_dispatch", lambda: r.fetch("team_reader", p))
     r.retire("reviewer", p, "来源撤回，证据对已失效")
-    e.replace("steward", "C1", e.blobs[original[0][1]])
+    e.replace("steward", "C1", e.blobs[original[0].sha256])
     denied("restoration_does_not_resurrect_retired_asset", lambda: r.reopen("reviewer", p))
     denied("retired_asset_cannot_be_dispatched", lambda: r.fetch("team_reader", p))
     check("audit_preserves_rejection_and_initial_evidence",
@@ -278,8 +323,9 @@ def run(directory):
     return {"checks": checked, "team_projection_at_first_publication": delivered,
             "final_status": r.state(p), "previous_dispatch_receipt": issued,
             "project_audit": {"proposal_id": identity, "ledger": r.audit("reviewer", p),
-                              "inputs": [{"report": REPORTS[k][0], "run": f"verify-{k}", "sha256": sha,
-                                          "pointer": POINTER} for k, sha in original]}}
+                              "inputs": [{"report": REPORTS[pin.source][0], "run": f"verify-{pin.source}",
+                                          "sha256": pin.sha256, "generation": pin.generation,
+                                          "pointer": POINTER} for pin in original]}}
 
 
 if __name__ == "__main__":

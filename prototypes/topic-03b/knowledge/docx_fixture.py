@@ -8,6 +8,8 @@ class Origin:
         self.current = {}
         self.readers = {}
         self.unknown = set()
+        self.minute = 0
+        self.read_until = {}  # (member, source) -> exclusive minute in the simulated clock
         self.fail_page = None
         self.on_page = None
         self.calls = []
@@ -38,7 +40,8 @@ class Origin:
     def can_read(self, actor, source):
         if source in self.unknown:
             raise ConnectionError("read right unknown")
-        return actor in self.readers.get(source, ())
+        until = self.read_until.get((actor, source))
+        return actor in self.readers.get(source, ()) and (until is None or self.minute < until)
 
     def page(self, source, revision, token):
         offset = int(token or 0)

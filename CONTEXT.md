@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.1](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
+本词汇表记录专题一 V0.3、[专题二 V0.3](docs/architecture/02-sop-workflow.md)、[专题三 A V0.6](docs/architecture/03a-execution-plane.md)与[专题三 B V0.2](docs/architecture/03b-capability-governance.md)使用的业务含义。工作规则见[专题一](docs/architecture/01-unified-work-lifecycle.md)，底座工作假设与设计基线见[统一架构总览](docs/architecture/overview.md)。
 
 ## 工作与责任
 
@@ -111,6 +111,10 @@
 **人工门禁（Human Gate）** 请求有权的成员对当前问题给出决定。问题关联流程实例、节点轮次、候选和适用标准。工作流引用同一份 Issue 决定，按此次放行、例外或验收的权限生效。
 
 **Knowledge（正式知识）**：具有来源、适用范围和有效版本、已被认可可供后续工作使用的项目或团队知识。候选经验经确认和发布后成为正式知识。
+
+**来源章节引用** 固定一份权威文档的来源、修订、章节或块身份以及所选正文摘要。工作上下文用它定位本轮选中的材料。接收者的源读权与实际进入宿主的回合分别核对。
+
+**派生使用授权** 记录来源管理者允许哪些受众使用由项目证据提炼出的哪一版文案，关联提案修订和当前受审证据。团队成员按发布范围阅读获准正文，原报告沿用项目的源读权。
 
 **Evaluation（评价）**：基于执行事实、验证结果或人工反馈，对某个明确对象作出的质量判断。
 

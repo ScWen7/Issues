@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题三 B「能力与知识治理」已进入 V0.1 第一阶段。订单规则从四列换成包含付款时间的五列时，团队默认、项目覆盖、在途实例和宿主当轮输入各自可追溯。已以三个上游代码库、真实 Codex 回合、工作簿与核验脚本跑通首个案例。下一阶段验证项目知识来源修订、按角色选择和经验转正。[3B 设计](docs/architecture/03b-capability-governance.md) · [源码、运行结果与复跑](docs/research/03b-source-evidence.md)
+专题三 B「能力与知识治理」已推进到 V0.2。订单需求改版后，开发取得时区转换说明，独立核验取得角色检查说明。真实 Codex 请求揭示撤权后续用旧线程仍会携带原文，设计据此改为新线程重新取材。订单 C1 的跨区返工与 C2 的修复报告，也已走通从项目草稿到团队经验的审核和退役。下一阶段验证 Role、Skill 和 Playbook 同时使用时的预算与冲突。[3B 设计](docs/architecture/03b-capability-governance.md) · [订单知识与宿主实测](docs/research/topic-03b/project-knowledge.md)
 
 专题三 A「执行平面与宿主适配」V0.6 已完成设计收口。最新修订覆盖返工报告晚到附件、投递证据缺失及旧领取代次的恢复条件，53 项基础回归在本轮远端作业通过。[3A 设计](docs/architecture/03a-execution-plane.md) · [与 3B 的交接](docs/architecture/execution-capabilities.md)
 
@@ -32,6 +32,7 @@
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
 | [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
 | [专题三 B：能力与知识治理](docs/architecture/03b-capability-governance.md) | 查看规则和脚本如何发布、在项目中选用、换版和重验 |
+| [专题三 B：项目知识与经验发布](docs/research/topic-03b/project-knowledge.md) | 从权威文档修订查到角色搜索、实际宿主输入、撤权处置和返工经验发布 |
 | [专题三 B：源码与订单实验](docs/research/03b-source-evidence.md) | 从规则发布追到真实宿主回合、脚本摘要、工作簿和结果消费 |
 | [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、三种宿主入口、任务身份、换机接续和迟到结果归属 |
 | [专题三 A：宿主能力与 3B 交接](docs/architecture/execution-capabilities.md) | 按入口和宿主查看能力证据、缺项处理及资产版本交接 |
