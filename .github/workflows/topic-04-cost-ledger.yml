@@ -19,4 +19,4 @@ jobs:
         with:
           node-version: 24
       - name: Run deterministic cost ledger cases
-        run: node --test prototypes/topic-04/cost-ledger.test.mjs
+        run: node --test prototypes/topic-04/*.test.mjs
