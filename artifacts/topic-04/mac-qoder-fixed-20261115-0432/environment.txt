@@ -1,0 +1,16 @@
+collected_at_utc=2026-11-15T04:34:19.717306+00:00
+test_host=local Mac
+os_version=15.3.2
+kernel_arch=Darwin 24.3.0 x86_64
+node=v24.15.0
+qoder=1.1.88
+qodercli=1.1.88
+qodercli_path=/Users/scwen/.local/bin/qodercli
+qoder_sdk=1.0.59
+sdk_declared_managed_cli_version=1.1.83
+runtime_selection=explicit QODERCLI_PATH
+request_id_exposure=QODER_EXPOSE_REQUEST_ID=true in SDK options.env
+source_commit=a99d9df5080d4a1e28f0f51be27ada550db15f69
+probe_sha256=85eb073b29c97e21276741f93c8de6d1c0812fb43f9ead47feb201483029f4a8
+run_id=topic04-qoder-mac-20261115-0432-fixed
+previous_receipt_sha256=26f33310429c2ee3ca9ca204456f8cfa9dbf56fe26c87a26976b95bed24f46c4

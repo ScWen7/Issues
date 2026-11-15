@@ -1,0 +1,25 @@
+{
+  "provider": "qoder",
+  "sdk_version": "1.0.59",
+  "runtime_version": "1.1.88",
+  "run_id": "topic04-qoder-mac-20261115-0432-fixed",
+  "source_commit": "a99d9df5080d4a1e28f0f51be27ada550db15f69",
+  "request_id_exposure_enabled": true,
+  "started_at": "2026-11-15T04:32:57.301096+00:00",
+  "finished_at": "2026-11-15T04:35:57.283973+00:00",
+  "exit_code": -15,
+  "timed_out": true,
+  "stderr_seen": true,
+  "unrecognized_stdout_lines": 0,
+  "safe_probe_diagnostics": [
+    {
+      "provider": "qoder",
+      "status": "incomplete",
+      "assistantCount": 0,
+      "resultCount": 1
+    }
+  ],
+  "diagnostic_categories": [],
+  "request_rows": 0,
+  "session_snapshot_rows": 1
+}

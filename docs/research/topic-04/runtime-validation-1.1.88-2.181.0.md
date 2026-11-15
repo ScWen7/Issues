@@ -206,7 +206,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 对照 2026-11-15 可访问的官方协议文档，补充以下结论：
 
-**Qoder。** 官方 TypeScript SDK 类型定义中，Assistant 消息的 `message.message.usage.credits`、`original_credits`、`billable` 是可选的单次模型请求字段；Result 的 `total_credits` 与 `modelUsage[model].credits` 是当前 CLI Session 累计值。顶层 `request_id` 默认不暴露，需在 SDK options.env 中设置 `QODER_EXPOSE_REQUEST_ID='true'`。本次探针没有启用该选项，并把 `message.uuid` 写入回执的 `request_id` 列；这是投影字段误命名，不是原生 request_id。本次应解释为：SDK 消息事件 UUID 已观察，原生 request_id 未观察，Assistant 请求级 Credits 未观察。现存 JSONL 作为原始归档保留，不追改原始回执或其 SHA-256。已在提交 `6c5b34a` 修正探针：启用 `QODER_EXPOSE_REQUEST_ID=true`，分开输出 `event_id=message.uuid` 与 `request_id=message.request_id ?? null`。该修复尚未在目标 Mac 上重新执行，新的请求 ID / Credits 字段仍待真实回执确认。
+**Qoder。** 官方 TypeScript SDK 类型定义中，Assistant 消息的 `message.message.usage.credits`、`original_credits`、`billable` 是可选的单次模型请求字段；Result 的 `total_credits` 与 `modelUsage[model].credits` 是当前 CLI Session 累计值。顶层 `request_id` 默认不暴露，需在 SDK options.env 中设置 `QODER_EXPOSE_REQUEST_ID='true'`。首轮探针没有启用该选项，并把 `message.uuid` 写入回执的 `request_id` 列；这是投影字段误命名，不是原生 request_id。首轮应解释为：SDK 消息事件 UUID 已观察，原生 request_id 未观察，Assistant 请求级 Credits 未观察。现存 JSONL 作为原始归档保留，不追改原始回执或其 SHA-256。已在提交 `6c5b34a` 修正探针：启用 `QODER_EXPOSE_REQUEST_ID=true`，分开输出 `event_id=message.uuid` 与 `request_id=message.request_id ?? null`。修正版已在目标 Mac 重新执行，新回执的 request_id 仍为 null、请求级 Credits 仍未观察，具体结果见第 8.2 节。
 
 **CodeBuddy。** 官方 v2.181.0 Release Notes 明确说明 stream-JSON per-turn usage 完善并提供稳定 Stage identity。官方协议明确：frame `uuid` 是投递身份；`requestId` 是用户 Turn 身份；`stage.id` 是计量 Stage 稳定身份；同一 Stage 后续修订覆盖原值；Turn snapshot 与 Result 内 `turnUsage` 是同一份快照。真实 0.69 Stage 与两份 0.69 snapshot 一致，符合该口径。
 
@@ -215,3 +215,20 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 **归档环境差异。** 早先本节将架构写为 arm64，与归档 `environment.txt` 的 `Darwin 24.3.0 x86_64` 不一致；现按实际采集输出修正为 x86_64（仅陈述采集环境报告，不推断物理 CPU 架构）。
 
 官方资料：[Qoder Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript references](https://docs.qoder.com/cli/sdk/references-typescript) · [CodeBuddy v2.181.0 Release Notes](https://www.codebuddy.cn/docs/cli/release-notes/v2.181.0) · [CodeBuddy Stream-JSON usage_update](https://www.codebuddy.cn/docs/cli/stream-json-turn-usage) · [Copilot Usage and billing](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing) · [Copilot Streaming events](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events)。
+
+### 8.2 Qoder 修正版探针的 Mac 重跑（2026-11-15）
+
+使用提交 `a99d9df5080d4a1e28f0f51be27ada550db15f69` 的探针副本，复制后逐字节核对源码。qoder 与独立 qodercli 均为 1.1.88，SDK 保持 1.0.59；继续通过 `QODERCLI_PATH` 选择本机 CLI，并在 SDK options.env 启用 `QODER_EXPOSE_REQUEST_ID=true`。本轮采用独立临时目录、新 Run 标识和新 Session，未重跑其他宿主。
+
+| 检查 | 新回执结果 |
+|---|---|
+| 身份映射 | event_id 有值，request_id 为 null；两字段分开保存 |
+| 请求级用量 | Assistant 事件 0 条，请求 Credits 为 null / unknown |
+| Session 快照 | Result 事件 1 条，原生 total_credits 为 0，单独记为 Session 累计快照 |
+| 结束状态 | 探针输出 incomplete，assistantCount=0、resultCount=1；Node 进程 180 秒未退出，由采集器终止，退出码 -15 |
+| 重放 | 新快照按 event_id 离线重放三次，唯一事件数为 1；请求级重放仍为未观察 |
+| 总判定 | PARTIAL：已核对字段映射修复，原生请求身份与请求级 Credits 仍未取得 |
+
+新回执 SHA-256 为 `581cefbb868896d47bd15efcdcd429d7416d1274e9a4d0754dc9e3dcae1168c3`。首轮原始回执仍为 `26f33310429c2ee3ca9ca204456f8cfa9dbf56fe26c87a26976b95bed24f46c4`，已与原归档逐字节核对。stderr 只保留出现标志及探针自身的白名单 incomplete 计数；原始诊断、Prompt 和模型回复正文未进入材料。
+
+[本轮完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432.zip) · [新回执](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-receipt.jsonl) · [进程状态](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-process.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/SHA256SUMS.txt)

@@ -137,13 +137,13 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 | CodeBuddy CLI 2.181.0 | `system/usage_update` 的 stage 带 `stage.id`、`stage.credits`；snapshot 与 Result 内 `turnUsage` 相同；`total` 是当前 Turn 快照。 | 一条真实 model stage = 0.69 Credits；Turn snapshot = 0.69；Result snapshot = 0.69。 | 该 Turn 的真实 Stage 消耗为 0.69；两份 snapshot 是同一事实的重复呈现，不相加。 |
 | GitHub Copilot CLI 1.0.107 | 官方 SDK 的 `assistant.usage` 提供单次调用 Token 与 premium multiplier；`session.usage_checkpoint.totalNanoAiu` / `session.usage.getMetrics` 提供 Session 累计 AI credit。 | 两次 invocation 共用一个 Session。累计 nano-AIU 为 7,324,050,000 → 7,637,870,000；premium request cost 为 1 → 2。 | 差值 313,820,000 nano-AIU 仅是连续 Session snapshot 的派生差；没有直接的逐请求 nano-AIU 事件，逐请求 Credits = unknown。 |
 
-Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent SDK 包为 1.0.59，SDK 默认声明管理的 CLI 版本为 1.1.83，但测试通过 `QODERCLI_PATH` 显式指定本机 1.1.88，因此不是 SDK 自动下载版本的验证。Qoder 官方文档说明顶层 `request_id` 默认不提供，需通过 `QODER_EXPOSE_REQUEST_ID=true` 启用。现有 Qoder 回执探针曾把 `message.uuid` 投影到 `request_id`，字段命名不准确：该值应解释为 SDK 消息事件 UUID；本次真实 request_id 未取得。已在提交 `6c5b34a` 修正探针：显式启用 `QODER_EXPOSE_REQUEST_ID=true`，分别输出 `request_id` 与 `event_id`。该代码修复尚未经过目标 Mac 上的真实重跑，不能回填为已验证事实。不得将旧回执中的 event UUID 误用为请求去重键。
+Qoder 版本核对补充：本机 qodercli 与目标版本均为 1.1.88；Agent SDK 包为 1.0.59，SDK 默认声明管理的 CLI 版本为 1.1.83，但测试通过 `QODERCLI_PATH` 显式指定本机 1.1.88，因此不是 SDK 自动下载版本的验证。Qoder 官方文档说明顶层 `request_id` 默认不提供，需通过 `QODER_EXPOSE_REQUEST_ID=true` 启用。首轮 Qoder 回执探针曾把 `message.uuid` 投影到 `request_id`，字段命名不准确：该值应解释为 SDK 消息事件 UUID；首轮真实 request_id 未取得。已在提交 `6c5b34a` 修正探针：显式启用 `QODER_EXPOSE_REQUEST_ID=true`，分别输出 `request_id` 与 `event_id`。2026-11-15 在同一 Mac 以提交 `a99d9df` 的修正版重跑，取得独立的新回执：event_id 有值，request_id 仍为 null，Assistant 用量事件为零，Session 累计快照为 0，判定仍为 PARTIAL。探针报告 incomplete，Node 进程在 180 秒后由采集器终止。新旧回执分别保存，旧回执字节与 SHA-256 保持原值；消息事件 UUID 只按消息身份使用。[修正版重跑记录](topic-04/runtime-validation-1.1.88-2.181.0.md#82-qoder-修正版探针的-mac-重跑2026-11-15) · [新验证明细](../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/validation.json)。
 
 ### 10.2 事件身份、重复上报与修订
 
 - **CodeBuddy：** 原生 requestId 表示用户 Turn；`stage.id` 表示模型或生成工具 Stage 的稳定身份；外层 frame `uuid` 是投递身份，不是计量身份。按 `(session_id, requestId, stage.id)` upsert。真实回执离线重放三次，仍归并为 0.69；Turn snapshot 和 Result 中相同的 snapshot 不得重复结算。本次没有真实 Stage 修订事件，Stage 更正覆盖由 13 项离线协议测试验证。
 - **Copilot：** 官方事件信封有 UUID event ID；本机两个 checkpoint 离线重放三次后仍只有两个唯一 checkpoint。两个 invocation 的 `turnId` 都是 `0`，说明 turnId 是会话内部序号，恢复 / 多入口下不能单独作为唯一键。第二次 invocation 有 `interactionId` 与 `apiCallId`，第一次的 API call ID 未被初始投影保留。result 终态帧在本次 JSONL 投影中没有 event ID，不能用于 checkpoint 去重。
-- **Qoder：** 本次没有 Assistant 请求用量事件，因此请求级重复上报行为未观察；Result Session snapshot 不进入请求消耗求和。当前探针把 event UUID 误标为 request_id，应在后续采集修正字段并启用 request_id 后再验证。
+- **Qoder：** 首轮和修正版重跑均没有 Assistant 请求用量事件，请求级重复上报行为保持未观察；Result Session snapshot 单独保存。旧回执中误标为 request_id 的值按事件 UUID 解读；修正版已拆分两个字段，实际 request_id 仍为 null。新快照按 event_id 离线重放三次后只保留一个事件，此项只验证快照事件去重。
 
 ### 10.3 Run / Session / Turn 的关联结论
 
