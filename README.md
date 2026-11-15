@@ -6,6 +6,8 @@
 
 从[团队研发协作工作机制](docs/architecture/overview.md#3-工作主线)开始。用订单导出说明负责人怎样组织工作、不同成员如何取得依据、何时调用 SOP、结果如何回到 Issue，再用下一项相似需求研究经验复用。先以轻量修改走通原 Issue，再查订单任务确实缺哪段资料或哪项能力。团队与项目在平台维护可复用配置，资料可沿用原有来源，成员无需维护团队 Git 仓。当前优先核验补充依据对角色判断和人员交接的实际影响。[团队与项目上下文](docs/architecture/overview.md#团队与项目上下文) · [本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
 
+团队知识与代码理解分别开展产品设计。成员可在没有 Issue 时查阅、维护团队资料，或从项目架构读到某个版本的实现。Issue 和本地 Agent 按需引用其中的依据。[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) · [项目代码 Wiki](docs/architecture/code-wiki.md)
+
 ## 当前架构基线
 
 **V1.1 · Multica 基座融合架构 · 交叉审查修订**
@@ -27,6 +29,8 @@
 | [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
 | [专题三 A：宿主能力证据矩阵](docs/architecture/execution-capabilities.md) | 不同宿主和入口的能力、证据与缺项 |
 | [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
+| [团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) | 从原文找到有效业务口径，维护项目说明、团队知识及其适用范围 |
+| [项目代码 Wiki](docs/architecture/code-wiki.md) | 按基准阅读项目架构、模块、关键流程和跨仓调用，回到代码核对 |
 | [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
 | [专题五：统一工作台](docs/architecture/05-unified-workbench.md) | 项目、Issue、待我决定和十二类用户工作的入口；订单、轻量工作及异常走查 |
 | [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
