@@ -70,6 +70,7 @@ export function normalizeQoderUsage(event, identity = {}) {
     nativeRequestId: event.eventId,
     provider: "qoder",
     runId: identity.runId ?? null,
+    attributionStatus: identity.runId ? "explicit_run_binding" : "member_event_unallocated",
     memberId: event.memberId ?? event.userId ?? null,
     metric: "credits_consumed",
     unit: "qoder_credit",
@@ -110,7 +111,42 @@ export function normalizeCodeBuddyUsage(input) {
     },
     currency: null,
     trustRank: input.eventId ? 2 : 1,
-    attributionStatus: input.eventId ? "provider_event" : "member_period_statement"
+    attributionStatus: input.runId ? "explicit_run_binding" : (input.eventId ? "provider_event_unallocated" : "member_period_statement")
+  };
+}
+
+export function normalizeQoderPackage(pkg, identity = {}) {
+  if (!pkg?.id || !Number.isFinite(pkg.limitValue) ||
+      !Number.isFinite(pkg.usedValue) || !Number.isFinite(pkg.remainingValue) || !pkg.unit) {
+    throw new Error("Qoder package requires id, numeric quota fields and unit");
+  }
+  return {
+    provider: "qoder",
+    organizationId: identity.organizationId ?? null,
+    packageId: pkg.id,
+    source: pkg.source ?? null,
+    status: pkg.status ?? null,
+    unit: pkg.unit,
+    limit: pkg.limitValue,
+    used: pkg.usedValue,
+    remaining: pkg.remainingValue,
+    activatedAt: pkg.activatedAt ?? pkg.createdAt ?? null,
+    expiresAt: pkg.expiresAt ?? null,
+    observedAt: identity.observedAt ?? null,
+    recordType: "quota_snapshot"
+  };
+}
+
+export function bindUsageToRun(usage, binding) {
+  if (!usage || !binding?.runId || !binding.evidenceRef || !binding.method) {
+    return { ...usage, runId: null, attributionStatus: "unallocated" };
+  }
+  return {
+    ...usage,
+    runId: binding.runId,
+    attributionStatus: "explicitly_attributed",
+    attributionEvidence: binding.evidenceRef,
+    attributionMethod: binding.method
   };
 }
 
