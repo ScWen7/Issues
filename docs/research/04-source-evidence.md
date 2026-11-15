@@ -48,6 +48,16 @@ V0.1 · 探索基线 · 2026-11-15
 
 证据：[3B Hook 复验归属修订](topic-03b/existing-session.md#hook-复验的-run-归属修订) · [后继 Run 原始回执](topic-03b/fixtures/hook-reverification.json)。
 
+### 2.5 Qoder 与 CodeBuddy Credits 官方计量机制
+
+**Qoder：** 官方企业 Usage API 提供成员级和组织级 Credits 事件。稳定 `eventId`、`beginAt`、可更新的 `finishAt`、成员、来源、操作、模型档位、`credits` 和 Billing Factor 调整后的 `cost` 均可读取；事件列表支持分页，查询时间范围最多 7 天。组织资源包 API 返回包 ID、来源（购买 / 赠送 / 试用等）、状态、额度、累计使用、剩余额度和到期时间。API 还允许负 Credits 退款 / 冲正。该接口要求组织 API Key，不能假设个人订阅账号也有同样 API 权限。
+
+**CodeBuddy：** 官方文档确认 Credits 是 AI 操作统一计量单位，受模型档位、任务复杂度和上下文长度影响；Team 成员从共享池扣减，余额及使用历史通过 Profile → Usage 查看。本轮检索到的公开文档没有给出逐事件 Usage API 或稳定事件 ID，因此先设计为成员 / 团队 / 周期级账单对账导入，不假定可实时逐 Run 归因。
+
+**本轮接入原则：** Qoder Credit 与 CodeBuddy Credit 使用独立 unit；Credits 数值不是美元。Qoder API 的 `cost` 仍是 Credits 调整值。只有有明确套餐 / 发票 / 购买包金额和有效期时才换算成估算货币金额；免费、赠送、团队共享额度和付费购买额度要保留不同来源，不能把用掉的 Credits 统一视作现金支出。
+
+官方依据：[Qoder Enterprise Usage APIs](https://docs.qoder.cn/en/enterprise/usage-api) · [Qoder Credits](https://docs.qoder.com/Credits) · [CodeBuddy Credits](https://www.codebuddy.ai/docs/ide/Account/credits) · [CodeBuddy Usage](https://www.codebuddy.ai/docs/ide/Account/usage)。
+
 ## 3. 第一批关键验证假设
 
 | 编号 | 假设 | 失败时的设计影响 |
@@ -56,6 +66,9 @@ V0.1 · 探索基线 · 2026-11-15
 | C2 | Codex 累计快照与 Claude 按消息累计用量可以统一映射为带区间的 Usage Entry，同时保留宿主原口径 | 无法证明独占区间时，保留 Token-only / partial，不做差额猜测 |
 | C3 | 迟到的更可信证据能更正当前计量，同时完整保留旧值及更正链 | 使用 append-only 修订，不覆盖原始 Observation |
 | C4 | SOP 节点、父子 Issue、Squad、项目汇总可由 Run 去重得到，不需要各层独立记账 | 若 Run 归属不完整，先补归属回执，不在汇总层补猜 |
+| C5 | Qoder 同一 eventId 的重复拉取 / finishAt 更新执行 upsert；负 Credits 退款 / 冲正不丢失 | 若无法确认事件修订关系，保留原始快照并标记待核对 |
+| C6 | CodeBuddy 只有成员 / 周期 Credits 汇总时，不将其伪分配给具体 Run | 先显示未分摊团队 / 成员成本，等待更细粒度的官方记录 |
+| C7 | 不同宿主 Credits 只有在有来源、币种、有效期和版本的换算依据时才可换算金额 | 保留原生 Credits，不输出虚假的统一成本 |
 | Q1 | 事后评分使用独立评价执行记录，不能改写原 Run 的状态和业务验收 | 评分只能作为独立反馈，不接入门禁 |
 | Q2 | Benchmark 只有在样本、标准、模型 / 工具和评分配置可比时才给出胜负结论 | 显示不可比及原因，不产出误导性排名 |
 | I1 | 改进提案可以从失败事实追到候选资产修改、回归题和发布版本 | 无证据闭环的建议只保留为人工笔记 |
@@ -72,13 +85,19 @@ V0.1 · 探索基线 · 2026-11-15
 - 固定 Benchmark 下的候选对比；样本、rubric、模型、工具、effort 变化时拒绝直接比较。
 - 改进建议被拒绝、部分应用、候选回归失败、审核通过发布、发布后效果未改善等分支。
 
-## 5. 成本账本原型首轮结果
+## 5. 异构 Credits 适配与验证
+
+原型增加 Qoder Usage 事件归一化、CodeBuddy 成员 / 周期用量归一化、Qoder 额度包快照、显式 Run 关联和按版本换算货币金额。Qoder 的事件归一化保留 eventId、beginAt、finishAt、memberId、source、operation、modelTier、credits 与 billing-adjusted credits；没有显式 Run 绑定时状态保持 member_event_unallocated。CodeBuddy 在缺少事件 ID 时保持 member_period_statement，Run 为空。两者单位分别为 qoder_credit 与 codebuddy_credit，不可混加。
+
+测试覆盖事件更新身份、负 Credits、额度快照不作为执行用量、无显式绑定不归 Run、无换算依据不生成金额，以及不同厂商 Credits 隔离。该层仅是归一化与归属原型，不代表已连接成员真实账户；Qoder 企业 API 实际接入仍需组织 API Key，CodeBuddy 真实账单需取得成员提供的 Usage 明细。
+
+## 6. 成本账本原型首轮结果
 
 已在分支中加入确定性 Node 原型，覆盖多观察源去重、命名空间隔离、同等可信来源冲突、较高可信来源优先、Run 归属冲突、缺失原生标识、累计快照差额、基线缺失 / 模型变化 / 计数重置 / 乱序，以及 Run 汇总排重。成本账本 11 项用例通过；随后与评价原型合并运行的远端 Node 24 CI 共 20 项用例全部通过。[成本账本独立 CI #4](https://github.com/ScWen7/Issues/actions/runs/43670463148) · [成本 + 评价 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。
 
 该原型仅验证确定性归集规则，不代表最终账本 Schema。后续还需增加 Observation 更正链、跨采集器身份映射、计量覆盖区间、供应商费率 / 账单对账和平台后台成本类型。
 
-## 6. 评价与 Benchmark 原型首轮结果
+## 7. 评价与 Benchmark 原型首轮结果
 
 新增独立评价原型：只对终态业务 Run 启动评价，评价记录引用原 Run、由独立 evaluation Run 承载；缺失证据返回 inconclusive 而不是低分；加权维度分必须带证据；事后评价默认 advisory-only，只有 SOP 明确声明门禁且 Run 与 scorer 版本匹配时才允许形成门禁结果。
 
@@ -86,6 +105,6 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 
 当前原型仍不实现评分任务调度、模型裁判调用、完整样本存储、人工审批 UI 或资产发布；它验证的是记录隔离、比较资格和决策边界。
 
-## 7. 证据边界
+## 8. 证据边界
 
 现有上游测试和 3A 回环探针证明部分协议与算法行为，不证明真实供应商账单完整性、所有宿主成本覆盖或生产团队中的改进收益。第一轮原型将使用可复现的合成 Observation 和已有真实宿主协议记录；账单对账与真实项目发布后观察另列现场验收。
