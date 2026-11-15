@@ -149,3 +149,35 @@ test("Qoder and CodeBuddy credits cannot be mixed by unit conversion", () => {
   assert.notEqual(qoder.unit, codebuddy.unit);
   assert.notEqual(qoder.provider, codebuddy.provider);
 });
+
+test("Qoder usage events stay unallocated until an explicit Run binding exists", () => {
+  const usage = normalizeQoderUsage({
+    eventId: "evt-2", beginAt: "2026-11-15T00:00:01Z",
+    memberId: "member-1", source: "CLI", operation: "Agent", credits: 18
+  }, { organizationId: "org-1" });
+  assert.equal(usage.runId, null);
+  assert.equal(usage.attributionStatus, "member_event_unallocated");
+});
+
+test("Qoder package balances are quota snapshots, not execution usage", () => {
+  const pkg = normalizeQoderPackage({
+    id: "package-1", source: "purchased", status: "active",
+    limitValue: 1000, usedValue: 125.5, remainingValue: 874.5,
+    unit: "credits", expiresAt: "2027-01-01T00:00:00Z"
+  }, { organizationId: "org-1", observedAt: "2026-11-15T02:00:00Z" });
+  assert.equal(pkg.recordType, "quota_snapshot");
+  assert.equal(pkg.used, 125.5);
+  assert.equal(pkg.remaining, 874.5);
+  assert.equal(pkg.provider, "qoder");
+});
+
+test("Run attribution requires an explicit binding and evidence reference", () => {
+  const usage = normalizeQoderUsage({ eventId: "evt-3", credits: 8 }, { organizationId: "org-1" });
+  const unbound = bindUsageToRun(usage, { runId: "run-1", method: "time-window" });
+  assert.equal(unbound.runId, null);
+  const bound = bindUsageToRun(usage, {
+    runId: "run-1", method: "member-confirmed-event-link", evidenceRef: "receipt:member-confirmed"
+  });
+  assert.equal(bound.runId, "run-1");
+  assert.equal(bound.attributionStatus, "explicitly_attributed");
+});
