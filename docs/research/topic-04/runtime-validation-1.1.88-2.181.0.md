@@ -232,3 +232,15 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 新回执 SHA-256 为 `581cefbb868896d47bd15efcdcd429d7416d1274e9a4d0754dc9e3dcae1168c3`。首轮原始回执仍为 `26f33310429c2ee3ca9ca204456f8cfa9dbf56fe26c87a26976b95bed24f46c4`，已与原归档逐字节核对。stderr 只保留出现标志及探针自身的白名单 incomplete 计数；原始诊断、Prompt 和模型回复正文未进入材料。
 
 [本轮完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432.zip) · [新回执](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-receipt.jsonl) · [进程状态](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-process.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/SHA256SUMS.txt)
+
+### 8.3 Qoder Query 生命周期修正与下一轮验证
+
+官方 SDK 的 Cost and usage 示例在读取完用量后显式调用 `q.close()`；TypeScript References 说明 `query()` 返回可控制的 Query，且 `options.abortController` 可主动结束 Session。8.2 回执在 Result 已到达后仍运行至外部 180 秒超时，当前探针没有关闭 Query，因此进程超时不能作为 Qoder CLI 任务执行失败的证据。官方文档：[Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
+
+已在提交 `3d18c51e6e459b6f7f4ebf609f46a521642781f6` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中调用 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正尚未在 Mac 真实执行，因此 8.2 的 PARTIAL 结论仍有效，但超时原因暂定为 `probe_lifecycle_unverified`，不得宣称为 CLI / SDK Runtime 故障。
+
+下一次真实复验只需运行该修正版，不更改 CLI / SDK 版本，不扩大任务权限。判定分支：
+- Result 后正常退出，且出现 Assistant message：核对请求级 `usage.credits`、顶层 `request_id`、`event_id`，再做请求回执三次离线重放。
+- Result 后正常退出，但仍无 Assistant message：记录为 SDK / CLI 消息流字段缺失或协议兼容问题；请求 Credits 继续 unknown。
+- 仍超时：检查 q.close() 是否执行、CLI 子进程是否退出，并保留安全诊断分类；不得只凭外层超时判 Runtime 失败。
+- 没有 Result：单独检查初始化、鉴权、请求执行和错误类别；不得将缺失 Credits 解释为 0。
