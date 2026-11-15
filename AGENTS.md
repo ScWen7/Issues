@@ -1,12 +1,9 @@
-# AgentPlatform
+# AgentPlatform 仓库维护
 
-本目录维护 Team Agent Collaboration Platform 的产品架构设计，当前不包含平台实现。
+`master` 是发布产品设计的默认分支。从 [README](README.md) 进入[架构总览](docs/architecture/overview.md)，按问题找到负责的专题。术语在 [CONTEXT.md](CONTEXT.md) 维护，Multica 固定版本的覆盖范围见[底座能力与边界](docs/architecture/governance-baseline.md)。
 
-- 用户维护的方向输入为 `Team Agent Collaboration Platform.md`；不得把其中初始概念当作已确定的数据模型。
-- 设计入口为 `README.md`，统一术语见 `CONTEXT.md`，跨专题关系见 `docs/architecture/overview.md`。
-- 当前阶段按[整体产品范围](docs/architecture/overview.md#当前设计重点)推进。以成员从平台或本机开工、团队接手交付以及经验在下次工作中被采用的路径组织五个专题。设计进度与待完善处统一见[总览](docs/architecture/overview.md#4-跨专题职责)。
-- 提出下一项设计时，先核对总览、对应专题及 Multica 现有入口、配置和源码，说明尚缺哪项成员决定。产品设计、案例推演和后续工程接入各按实际范围记录。[治理基线](docs/architecture/governance-baseline.md#3-扩展原则先复用再补缺口)
-- 先确定工作机制、产品边界和核心模型，不提前编写数据库、接口或技术实现方案。
-- 用轻量文案和跨成员订单说明同一设计如何应对不同规模的工作。团队 Wiki 与项目资料、项目代码 Wiki 可分别按需接入。
-- 研究引用固定源码版本与文件位置，区分代码事实、设计推导和未验证能力。参考源码只读，研究副本与临时笔记放 `.tmp/`。
-- 任何专题均复用统一工作对象、Work Context、Execution Contract 和 Evidence & Feedback；不得另建一套工作状态或证据权威。
+- 直接更新定义该行为的正文。写清谁在什么情形下可以采取什么行动、结果记录在哪里、谁能接着工作。总览只维护跨专题关系；其他文档引用原定义。
+- 提出产品扩展时，先对照 Multica 的实际入口、配置、源码或测试，说明哪个成员的具体工作仍缺支持。已有机制直接沿用。团队资料与代码说明根据工作需要接入。
+- 产品设计放在 `docs/architecture/`。带版本的源码观察、实验方法和结果放在 `docs/research/`，复跑工具和原始回执分别归 `prototypes/` 与 `artifacts/`。用例标明假设。能力覆盖按实际入口记录，缺少回执的字段标为未知。
+- 工作从最新 `master` 开始。需要分支时围绕一项具体改动使用短期分支，合回后核对全部独有提交和打开的 PR，再清理分支。已经发布的方案就地维护，讨论和修订过程由 Git 或 PR 记录。
+- 修改名称、路径或标题时同步检查引用。运行 `python3 .github/scripts/check_design_links.py` 检查仓库内的链接和设计入口。合入前核对专题间的对象含义，以及源码或实验引用的版本。

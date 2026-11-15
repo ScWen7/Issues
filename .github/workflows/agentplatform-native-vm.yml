@@ -1,7 +1,7 @@
 name: AgentPlatform native cross-VM handoff
 on:
   push:
-    branches: [research/3a-independent-runners]
+    branches: [master]
     paths:
       - .github/workflows/agentplatform-native-vm.yml
       - prototypes/topic-03a/native-runner/**

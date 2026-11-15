@@ -1,12 +1,10 @@
-> **架构治理说明（2026-11-15）：** 本文保留 Qoder、CodeBuddy、Copilot 等真实 Runtime 回执和官方协议核验。当前专题四 V1.1 以 Multica Task Usage / Run / Trace 为计量事实底座；本地 Credits 上报链和请求 / Stage 去重的缺项已有固定源码依据，目标 Qoder ACP 是否暴露请求 Credits 仍待对应入口实测。SDK 探针保持其协议实验用途。业务与后台成本分类、候选 Benchmark 先于发布的机制见[专题四 V1.1](../architecture/04-cost-quality-improvement.md)和[架构治理基线](../architecture/governance-baseline.md)。
-
 # 专题四 · 成本、质量与自改进研究记录
 
-V0.1 · 探索基线 · 2026-11-15
+研究日期为 2026-11-15。证据包括固定上游源码、协议夹具、独立原型和指定版本的本机回执。[成本、质量与改进设计](../architecture/04-cost-quality-improvement.md)
 
-## 1. 本轮输入
+## 1. 执行与计量范围
 
-专题四承接：
+相关输入如下。
 - [专题三 A：执行平面研究](03a-source-evidence.md)，提供 Run、宿主原生标识、Trace、Usage、Artifact、共享范围和采集覆盖。
 - [专题三 B：能力与知识治理](../architecture/03b-capability-governance.md)，提供资产版本、实际投递 / 加载证据、工具来源和跨宿主结果证明。
 - [专题二：SOP 工作流](../architecture/02-sop-workflow.md)，提供 Node Attempt、节点内自修正、执行重试、跨节点返工和预算边界。
@@ -22,7 +20,7 @@ V0.1 · 探索基线 · 2026-11-15
 - 控制平面按 task / provider / model 覆盖当前用量快照；过程快照跳过加法指标，避免刷新重复累计。
 - 当前上游仍需本项目补齐：多个采集源的并发合并、来源冲突、计量覆盖区间、跨系统幂等和更正历史。
 
-证据与复跑：[3A 研究第 11 节](03a-source-evidence.md#11-第二阶段宿主协议与本地观察)。
+证据与复跑：[3A 研究第 11 节](03a-source-evidence.md#11-宿主协议与本地观察)。
 
 ### 2.2 TeamAI：独立评价与自改进
 
@@ -44,9 +42,9 @@ V0.1 · 探索基线 · 2026-11-15
 
 证据：[LoopForge 分册第 9 点](topic-02/loopforge.md)。
 
-### 2.4 专题三 B 的最新复验归属修订
+### 2.4 Hook 复验的执行归属
 
-专题三 B 后续交叉审查明确了一个成本归集边界：会话切换发生在实际开工前，且原派发仍有效时，可以沿用原 Run；但 Hook 改写结果发生在宿主已返回并退出后，重新执行必须签发后继 Run，关联原 Run 的拒收证据，同时可保留原 Node Attempt、候选和规则版本。该修订已进入当前分支所合并的 3B 资料与真实回执。专题四必须将原 Run 的失败执行成本与后继 Run 的复验成本分别记录，再由节点尝试视图汇总，不能因它们属于同一尝试而合并为一次执行。
+实验在宿主返回并退出后发现 Hook 改写了结果。复验关联后继 Run，原 Run 留有拒收证据。两次执行可以对应同一节点尝试、候选和规则版本，使用量分别归属各自执行。开工前换会话且原派发仍有效时，仍可使用原 Run。
 
 证据：[3B Hook 复验归属修订](topic-03b/existing-session.md#hook-复验的-run-归属修订) · [后继 Run 原始回执](topic-03b/fixtures/hook-reverification.json)。
 
@@ -62,8 +60,7 @@ V0.1 · 探索基线 · 2026-11-15
 
 官方依据：[Qoder Agent SDK Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder SDK TypeScript references](https://docs.qoder.com/cli/sdk/references-typescript) · [CodeBuddy Stream-JSON Per-Turn Usage Events](https://www.codebuddy.ai/docs/cli/stream-json-turn-usage) · [Qoder Hooks](https://docs.qoder.com/cli/hooks) · [CodeBuddy Hooks](https://www.codebuddy.ai/docs/cli/hooks)。
 
-
-## 3. 第一批关键验证假设
+## 3. 协议和归属假设
 
 | 编号 | 假设 | 失败时的设计影响 |
 |---|---|---|
@@ -79,7 +76,7 @@ V0.1 · 探索基线 · 2026-11-15
 | I1 | 改进提案可以从失败事实追到候选资产修改、回归题和发布版本 | 无证据闭环的建议只保留为人工笔记 |
 | I2 | 资产发布后必须通过新实例和后续样本验证，不能用提案分数宣称线上改善 | 效果未验证时状态保持“待观察” |
 
-## 4. 首轮验证场景
+## 4. 样本场景
 
 - 多路观察同一请求、同源重复回放、跨源部分重叠、无原生 ID 的弱关联。
 - 累计快照首基线缺失、计数重置、乱序、跨模型、跨 Issue 交错、终态后晚到用量。
@@ -109,13 +106,13 @@ V0.1 · 探索基线 · 2026-11-15
 
 当前状态：**2026-11-15 本机 Mac 实测已归档**。Qoder 1.1.88 首轮 SDK 超时；后续显式关闭 Query 和共享 Daemon，主进程自然退出，六个派生进程经定向清理。各轮仅取得 Session 累计快照，请求 Credits 仍为 unknown，判为 PARTIAL，见[最终复测](topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15)；CodeBuddy 2.181.0 取得 Stage 和一致的终态快照，判为 PASS；新增 Copilot 1.0.107 取得两轮累计用量及恢复后的标识对照，逐请求 Credits 保持 unknown，判为 PARTIAL。真实回执、离线重放、缺失字段对照分别记录。[实测结果](topic-04/runtime-validation-1.1.88-2.181.0.md#8-本机-mac-实测记录2026-11-15) · [白名单回执与验证明细](../../artifacts/topic-04/mac-20261115-0350/validation.json)。
 
-## 7. 成本账本原型首轮结果
+## 7. 本地计量模型结果
 
 已在分支中加入确定性 Node 原型，覆盖多观察源去重、命名空间隔离、同等可信来源冲突、较高可信来源优先、Run 归属冲突、缺失原生标识、累计快照差额、基线缺失 / 模型变化 / 计数重置 / 乱序，以及 Run 汇总排重。成本账本 11 项用例通过；随后与评价原型合并运行的远端 Node 24 CI 共 20 项用例全部通过。[成本账本独立 CI #4](https://github.com/ScWen7/Issues/actions/runs/43670463148) · [成本 + 评价 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。
 
 该原型仅验证确定性归集规则，不代表最终账本 Schema。后续还需增加 Observation 更正链、跨采集器身份映射、计量覆盖区间、估算所用费率版本和平台后台成本类型。
 
-## 8. 评价与 Benchmark 原型首轮结果
+## 8. 评价与 Benchmark 模型结果
 
 新增独立评价原型：只对终态业务 Run 启动评价，评价记录引用原 Run、由独立 evaluation Run 承载；缺失证据返回 inconclusive 而不是低分；加权维度分必须带证据；事后评价默认 advisory-only，只有 SOP 明确声明门禁且 Run 与 scorer 版本匹配时才允许形成门禁结果。
 
@@ -178,7 +175,6 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 8.4 的真实 Mac 复测显示 `await q.close()` 已返回，但 Node 进程仍驻留至外部时限。进一步核对 SDK 1.0.59 官方 npm 包 Runtime Behavior：TypeScript `query()` 使用进程级共享 qodercli daemon，首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；宿主退出前必须调用 `shutdownDaemon()` 停止共享 daemon。`q.close()` 只关闭当前 Query / Session，不能替代 daemon shutdown。官方说明：[npm package](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk) · [How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
 
 因此，8.4 的进程驻留符合共享 Daemon 设计，不构成资源泄漏证据。探针已在 `653e6b1` 修正为先 `await q.close()`、再 `await shutdownDaemon()`。本次使用提交 `85e9a49` 完成 Mac 真实复测：16.458 秒收到 Result，16.794 秒出现两次 await 之后的 incomplete 诊断，16.835 秒主进程自然退出，退出码 2。主进程退出后仍观察到六个本轮派生进程，按已记录的 PID 与进程组限定范围进行额外清理，复查剩余为零。主进程退出已得到验证，派生进程自动清理仍有缺口。Assistant message 为零、request_id 为 null、请求级 Credits 为 unknown，Session 快照为 0，总判定仍为 PARTIAL。[最新复测记录](topic-04/runtime-validation-1.1.88-2.181.0.md#86-qoder-daemon-关闭后的-mac-复测2026-11-15) · [新验证明细](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json)。
-
 
 ### 10.7 Qoder `shutdownDaemon()` 的真实 Mac 复测
 

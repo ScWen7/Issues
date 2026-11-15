@@ -9,11 +9,11 @@
 在成员机器上：
 
 ```bash
-git clone --branch research/topic-04-cost-quality-improvement https://github.com/ScWen7/Issues.git
+git clone https://github.com/ScWen7/Issues.git
 cd Issues
 ```
 
-如果已经有仓库副本，切换到该研究分支并拉取最新提交。
+复跑下文特定的一组历史记录时，在独立仓库副本中检出该组注明的提交，以获得相应版本的探针。
 
 ## 1. 验证原则
 
@@ -172,7 +172,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 另提交 `environment.txt`、`npm ls` 输出（Qoder）和回执文件 SHA-256。不要提交 access token、API Key、账号邮箱、完整 CLI 环境变量、Prompt、回复正文、工具参数或源代码。
 
-## 7. 通过标准与下一步
+## 7. 通过标准
 
 4.1.2 不以“命令运行成功”为通过。必须拿到真实 Runtime stdout / SDK 消息、原生身份、Credits 字段及其 scope。
 
@@ -183,7 +183,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 ## 8. 本机 Mac 实测记录（2026-11-15）
 
-测试代码固定为研究分支提交 `2bf9322e721390b537d6a7ba5d617d0c169a6d7e`。环境为 macOS 15.3.2，采集环境报告的 Darwin 架构为 x86_64，Node 24.15.0、npm 11.12.1。Qoder SDK 实装版本为 1.0.59，通过 `QODERCLI_PATH` 显式指定已核对为 1.1.88 的本机 qodercli。Copilot 使用本机 CLI JSON 事件流及原生 `--usage-output-file`，未另装 SDK。
+测试代码固定为提交 `2bf9322e721390b537d6a7ba5d617d0c169a6d7e`。环境为 macOS 15.3.2，采集环境报告的 Darwin 架构为 x86_64，Node 24.15.0、npm 11.12.1。Qoder SDK 实装版本为 1.0.59，通过 `QODERCLI_PATH` 显式指定已核对为 1.1.88 的本机 qodercli。Copilot 使用本机 CLI JSON 事件流及原生 `--usage-output-file`，未另装 SDK。
 
 | Runtime | 判定 | 真实观察 |
 |---|---|---|
@@ -200,7 +200,6 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 - [完整材料 ZIP](../../../artifacts/topic-04/mac-20261115-0350-with-copilot.zip)
 - [验证明细](../../../artifacts/topic-04/mac-20261115-0350/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-20261115-0350/SHA256SUMS.txt)
 - [Qoder 回执](../../../artifacts/topic-04/mac-20261115-0350/qoder-receipt.jsonl) · [CodeBuddy 回执](../../../artifacts/topic-04/mac-20261115-0350/codebuddy-receipt.jsonl) · [Copilot 回执](../../../artifacts/topic-04/mac-20261115-0350/copilot-receipt.jsonl)
-
 
 ### 8.1 官方协议字段复核与回执身份更正
 
@@ -233,13 +232,13 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 [本轮完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432.zip) · [新回执](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-receipt.jsonl) · [进程状态](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/qoder-process.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-fixed-20261115-0432/SHA256SUMS.txt)
 
-### 8.3 Qoder Query 生命周期修正与下一轮验证
+### 8.3 Qoder Query 关闭探针
 
 官方 SDK 的 Cost and usage 示例在读取完用量后显式调用 `q.close()`；TypeScript References 说明 `query()` 返回可控制的 Query，且 `options.abortController` 可主动结束 Session。8.2 回执在 Result 已到达后仍运行至外部 180 秒超时，该轮探针没有关闭 Query，因此进程超时不能作为 Qoder CLI 任务执行失败的证据。官方文档：[Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
 
 已在提交 `d338cf57cac36f60b9985965f38f36a5c598d3ec` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中等待 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正已完成第 8.4 节的 Mac 真实复测：关闭调用返回后进程仍驻留，请求身份与请求 Credits 仍未取得。8.2 的原始记录保持原样。
 
-下一次真实复验只需运行该修正版，不更改 CLI / SDK 版本，不扩大任务权限。判定分支：
+按以下条件解释该版本探针的输出。
 - Result 后正常退出，且出现 Assistant message：核对请求级 `usage.credits`、顶层 `request_id`、`event_id`，再做请求回执三次离线重放。
 - Result 后正常退出，但仍无 Assistant message：记录为 SDK / CLI 消息流字段缺失或协议兼容问题；请求 Credits 继续 unknown。
 - 仍超时：检查 q.close() 是否执行、CLI 子进程是否退出，并保留安全诊断分类；不得只凭外层超时判 Runtime 失败。
@@ -248,8 +247,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 ```bash
 git fetch origin
-git checkout research/topic-04-cost-quality-improvement
-git pull --ff-only origin research/topic-04-cost-quality-improvement
+git switch --detach d338cf57cac36f60b9985965f38f36a5c598d3ec
 export REPO_ROOT="$PWD"
 mkdir -p /tmp/teamai-topic04-qoder-close && cd /tmp/teamai-topic04-qoder-close
 npm init -y
@@ -290,7 +288,7 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 
 [完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-close-20261115-0446.zip) · [回执](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/qoder-process-summary.txt) · [生命周期观测](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-close-20261115-0446/SHA256SUMS.txt)
 
-### 8.5 Qoder 共享 Daemon 生命周期修正与下一轮复测
+### 8.5 Qoder 共享 Daemon 关闭探针
 
 第三轮回执（8.4）证明 `await q.close()` 已返回，但宿主 Node 进程仍存活。进一步核对 `@qoder-ai/qoder-agent-sdk` 1.0.59 官方 npm 包说明发现：TypeScript `query()` 使用进程级共享 qodercli daemon；首次 Query 启动 daemon，同一宿主进程内后续 Query 复用；`q.close()` 只关闭当前 Query / Session，宿主进程退出前还必须调用 `shutdownDaemon()` 停止共享 daemon。官方说明：[npm package Runtime Behavior](https://www.npmjs.com/package/@qoder-ai/qoder-agent-sdk)；[SDK How it works](https://docs.qoder.com/cli/sdk/how-it-works)。
 
@@ -298,7 +296,7 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 
 本轮仍未解决 Assistant 消息缺失、原生 request_id 为 null、请求级 Credits unknown；这些是独立于 Daemon 退出的问题，不能因为修复进程收尾而视为解决。
 
-下一轮只验证两个边界：
+该探针分别观察生命周期和用量。
 - `q.close()` 后 `shutdownDaemon()` 能否使本轮 Runtime 派生进程正常退出；进程树采样必须限定到本次探针的精确工作目录 / PID，不能把其他 Qoder 会话或宿主进程算入。
 - 正常退出与否不影响用量判定：仍需观察 Assistant message、原生 `request_id` 和 `message.message.usage.credits`；缺失继续为 unknown。
 
@@ -306,8 +304,7 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 
 ```bash
 git fetch origin
-git checkout research/topic-04-cost-quality-improvement
-git pull --ff-only origin research/topic-04-cost-quality-improvement
+git switch --detach 653e6b1
 export REPO_ROOT="$PWD"
 mkdir -p /tmp/teamai-topic04-qoder-daemon-close && cd /tmp/teamai-topic04-qoder-daemon-close
 npm init -y
@@ -349,17 +346,12 @@ shasum -a 256 qoder-receipt.jsonl qoder-process-summary.txt
 
 [完整材料 ZIP](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459.zip) · [回执](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-receipt.jsonl) · [进程摘要](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-process-summary.txt) · [进程观测](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/process-observation.json) · [验证明细](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/SHA256SUMS.txt)
 
-
-### 8.7 本轮结论与后续验证边界
+### 8.7 进程收尾与计量的证据范围
 
 8.6 已证明 `q.close()` + `shutdownDaemon()` 可使探针 Node 主进程在约 16.8 秒内自然退出，不再触发 180 秒外部超时。退出码 2 是探针因 Assistant 事件缺失而主动设置的 incomplete 状态，不是 Runtime 进程崩溃。与此同时，主进程退出后仍观察到六个本轮派生进程，采集器按已记录 PID 关系和本轮进程组清理后归零。因此必须拆分三个状态：Query/Daemon API 关闭完成、Node 主进程自然退出、所有本轮派生进程清理完成。当前前两项已验证，第三项仍需显式清理；不能将 `shutdownDaemon()` 宣称为完整进程树清理保证。
 
 Qoder 用量能力仍为 PARTIAL：Assistant message 为 0，`request_id=null`，请求 Credits 为 null / unknown；Session `total_credits=0` 是已观察到的累计快照，不代表本次请求消耗为 0。event_id 可用于该 Result 观察的离线幂等重放（三次输入归并为一条），但不替代 Request ID，也不证明请求级用量幂等。
 
-**下一阶段执行顺序：**
-1. 在受控独立进程组中复验派生进程清理，记录 SDK / CLI 子进程类型、PID 父子关系与退出时间；仅清理本轮进程组，不按进程名称全局 kill，避免影响成员其他 Qoder 会话。
-2. 研究 Qoder SDK 1.0.59 的实际事件流：Assistant message 缺失时，检查 SDK 初始化 / CLI 子进程输出适配及官方支持的 CLI JSON / SDK 入口，确定 `total_credits=0` 的含义；在取得独立证据前保持 unknown。
-3. 单独验证 `QODER_EXPOSE_REQUEST_ID=true` 是否在当前 SDK / CLI 版本组合中传入 CLI 子进程并生效；不能只因设置了环境变量就认定字段受支持。
-4. 如果受管 SDK 仍无 Assistant 消息，评估 Qoder 官方 CLI 原生结构化输出作为另一条 Runtime 入口；先核对 1.1.88 官方协议，再做真实 Mac 试验，不从账户 Usage 或企业 API 补数。
+这组样本只覆盖上述受管 SDK 和 CLI 版本。它未说明独立 IDE、其他 CLI 通道或请求级计量的行为。
 
 本轮材料：[mac-qoder-daemon-close-20261115-0459](../../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/)。

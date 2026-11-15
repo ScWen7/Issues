@@ -1,75 +1,25 @@
-# Team Agent Collaboration Platform
+# AgentPlatform · 团队 Agent 研发协作工作台
 
-本项目设计一套研发团队共用的 Agent 工作台。成员在中心管理多个 Issue，使用各自的本地 Agent 完成跨角色、跨仓库的工作。团队资料和项目现状为规划、实施、核验和交接提供依据。稳定的方法可以成为 SOP，一次交付中得到验证的经验可供另一名成员在后续工作中采用。
+团队成员在项目中共同推进 Issue，在各自获准的本地 Agent 环境中完成研发工作。打开一个 Issue，接手者能找到目标、当前负责人、已交付的变更，以及接下来要谁作什么决定。仓库提供产品与架构设计、上游源码依据及研究原型。
 
-## 当前设计重点
+## 团队怎样工作
 
-[整体产品设计与首期范围](docs/architecture/overview.md#当前设计重点)说明团队如何在同一个项目中推进多项研发工作。成员可在平台建 Issue，由自己、Agent 或 Squad 负责，也可以先用本机工具调查，再把愿意共享的结论、变更或制品交回相应 Issue。接手的人能看到由谁推进、已有何种交付、接下来要做什么。
+成员可以从项目列表接下 Issue，也可以先在自己的工具中调查，再把选定的结论、变更或文件交回 Issue。自己负责时可在评论中请 Agent 协助。需要交出整项责任时使用原生指派。独立分工有自己的负责人和交付物，使用子 Issue。指派给 Squad 时，其 Leader 在获准的本地 Runtime 上组织协作。[工作生命周期](docs/architecture/01-unified-work-lifecycle.md)
 
-日常协作沿用 Multica 的项目、Issue、评论、交接和本地执行。独立分工用子 Issue，省去独立业务 Task 层。一次受管执行记为 Run。稳定环节可调用 SOP。有证据可复用的方法经审核后供下一项工作选用。团队 Wiki 与项目资料、项目代码 Wiki 均可单独接入。
+一次受管执行记为 Run。稳定的重复环节可以调用 SOP。成员在 Issue 中决定业务范围和接受哪次交付，后续工作可选用团队已审核的方法。提供机器、执行检查、接受业务结果是不同职责。[架构总览](docs/architecture/overview.md) · [工作台](docs/architecture/05-unified-workbench.md)
 
-五个专题的分工及进度见[统一架构总览](docs/architecture/overview.md#4-跨专题职责)。[工作台使用路径](docs/architecture/05-unified-workbench.md#一入口与工作位置)说明成员如何从两个入口协作。[轻量改动](docs/architecture/01-unified-work-lifecycle.md#125-最小路径修改导出按钮文案)和[跨成员交付](docs/architecture/overview.md#订单贯穿案例)展示工作变复杂时如何分工。
+## 五个设计专题
 
-## 当前架构基线
-
-**V1.1 · Multica 基座融合架构 · 交叉审查修订**
-
-- **Multica**：Issue / Sub-Issue、Squad、Project Workflow、Run、Daemon、Runtime、Provider Backend、Session、Process、Trace、上下文准备 / 投递回执及 Task Usage 等工作与执行底座。
-- **TeamAI 机制参考**。平台借鉴能力作用域、角色检索、版本、经验贡献和评价机制，在原生 Issue、Agent / Skill 和 Run 上使用。
-- **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
-
-专题一至四已有设计与分项证据，真实 Multica 融合验收按各专题追踪。专题五已把十二类工作映射到现有入口，其[离线交互原型](prototypes/topic-05/workbench.html)用于核对订单验收、轻量工作和资源等待的具体判断。脚本托管、调用级证据、本地 Credits 上报等工程缺口见[治理盘点](docs/architecture/governance-baseline.md#固定版本的底座盘点)。
-
-## 架构入口
-
-| 文档 | 用途 |
+| 要了解的问题 | 设计正文 |
 |---|---|
-| [架构治理基线](docs/architecture/governance-baseline.md) | 最高层架构所有权、复用原则和禁止重复建设的约束 |
-| [统一架构总览](docs/architecture/overview.md) | 团队研发协作工作机制、团队与项目上下文、当前评审重点及五个专题的关系 |
-| [专题一：统一工作生命周期](docs/architecture/01-unified-work-lifecycle.md) | Issue First、Human / Agent / Squad 责任、工作约定和验收 |
-| [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | LoopForge SOP 如何附着于 Issue，并通过 Multica Run 执行 |
-| [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
-| [专题三 A：宿主能力证据矩阵](docs/architecture/execution-capabilities.md) | 不同宿主和入口的能力、证据与缺项 |
-| [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
-| [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
-| [专题五：统一工作台](docs/architecture/05-unified-workbench.md) | 项目、Issue、待我决定和十二类用户工作的入口；订单、轻量工作及异常走查 |
-| [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
-| [本轮交叉审查修订记录](docs/review/governance-v1.1.md) | 查看审查发现、对应修订与本轮文档核验结果 |
+| 谁负责、怎样分工、介入和完成？ | [工作生命周期](docs/architecture/01-unified-work-lifecycle.md) |
+| 何时自主规划，何时让 SOP 处理依赖、核验和返工？ | [SOP 与项目工作流](docs/architecture/02-sop-workflow.md) |
+| 成员本机怎样接工作，Agent 怎样取得工具和项目依据？ | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
+| 怎样计算已知用量、评价交付，并让有效的方法进入下次工作？ | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) |
+| 成员在哪里处理待办、查看交付、接手工作与选用方法？ | [统一工作台](docs/architecture/05-unified-workbench.md) |
 
-### 按需扩展
+项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
 
-[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)各自保留独立设计。需要团队口径或代码说明时，Issue 可引用获准的来源、版本和位置。两个扩展均未启用时，协作主线仍可直接使用原 Issue、现有项目资料和工程仓。团队资料可在已有来源或平台中维护，无需单独的知识 Git 仓。
+## 查设计与依据
 
-## 研究与验证证据
-
-专题一至四的源码研究、原始回执、订单案例和原型测试全部保留。它们用于证明上游实际能力、目标宿主行为和设计缺口，不自动构成新增平行系统的实现要求。
-
-- [专题一源码研究](docs/research/01-source-evidence.md)
-- [专题二三库源码与测试](docs/research/02-source-evidence.md)
-- [专题三 A 执行底座研究](docs/research/03a-source-evidence.md)
-- [专题三 B 能力治理研究](docs/research/03b-source-evidence.md)
-- [专题四真实 Runtime 用量研究](docs/research/04-source-evidence.md)
-- [Qoder / CodeBuddy / Copilot 真实回执与验证](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md)
-- [专题五原生操作路径与源码](docs/research/05-source-evidence.md) · [工作台场景走查](docs/research/topic-05/workbench-walkthrough.md) · [真实 CodeBuddy 回执与原生展示函数回放](docs/research/topic-05/codebuddy-display-replay.md)
-- [专题二状态模型原型验证](docs/research/topic-02/prototype-validation.md)
-
-### 专题四宿主用量证据
-
-- Qoder CLI 1.1.88 / SDK 1.0.59：PARTIAL。Query / Daemon 关闭与进程清理边界已实测；Assistant 请求事件、原生 request_id 和请求级 Credits 仍 unknown。Session total_credits=0 不作为单次消耗。
-- CodeBuddy CLI 2.181.0：PASS（受管 CLI 入口）。单 Stage 0.69 Credits 已取得；真实 Stage 修订覆盖仍待进一步验证。
-- GitHub Copilot CLI 1.0.107：PARTIAL。取得 Session 累计 nano-AIU checkpoint，逐请求 nano-AIU 仍 unknown。
-
-这些证据用于扩展 Multica Task Usage，不另建成本账本。未知值保持 unknown。
-
-## 设计与实现审查要求
-
-各专题及改变对象、权威归属或控制机制的实现方案，按[治理基线六问表](docs/architecture/governance-baseline.md#7-设计与实现的强制审查表)回答以下问题。
-
-1. Multica 已有什么源码、对象、接口、事件或测试可以复用？
-2. 哪个实际场景仍有缺口，依据是什么？
-3. 选择哪种扩展方式？若修改核心，说明现有配置及扩展点为何不足。
-4. 谁拥有新增事实，哪些信息仅为引用或派生视图？
-5. 是否形成第二权威？说明如何避免重复维护状态、身份、权限或计量。
-6. 如何验证适用的正常、失败、重放、撤权、恢复与迟到场景？分别列出已执行的证据和待做的融合验收。
-
-若形成第二套工作状态、Run、Runtime、派发、权限或成本账本，设计不得进入实现。
+产品范围及跨专题关系见[架构总览](docs/architecture/overview.md)，对象含义见[统一术语](CONTEXT.md)。Multica 已提供的能力和需要适配的部分见[底座能力与边界](docs/architecture/governance-baseline.md)。研究记录按源码版本、宿主入口和观察范围区分事实与假设。[源码与研究](docs/research) · [宿主能力矩阵](docs/architecture/execution-capabilities.md) · [交互原型](prototypes/topic-05/workbench.html)

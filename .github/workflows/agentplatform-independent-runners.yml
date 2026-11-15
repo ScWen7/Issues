@@ -1,7 +1,7 @@
 name: AgentPlatform independent runner handoff
 on:
   push:
-    branches: [research/3a-independent-runners]
+    branches: [master]
     paths: ['.github/workflows/agentplatform-independent-runners.yml', 'prototypes/topic-03a/runner-handoff/**']
   workflow_dispatch:
 permissions:

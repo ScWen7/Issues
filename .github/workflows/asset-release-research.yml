@@ -1,7 +1,7 @@
 name: AgentPlatform asset release research
 on:
   push:
-    branches: [research/3b-asset-release, research/3b-knowledge-context, research/3b-role-composition, research/3b-host-handoff, research/3b-existing-session]
+    branches: [master]
     paths:
       - .github/workflows/asset-release-research.yml
       - prototypes/topic-03b/**

@@ -1,0 +1,18 @@
+name: Design document links
+on:
+  push:
+    branches: [master]
+    paths: ['**/*.md', '.github/scripts/check_design_links.py', '.github/workflows/design-docs.yml']
+  pull_request:
+    branches: [master]
+    paths: ['**/*.md', '.github/scripts/check_design_links.py', '.github/workflows/design-docs.yml']
+permissions:
+  contents: read
+jobs:
+  links:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: python3 .github/scripts/check_design_links.py

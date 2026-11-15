@@ -1,7 +1,7 @@
 name: Topic 04 cost ledger prototype
 on:
   push:
-    branches: [research/topic-04-cost-quality-improvement]
+    branches: [master]
     paths:
       - .github/workflows/topic-04-cost-ledger.yml
       - prototypes/topic-04/**

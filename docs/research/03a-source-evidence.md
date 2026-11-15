@@ -1,14 +1,6 @@
-# 专题三 A · 执行底座源码研究记录
+# 执行底座、宿主和跨机交付的源码与实验
 
-> **架构治理说明（2026-11-15）：** 本文的源码、测试和多机实验是理解 Multica 执行底座的证据。当前设计以 Multica Daemon / Runtime / Backend / Run / Session / Process / Workspace / Usage 为事实权威；专题三 A V1.1 已将 Script 托管、本地 Credits 通路和调用级证据列为明确扩展项，并保留会话、进程和结果消费的具体规则。历史实验结果保持原来源与范围；融合机制以[专题三 A V1.1](../architecture/03a-execution-plane.md)和[架构治理基线](../architecture/governance-baseline.md)为准。
-
-更新日期：2026-11-15  
-第一阶段上游快照：[multica-ai/multica @ fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)  
-第一阶段采用源码与测试断言阅读。第二阶段的四份固定源码、上游定向测试、真实 CLI 回环实验及设计模型见[第二阶段研究](#11-第二阶段宿主协议与本地观察)。  
-第三阶段用两个真实 CLI 和 Multica 服务端验证上下文换版、共享任务身份与报告归属。[第三阶段研究](#12-第三阶段上下文与任务身份)  
-第四阶段沿两个真实 Git 候选、XLSX、脚本与 Daemon 回报检查制品及结果归属。[第四阶段研究](#13-第四阶段工作副本受管脚本与结果交接)  
-第五阶段核对独立虚拟机、双身份权限、原机重连和本地会话恢复。[第五阶段研究](#14-第五阶段跨主机接续与设计收口)  
-平台设计入口：[专题三 A：执行平面与宿主适配](../architecture/03a-execution-plane.md)
+Multica 源码快照为 [`fdfbfcd`](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)。Daemon 的注册、领取与恢复一节记录源码和测试断言。宿主协议、上下文和任务身份、工作副本与跨机交付各节列出实际运行环境和范围。各宿主的接入程度见[能力矩阵](../architecture/execution-capabilities.md)，平台的执行机制见[本地执行设计](../architecture/03a-execution-plane.md)。
 
 ## 1. 已追踪的底层路径
 
@@ -71,31 +63,23 @@
 - [Daemon 取消确认及保留工作结果](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5985-L6070)
 - [本地 Runtime Profile 官方说明](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/apps/docs/content/docs/daemon-runtimes.mdx#L191-L235)
 
-## 3. 已识别的设计动机与本项目启发
+## 3. 执行阶段、协议与资源的边界
 
 ### 3.1 为什么 Claim 与 Start 分离
 
 本地准备可能包含仓库、工作目录、技能包、MCP、Provider Home 和上下文文件等步骤。若领取即标记 running，工作台和其他消费者可能读取一个尚未准备完成的工作目录。Multica 因此在本地准备后才调用 StartTask；claim-aware Start 再绑定 runtime_id 与 dispatched_at，防止过期领取者启动已经转交的任务。新旧路径的具体行为见[第 10.4 节](#104-claim--start-generation-与丢失响应恢复)。
 
-**本项目启发：** Run 生命周期至少需要区分领取、准备、实际启动和终态回报；SOP 节点的 ready 不能直接当作 Agent 已开工。
-
 ### 3.2 为什么 Runtime 和 Protocol Family 分离
 
 Runtime 是具体可调度的工具身份；Protocol Family 是适配器实现的通信协议族。Multica 的 Runtime Profile 选择一个已支持的协议族，再提供命令与固定参数。自定义命令复用已有协议，不会自动获得新协议能力。
-
-**本项目启发：** Runtime Identity、Host、Provider Adapter 和 Agent Role 应分别建模。不能把“能执行某个命令”当作“已支持这个 Agent”。
 
 ### 3.3 为什么 Backend 统一、底层协议不统一
 
 平台统一 Backend.Execute 与 Session.Messages / Result，使 Daemon 不需要理解每个工具的协议细节；每个 Provider Adapter 负责启动参数、传输协议、事件解析、会话恢复、取消和 Usage。Claude、Codex 和 OpenCode 的实现证明其协议差异远大于命令行参数差异。
 
-**本项目启发：** 平台应统一生命周期和结构化执行结果，不强制所有宿主使用 ACP 或 JSON-RPC。适配能力需要显式声明和验证。
-
 ### 3.4 为什么本地工作区需要独立生命周期
 
 Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数据和清理；EnvRoot Claim 防止同一目录被并发复用；GC 需要读取归属和工作状态后才能回收。Worktree 进一步保存用户未提交改动快照、跨轮次分支状态和冲突信息。
-
-**本项目启发：** Workspace 是执行资源，有自己的准备、占用、交接、清理和恢复生命周期。代码副本策略只是 Workspace Adapter 的一种实现。
 
 ### 3.5 取消确认与资源复用的适用范围
 
@@ -105,29 +89,7 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 
 证据：[能力协商](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L8753-L8759)、[清理确认回报](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L6147-L6151)、[同 Agent / Runtime 匹配](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_cleanup.sql#L15-L20)、[等待确认条件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_cleanup.sql#L50-L93)、[取消确认异常入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L6067-L6079)、[专项状态更新](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_cleanup.sql#L37-L48)、[Provider 差异与收敛断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon_process_cleanup_test.go#L115-L177)。
 
-**本项目启发：** 分别观察 Stop 请求、宿主结果、进程退出、资源占用、清理结论及持久化回执。3A 的能力矩阵按宿主及版本标明原生覆盖，专题一的复用说明同步采用这组事实。
-
-## 4. 后续研究与验证清单
-
-已有静态追踪记录在第 2、5、7 节，下一轮围绕下列问题补齐调用链、宿主覆盖和运行验证，再收敛 3A 设计：
-
-1. Runtime 注册、Profile 解析、在线状态、心跳、批量 Claim 和队列公平性：`daemon.go` 注册路径、`handler/daemon.go` Claim、`task_claim_decision.go`、相关 SQL。
-2. 进程树管理、OS 差异、优雅停止、停止回执与重启恢复：`processtree`、`shutdown.go`、`daemon_process_cleanup_test.go`、`shutdown_retry_test.go`。
-3. Session 与工作区连续性：PriorSessionID / PriorWorkDir 的服务端选择、Provider ResumeRejected、会话文件 / 账号绑定、工作区复用和跨 Runtime 接续。
-4. 隔离与授权：本地文件系统隔离、Codex sandbox、进程环境继承、Task-scoped Token、Runtime 所有者授权和跨成员共享。
-5. 多平台适配：Windows / macOS / Linux 的命令启动、进程树、路径、临时目录和 Worktree 行为。
-6. Script 执行：当前受管命令、Environment Command 与 Run 之间的真实边界，确认是复用现有执行器还是增加独立 Script Executor。
-7. 对照宿主官方协议文档与上游测试，验证各 Provider 的能力矩阵和版本兼容策略。
-8. 本地主动交互与事后关联：对照 Multica 会话关联和 TeamAI skill driver / agent observation，明确实际执行段、身份、选定共享、重复观察和用量来源。
-9. 上下文注入与加载证据：以 `context_receipt.go`、`execenv/context.go` 和各宿主 Skill / Rule / MCP 入口建立通道矩阵，分别验证投递、读取、使用及加载探测的适用版本。
-10. 结构化节点回报：对照原始宿主结果、显式结构化提交、具名制品及候选，研究 Adapter、Daemon、控制平面与 SOP 的职责分配。
-11. 任务身份与平台个人凭据：追踪 task token、marker、CLI 配置回退和实际文件访问；把模型服务登录态与平台操作凭据按用途区分。
-12. 权威终态与恢复拒绝：对照 TerminalObserved、永久 / 暂时恢复拒绝、兼容性回退及工具观测，验证各宿主的结果保留、重试与收尾行为。
-
-本记录是源码探索阶段材料，不作为最终平台架构结论。
-
-
-## 5. 第二轮追踪：注册、授权、心跳、隔离与测试反例
+## 5. 注册、授权、心跳、隔离与测试反例
 
 ### 5.1 Runtime 注册与配置漂移
 
@@ -192,18 +154,9 @@ Prepare / Reuse 处理工作目录、Provider 配置、技能、MCP、会话数�
 | `shutdown_retry_test.go` / `shutdown_test.go` | Daemon 关闭、运行任务清理与回报 |
 | `runtime_visibility_revocation_test.go` / `runtime_ownership_test.go` | Runtime 共享、撤销和所有者权限 |
 
-## 6. 第二轮研究后的设计判断
+## 7. 上下文、凭据与会话结果
 
-- **Runtime 注册属于能力发现与授权绑定，不是单纯心跳登记。** 需要记录 Host、Runtime Profile、协议族、命令版本、能力和所有者。
-- **统一 Backend 契约应覆盖完整交互生命周期。** 至少包括 Start、Message Stream、Tool Activity、Supplement、Cancel、Terminal Result、Usage、Session Resume 和 Cleanup；每项能力需可选并显式报告。
-- **Execution Environment 应独立于 Provider Adapter。** Workspace 准备、代码获取、上下文和技能注入不应全部散落在各宿主适配器中。
-- **Git Worktree 只是一种可选代码隔离 / 交付策略。** 平台还要研究非 Git 目录、压缩包、Artifact 和远端 Workspace 的策略。
-- **停止确认与资源回收分别记录能力和事实。** Adapter 报告宿主结果，Host Daemon 管理本地进程与资源，服务端按实际协商和回执处理后继执行；平台通用策略结合能力矩阵与原型结果收敛。
-
-
-## 7. 新增追踪：上下文、凭据与会话结果
-
-以下核对沿用本记录的固定提交，证据为公开实现与测试断言阅读。代表路径用于补齐探索输入，各宿主的真实运行覆盖由下一轮能力矩阵验证。
+这一节的结论来自固定实现及测试断言。宿主实际运行的证据按入口列在[能力矩阵](../architecture/execution-capabilities.md)。
 
 ### 7.1 ContextReceipt 的生成时机与证据等级
 
@@ -255,9 +208,9 @@ Cursor 在协议 result 事件后先标记已观察终态再关闭后台执行�
 
 fresh fallback 在该原生分支中执行一次，并重新构造冷启动上下文；永久拒绝退休旧会话，暂时拒绝保留旧会话资格，两次用量合并。本轮平台 Run 的最终报告发生在这段内部恢复之后。[执行与上下文重建](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9255-L9330)、[结果及用量合并](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9797-L9811)、[忙会话恢复断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/pi_busy_retry_unix_test.go#L24-L100)
 
-3A 的下一轮矩阵应分别覆盖明确拒绝与兼容判断、永久与暂时拒绝、有无工具事件、新旧会话 ID、原始失败和重试结果。具体重放策略结合宿主版本及工作副作用确定。
+恢复回报可分别核对拒绝类型、原会话与新会话 ID、工具事件及重试的结果。
 
-## 10. 第一阶段完成：Runtime / Daemon 注册、调度、领取与恢复
+## 10. Runtime / Daemon 注册、调度、领取与恢复
 
 本节沿固定上游提交 fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc，追踪 Daemon 注册、服务端授权、批量 Claim、SQL 原子领取、Start generation、心跳、Runtime liveness、失联收敛和数据库测试。此处为实现与测试断言阅读结果；本轮没有运行 Multica 上游 Go 测试。
 
@@ -409,25 +362,15 @@ Runtime 被服务端删除时，Daemon 会从本地 Runtime 集合移除对应 I
 
 [普通与托管绑定分支](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L132-L147)、[Qoder 连接凭据校验](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/qoder_connection.go#L596-L609)。
 
-### 10.8 第一阶段结论
+### 10.8 领取与恢复的证据范围
 
 Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器”，而是一套围绕执行资源身份、数据库原子派发、容量互斥、Claim generation、心跳租约、故障分类、授权复核和恢复收敛形成的执行控制机制。
 
-对本项目的直接设计输入：
+以上为固定源码与测试断言的静态阅读。该组用例未在此次阅读中执行。运行时实际领取和宿主开工的回执各自记录。
 
-1. Host、Daemon、Runtime Instance 分开建模；Runtime Instance 按 Workspace 和 Provider / Profile 形成。
-2. 以 Run 作为实际执行记录，派发需包含可比较的 Claim Generation；领取、准备、Start、进程启动和终态观察分别留证。
-3. 资源调度同时考虑 Daemon 本地槽、Runtime 容量和执行者 / Agent 容量；容量更新与 Claim 使用同一互斥机制。
-4. 所有入口最终进入同一派发服务；数据库原子占用是并发正确性的最终依据，通知与轮询只负责降低延迟。
-5. Runtime 在线状态采用心跳租约与持久状态结合；短暂离线、进程退出、Daemon 重启和 Runtime 删除必须走不同恢复分支。
-6. 平台后续验证逐项核对准备续租、Waiting、Start 与结果回报的代次资格；原生已核对的领取重放及 claim-aware Start 保护与待补链路分别记录。
-7. Workspace、Host / Daemon、Runtime Owner、共享授权和 Task Token 是不同权限层，最终交付时必须重新核验当前授权。
+### 10.9 Prepare 跨代写入与领取边界
 
-本阶段完成源码路径与代表测试断言追踪，未执行上游 Go 测试。下一阶段按 V0.2 顺序进入“宿主与本地交互入口”，重点比较中心派发、成员从 CLI / IDE 主动关联、事后补录，以及会话观察和真实用量归属。
-
-### 10.9 本轮收口与后续验证输入
-
-已收口新旧 Start 路径、超时组合条件、Qoder 托管授权和 Start 锁定 SQL 引用。以下事项按固定提交核对后保留为后续研究输入。
+下列行为根据固定源码的实际更新条件判定。
 
 **Prepare 跨代写入。** 固定提交 fdfbfcd 中，准备续租按任务、Runtime 与准备状态更新；等待目录 `MarkAgentTaskWaitingLocalDirectory` 和失败更新按任务及活动状态匹配。这些更新条件未包含 dispatched_at，入口仍执行 Daemon / Runtime 授权检查。本轮关注同一仍获授权 Runtime 重领时的旧准备动作。[准备续租](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L989-L1000)、[等待目录](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1010-L1026)、[失败更新](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1201-L1214)、[执行者鉴权](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L220-L292)。
 
@@ -435,17 +378,9 @@ Multica 的 Runtime / Daemon 不是一个“机器在线列表 + 任务轮询器
 
 目录锁保护工作副本，同任务终态回报跟踪串行化本地发送；两处保护分别围绕目录占用与任务回报投递，领取代次隔离仍需逐项验证。[目录锁](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/execenv/execenv.go#L1464-L1503)、[终态回报跟踪](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L6539-L6600)。
 
-| 后续验证输入 | 已核对依据与待取得的结果 | 承接阶段 |
-|---|---|---|
-| Prepare 跨代写入 | 用同 Runtime 的租约失效、重领和旧准备失败注入，分别观察续租、Waiting、失败回报对新代次的影响；以旧 Start 返回 409 且无终态回报为对照，取得实际时序与结果后确定适配范围 | 恢复链路与原型验证 |
-| 同 Issue / Agent 串行与 SOP 并行 | 原生 Issue + Agent 活动互斥及每批按 Agent 去重已确认；比较并行 Script、同角色 DAG 节点的执行身份与目录策略，按实际开工情况确定互斥粒度 | Workspace / Script 与设计收敛 |
-| 共享 Runtime 的任务身份 | 已核对任务 token 的 UserID 取 Runtime Owner；继续跟踪服务端任务作用域、Issue 访问和 Grant 校验，分别判断资源所有者身份与实际平台操作权限。[签发身份](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4441-L4456) | 上下文与任务身份 |
+共享 Runtime 的任务身份实验覆盖任务令牌、Issue 访问及资源所有者资格。工作副本实验覆盖 Issue / Agent 互斥、旧准备的本地写入、Start 409 与清理。续租、登记 Waiting 和 Start 前失败回报三个服务端更新条件来自源码阅读，未取得跨代故障注入的运行回执。[签发身份](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L4441-L4456) · [工作副本实验](topic-03a/workspace-continuity.md#两条新实验)
 
-后续阶段进度：共享 Runtime 身份已由第三阶段验证；Issue / Agent 串行及旧准备的本地写入、目录隔离、Start 409 和清理由第四阶段验证。上表 Prepare 项中的旧续租、Waiting 和 Start 前失败回报三条服务端写入路径继续保留故障注入任务；[工作副本实验](topic-03a/workspace-continuity.md#两条新实验)记录各自的实际覆盖。
-
-本轮新增 Prepare 结论采用固定源码的静态路径核对，故障注入结果由后续原型取得。第一阶段源码研究已收口；下一项仍按计划研究宿主与本地交互入口。
-
-## 11. 第二阶段：宿主协议与本地观察
+## 11. 宿主协议与本地观察
 
 这一阶段固定四份源码，沿“本地开始工作、宿主产生事件、重读历史、多路结算、成员选择共享”追到协议、适配器和记账实现。实验使用临时配置与合成输入，真实 CLI 执行协议和本地操作，模型响应由回环服务提供。[项目接入规则](../architecture/03a-execution-plane.md#5-本地主动会话与-agentobservation)
 
@@ -484,9 +419,9 @@ node --test prototypes/topic-03a/local-observation.test.mjs
 
 [Codex 探针](../../prototypes/topic-03a/codex_observation_probe.py)使用 codex-cli 0.167.0-alpha.4。[Claude Code 探针](../../prototypes/topic-03a/claude-local-probe.py)使用 Claude Code 2.1.325。[13 项设计模型测试](../../prototypes/topic-03a/local-observation.test.mjs)通过，涵盖重复观察、部分重叠绑定、切换 Issue、撤权后补传、累计值与重置、父子计量覆盖和 C1 迟到回报。模型验证单进程下的归属规则，两个探针验证各自宿主的实际行为。
 
-后续集成验收以同一成员同时打开 CLI 和 IDE 为起点。让已授权的本地适配器与中心 Daemon 同时观察同一回合，再断网、缩小选区、重连、补录并在新回合切换 Issue。应得到原 Run 或明确的外部观察、有效选区的单份投影，以及与唯一原生请求集合一致的用量。另验证无原始标识、部分消息缺失、父子代理并行和只有会话总额时的降级结果。下一阶段研究上下文投递、加载回执与任务身份。
+CLI 与独立 IDE 同时观察、断网缩小共享选区再补传、以及多个工作混用会话时的端到端表现，不在上述宿主样本的覆盖范围内。
 
-## 12. 第三阶段：上下文与任务身份
+## 12. 上下文与任务身份
 
 订单导出的 D2 要求在 C2 增加付款时间列。实验沿着两个问题追踪同一份报告：D2 在哪一轮到达宿主，谁有权把 C2 的核验结果交到哪个 Issue。宿主使用真实可执行文件、本机模拟模型服务和合成工作材料；权限实验运行 Multica 生产 handler、认证中间件与实际迁移过的 PostgreSQL。两组实验以同一份结果文件的 SHA-256 贯通。
 
@@ -523,14 +458,7 @@ go test -count=1 -run '^Test(WriteRuntimeConfigFilePreservesUserContent|WriteRun
 go test -count=1 -run '^Test(IssueReadCommandsUseInjectedTaskToken|IssueReadCommandsFailClosedWithoutTaskToken|NewAPIClient_WorkdirMarkerRequiresTaskToken|NewAPIClient_AgentContextRequiresTaskToken|ResolveWorkspaceID_AgentContextSkipsConfig|ResolveToken_AgentContextSkipsConfig|NewAPIClient_WorkdirParentEscapeFailsClosed)$' ./cmd/multica
 ```
 
-### 留给下一阶段的测试要求
-
-1. 在支持 Codex 文件沙盒的机器上用 0.167.0-alpha.4 跑项目 `AGENTS.md` 通道。固定预期 D1 → D2、热继续、显式补发、同进程恢复、跨进程恢复、文件移除；保存各次实际请求对应的版本。当前容器在读取项目文件阶段遇到 NETLINK_ROUTE 限制。该版本已跑通 HOME 组；以上项目通道保留为独立验项。
-2. 用真实工作副本和受管 Script 产出订单导出 C2。A2 用不同角色和订单范围核对；A3 对候选实际文件核对付款时间、未付款空值和时区，记录候选摘要、执行版本、退出与检查结果。
-3. 在真实 Daemon 和共享 Runtime 上复跑两端交接。在节点尝试换代、撤销后回报、重复上报与跨机恢复时，核对关联到的 Run、尝试、制品和历史；对比服务端已取消与宿主已停止的时间点。SOP 专属的 Grant 检查本轮由设计模型验证，服务端实现和在途回报竞争留在集成阶段。
-4. 对 Prepare 跨领取代次和同一 Issue / Agent 的 SOP 并行设置独立工作副本，检查迟到的旧进程写入、目录占用、清理与 C2 接续。结合这些结果确定结构化回报和制品回收规则。
-
-## 13. 第四阶段：工作副本、受管脚本与结果交接
+## 13. 工作副本、受管脚本与结果交接
 
 本轮从同一订单导出规则 D2 出发，把两个真实 Git 提交、导出的 XLSX、核验器、结构化报告和控制平面回执对到同一次节点尝试。实验分段使用同一批报告或文件字节衔接。业务数据取自四类角色和三个合成订单，宿主使用协议夹具，Daemon 与 PostgreSQL 使用 Multica 的真实实现。专题一保留其完整验收规则。[阶段设计](../architecture/03a-execution-plane.md#回报消费与接续)
 
@@ -570,15 +498,9 @@ TeamAI 的业务贯穿采用专题二固定提交 `556b524`，C1 和 C2 都通�
 ./node_modules/.bin/vitest run --pool=threads --maxWorkers=1 src/__tests__/workflow-place.test.ts
 ```
 
-### 第五阶段验收输入
+Codex 0.167.0-alpha.4 的项目 AGENTS.md 通道在原生文件沙盒创建 NETLINK_ROUTE socket 时被宿主环境拒绝，该组模型请求数为零。
 
-下列为第四阶段结束时的验收输入，实际完成结果见[第五阶段记录](#14-第五阶段跨主机接续与设计收口)。
-
-- 用两台独立主机与各自的成员身份跑一次跨机接续。原机离线、另一台按精确提交及具名附件恢复、原机重连后发送旧结果，把三次观察对到同一 Issue 和各自的 Run。记录接管时不可达的未提交文件和仍占用的资源。
-- 汇总中心派发、本地关联和事后补录三种入口在每个已测宿主上的能力。逐项注明证据由谁提供、缺失时用户看到什么、重要决定换版后怎样继续，并据此明确 3A 交给 3B 的资产加载回执。
-- 对 Codex 0.167.0-alpha.4 的项目 AGENTS.md 通道，本轮重跑仍在原生文件沙盒创建 NETLINK_ROUTE socket 时被宿主环境拒绝，模型请求数为零。保留正常文件沙盒的独立主机复跑项。真实部门订单服务、其余验收项和用户接受按专题一另行核验。
-
-## 14. 第五阶段：跨主机接续与设计收口
+## 14. 跨主机接续
 
 同一个订单验证 Issue 有两份候选。C1 的东区工作簿多出一条西区订单，检查结论为返工；C2 修正了选区，A2、A3 通过。以“C1 卡在原机发送队列，接替者先处理 C2”为共同场景，分别观察机器中断、权限、会话和结果消费。下表给出每个结论对应的运行环境。
 
@@ -597,14 +519,12 @@ Git 交付和工作簿下载有不同的可见范围。两机实验中完整仓�
 
 TeamAI 交接的条件写入和分支前移检查可复用于可写副本；查验历史 C2 时仍按固定提交取回。LoopForge 在同代次内允许较早 attempt 的成功提交，并按生成时间挑同名子流程制品。AgentPlatform 对当前节点的消费同时核对尝试、候选和具名制品的来源。本轮在本地重新跑通 TeamAI 此前因资源退出的 54 项交接套件，连同其余定向用例共 65 项不同测试。在独立 runner 上完整串行执行 TeamAI 的三个工作区、交接与命令套件，139/139 通过。LoopForge 通过 11 项原生测试，其中 21 MiB 工作区经分块传输后清理、恢复，全部字节匹配；该用例在独立虚拟机也通过。[两库源码、复跑与设计取舍](topic-03a/upstream-handoff.md)
 
-本轮设计交付见[执行平面](../architecture/03a-execution-plane.md)及[宿主能力与 3B 交接](../architecture/execution-capabilities.md)。3B 首个实验沿 D2 的规则、核验脚本及其发布版本检查选择和在途换版，通过 3A 的回执定位实际材料、调用、候选和验证结果。
-
 本次同步复跑 38 项工作流、观察与上下文状态模型测试，以及 13 项结果接收断言，全部通过。两套远端工作流的五个宿主与上游作业、两个原生双虚拟机作业均通过。[上游与宿主作业](https://github.com/ScWen7/Issues/actions/runs/43621807704) · [Multica 跨虚拟机验收](https://github.com/ScWen7/Issues/actions/runs/43621447364)
 
-### V0.6 交叉审查修订
+### Prepare 与返工报告补件的证据范围
 
 Prepare 的阶段结论已限定为本地写入、目录占用、Start 拒绝和清理；旧续租、Waiting、准备失败回报三条服务端路径保持待验证。恢复设计明确按原领取代次核验这些操作。上下文展示同步区分写入已确认但加载未知、投递状态未知和明确未投递。
 
 结果接收原型修复返工报告先到、附件后到时的提前去重返回。相同报告在当前授权下重新核对清单中的晚到文件，幂等补登记交付引用，原报告、归属和节点消费回执保持原值。新增两项回归先在旧逻辑上复现失败，再随修复通过：当前返工报告补件后并发重发只补一份引用；历史返工报告先拒绝错误字节，收到正确原件后补齐且保持历史归属。有权接收者均能查回补齐文件的摘要。
 
-本次本地复跑结果为结果接收原型 **15 / 15 通过**，工作流、观察与上下文模型 **38 / 38 通过**。运行命令沿用本页，设置 `PYTHONDONTWRITEBYTECODE=1` 避免生成 Python 缓存。以上为本轮修订验证；前述远端作业保留第五阶段的运行记录。
+本次本地复跑结果为结果接收原型 **15 / 15 通过**，工作流、观察与上下文模型 **38 / 38 通过**。运行命令沿用本页，设置 `PYTHONDONTWRITEBYTECODE=1` 避免生成 Python 缓存。
