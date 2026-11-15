@@ -81,7 +81,7 @@ SOP 负责流程内部依赖，不取得 Issue 状态和实际 Run 的所有权�
 | 三 A：Multica 执行底座审计与扩展 | 盘点 Daemon / Runtime / Backend / Session / Workspace / Trace；补齐 Script、调用证据和已识别的采集缺口 | 原生执行链、Provider Adapter 与上下文准备机制 |
 | 三 B：团队能力与知识治理 | 将 TeamAI 的资源治理、检索、版本、分发和加载核验接入 Multica | Agent、Skill、Plugin、ContextReceipt、Runtime 派发 |
 | 四：成本、质量与 RSI | 扩展 Task Usage，融合 Scorers / Evaluator；定义分项成本、Benchmark 和改进效果 | Run、Trace、Task Usage、Result；资产发布引用专题三 B 治理 |
-| 五：统一工作台 | 整合工作、执行、能力资产、SOP、评价与改进入口 | Multica 既有工作对象和产品路径 |
+| [五：统一工作台](05-unified-workbench.md) | 首轮将十二类工作映射到产品入口，围绕订单候选、人工决定、轻量工作和资源等待设计交互 | Multica 既有工作对象和产品路径 |
 
 ## 5. 统一工作对象
 

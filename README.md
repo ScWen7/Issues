@@ -10,7 +10,7 @@
 - **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
 - **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
 
-专题一至四已有设计与分项研究证据，真实 Multica 融合验收仍按各专题追踪。专题五目前仅界定统一工作台的职责和交接，信息架构与交互设计尚待展开。
+专题一至四已有设计与分项研究证据，真实 Multica 融合验收仍按各专题追踪。专题五首轮已将十二类用户工作映射到现有入口，并完成订单、轻量工作和资源等待场景的交互设计。可下载[离线交互原型](prototypes/topic-05/workbench.html)走查 C1 失败、C2 补证及具名验收。
 
 先复用 Multica 已有能力，再对真实缺口做最小扩展。不得建设第二套 Issue、Run、Runtime、派发控制、权限或成本账本。
 
@@ -28,6 +28,7 @@
 | [专题三 A：宿主能力证据矩阵](docs/architecture/execution-capabilities.md) | 不同宿主和入口的能力、证据与缺项 |
 | [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
 | [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
+| [专题五：统一工作台](docs/architecture/05-unified-workbench.md) | 项目、Issue、待我决定和十二类用户工作的入口；订单、轻量工作及异常走查 |
 | [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
 | [本轮交叉审查修订记录](docs/review/governance-v1.1.md) | 查看审查发现、对应修订与本轮文档核验结果 |
 
@@ -41,6 +42,7 @@
 - [专题三 B 能力治理研究](docs/research/03b-source-evidence.md)
 - [专题四真实 Runtime 用量研究](docs/research/04-source-evidence.md)
 - [Qoder / CodeBuddy / Copilot 真实回执与验证](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md)
+- [专题五原生操作路径与源码](docs/research/05-source-evidence.md) · [工作台场景走查](docs/research/topic-05/workbench-walkthrough.md) · [真实 CodeBuddy 回执与原生展示函数回放](docs/research/topic-05/codebuddy-display-replay.md)
 - [专题二状态模型原型验证](docs/research/topic-02/prototype-validation.md)
 
 ## 当前专题四真实用量状态

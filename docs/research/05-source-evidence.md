@@ -1,0 +1,39 @@
+# 专题五 · 从 Multica 现有工作台走一次订单交付
+
+本轮追踪成员如何找到订单 Issue、指派参与者、参与讨论、检查候选并追到执行依据。Multica 固定在 `fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`，与 V1.1 治理基线一致。下表的原生行为取自该提交的 Web 组件、服务端和测试断言。本轮进行了源码阅读及设计走查，未运行 Multica Web、浏览器端到端测试或真实成员验收。原型和宿主实验的运行状态保留在各专题证据中。[治理基线](../architecture/governance-baseline.md) · [固定源码](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)
+
+## 项目、分工与协作
+
+路由以工作区 `/{slug}` 为前缀。页面上的可选择、服务接受写入、Runtime 开工是三个不同的时点。
+
+| 成员动作与原生入口 | 固定版本的行为与证据 | 专题五采用的交互 |
+|---|---|---|
+| 项目成员在 `/projects/{id}` 找订单 | 项目复用 IssueSurface，已有看板、列表、表格、泳道和甘特视图，另有项目资源区。[项目资源和列表](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/projects/components/project-detail.tsx#L545-L569) | 在同一项目视图定位订单。按可验证事实解释某项工作正在等人、等前置结果还是等执行资源，点入同一 Issue 查看依据。 |
+| 提出人创建 Issue、安排子项 | 创建提交包括项目、状态、负责人、附件；子项可带父 Issue 和相对阶段。父项提交成功后批量关联已选子项另有失败窗口。[创建及子项关联](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/modals/create-issue.tsx#L548-L605) | 轻量修改从一个 Issue 开工。订单拆分时只记录需要独立负责人或交付的部分。部分关联失败应显示已创建的父项和仍缺的子项，再处理缺项。 |
+| 负责人给 Human、Agent 或 Squad 指派 Issue | 选择器提交成员或 Agent 身份，Agent 会校验可指派与 Runtime 绑定，Squad 选项检查 Leader 绑定。服务端另有普通成员指派私有 Leader 的 Squad 返回 403 的反例。[选择器](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/pickers/assignee-picker.tsx#L286-L377) · [服务端权限用例](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/squad_private_leader_test.go#L14-L47) | 沿用负责人选择。指派被服务拒绝时保留原负责人，解释允许披露的失败原因。成功指派后单独呈现是否已实际开工。 |
+| 负责人查看 Squad、子项和当前活动 | Squad 查成员工作/空闲/离线快照、当前关联工作及按本队指派过滤的近期 Issue。详情页的队伍配置编辑限工作区 owner/admin 或队伍创建者。Issue 页子项区显示完成数和执行活动。[队伍与权限](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/squads/components/squad-detail-page.tsx#L129-L170) · [Issue 子项](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/issue-detail.tsx#L3925-L3941) | 队伍设置管理成员和 Leader。某一订单的接管在该 Issue 记录责任与在途处理。子项数量是组织进度；候选的检查和接受各引用自己的结果。 |
+| 成员在 Issue 评论区回复或补充范围 | 上游用例安排 Issue 由 Agent A 负责、既有线程由 B 跟进。回复该线程会为 B 入队一个 Run；同一示例的顶层评论路由给 A。[线程回复](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/e2e/comment-agent-routing.spec.ts#L75-L94) · [顶层评论](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/e2e/comment-agent-routing.spec.ts#L103-L114) | 明示回复对象。需要改变范围、接受 C2 或接管时，在 Issue 用具名决定记录目标、适用版本和动作后果；当前模型输入与成员明确共享到 Issue 的内容分开呈现。 |
+
+## 做决定、看结果与处理异常
+
+| 成员动作与原生入口 | 固定版本的行为与证据 | 专题五采用的交互 |
+|---|---|---|
+| 成员从 `/inbox` 打开待办 | 点击通知以 Issue 或通知为键选择，详情直接嵌入原 IssueDetail，支持定位评论。已读、归档作用于通知。私有项目撤权后，使用旧通知执行这些动作会收到 404。[回到 Issue](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/inbox/components/inbox-page.tsx#L893-L927) · [撤权与已读/归档断言](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/private_project_inbox_relations_test.go#L44-L85) | “待我决定”引用 Issue 上当前有效的问题。打开、已读、归档不会消费业务门禁；接受或退回时重查权限、候选与标准，旧入口不能泄露已失权正文。 |
+| 项目维护者配置交接，负责人查看下一步 | Project Workflow 面板列出步骤和交给谁，分别检查管理项目、创建或编辑工作流的能力。原服务器在有效的状态变化时解析接手者，旧 Run 守卫比较当前步骤名称。[面板权限](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/workflows/project-workflow-sheet.tsx#L62-L109) · [状态交接守卫](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_workflow_entry.go#L97-L128) | 项目列和负责人交接在原面板维护。订单调用局部 SOP 后，节点前置、尝试、返工和当前出口由 Issue 关联的实例解释。A→B→A 再进同一步骤，原生同名检查不足以证明旧批准仍有效。[SOP 机制](../architecture/02-sop-workflow.md) |
+| 验收人打开 XLSX、核查 C1 与 C2 | Issue 交付区归集本项评论交付的文件，每条评论仍显示自己的文件；PR 有独立区域。交付区按文件名可复制最新版本链接。上游用例说明默认时间线请求紧凑 Run，打开 Runs 后读本项完整历史，显式包含子项后才查执行子树。[交付区的聚合与最新链接](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/deliverables/deliverables-section.tsx#L24-L45) · [时间线与子树用例](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/e2e/issue-task-history.spec.ts#L48-L84) | 工作现场先显示候选、标准、失败项与复验结论。C1/C2 可有同名文件，具名接受须固定实际版本或摘要及生产 Run；最新链接用于浏览。展开证据再看报告、制品、Run 与 Trace。 |
+| 成员查看或共享执行资源 | 测试从 `/runtimes/{id}` 进入机器、选具体 Runtime，选择成员后须保存；改回 Private 成功后刷新保留，移除再加回成员也不会自动恢复共享。服务端对共享范围缩小枚举受影响的 Agent 和活动任务。[共享和撤回用例](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/e2e/runtime-sharing.spec.ts#L19-L56) · [受影响对象](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/runtime_sharing.go#L99-L147) | 订单上只给出当前可知的阻塞原因、负责人和资源入口。换人或换机须分别取得对应权限，已发出停止请求与宿主已退出分别显示。 |
+
+## 能力、知识和改进怎样接入工作现场
+
+| 对象 | 可复用的证据 | 设计上的交接 |
+|---|---|---|
+| 验收 Skill 与项目知识 | 原生工作区 Skill 记录编辑版本；恢复操作形成新的最新版本。项目资源支持为仓库设定、修改和清除 checkout ref。TeamAI 的代码知识时效判定会对比文件内容摘要，区分 current、stale、missing 和 unknown。[Skill 版本历史](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/skills/components/skill-versions-tab.tsx#L60-L90) · [项目来源用例](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/e2e/project-resource-ref.spec.ts#L30-L61) · [TeamAI 文件时效](https://github.com/Tencent/teamai-cli/blob/1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956/src/codebase-freshness.ts#L284-L333) | 从订单追到本轮选材、实际投递和当前获准的证据。项目仓库 ref 只说明预期来源；实际输入按 Run 回执定位。正文失权时只显示获准范围内的缺项和处置。[3B 选版与来源](../architecture/03b-capability-governance.md) |
+| SOP 核验、人工介入 | LoopForge 的门禁提交检查 pass、rework、fail、human 及理由；human 还要求具体人工动作。[LoopForge 门禁提交](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/gate_submit.go#L44-L104) | C1 权限失败时展示哪项检查不合格、该返工给谁。要求人处理时显示具体问题和当前候选，待决定与核验通过分别记录。订单真实接受沿 Issue 的既有权限写入路径扩展。 |
+| 成本与质量 | Multica `/usage` 的 Usage、Errors 分页由时间和项目筛选。Run 明细查询返回 `credits_micros`；Issue 的 Runs 弹窗已有按供应商汇总并展示 Credits 的客户端路径。Issue 服务端摘要与每日看板查询均未汇总 Credits；有任意 Usage 行的 Run 数也不能代表 Credits 覆盖。[明细换算](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/runtimes/utils.ts#L1084-L1095) · [弹窗合计](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/issue-run-timeline.ts#L184-L196) · [弹窗显示](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/issue-runs-dialog.tsx#L263-L278) · [工作区使用量页](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/dashboard/components/dashboard-page.tsx#L132-L147) · [Run 明细](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L27-L53) · [Issue 摘要与每日看板](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L84-L161) | Run 错误、C1 业务核验失败和人工退回分别归因。用量按宿主、单位及覆盖范围展示，只有合成计量或 Stage 协议证据时，不给订单编造成本。[专题四现状与验收](../architecture/04-cost-quality-improvement.md) |
+| 评价、候选改进与后续验证 | TeamAI 从实际经验中筛选满足置信度等条件的候选；前序研究保留该提交的发布、评审与来源撤回实验。[候选筛选](https://github.com/Tencent/teamai-cli/blob/1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956/src/maintenance/promote.ts#L34-L86) · [能力与知识实证](03b-source-evidence.md) | 订单交付结束后，从 Findings 定位失败证据，记录候选、匹配的 Benchmark、审核及后续观察。正式资产发布或项目配置采用回到对应的有权入口。 |
+
+## 真实产品还要验证什么
+
+1. 用普通项目成员、验收人和失去访问权的成员分别从通知进入。检查是否定位到当前问题、能否看到恰当证据、旧候选能否被误操作。上游断言覆盖通知和访问控制，本项目的候选绑定与审批动作仍需联调。
+2. 用具有相同文件名的 C1 和 C2 走完退回、补交、接受。在 C1 的旧详情停留、C2 到达后再点决定，核对最终记录指向的候选、实际附件版本、标准和决定人。另查完整历史的加载是否保持按需展开。
+3. 让两个 Issue 共用一个单槽 Runtime；分别制造资源排队、Leader 离线、已有 Worker 回报。使用产品界面核对哪类事实可以解释等待，哪类只能标为原因待查，以及接管后先前执行和结果归谁。订单费用与单独宿主探针分别展示来源。

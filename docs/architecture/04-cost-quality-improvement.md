@@ -90,7 +90,7 @@ Run 是实际执行的归属单位；Session 是连续性资源，可由多个 R
 
 实际费用、估算、仅 Token 和未知在同一周期分别列示。总计同时带已覆盖执行数与应覆盖执行数；已知部分的合计标为部分总量。真实零值须由明确上报与覆盖证明，字段缺失保留 unknown。固定[上报入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5509-L5527)保留显式零 Credits，缺失或负值写为空；USD 仅正数被认作原生报价。旧记录的空 USD 无法区分免费与未上报，有费率依据时可另列估算。
 
-原生 Issue 摘要只在已开始且有结束时间的终态 Run 中统计上报覆盖：只要有一行 Usage，就计入 `metered_task_count`。分指标展示时按该单位适用的 Run 和实际覆盖区间计算分子与分母；只报 Token 的 Run 仍可能缺 Credits。
+原生 Issue 摘要只在已开始且有结束时间的终态 Run 中统计上报覆盖：只要有一行 Usage，就计入 `metered_task_count`。分指标展示时按该单位适用的 Run 和实际覆盖区间计算分子与分母；只报 Token 的 Run 仍可能缺 Credits。专题五用真实回执和接口明细夹具跑过固定版前端函数：Issue 执行日志可按供应商汇总已收到的 Credits。只报 24 个 Token 且费率未知的对照行，其原生金额格式化结果为 `$0.00`。产品应保留 Token 数、费用未知及覆盖范围。[可复跑的展示实验](../research/topic-05/codebuddy-display-replay.md)
 
 ### 3.5 十维归集与重复引用
 
