@@ -94,13 +94,26 @@ V0.1 · 探索基线 · 2026-11-15
 
 测试覆盖两类 Runtime Credits 的单位隔离、显式 Run 绑定、无用量上报时保持 unknown，以及不从订阅额度、账户余额或 Token 数推算 Credits。当前 32 项 CI 是基于官方文档字段构造的确定性协议夹具，不是成员机器上安装版 Qoder / CodeBuddy 的真实进程回环；真实版本、IDE 会话旁路和宿主升级兼容仍待现场验收。Qoder SDK 方式需要平台 Runtime 启动 / 恢复由 SDK 管理的 qodercli；CodeBuddy 需要由 Runtime 启动 `--output-format stream-json` 的 CLI。成员仅打开 IDE 且未通过上述 Runtime 托管时，不宣称已采集 Credits，保持 unknown。
 
-## 6. 成本账本原型首轮结果
+## 6. 真实 Runtime 验证包（4.1.2）
+
+目标环境由成员提供：Qoder CLI 1.1.88、CodeBuddy Code CLI 2.181.0。已新增本机探针和回执说明：
+- [目标版本本机验证步骤与回执要求](topic-04/runtime-validation-1.1.88-2.181.0.md)
+- [Qoder Agent SDK 探针](../../prototypes/topic-04/qoder-sdk-runtime-probe.mjs)
+- [CodeBuddy stream-json 探针](../../prototypes/topic-04/codebuddy-stream-runtime-probe.mjs)
+
+官方版本证据：CodeBuddy v2.181.0 Release Notes 明确列出 CLI v2.181.0，并说明新增 stream-JSON per-turn usage，包含稳定 stage identity 和 Credits 结算；因此本次版本是目标功能版本，不只是“可能支持”。[v2.181.0 Release Notes](https://www.workbuddy.ai/docs/cli/release-notes/v2.181.0)。Qoder Agent SDK 官方文档提供请求级 `message.message.usage.credits` 和 Session 累计 `result.total_credits`，并说明 Credits 字段可选、缺失不可视为 0。[Qoder SDK Cost and Usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK Options](https://docs.qoder.com/cli/sdk/references-typescript)。
+
+探针只执行无工具的只读提示，按白名单保存 Credits、Session / Request / Stage 身份、版本和状态，不保存 Prompt / 回复正文、源代码、工具参数、账号凭据或账户额度。Qoder 探针显式支持 `QODERCLI_PATH`，以便将 SDK 绑定到成员声明的 qodercli 二进制；若无独立 qodercli，SDK 自动管理版本必须单独记录。CodeBuddy 探针启动 `--output-format stream-json`，只留存 `usage_update` 与终态摘要。
+
+当前状态：**验证包已准备，真实成员机器回环尚未执行**。CI 仅完成脚本语法检查和 32 项确定性回归，不得当作真实宿主运行证据。收到成员回执后，按目标版本分别判定 PASS / PARTIAL / UNKNOWN / NOT_TARGET_VERSION。
+
+## 7. 成本账本原型首轮结果
 
 已在分支中加入确定性 Node 原型，覆盖多观察源去重、命名空间隔离、同等可信来源冲突、较高可信来源优先、Run 归属冲突、缺失原生标识、累计快照差额、基线缺失 / 模型变化 / 计数重置 / 乱序，以及 Run 汇总排重。成本账本 11 项用例通过；随后与评价原型合并运行的远端 Node 24 CI 共 20 项用例全部通过。[成本账本独立 CI #4](https://github.com/ScWen7/Issues/actions/runs/43670463148) · [成本 + 评价 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。
 
 该原型仅验证确定性归集规则，不代表最终账本 Schema。后续还需增加 Observation 更正链、跨采集器身份映射、计量覆盖区间、供应商费率 / 账单对账和平台后台成本类型。
 
-## 7. 评价与 Benchmark 原型首轮结果
+## 8. 评价与 Benchmark 原型首轮结果
 
 新增独立评价原型：只对终态业务 Run 启动评价，评价记录引用原 Run、由独立 evaluation Run 承载；缺失证据返回 inconclusive 而不是低分；加权维度分必须带证据；事后评价默认 advisory-only，只有 SOP 明确声明门禁且 Run 与 scorer 版本匹配时才允许形成门禁结果。
 
@@ -108,6 +121,6 @@ Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、e
 
 当前原型仍不实现评分任务调度、模型裁判调用、完整样本存储、人工审批 UI 或资产发布；它验证的是记录隔离、比较资格和决策边界。
 
-## 8. 证据边界
+## 9. 证据边界
 
 现有上游测试和 3A 回环探针证明部分协议与算法行为，不证明真实供应商账单完整性、所有宿主成本覆盖或生产团队中的改进收益。第一轮原型将使用可复现的合成 Observation 和已有真实宿主协议记录；账单对账与真实项目发布后观察另列现场验收。
