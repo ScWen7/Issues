@@ -19,26 +19,39 @@ class SocketClient:
         self.socket = socket
         self.sequence = 0
         self.seen = []
+        self.pending_notifications = []
         self.call("initialize", {"clientInfo": {"name": name, "version": "1"},
                                  "capabilities": {"experimentalApi": True}})
         socket.send(json.dumps({"method": "initialized", "params": {}}))
 
+    def receive(self, deadline):
+        message = json.loads(self.socket.recv(timeout=max(0, deadline - time.monotonic())))
+        self.seen.append(message)
+        return message
+
     def call(self, method, params):
         self.sequence += 1
         self.socket.send(json.dumps({"id": self.sequence, "method": method, "params": params}))
-        message = self.wait(lambda m: m.get("id") == self.sequence)
-        if "error" in message:
-            raise RuntimeError(message["error"])
-        return message["result"]
+        deadline = time.monotonic() + 20
+        while True:
+            message = self.receive(deadline)
+            if message.get("id") == self.sequence and "method" not in message:
+                if "error" in message:
+                    raise RuntimeError(message["error"])
+                return message["result"]
+            self.pending_notifications.append(message)
 
     def wait(self, predicate):
+        # A turn can finish before its RPC response is read. Keep that native event.
+        for index, message in enumerate(self.pending_notifications):
+            if predicate(message):
+                return self.pending_notifications.pop(index)
         deadline = time.monotonic() + 20
-        while time.monotonic() < deadline:
-            message = json.loads(self.socket.recv(timeout=max(0, deadline - time.monotonic())))
-            self.seen.append(message)
+        while True:
+            message = self.receive(deadline)
             if predicate(message):
                 return message
-        raise TimeoutError("App Server response timed out")
+            self.pending_notifications.append(message)
 
 
 @contextmanager

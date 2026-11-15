@@ -1,6 +1,6 @@
 # 已打开的 Claude Code 会话能否接续订单核验
 
-成员先在 Claude Code 提交一条带随机标记的合成消息，等该轮正常结束，再派发订单。适配器在同一条已连接的控制通道上读取 MCP 状态，核对前一轮实际使用的模型、启动配置与成员允许带入新工作的历史。各场景使用 Claude Code 2.1.325、固定返回的本地 Messages 端点、真实 stdio 服务，以及三份 C2 工作簿。当前实测覆盖适配器从启动起就能观察的既有 CLI 会话。对任意已打开的桌面或 IDE 会话，仍需单独验证控制通道、历史覆盖和配置来源。[实验代码](../../../prototypes/topic-03b/cross-host/claude_existing.py) · [订单运行入口](../../../prototypes/topic-03b/cross-host/order_existing.py)
+成员先在 Claude Code 提交一条带随机标记的合成消息，等该轮正常结束，再派发订单。适配器在同一条已连接的控制通道上读取 MCP 状态，核对前一轮实际使用的模型、启动配置与成员允许带入新工作的历史。各场景使用 Claude Code 2.1.325、固定返回的本地 Messages 端点、真实 stdio 服务，以及三份 C2 工作簿。这组复用实验从启动起就能观察既有 CLI 会话，订单 MCP 配置和任务凭据在预热时已经装载。预热没有工具调用。对任意已打开的桌面或 IDE 会话，仍需单独验证控制通道、历史覆盖和配置来源。[实验代码](../../../prototypes/topic-03b/cross-host/claude_existing.py) · [订单运行入口](../../../prototypes/topic-03b/cross-host/order_existing.py)
 
 | 派发时的情形 | 订单提示进入哪个会话 | 实际核验与结果 |
 |---|---|---|
@@ -14,7 +14,7 @@
 
 预热轮的原生 system/init 和实际模型请求均报告相同模型。接单前适配器还会通过 mcp_status 复核项目服务的连接范围、启动目标、服务自报身份和工具名。两轮各有自己的 UserPromptSubmit 与 Stop，在同一轮内两者指向相同的 prompt ID。探针分别检查业务首包和带 tool_result 的后续包是否包含旧轮标记。允许复用时，两次命中且工作 prompt ID 不同于旧轮。转入新会话时，两次均未命中，且原会话没有订单模型请求。团队回执只记录 ID、摘要、命中结果与配置来源，这里对历史授权的变更使用实验授予表模拟。[SDK 的控制协议入口](https://github.com/anthropics/claude-agent-sdk-python/blob/4720d367f7db9d5df8a166c74d7f36a538ac8c34/src/claude_agent_sdk/_internal/query.py#L813-L819) · [宿主和模型证据](../../../prototypes/topic-03b/cross-host/claude_existing.py)
 
-本实验能从启动时的明确参数和隔离的配置目录追溯 Hook 来源，随后读取实际配置文件摘要，并以宿主发出的事件确认哪些命令确实运行过。mcp_status 给出连接的服务与工具。若现场仅能读取 MCP 清单，Hook 全集、旧历史的授权和未知命令的副作用仍待确认。[配置加载路径](https://github.com/anthropics/claude-agent-sdk-python/blob/4720d367f7db9d5df8a166c74d7f36a538ac8c34/src/claude_agent_sdk/_internal/transport/subprocess_cli.py#L619-L685)
+本实验能从启动时的明确参数和隔离的配置目录追溯 Hook 来源，探针还能通过原生 get_settings 读取当前生效的 hooks 以及 flagSettings 来源，比对完整命令配置与批准摘要，再以宿主事件确认实际执行的命令。mcp_status 给出连接的服务与工具。若现场仅能读取 MCP 清单，Hook 全集、旧历史的授权和未知命令的副作用仍待确认。[配置加载路径](https://github.com/anthropics/claude-agent-sdk-python/blob/4720d367f7db9d5df8a166c74d7f36a538ac8c34/src/claude_agent_sdk/_internal/transport/subprocess_cli.py#L619-L685)
 
 ## 同一个工具调用怎样认账
 

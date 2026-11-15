@@ -61,18 +61,30 @@ def prompt(send, receive, text):
     return frames
 
 
+def control_read(send, receive, subtype):
+    rid = uuid4().hex
+    send({"type": "control_request", "request_id": rid, "request": {"subtype": subtype}})
+    while True:
+        frame = receive()
+        if frame["type"] == "control_response" and frame["response"]["request_id"] == rid:
+            assert frame["response"]["subtype"] == "success"
+            return frame["response"]["response"]
+
+
+def observed_hooks(send, receive, settings):
+    readback = control_read(send, receive, "get_settings")
+    effective = readback["effective"]["hooks"]
+    sources = [item["source"] for item in readback["sources"] if item["settings"].get("hooks")]
+    checksum = native.digest(native.plain({"hooks": effective}))
+    assert checksum == native.digest(settings.read_text()) and sources == ["flagSettings"]
+    return {"settings_sha256": checksum, "hook_sources": sources}
+
+
 def catalog(send, receive, case):
     # The SDK has one initialize request per stream. mcp_status is also valid between turns.
     until = time.monotonic() + 15
     while True:
-        rid = uuid4().hex
-        send({"type": "control_request", "request_id": rid, "request": {"subtype": "mcp_status"}})
-        while True:
-            frame = receive()
-            if frame["type"] == "control_response" and frame["response"]["request_id"] == rid:
-                assert frame["response"]["subtype"] == "success"
-                states = {s["name"]: s for s in frame["response"]["response"]["mcpServers"]}
-                break
+        states = {s["name"]: s for s in control_read(send, receive, "mcp_status")["mcpServers"]}
         if all(alias in states and states[alias]["status"] != "pending" for alias in case["servers"]):
             break
         if time.monotonic() >= until:
@@ -142,7 +154,8 @@ def open_session(binary, case, callback, extra_hook=False, transform_log=None):
 
 def business(session, case, marker):
     send, receive, endpoint, audit_log, settings, trusted_settings, _ = session
-    assert native.digest(settings.read_text()) == trusted_settings
+    config = observed_hooks(send, receive, settings)
+    assert config["settings_sha256"] == trusted_settings
     mcp = catalog(send, receive, case)
     offset = len(events_at(audit_log))
     endpoint.business = True
@@ -158,7 +171,7 @@ def business(session, case, marker):
     assert [h["hook_event_name"] for h in tool_hooks] == expected
     assert all(h["session_id"] == result["session_id"] and h["tool_use_id"] == result["call_id"]
                and h["prompt_id"] == result["prompt_id"] and h["tool_name"] == endpoint.target for h in tool_hooks)
-    return result, marker_seen[0], {"settings_sha256": trusted_settings, "model": MODEL,
+    return result, marker_seen[0], {**config, "model": MODEL,
                                     "mcp_status": mcp, "hook_events": tool_hooks}
 
 
@@ -184,7 +197,8 @@ def run_claude_existing(binary, case, before_call=None, *, scenario="reuse"):
         if scenario == "history-revoked":
             history_grants.pop(prior_id)
         scope_ok = start["prompt_id"] in history_grants.get(prior_id, set())
-        settings_hash = sha256(settings.read_bytes()).hexdigest()
+        effective = observed_hooks(send, receive, settings)
+        settings_hash = effective["settings_sha256"]
         trusted_hooks = settings_hash == trusted
         local_events = events_at(local_log)
         if local_events:
@@ -209,6 +223,7 @@ def run_claude_existing(binary, case, before_call=None, *, scenario="reuse"):
                    "prior_business_requests": len(endpoint.received), "selected_model_requests": actual["model_requests"],
                    "prior_marker_in_selected_input": included, "prior_model_requests": len(endpoint.warm_requests),
                    "prior_model": init["model"], "prior_mcp_status": mcp, "prior_settings_sha256": settings_hash,
+                   "prior_hook_sources": effective["hook_sources"],
                    "approved_prior_settings_sha256": trusted, "prior_history_authorized": scope_ok,
                    "extra_hook_warm_events": len(local_events), "extra_hook_work_events": len(events_at(local_log))-len(local_events),
                    "hook_program_sha256": sha256(AUDIT_HOOK.read_bytes()).hexdigest(), "selected": selected}
