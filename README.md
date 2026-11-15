@@ -4,9 +4,7 @@
 
 ## 当前设计重点
 
-从[团队研发协作工作机制](docs/architecture/overview.md#3-工作主线)开始。用订单导出说明负责人怎样组织工作、不同成员如何取得依据、何时调用 SOP、结果如何回到 Issue，再用下一项相似需求研究经验复用。先以轻量修改走通原 Issue，再查订单任务确实缺哪段资料或哪项能力。团队与项目在平台维护可复用配置，资料可沿用原有来源，成员无需维护团队 Git 仓。当前优先核验补充依据对角色判断和人员交接的实际影响。[团队与项目上下文](docs/architecture/overview.md#团队与项目上下文) · [本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
-
-团队知识与代码理解分别开展产品设计。成员可在没有 Issue 时查阅、维护团队资料，或从项目架构读到某个版本的实现。Issue 和本地 Agent 按需引用其中的依据。[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) · [项目代码 Wiki](docs/architecture/code-wiki.md)
+当前交付是[协作平台主线设计](docs/architecture/overview.md#3-工作主线)。围绕同一项工作说明谁承接、何时分工、谁在获准的本地 Runtime 执行、怎样取回可核验的结果，以及返工、接管和验收由谁继续。用一项按钮文案修改检查最短路径，用跨成员、跨仓库的订单导出检查并行、等待与交接。五个专题共同支持这两条路径。[本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
 
 ## 当前架构基线
 
@@ -29,12 +27,14 @@
 | [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
 | [专题三 A：宿主能力证据矩阵](docs/architecture/execution-capabilities.md) | 不同宿主和入口的能力、证据与缺项 |
 | [专题三 B：TeamAI 能力与知识治理融合](docs/architecture/03b-capability-governance.md) | 资产作用域、版本、检索、投递、Skill Driver 与 AgentObservation |
-| [团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) | 从原文找到有效业务口径，维护项目说明、团队知识及其适用范围 |
-| [项目代码 Wiki](docs/architecture/code-wiki.md) | 按基准阅读项目架构、模块、关键流程和跨仓调用，回到代码核对 |
 | [专题四：成本、质量与工程级 RSI](docs/architecture/04-cost-quality-improvement.md) | Multica Usage 扩展、TeamAI Scorers、LoopForge Evaluator / Benchmark / RSI |
 | [专题五：统一工作台](docs/architecture/05-unified-workbench.md) | 项目、Issue、待我决定和十二类用户工作的入口；订单、轻量工作及异常走查 |
 | [统一术语](CONTEXT.md) | 统一 Issue、Run、Session、SOP、资产、评价和证据概念 |
 | [本轮交叉审查修订记录](docs/review/governance-v1.1.md) | 查看审查发现、对应修订与本轮文档核验结果 |
+
+### 按需扩展
+
+[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)各自保留独立设计。需要团队口径或代码说明时，Issue 可引用获准的来源、版本和位置。两个扩展均未启用时，协作主线仍可直接使用原 Issue、现有项目资料和工程仓。团队资料可在已有来源或平台中维护，无需单独的知识 Git 仓。
 
 ## 研究与验证证据
 

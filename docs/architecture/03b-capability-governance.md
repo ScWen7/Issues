@@ -16,6 +16,8 @@
 
 ### 团队与项目怎样维护可复用内容
 
+本阶段保留两类 Wiki 的扩展边界。未启用时，工作沿原 Issue、已有资料和工程仓继续。启用后，资料可按原文修订和章节引用，代码说明可按仓库、代码基准和实现位置引用。成员交接后按接收者的现有权限读取，决定及执行结果回原 Issue 和 Run。项目能力配置照常沿原生 Agent、Skill 与获准工具使用。
+
 以下是协作平台的设计取舍。TeamAI 的角色检索、源定位和经验审核可以分别借鉴；它通过团队 Git 引用、分支及同步命令选取发布内容。平台成员直接在团队或项目范围维护可复用内容，协作、选用、审核和撤回均可在没有团队知识 Git 仓的情况下进行。产品源文档、工程代码和平台维护的配置分别沿各自的更新方式演进。[TeamAI 的 Git 引用解析](https://github.com/Tencent/teamai-cli/blob/1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956/src/team-ref.ts#L37-L72) · [知识范围与能力授权](https://github.com/Tencent/teamai-cli/blob/1bc2ce18e0b3666f512ee7d0d94f6a5e0c9fc956/src/resource-namespaces.ts#L26-L68)
 
 | 内容 | 谁维护，如何进入同一项工作 |
