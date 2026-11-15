@@ -91,3 +91,12 @@ test("unknown, conflicting and ownership-conflicted entries do not enter money t
   ];
   assert.equal(aggregateRunCosts(entries, ["run-a", "run-b"]), 0.04);
 });
+
+test("a post-hook successor Run has its own additive cost while the rejected Run remains auditable", () => {
+  const entries = [
+    { key: "original-request", runId: "post-hook-order", status: "reconciled", amount: 0.03, currency: "USD" },
+    { key: "successor-request", runId: "post-hook-reverification", status: "reconciled", amount: 0.02, currency: "USD" }
+  ];
+  assert.equal(aggregateRunCosts(entries, ["post-hook-order", "post-hook-reverification"]), 0.05);
+  assert.equal(aggregateRunCosts(entries, ["post-hook-reverification"]), 0.02);
+});
