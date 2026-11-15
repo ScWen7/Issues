@@ -1,6 +1,6 @@
 # Team Agent Collaboration Platform 统一术语
 
-本词汇表记录 V1.1 Multica 基座融合架构使用的业务含义。以[架构治理基线](docs/architecture/governance-baseline.md)和[统一架构总览](docs/architecture/overview.md)为准；专题一至四设计分别见对应文档。Multica 原生对象优先沿用其自身语义，本词汇表不定义平行状态、Run 或 Runtime。当前设计与用户已确认事项的效力见[设计基线表](docs/architecture/overview.md#设计基线与决策效力)。
+本词汇表记录五个专题共用的业务含义。Multica 原生对象沿用自身语义，平台的产品取舍见[架构治理基线](docs/architecture/governance-baseline.md)与[总览的设计基线表](docs/architecture/overview.md#设计基线与决策效力)。
 
 ## 工作与责任
 
@@ -8,7 +8,7 @@
 
 **子 Issue（Sub-issue）**：通过父子关系纳入另一 Issue 的工作事项，适合独立分配、跟踪和交付的分工；它不是另一种 Task 模型。
 
-**Task（任务）**：对具体工作的普通称呼，当前设计用子 Issue 承担独立分工，同 Issue 下的 Run 承担短协作。省去设计输入中的独立业务 Task 层仍待用户确认。外部源码中的同名对象按原项目语义解释。
+**Task（任务）** 在本版方案中是对具体工作的普通称呼。协助者在原 Issue 答复问题，成员亲自操作后在该处交回结果，Agent 的实际执行归该 Issue 的 Run。有独立负责人和交付要求的分工使用子 Issue。省去设计输入中的独立业务 Task 层仍待用户确认，外部源码中的同名对象按原项目语义解释。
 
 **Run（执行记录）**：沿用 Multica 的受管理执行记录语义，记录执行者、环境、输入、过程和结果。业务 Run 直接关联所服务的 Issue；SOP 实例仅管理流程定义和节点依赖，并引用 Multica Run；宿主会话管理对话连续性。
 
@@ -28,7 +28,7 @@
 
 **总责人（Accountable Member）**：在整个 Issue 生命周期保持稳定的真实人员（Member），对 Agent 或 Squad 主导工作的目标、范围、重大业务取舍与交付质量负最终责任。不可为 Agent 或 Squad。可与提出人（Requester）或验收人（Acceptor）为同一人；原“人工责任成员”统一并入此概念。Multica Run 的 `AccountableUserID` 是该次执行的审计 / 成本归因字段；它与 Issue 总责人的映射按具体工作关系核对，不提供额外授权。
 
-**验收人（Acceptor）**：按工作约定对交付候选进行独立判断、决定是否满足目标的 Member；明确适用的项目验收规则可以承担部分可自动验证的判断。
+**验收人（Acceptor）** 是工作约定中有权接受或退回交付的成员。要求人工验收时，由指定成员对当前候选和适用标准作出明确决定。项目预先允许按检查完成的低风险事项，可凭该候选的规定检查结果完成。
 
 **平台强制规则（Platform Mandatory Rules）**：由控制平面统一执行的工作约束，例如人工验收事项的全部完成入口校验有效验收决定、人工门禁等待明确答复、Runtime 使用校验所有者共享同意。代码强制与提示词约定分别记录。
 
