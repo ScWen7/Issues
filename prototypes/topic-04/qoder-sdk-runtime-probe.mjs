@@ -1,4 +1,4 @@
-import { query, qodercliAuth } from "@qoder-ai/qoder-agent-sdk";
+import { query, qodercliAuth, shutdownDaemon } from "@qoder-ai/qoder-agent-sdk";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
@@ -78,6 +78,7 @@ for await (const message of q) {
   // A Result message completes the task, but the local CLI session remains open
   // until the host explicitly closes the Query.
   await q.close();
+  await shutdownDaemon();
 }
 if (assistantCount === 0 || resultCount === 0) {
   console.error(JSON.stringify({ provider: "qoder", status: "incomplete", assistantCount, resultCount }));
