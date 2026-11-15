@@ -23,6 +23,10 @@
 
 **Claude Code 的工具成功返回后，Hook 仍可修改模型看到的内容。** 实验 Hook 在成功的项目工具响应外层加了一条演示备注。服务回执、Run 和调用 ID 正确，原生工具结果与第二次模型请求均为修改后的摘要。标准核验入口因服务摘要不同拒绝建立本次执行证明。节点消费和制品关联均为零。控制者随后让相同 Run 在新受管会话里重新执行只读核验，从未修改的报告消费一次。两次服务执行分别记录。若业务允许某种转换，应在该契约里明确允许转换的字段和核验方法。[Hook 实验](../../../prototypes/topic-03b/cross-host/claude_existing.py)
 
+## 一次可追溯的远端结果
+
+在作业 43664884852 中，Claude Code 先完成个人回合，随后在原 Session 接到新派的 C2。原生调用 `toolu_6e27e767775f4a14a9183d9f3e456eda` 对应项目服务回执 `ffd962376d2541b3923465af6054fb20`。第二次模型请求携带该调用的工具结果。接收方看到了 `issued-after-member-prompt` 提交的报告，消费记录指向原节点 `verify-order-export` 第 2 次尝试，结论为 `pass`。对应的东区、西区和跨区工作簿各有独立摘要。[完整回执中的 claude-late-binding](fixtures/existing-session.json) · [CI 原始制品](https://github.com/ScWen7/Issues/actions/runs/43664884852/artifacts/14141282681)
+
 ## 复跑
 
 从仓库根目录执行，使用专题三 B 上一阶段固定的两种 Linux 宿主二进制。临时路径应当尚不存在。回归只上传筛选后的摘要。
@@ -33,4 +37,8 @@ python prototypes/topic-03b/cross-host/order_existing.py /tmp/order-session-evid
   --codex /path/to/codex --claude /path/to/claude
 ```
 
-每个一般场景单独建账。`cases` 保存原会话与最终会话、工具调用、返回和消费记录。`concurrent_input` 保存两个 Codex 客户端交替发言后的可见性观察。`post_hook_result` 将变更过的响应与干净会话的复验分开保存。真实员工的组织账号、未接入平台的 IDE 窗口、生产订单服务和正式业务验收属于现场验证范围。
+十二个订单场景各自单独建账。六个场景转入新会话并完成核验，四个场景在原会话内取得有效报告，两次调用前撤权均无消费。十份成功报告均首次接收，重复投递保持一次消费、三份制品。另两项对照分别测试并发输入，以及 Hook 改写后如何保留原节点并重新核验。[远端验证作业](https://github.com/ScWen7/Issues/actions/runs/43664884852/job/132661948611)
+
+`cases` 保存原会话与最终会话、工具调用、返回和消费记录。`concurrent_input` 保存两个 Codex 客户端交替发言后的可见性观察。`post_hook_result` 将变更过的响应与干净会话的复验分开保存。真实员工的组织账号、未接入平台的 IDE 窗口、生产订单服务和正式业务验收属于现场验证范围。
+
+本地重复运行时曾遇到预热回合等待超时。WebSocket 探针现保留 RPC 响应前先到的原生通知；该顺序另用确定性输入核对过。随后完整本地矩阵通过。用于收口的回执取自远端固定版本作业。

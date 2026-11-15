@@ -22,6 +22,8 @@
 | CodeBuddy | stderr 的「Session 不存在」可与失败及请求的 Session 对照。权威 result 到达后，随后的普通错误行保留为诊断。多帧共用响应 ID 的兜底用量在本次执行内折叠。[恢复与终态测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codebuddy_test.go#L587-L630) · [晚到错误](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codebuddy_test.go#L741-L783) |
 | OpenCode | ACP 源码对实际 Session 发 `session/cancel`，经等待后可终止进程。强制选择 2.x `run` 的夹具则以进程退出判断终态，任务带受管 MCP 会在启动前返回具体错误。记录实际 transport 和失败原因，需 MCP 的工作可换用已验证可投递该服务的 Runtime。上述三个宿主的固定 Multica Session 实现均仅提供消息与 Result，清理与复用另查实际回执。[ACP 取消](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/opencode_acp.go#L604-L630) · [2.x 两种 MCP 路径](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/opencode_v2.go#L97-L115) |
 
+专题三 B 在固定的 Codex 0.144.6 前台终端验证了第二客户端接入已开放端点，在 Claude Code 2.1.325 验证了已有控制流接入一个晚到的订单工具。历史不再全量获准、成员仍可并发输入或 Hook 改写返回时，分别记录切换会话或停止接收的依据。[现有会话实测](../research/topic-03b/existing-session.md)
+
 ## 一个执行怎样进 Issue、怎么停
 
 - **归属与共享。** 中心派发在启动时保留派发回执，本地主动关联从下一次可识别输入生效，事后补录保留原发生时间、导入时间和生产方。三条入口先找同一宿主命名空间内的原生执行单元，再绑定原 Run。命中不同 Issue 时查原生产归属，其余 Issue 引用。成员在本机分别预览消息、工具名和结果、参数和输出、模型用量、制品，按选区投递。离线补传按当前授权和选区复核，缩小范围后取消旧版待发项。界面分别展示成员自述、带宿主标识的记录，以及中心实际核对的目标、身份、摘要或标准。[三种入口与共享](03a-execution-plane.md#46-本地交互式执行的接入)
