@@ -76,7 +76,8 @@ export QODERCLI_PATH="$(command -v qodercli)"
 运行：
 
 ```bash
-node "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" > qoder-receipt.jsonl
+cp "$REPO_ROOT/prototypes/topic-04/qoder-sdk-runtime-probe.mjs" .
+node qoder-sdk-runtime-probe.mjs > qoder-receipt.jsonl
 ```
 
 探针使用现有 Qoder CLI 登录态，通过 `qodercliAuth()` 认证；不读取账号配额。提示内容为只需返回 OK 的无工具任务。探针将请求级 Assistant usage 与 Result session snapshot 分开输出，并记录 SDK 实际使用的 CLI 路径和版本。
