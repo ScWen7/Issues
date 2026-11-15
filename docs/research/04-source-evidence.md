@@ -101,7 +101,7 @@ Qoder Credit 与 CodeBuddy Credit 使用独立 unit，禁止混加。除非未�
 
 新增独立评价原型：只对终态业务 Run 启动评价，评价记录引用原 Run、由独立 evaluation Run 承载；缺失证据返回 inconclusive 而不是低分；加权维度分必须带证据；事后评价默认 advisory-only，只有 SOP 明确声明门禁且 Run 与 scorer 版本匹配时才允许形成门禁结果。
 
-Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、effort、评分器版本、聚合方式、环境摘要和重复次数全部一致。改进评估只有在可比时才计算质量提升和成本变化；达到阈值只生成 candidate-for-review，不自动批准或发布。首次 CI 发现浮点输出精度断言过严，已将展示差值规范到六位小数，阈值判断仍使用未舍入原值。修正后成本与评价共 20 项回归在 Node 24.22.2 全部通过。[远端 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。加入 Qoder / CodeBuddy Credits 归一化、额度快照和显式 Run 归属后，远端 Node 24.22.2 共 27 项回归全部通过。[异构计量 CI #9](https://github.com/ScWen7/Issues/actions/runs/43671321296)。
+Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、effort、评分器版本、聚合方式、环境摘要和重复次数全部一致。改进评估只有在可比时才计算质量提升和成本变化；达到阈值只生成 candidate-for-review，不自动批准或发布。首次 CI 发现浮点输出精度断言过严，已将展示差值规范到六位小数，阈值判断仍使用未舍入原值。修正后成本与评价共 20 项回归在 Node 24.22.2 全部通过。[远端 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。此前 27 项测试包含后来明确不采用的企业 API / 账户用量适配。按 Runtime-only 边界移除这些路径并重写测试后，当前有效版本为 24 项回归全部通过，覆盖 Qoder / CodeBuddy Runtime Credits 上报、显式 Run 绑定、未上报保持 unknown、单位隔离，以及成本与评价基线。[Runtime-only CI #12](https://github.com/ScWen7/Issues/actions/runs/43671634747)。
 
 当前原型仍不实现评分任务调度、模型裁判调用、完整样本存储、人工审批 UI 或资产发布；它验证的是记录隔离、比较资格和决策边界。
 
