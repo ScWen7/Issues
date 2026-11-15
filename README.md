@@ -1,6 +1,10 @@
 # Team Agent Collaboration Platform
 
-本项目建设面向研发团队的人机协作产品，**以 Multica 为协作与执行基座，融合 TeamAI 团队能力治理与 LoopForge SOP / 工程级 RSI 能力**。本仓库维护产品架构、源码研究、原型验证和真实宿主实验；不把专题设计误解为必须自建所有底层能力。
+本项目设计一套研发团队共用的 Agent 工作台。成员在中心管理多个 Issue，使用各自的本地 Agent 完成跨角色、跨仓库的工作。团队资料和项目现状为规划、实施、核验和交接提供依据。稳定的方法可以成为 SOP，一次交付中得到验证的经验可供另一名成员在后续工作中采用。
+
+## 当前设计重点
+
+从[团队研发协作工作机制](docs/architecture/overview.md#3-工作主线)开始。用订单导出说明负责人怎样组织工作、不同成员如何取得依据、何时调用 SOP、结果如何回到 Issue，再用下一项相似需求研究经验复用。轻量修改用来检验协作手续。当前最值得补证的是一份真实项目资料如何被不同角色找到、怎样影响工作，以及资料改版或人员交接时谁需要重新判断。[团队与项目上下文](docs/architecture/overview.md#团队与项目上下文) · [本阶段交付与评审](docs/architecture/overview.md#本阶段交付与评审)
 
 ## 当前架构基线
 
@@ -10,18 +14,14 @@
 - **TeamAI**：Role / Skill / Rule / Playbook、知识检索、作用域与版本、上下文选择和投递、Skill Driver、AgentObservation、Scorers。
 - **LoopForge**：可组合 SOP / DAG、Agent / Script / Human Gate、执行 Trace 评价、结构化 Findings、改进处方、Benchmark 和 RSI 自改进闭环。
 
-专题一至四已有设计与分项研究证据，真实 Multica 融合验收仍按各专题追踪。专题五首轮已将十二类用户工作映射到现有入口，并完成订单、轻量工作和资源等待场景的交互设计。可下载[离线交互原型](prototypes/topic-05/workbench.html)走查 C1 失败、C2 补证及具名验收。
-
-先复用 Multica 已有能力，再对真实缺口做最小扩展。不得建设第二套 Issue、Run、Runtime、派发控制、权限或成本账本。
-
-本轮保留 Multica 的所有权边界，并补回受托范围的派发前置、本轮激活、结果消费、不可变验收资产和撤权后的历史处置。Script 托管、本地 Credits 上报及调用级证据按固定源码列为扩展项。改进流程统一为候选、Benchmark、审核发布和后续观察；订单案例与六问审查表随各专题维护。
+专题一至四已有设计与分项证据，真实 Multica 融合验收按各专题追踪。专题五已把十二类工作映射到现有入口，其[离线交互原型](prototypes/topic-05/workbench.html)用于核对订单验收、轻量工作和资源等待的具体判断。脚本托管、调用级证据、本地 Credits 上报等工程缺口见[治理盘点](docs/architecture/governance-baseline.md#固定版本的底座盘点)。
 
 ## 架构入口
 
 | 文档 | 用途 |
 |---|---|
 | [架构治理基线](docs/architecture/governance-baseline.md) | 最高层架构所有权、复用原则和禁止重复建设的约束 |
-| [统一架构总览](docs/architecture/overview.md) | V1.1 产品定位、决策效力、共享契约、专题职责与订单贯穿案例 |
+| [统一架构总览](docs/architecture/overview.md) | 团队研发协作工作机制、团队与项目上下文、当前评审重点及五个专题的关系 |
 | [专题一：统一工作生命周期](docs/architecture/01-unified-work-lifecycle.md) | Issue First、Human / Agent / Squad 责任、工作约定和验收 |
 | [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | LoopForge SOP 如何附着于 Issue，并通过 Multica Run 执行 |
 | [专题三 A：Multica 执行底座审计](docs/architecture/03a-execution-plane.md) | Multica Daemon / Runtime / Backend / Session / Process 的覆盖与最小扩展 |
@@ -45,7 +45,7 @@
 - [专题五原生操作路径与源码](docs/research/05-source-evidence.md) · [工作台场景走查](docs/research/topic-05/workbench-walkthrough.md) · [真实 CodeBuddy 回执与原生展示函数回放](docs/research/topic-05/codebuddy-display-replay.md)
 - [专题二状态模型原型验证](docs/research/topic-02/prototype-validation.md)
 
-## 当前专题四真实用量状态
+### 专题四宿主用量证据
 
 - Qoder CLI 1.1.88 / SDK 1.0.59：PARTIAL。Query / Daemon 关闭与进程清理边界已实测；Assistant 请求事件、原生 request_id 和请求级 Credits 仍 unknown。Session total_credits=0 不作为单次消耗。
 - CodeBuddy CLI 2.181.0：PASS（受管 CLI 入口）。单 Stage 0.69 Credits 已取得；真实 Stage 修订覆盖仍待进一步验证。
