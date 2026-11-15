@@ -4,9 +4,9 @@
 
 ## 当前交付
 
-当前交付为专题三 A「执行平面与宿主适配」V0.6 设计评审稿。五个阶段围绕同一个问题收口：成员换机或离线后，谁有权接手，能拿到什么，迟到结果归哪一次执行。独立 Linux 虚拟机验证了候选与工作簿交接；原生 Multica 双身份验证了目标 Issue、附件和 Runtime 用量的授权；真实 Codex 与 Claude Code 验证了本地会话与可共享工作材料的区别。[完整设计](docs/architecture/03a-execution-plane.md) · [第五阶段实验](docs/research/03a-source-evidence.md#14-第五阶段跨主机接续与设计收口)
+专题三 B「能力与知识治理」已进入 V0.1 第一阶段。订单规则从四列换成包含付款时间的五列时，团队默认、项目覆盖、在途实例和宿主当轮输入各自可追溯。已以三个上游代码库、真实 Codex 回合、工作簿与核验脚本跑通首个案例。下一阶段验证项目知识来源修订、按角色选择和经验转正。[3B 设计](docs/architecture/03b-capability-governance.md) · [源码、运行结果与复跑](docs/research/03b-source-evidence.md)
 
-下一阶段进入专题三 B「能力与知识治理」。首个案例是订单导出的规则和核验脚本换版：沿同一 Issue 决定 D2，追踪资产由谁发布、对哪些项目生效、在途节点选中哪一版，再从具体宿主回合核对加载与产出。[入口与宿主能力矩阵、3B 交接](docs/architecture/execution-capabilities.md)
+专题三 A「执行平面与宿主适配」V0.6 已完成设计收口。最新修订覆盖返工报告晚到附件、投递证据缺失及旧领取代次的恢复条件，53 项基础回归在本轮远端作业通过。[3A 设计](docs/architecture/03a-execution-plane.md) · [与 3B 的交接](docs/architecture/execution-capabilities.md)
 
 专题二「SOP 与研发工作流融合」当前设计基线为 V0.3。[设计稿](docs/architecture/02-sop-workflow.md)明确 Delegation Grant 委托授权、Dispatch Control Binding 单一派发控制、SOP 结果到 Project Workflow 的出口校验，以及子 Issue 委托轮次与 child_done 的关系；保留节点自修正、Script 执行、代码工作副本接续和成本归集设计。配套 [17 项原型状态模型测试](docs/research/topic-02/prototype-validation.md)，本次修正回执去重判断的变量笔误后复跑为 17 PASS / 0 FAIL。[源码研究](docs/research/02-source-evidence.md)保留三个上游的固定版本、调用链与已有实跑记录。
 
@@ -31,6 +31,8 @@
 | [专题二：SOP 与研发工作流融合](docs/architecture/02-sop-workflow.md) | 审阅分工、图依赖、人工门禁、返工与接管规则以及实现前的验证条件 |
 | [专题二：三库源码与测试](docs/research/02-source-evidence.md) | 查看 Multica、TeamAI、LoopForge 的实际执行路径、设计原因和本轮运行记录 |
 | [专题二：状态模型验证](docs/research/topic-02/prototype-validation.md) | 查看模型场景、运行命令、本次修复后的结果及真实集成验证任务 |
+| [专题三 B：能力与知识治理](docs/architecture/03b-capability-governance.md) | 查看规则和脚本如何发布、在项目中选用、换版和重验 |
+| [专题三 B：源码与订单实验](docs/research/03b-source-evidence.md) | 从规则发布追到真实宿主回合、脚本摘要、工作簿和结果消费 |
 | [专题三 A：执行平面与宿主适配](docs/architecture/03a-execution-plane.md) | 查看执行分层、三种宿主入口、任务身份、换机接续和迟到结果归属 |
 | [专题三 A：宿主能力与 3B 交接](docs/architecture/execution-capabilities.md) | 按入口和宿主查看能力证据、缺项处理及资产版本交接 |
 | [专题三 A：源码研究记录](docs/research/03a-source-evidence.md) | 查看固定版本的注册、授权、加载回执、任务凭据及宿主结果证据 |

@@ -1,0 +1,39 @@
+name: AgentPlatform asset release research
+on:
+  push:
+    branches: [research/3b-asset-release]
+    paths:
+      - .github/workflows/asset-release-research.yml
+      - prototypes/topic-03b/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  order-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONDONTWRITEBYTECODE: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare pinned model client and workbook tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install XlsxWriter==3.2.9 openpyxl==3.1.5
+          cd "$RUNNER_TEMP"
+          pkg=$(npm pack @openai/codex@0.144.6-linux-x64 --silent)
+          echo "b6752eb2e8c10e6fcc96ac5c1c8ad8342cdb9a74504fb84686addf081a7d2868  $pkg" | sha256sum -c -
+          tar -xzf "$pkg"
+      - name: Verify latest 3A handoff and 3B publication, host input and results
+        run: |
+          node --test prototypes/topic-02/state-model.test.mjs prototypes/topic-03a/local-observation.test.mjs prototypes/topic-03a/context-decision.test.mjs
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03a/result-admission/test_admission.py
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/order_release.py "$RUNNER_TEMP/order-release" --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex"
+      - name: Retain the synthetic selections, three host turns and C2 result
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: order-release-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/order-release/summary.json
+          retention-days: 7
