@@ -88,7 +88,7 @@ class Study:
         runtime = "member-runtime-" + host
         contract = frozen_contract(candidate)
         if prior is not None:
-            assert prior.contract == contract and prior.epoch + 1 == epoch and prior.member != member
+            assert prior.contract == contract and prior.epoch + 1 == epoch and prior.run != run
         else:
             assert epoch == 1
         providers, credential_hash = self.credentials(run, member, runtime, epoch)

@@ -120,10 +120,13 @@ class Review:
         require(actor in self.publishers and actor != p["author"], "independent team publisher required")
         self.evidence.verify_pair(actor, p["pins"])
 
-    def record(self, actor, p, decision, reason):
-        self.decisions.append({"decision": decision, "actor": actor, "reason": reason,
-                               "proposal": p["id"], "revision": p["revision"],
-                               "body_sha256": digest(p["text"].encode()), "evidence": list(p["pins"])})
+    def record(self, actor, p, decision, reason, source=None, audience=None):
+        entry = {"decision": decision, "actor": actor, "reason": reason,
+                 "proposal": p["id"], "revision": p["revision"],
+                 "body_sha256": digest(p["text"].encode()), "evidence": list(p["pins"])}
+        if source is not None:
+            entry.update(source=source, audience=audience)
+        self.decisions.append(entry)
 
     def reject(self, actor, p, revision, reason):
         require(p["status"] == "draft" and revision == p["revision"] and reason.strip(), "draft revision required")
@@ -156,6 +159,17 @@ class Review:
         if audience == TEAM and p["status"] == "released":
             p["status"] = "review_required"
         self.record(actor, p, "authorization_revoked", reason)
+
+    def revoke_source(self, actor, p, source, audience, reason):
+        require(any(pin.source == source for pin in p["pins"]), "source is not part of proposal")
+        require(actor in self.evidence.stewards.get(source, ()), "source stewardship required")
+        key = self.grant_key(p, audience)
+        require(key in self.grants and reason.strip(), "current derivative grant and reason required")
+        # A combined permission needs every source; withdrawing one invalidates this grant only.
+        self.grants.remove(key)
+        if audience == TEAM and p["status"] == "released":
+            p["status"] = "review_required"
+        self.record(actor, p, "source_authorization_revoked", reason, source, audience)
 
     def release(self, actor, p, revision):
         require(p["status"] in ("draft", "rechecking") and revision == p["revision"], "stale or closed review")

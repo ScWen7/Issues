@@ -1,0 +1,257 @@
+{
+  "accepted_result": {
+    "artifacts": [
+      {
+        "bytes": 5534,
+        "name": "cross.xlsx",
+        "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+      },
+      {
+        "bytes": 5494,
+        "name": "east.xlsx",
+        "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+      },
+      {
+        "bytes": 5444,
+        "name": "west.xlsx",
+        "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+      }
+    ],
+    "call": {
+      "call_id": "toolu_75c268c38f3e40afbf0b3ca4e6ed12ab",
+      "host": "claude",
+      "receipt": "74c90b05948a48469a0be315a4491ae6",
+      "result_hash": "36e8e1313b4402781e1d17bb1ed5a9acb9d966b9b93098980b1b80fb6f0cdad7",
+      "run": "post-hook-reverification",
+      "service": "orders/inspect-workbook@2",
+      "session": "050769e9-bfdc-4e93-9e20-4f7b0e526d5c",
+      "turn": "c82ca46a-6415-4144-919a-ffaab779370b"
+    },
+    "consumed": {
+      "attempt": 2,
+      "issue": "order-export-verification",
+      "node": "verify-order-export",
+      "run": "post-hook-reverification",
+      "verdict": "pass"
+    },
+    "placement": "current",
+    "report_sha256": "66e9bd3166e17505645bb0cb92947f097e3de2733cac99cd5edc3f62ed564d24",
+    "slot": "verification-report"
+  },
+  "reverification": {
+    "admission": [
+      {
+        "call_id": "toolu_c34484db9e074ead9cfee397d71524e7",
+        "disposition": "no verified tool result",
+        "source_run": "post-hook-order"
+      },
+      {
+        "call_id": "toolu_75c268c38f3e40afbf0b3ca4e6ed12ab",
+        "disposition": "current",
+        "source_run": "post-hook-reverification"
+      },
+      {
+        "call_id": "toolu_75c268c38f3e40afbf0b3ca4e6ed12ab",
+        "disposition": "duplicate",
+        "source_run": "post-hook-reverification"
+      }
+    ],
+    "cases": [
+      {
+        "binding": {
+          "attempt": 2,
+          "candidate": "C2",
+          "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+          "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+          "epoch": 2,
+          "issue": "order-export-verification",
+          "member": "order-member-B",
+          "node": "verify-order-export",
+          "rule": "D2",
+          "run": "post-hook-reverification",
+          "runtime": "member-runtime-claude"
+        },
+        "host": "claude",
+        "id": "clean-read-after-hook",
+        "native": {
+          "arguments": {
+            "candidate": "C2"
+          },
+          "binding": {
+            "attempt": 2,
+            "candidate": "C2",
+            "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+            "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+            "epoch": 2,
+            "issue": "order-export-verification",
+            "member": "order-member-B",
+            "node": "verify-order-export",
+            "rule": "D2",
+            "run": "post-hook-reverification",
+            "runtime": "member-runtime-claude"
+          },
+          "call_id": "toolu_75c268c38f3e40afbf0b3ca4e6ed12ab",
+          "discovered": [
+            "mcp__personal_orders__inspect_order",
+            "mcp__project_orders__inspect_order"
+          ],
+          "host": "Claude Code 2.1.325",
+          "is_error": false,
+          "model_requests": 2,
+          "offered_mcp": [
+            "mcp__project_orders__inspect_order"
+          ],
+          "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
+          "prompt_id": "c82ca46a-6415-4144-919a-ffaab779370b",
+          "result": {
+            "provider": "orders/inspect-workbook@2",
+            "receipt": "74c90b05948a48469a0be315a4491ae6",
+            "report": {
+              "A2": true,
+              "A3": true,
+              "artifacts": [
+                {
+                  "bytes": 5494,
+                  "name": "east.xlsx",
+                  "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+                },
+                {
+                  "bytes": 5444,
+                  "name": "west.xlsx",
+                  "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+                },
+                {
+                  "bytes": 5534,
+                  "name": "cross.xlsx",
+                  "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+                }
+              ],
+              "attempt": 2,
+              "candidate": "C2",
+              "checks": {
+                "cross": {
+                  "A2": true,
+                  "A3": true,
+                  "exit": 0,
+                  "ids": [
+                    "A-101",
+                    "A-102",
+                    "B-201"
+                  ],
+                  "workbook": true
+                },
+                "east": {
+                  "A2": true,
+                  "A3": true,
+                  "exit": 0,
+                  "ids": [
+                    "A-101",
+                    "A-102"
+                  ],
+                  "workbook": true
+                },
+                "viewer": {
+                  "A2": true,
+                  "exit": 3,
+                  "workbook": false
+                },
+                "west": {
+                  "A2": true,
+                  "A3": true,
+                  "exit": 0,
+                  "ids": [
+                    "B-201"
+                  ],
+                  "workbook": true
+                }
+              },
+              "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+              "issue": "order-export-verification",
+              "node": "verify-order-export",
+              "rule": "D2",
+              "run": "post-hook-reverification",
+              "verdict": "pass",
+              "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c"
+            },
+            "status": "ok"
+          },
+          "result_path": "messages[2].content[0].content[0].text",
+          "result_text_sha256": "36e8e1313b4402781e1d17bb1ed5a9acb9d966b9b93098980b1b80fb6f0cdad7",
+          "selected_tool": "mcp__project_orders__inspect_order",
+          "server_info": {
+            "name": "orders/inspect-workbook@2",
+            "version": "1"
+          },
+          "server_status": {
+            "personal_orders": "connected",
+            "project_orders": "connected"
+          },
+          "session_id": "050769e9-bfdc-4e93-9e20-4f7b0e526d5c",
+          "source": "dynamic",
+          "status": "completed",
+          "tool_hooks": [
+            "PreToolUse",
+            "PostToolUse"
+          ],
+          "wire_sha256": [
+            "90e12592c33aed622f38d577eebb4182882737d7cd5d0e2b708b8c24b599b24a",
+            "12a0486e3604656a45012b80aa81fd64ed366f2dc86185320c4b43d8d093ca94"
+          ]
+        },
+        "service_events": [
+          {
+            "outcome": "ok",
+            "receipt": "74c90b05948a48469a0be315a4491ae6",
+            "result_sha256": "36e8e1313b4402781e1d17bb1ed5a9acb9d966b9b93098980b1b80fb6f0cdad7",
+            "run": "post-hook-reverification",
+            "service": "orders/inspect-workbook@2"
+          }
+        ]
+      }
+    ],
+    "counts": {
+      "artifact": 3,
+      "consumed": 1
+    }
+  },
+  "reverification_link": {
+    "node_attempt": 2,
+    "reason": "service receipt differs from native tool result",
+    "source_run": "post-hook-order",
+    "successor_run": "post-hook-reverification"
+  },
+  "transformed": {
+    "amended_sha256": "c3d65ebbfe4fffc7d3eee5434174d17206b9afcdc91f74d2099b706014411d96",
+    "audited_tool_hooks": [
+      "PreToolUse",
+      "PostToolUse"
+    ],
+    "before_reverification": {
+      "artifact": 0,
+      "consumed": 0
+    },
+    "business_requests": 2,
+    "call_id": "toolu_c34484db9e074ead9cfee397d71524e7",
+    "disposition": "no verified tool result",
+    "model_result_sha256": "c3d65ebbfe4fffc7d3eee5434174d17206b9afcdc91f74d2099b706014411d96",
+    "native_result_sha256": "c3d65ebbfe4fffc7d3eee5434174d17206b9afcdc91f74d2099b706014411d96",
+    "prompt_id": "9f0b4592-af2d-4f4a-9c63-2bcf3ff59fa1",
+    "proof_rejection": "service receipt differs from native tool result",
+    "receipt": "4708b6d2cff042a889fcbf5f5ed6bc20",
+    "run": "post-hook-order",
+    "service": "orders/inspect-workbook@2",
+    "service_calls": 1,
+    "service_result_sha256": "fd4eb073390bc1bf767e0ad6798f330f6a938c556abd93d914cc725aeb13237a",
+    "session_id": "fd8337e3-fd2a-40ad-9289-8ea4ce241d0d",
+    "source_sha256": "fd4eb073390bc1bf767e0ad6798f330f6a938c556abd93d914cc725aeb13237a"
+  },
+  "validation_environment": {
+    "architecture": "arm64",
+    "binary_sha256": "84590fefe6338be9087f5814b61f9a54c5f21524163a4c127cb5a808e31009f2",
+    "claude_agent_sdk": "0.2.182",
+    "claude_code": "2.1.325",
+    "model_endpoint": "loopback scripted Messages protocol",
+    "os": "Darwin",
+    "python": "3.11.15"
+  }
+}

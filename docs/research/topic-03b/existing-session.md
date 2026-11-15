@@ -21,7 +21,7 @@
 
 **Codex 检查完历史后，成员仍可以输入。** 平台客户端加入正在运行的 App Server，读到唯一的已授权回合。成员随后在同一线程发出另一条合成消息；平台再发送无业务数据的诊断请求时，后者实际带上了刚加入的成员消息。全程零订单提示、零 MCP 调用。因此，原线程直连只适用于输入来源受控、历史授权可保持到本轮提交的情形。双方还能独立输入且无法协调时，直接在新线程按当前权限组装订单上下文。[原生顺序实验](../../../prototypes/topic-03b/cross-host/codex_existing.py)
 
-**Claude Code 的工具成功返回后，Hook 仍可修改模型看到的内容。** 实验 Hook 在成功的项目工具响应外层加了一条演示备注。服务回执、Run 和调用 ID 正确，原生工具结果与第二次模型请求均为修改后的摘要。标准核验入口因服务摘要不同拒绝建立本次执行证明。节点消费和制品关联均为零。控制者随后让相同 Run 在新受管会话里重新执行只读核验，从未修改的报告消费一次。两次服务执行分别记录。若业务允许某种转换，应在该契约里明确允许转换的字段和核验方法。[Hook 实验](../../../prototypes/topic-03b/cross-host/claude_existing.py)
+**Claude Code 的工具成功返回后，Hook 仍可修改模型看到的内容。** 实验 Hook 在成功的项目工具响应外层加了一条演示备注。服务回执、Run 和调用 ID 正确，原生工具结果与第二次模型请求均为修改后的摘要。标准核验入口因服务摘要不同拒绝建立本次执行证明。节点消费和制品关联均为零。首次宿主结果已返回、旧进程结束后，重新核验签发后继 Run，并关联原 Run 与改写拒收证据。只读核验继续采用原节点尝试、D2 和 C2，独立任务身份下的新进程再次执行；原 Run 保留拒收结论，新 Run 的有效报告消费一次。若业务允许某种转换，应在该契约里明确允许转换的字段和核验方法。[Hook 实验](../../../prototypes/topic-03b/cross-host/claude_existing.py)
 
 ## 一次可追溯的远端结果
 
@@ -42,3 +42,28 @@ python prototypes/topic-03b/cross-host/order_existing.py /tmp/order-session-evid
 `cases` 保存原会话与最终会话、工具调用、返回和消费记录。`concurrent_input` 保存两个 Codex 客户端交替发言后的可见性观察。`post_hook_result` 将变更过的响应与干净会话的复验分开保存。真实员工的组织账号、未接入平台的 IDE 窗口、生产订单服务和正式业务验收属于现场验证范围。
 
 本地重复运行时曾遇到预热回合等待超时。WebSocket 探针现保留 RPC 响应前先到的原生通知；该顺序另用确定性输入核对过。随后完整本地矩阵通过。用于收口的回执取自远端固定版本作业。
+
+## Hook 复验的 Run 归属修订
+
+交叉审查发现，原远端矩阵的 Hook 对照在旧宿主已经返回结果并退出后，仍使用同一 Run 启动新进程。当前探针改为签发后继 `post-hook-reverification`，关联 `post-hook-order` 的拒收证据，并推进派发代次、停用旧任务身份。目标、只读操作、D2、C2 和节点尝试 2 保持原值；原 Run 的拒收与新 Run 的成功分别留据。派发前尚未实际执行的会话切换继续沿用原 Run。
+
+本次在 macOS arm64、Python 3.11.15、SDK 0.2.182 携带的 Claude Code 2.1.325 上，用本机模拟 Messages 端点运行真实工具和 Hook。两次执行各发出两条模型协议请求、产生一次项目服务调用；第一份结果因 Hook 改写被拒，第二份以新 Run 消费一次并关联三份工作簿。两项本地回归另验证同成员新 Run 的独立凭据、原凭据失效、原尝试关联与过期派发者被拒；实现前两项均失败，修正后通过。[本次真实宿主回执](fixtures/hook-reverification.json) · [Run 身份回归](../../../prototypes/topic-03b/cross-host/test_reverification.py)
+
+原 `existing-session.json` 保留上述远端矩阵的历史记录；本次 Run 归属修订采用独立回执。完整矩阵入口已调用同一修订后的 `run_hook_reverification`，定向复跑可只运行该段：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3.11 prototypes/topic-03b/cross-host/test_reverification.py
+PYTHONDONTWRITEBYTECODE=1 python3.11 - /path/to/claude /absolute/new-output <<'PY'
+from pathlib import Path
+import subprocess, sys
+sys.path.insert(0, str(Path('prototypes/topic-03b/cross-host').resolve()))
+from order_existing import run_hook_reverification
+from order_handoff import ORDERS, Study, write
+binary, output = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve()
+output.mkdir(parents=True)
+orders = output / 'orders'
+subprocess.run([sys.executable, ORDERS / 'run.py', orders], check=True)
+result = run_hook_reverification(Study(output / 'study', orders, None, str(binary)))
+write(output / 'summary.json', result)
+PY
+```

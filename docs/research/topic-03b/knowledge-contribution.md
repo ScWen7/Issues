@@ -48,3 +48,18 @@ python3 prototypes/topic-03b/knowledge/contribution.py --fixtures docs/research/
 ```
 
 整个输出面向项目审阅者；提供给团队的字段仅取 `team_projection_at_first_publication` 的视图。身份、授权、派发和审核记录均在单次 Python 进程中运行。真实组织权限同步、持久事务、并发去重和已离线成员的本机副本撤回，留待产品实现与集成测试。
+
+## 单来源撤回回归
+
+交叉审查发现，整体撤回入口要求调用者同时管理 C1、C2；只管理 C1 的成员即使要求撤回 C1 对指定团队文案的派生使用，条目仍保持可投递。现增加 `revoke_source`：确认来源属于提案、调用者当前管理该来源，且对应文案、证据修订与受众的组合许可仍有效，再撤回该组合许可。审核记录写明来源与受众。原有整体授权、整体撤回和独立复审入口保持原行为。
+
+新增 **5 / 5 项回归通过**：C1 管理者可使团队经验转为待复核；无权、无关来源与已失去管理权的请求被拒；目标受众与理由必须匹配有效许可；其他受众许可、两份来源字节与既有派发回执保持原值；重新授权后仍等待独立团队复审。新增入口实现前五项测试因入口缺失失败，审查时也已通过原整体撤回入口复现 C1 管理者被拒且条目仍为 active。原有 **45 项基线**复跑通过，完整输出与已提交的历史夹具中 `contribution` 逐值相同。上述验证仅运行 Python 3.11 本地模型，历史宿主回合和上游作业沿用原记录。[回归用例](../../../prototypes/topic-03b/knowledge/test_contribution.py)
+
+```bash
+mkdir -p .tmp/3b-review-fixes
+PYTHONDONTWRITEBYTECODE=1 python3.11 -m unittest discover \
+  -s prototypes/topic-03b/knowledge -p test_contribution.py -v
+PYTHONDONTWRITEBYTECODE=1 python3.11 prototypes/topic-03b/knowledge/contribution.py \
+  --fixtures docs/research/topic-03a/fixtures \
+  --output .tmp/3b-review-fixes/contribution-baseline.json
+```

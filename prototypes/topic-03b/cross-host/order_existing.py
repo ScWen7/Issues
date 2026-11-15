@@ -44,6 +44,25 @@ def run_case(study, host, scenario, *, revoke=False):
     return {**study.summary(), "accepted_result": accepted}
 
 
+def run_hook_reverification(study):
+    original = study.issue("post-hook-order", "claude", 1)
+    transformed = run_claude_hook_transform(study, original)
+    # The first host returned its result and exited. A new execution owns its own Run.
+    successor = study.issue("post-hook-reverification", "claude", 2, prior=original)
+    clean = study.invoke(successor, "claude", "clean-read-after-hook")
+    assert study.submit(successor, clean) == "current" and study.submit(successor, clean) == "duplicate"
+    with sqlite3.connect(study.db) as db:
+        assert db.execute("SELECT task_active FROM dispatch WHERE run=?", (original.run,)).fetchone() == (0,)
+        assert db.execute("SELECT run FROM current_node").fetchone() == (successor.run,)
+        assert db.execute("SELECT COUNT(*) FROM dispatch").fetchone() == (2,)
+        assert set(db.execute("SELECT run FROM events")) == {(original.run,), (successor.run,)}
+    return {"transformed": transformed, "reverification": study.summary(),
+            "reverification_link": {"source_run": original.run, "successor_run": successor.run,
+                                    "reason": transformed["proof_rejection"],
+                                    "node_attempt": original.contract["attempt"]},
+            "accepted_result": study.accepted_result(successor, clean)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
@@ -74,12 +93,7 @@ def main():
     # Keep diagnostic traffic and the intentionally transformed output identifiable separately.
     interleaving = probe_interleaving(args.codex)
     study = Study(output / "claude-transform", orders, None, args.claude)
-    job = study.issue("post-hook-order", "claude", 1)
-    transformed = run_claude_hook_transform(study, job)
-    clean = study.invoke(job, "claude", "clean-read-after-hook")
-    assert study.submit(job, clean) == "current" and study.submit(job, clean) == "duplicate"
-    transform_control = {"transformed": transformed, "reverification": study.summary(),
-                         "accepted_result": study.accepted_result(job, clean)}
+    transform_control = run_hook_reverification(study)
     write(output / "summary.json", {"cases": cases, "concurrent_input": interleaving,
                                     "post_hook_result": transform_control})
     for key, value in cases.items():
