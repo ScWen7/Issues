@@ -60,118 +60,61 @@ export function deltaFromCumulative(previous, current) {
   return { value: current.value - previous.value, status: "measured", reason: null };
 }
 
-export function normalizeQoderUsage(event, identity = {}) {
-  if (!event?.eventId || !Number.isFinite(event.credits)) {
-    throw new Error("Qoder usage requires stable eventId and numeric credits");
+export function normalizeRuntimeCreditObservation(input) {
+  if (!["qoder", "codebuddy"].includes(input?.provider)) {
+    throw new Error("unsupported Credits runtime provider");
+  }
+  if (!Number.isFinite(input.credits) || !input.observedAt) {
+    return {
+      provider: input.provider,
+      source: "runtime",
+      sourceNamespace: input.memberId ?? "member-unresolved",
+      nativeRequestId: input.eventId ?? null,
+      runId: input.runId ?? null,
+      memberId: input.memberId ?? null,
+      metric: "credits_consumed",
+      unit: input.provider === "qoder" ? "qoder_credit" : "codebuddy_credit",
+      value: null,
+      status: "unknown",
+      unknownReason: "runtime_did_not_report_credits",
+      observedAt: input.observedAt ?? null
+    };
   }
   return {
-    source: "qoder-enterprise-usage-api",
-    sourceNamespace: identity.organizationId ?? "qoder-org-unresolved",
-    nativeRequestId: event.eventId,
-    provider: "qoder",
-    runId: identity.runId ?? null,
-    attributionStatus: identity.runId ? "explicit_run_binding" : "member_event_unallocated",
-    memberId: event.memberId ?? event.userId ?? null,
-    metric: "credits_consumed",
-    unit: "qoder_credit",
-    value: event.credits,
-    eventAt: event.beginAt ?? (event.timestamp ? new Date(event.timestamp).toISOString() : null),
-    finishAt: event.finishAt ?? null,
-    attributes: {
-      source: event.source ?? null,
-      operation: event.operation ?? null,
-      modelTier: event.modelTier ?? null
-    },
-    billingAdjustedCredits: Number.isFinite(event.cost) ? event.cost : null,
-    currency: null,
-    trustRank: 3
-  };
-}
-
-export function normalizeCodeBuddyUsage(input) {
-  if (!Number.isFinite(input?.credits) || !input.observedAt) {
-    throw new Error("CodeBuddy usage requires observed Credits and observation time");
-  }
-  return {
-    source: "codebuddy-account-usage",
-    sourceNamespace: input.teamId ?? input.memberId ?? "codebuddy-account-unresolved",
+    source: "runtime",
+    sourceNamespace: input.memberId ?? "member-unresolved",
     nativeRequestId: input.eventId ?? null,
-    provider: "codebuddy",
+    provider: input.provider,
     runId: input.runId ?? null,
+    attributionStatus: input.runId ? "runtime_run_binding" : "runtime_event_unallocated",
     memberId: input.memberId ?? null,
     metric: "credits_consumed",
-    unit: "codebuddy_credit",
+    unit: input.provider === "qoder" ? "qoder_credit" : "codebuddy_credit",
     value: input.credits,
     eventAt: input.eventAt ?? null,
     observedAt: input.observedAt,
     attributes: {
-      plan: input.plan ?? null,
-      packageType: input.packageType ?? null,
-      mode: input.mode ?? null
+      modelTier: input.modelTier ?? null,
+      operation: input.operation ?? null,
+      sessionId: input.sessionId ?? null,
+      turnId: input.turnId ?? null
     },
     currency: null,
-    trustRank: input.eventId ? 2 : 1,
-    attributionStatus: input.runId ? "explicit_run_binding" : (input.eventId ? "provider_event_unallocated" : "member_period_statement")
+    trustRank: 3,
+    status: "observed"
   };
 }
 
-export function normalizeQoderPackage(pkg, identity = {}) {
-  if (!pkg?.id || !Number.isFinite(pkg.limitValue) ||
-      !Number.isFinite(pkg.usedValue) || !Number.isFinite(pkg.remainingValue) || !pkg.unit) {
-    throw new Error("Qoder package requires id, numeric quota fields and unit");
-  }
+export function creditsUnavailable(provider, runId, reason = "runtime_usage_unavailable") {
+  if (!["qoder", "codebuddy"].includes(provider)) throw new Error("unsupported Credits runtime provider");
   return {
-    provider: "qoder",
-    organizationId: identity.organizationId ?? null,
-    packageId: pkg.id,
-    source: pkg.source ?? null,
-    status: pkg.status ?? null,
-    unit: pkg.unit,
-    limit: pkg.limitValue,
-    used: pkg.usedValue,
-    remaining: pkg.remainingValue,
-    activatedAt: pkg.activatedAt ?? pkg.createdAt ?? null,
-    expiresAt: pkg.expiresAt ?? null,
-    observedAt: identity.observedAt ?? null,
-    recordType: "quota_snapshot"
-  };
-}
-
-export function bindUsageToRun(usage, binding) {
-  if (!usage || !binding?.runId || !binding.evidenceRef || !binding.method) {
-    return { ...usage, runId: null, attributionStatus: "unallocated" };
-  }
-  return {
-    ...usage,
-    runId: binding.runId,
-    attributionStatus: "explicitly_attributed",
-    attributionEvidence: binding.evidenceRef,
-    attributionMethod: binding.method
-  };
-}
-
-export function convertCreditsToMoney(usage, conversion) {
-  if (!usage || !conversion ||
-      conversion.provider !== usage.provider ||
-      conversion.unit !== usage.unit ||
-      !Number.isFinite(conversion.moneyPerCredit) ||
-      !conversion.currency ||
-      !conversion.validFrom ||
-      !conversion.sourceRef) {
-    return { amount: null, currency: null, status: "unpriced" };
-  }
-  if (usage.eventAt && usage.eventAt < conversion.validFrom) {
-    return { amount: null, currency: null, status: "rate_not_applicable" };
-  }
-  if (conversion.validUntil && usage.eventAt && usage.eventAt >= conversion.validUntil) {
-    return { amount: null, currency: null, status: "rate_not_applicable" };
-  }
-  return {
-    amount: usage.value * conversion.moneyPerCredit,
-    currency: conversion.currency,
-    status: "estimated",
-    conversionSource: conversion.sourceRef,
-    conversionVersion: conversion.version ?? null
+    provider,
+    runId: runId ?? null,
+    metric: "credits_consumed",
+    unit: provider === "qoder" ? "qoder_credit" : "codebuddy_credit",
+    value: null,
+    status: "unknown",
+    unknownReason: reason
   };
 }
 
