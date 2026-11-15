@@ -237,7 +237,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 官方 SDK 的 Cost and usage 示例在读取完用量后显式调用 `q.close()`；TypeScript References 说明 `query()` 返回可控制的 Query，且 `options.abortController` 可主动结束 Session。8.2 回执在 Result 已到达后仍运行至外部 180 秒超时，当前探针没有关闭 Query，因此进程超时不能作为 Qoder CLI 任务执行失败的证据。官方文档：[Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
 
-已在提交 `3d18c51e6e459b6f7f4ebf609f46a521642781f6` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中调用 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正尚未在 Mac 真实执行，因此 8.2 的 PARTIAL 结论仍有效，但超时原因暂定为 `probe_lifecycle_unverified`，不得宣称为 CLI / SDK Runtime 故障。
+已在提交 `d338cf57cac36f60b9985965f38f36a5c598d3ec` 修正探针：收到 Result 后立即结束事件迭代，并在 `finally` 中调用 `q.close()`。保留 `QODER_EXPOSE_REQUEST_ID=true`，继续分别采集 `request_id` 与 `event_id`。该修正尚未在 Mac 真实执行，因此 8.2 的 PARTIAL 结论仍有效，但超时原因暂定为 `probe_lifecycle_unverified`，不得宣称为 CLI / SDK Runtime 故障。
 
 下一次真实复验只需运行该修正版，不更改 CLI / SDK 版本，不扩大任务权限。判定分支：
 - Result 后正常退出，且出现 Assistant message：核对请求级 `usage.credits`、顶层 `request_id`、`event_id`，再做请求回执三次离线重放。
