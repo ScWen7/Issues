@@ -1,0 +1,145 @@
+{
+  "source_commit": "2bf9322e721390b537d6a7ba5d617d0c169a6d7e",
+  "evidence": "two real local runtime probes; receipt replay is offline and sends no model requests",
+  "qoder": {
+    "result": "PARTIAL",
+    "runtime_version": "1.1.88",
+    "sdk_version": "1.0.59",
+    "process": {
+      "provider": "qoder",
+      "sdk_version": "1.0.59",
+      "runtime_version": "1.1.88",
+      "exit_code": -15,
+      "timed_out": true,
+      "stderr_seen": true,
+      "unrecognized_stdout_lines": 0,
+      "request_rows": 0,
+      "session_snapshot_rows": 1
+    },
+    "request_event_count": 0,
+    "distinct_request_count": 0,
+    "session_snapshot_count": 1,
+    "native_session_request_run_identity_present": false,
+    "session_snapshot_identity_present": true,
+    "request_credits": null,
+    "session_total_credits": 0,
+    "request_credit_status": "unknown",
+    "request_unknown_reason": "no_assistant_usage_event",
+    "threefold_replay_request_credits": null,
+    "replay_deduplicated": null,
+    "request_replay_status": "not_observed",
+    "session_snapshots_excluded_from_request_sum": true,
+    "native_turn_id": "not emitted by the supplied Qoder probe",
+    "runtime_missing_credit_rows": 0
+  },
+  "codebuddy": {
+    "result": "PASS",
+    "cli_version": "2.181.0",
+    "process": {
+      "provider": "codebuddy",
+      "cli_version": "2.181.0",
+      "exit_code": 0,
+      "usage_event_count": 2,
+      "result_event_count": 1,
+      "stderr_seen": false,
+      "receipt_file": "codebuddy-receipt.jsonl",
+      "status": "process_completed"
+    },
+    "turns": [
+      {
+        "run_id": "topic04-codebuddy-mac-20261115-0350",
+        "session_id": "01a1dd55-ce9d-778d-9151-55ce5b5c08d8",
+        "request_id": "01a1dd55cec37ba7b9a98514e6dc30f7",
+        "stage_event_count": 1,
+        "distinct_stage_count": 1,
+        "stage_sum": 0.69,
+        "snapshot_values": [
+          {
+            "scope": "turn_snapshot",
+            "value": 0.69
+          },
+          {
+            "scope": "result_snapshot",
+            "value": 0.69
+          }
+        ],
+        "snapshots_equal_stage_sum": true,
+        "reconciled_credits": 0.69,
+        "threefold_replay_credits": 0.69,
+        "replay_deduplicated": true,
+        "native_stage_revision_observed": false
+      }
+    ],
+    "snapshots_excluded_from_stage_sum": true,
+    "runtime_missing_credit_rows": 0
+  },
+  "negative_controls": {
+    "evidence": "offline synthetic field-omission and stage-correction controls",
+    "focused_repository_tests": {
+      "pass": 13,
+      "fail": 0
+    },
+    "missing_credits_value": null,
+    "missing_credits_status": "unknown",
+    "stage_correction_replaces_previous_value": true
+  },
+  "copilot": {
+    "result": "PARTIAL",
+    "runtime_version": "1.0.107",
+    "runtime_entry": "cli_json_and_usage_output_file",
+    "native_credit_status": "complete",
+    "session_total_nano_aiu": 7637870000,
+    "previous_session_total_nano_aiu": 7324050000,
+    "second_invocation_increment_nano_aiu": 313820000,
+    "increment_source": "difference of consecutive native snapshots from the same controlled session",
+    "session_total_premium_request_cost": 2,
+    "second_invocation_premium_request_increment": 1,
+    "native_request_credits": null,
+    "native_request_credit_status": "unknown",
+    "native_per_call_usage_events_observed": 0,
+    "per_call_credit_observation": "no direct per-call credit value was retained from these CLI event fields; totals come from native checkpoints and the usage file",
+    "session_id": "c47b1162-2799-4521-93a4-d756f8a4a051",
+    "session_confirmed_by_native_result": true,
+    "run_ids": [
+      "topic04-copilot-mac-20261115-0400",
+      "topic04-copilot-mac-20261115-0400-turn2"
+    ],
+    "native_turn_ids": [
+      "0",
+      "0"
+    ],
+    "turn_id_reused_after_resume": true,
+    "second_invocation_api_call_id": "msg_011Ch441WcQXbYJjD3HynFsR",
+    "second_invocation_interaction_id": "707a36da-b142-4322-b8dd-4bb50cb5bd7a",
+    "first_invocation_call_id_capture": "not retained by the initial metadata projection",
+    "checkpoint_and_usage_file_match": true,
+    "threefold_offline_replay_total_nano_aiu": 7637870000,
+    "offline_replay_deduplicated": true,
+    "unique_checkpoint_count_after_replay": 2,
+    "missing_value_control": {
+      "value": null,
+      "status": "unknown",
+      "explicit_zero_remains_zero": true
+    },
+    "tool_execution_events_observed": 0,
+    "units_kept_separate": [
+      "nano_aiu",
+      "premium_request_cost",
+      "token"
+    ],
+    "sources": [
+      "https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/usage-and-billing",
+      "https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events"
+    ],
+    "checks_passed": [
+      "native_version",
+      "successful_runtime_exit",
+      "native_session_confirmation",
+      "checkpoint_file_consistency",
+      "same_session_counter_increment",
+      "event_replay_deduplication",
+      "turn_id_collision_detection",
+      "missing_stays_unknown"
+    ]
+  }
+}

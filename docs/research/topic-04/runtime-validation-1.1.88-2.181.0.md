@@ -181,3 +181,23 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 - SDK 启动版本与用户声明版本不一致：单独记录，不混入目标版本结果。
 - 本机探针通过只证明受管 CLI 入口；IDE 原生入口必须另有独立证据。
 
+## 8. 本机 Mac 实测记录（2026-11-15）
+
+测试代码固定为研究分支提交 `2bf9322e721390b537d6a7ba5d617d0c169a6d7e`。环境为 macOS 15.3.2、arm64、Node 24.15.0、npm 11.12.1。Qoder SDK 实装版本为 1.0.59，通过 `QODERCLI_PATH` 显式指定已核对为 1.1.88 的本机 qodercli。Copilot 使用本机 CLI JSON 事件流及原生 `--usage-output-file`，未另装 SDK。
+
+| Runtime | 判定 | 真实观察 |
+|---|---|---|
+| Qoder / qodercli 1.1.88 | PARTIAL | 无 Assistant 用量事件；收到一份带 Session、结果事件 ID 与 Run 绑定的累计快照，原生值为 0。请求级 Credits 保持 null / unknown。SDK 180 秒未结束后由采集器终止，退出记录为 -15。 |
+| CodeBuddy CLI 2.181.0 | PASS | 一条 Stage 为 0.69 Credits；Turn Snapshot 与 Result Snapshot 均为 0.69。Session、Request、Stage 和 Run 标识完整，进程退出 0。 |
+| GitHub Copilot CLI 1.0.107 | PARTIAL | 同一 Session 的两次执行分别成功退出。原生累计 totalNanoAiu 从 7,324,050,000 增至 7,637,870,000，连续快照差值为 313,820,000 nano-AIU；totalPremiumRequestCost 从 1 增至 2。原生逐请求 Credits 未直接取得，继续保留 unknown；差值明确记作累计快照计算结果。 |
+
+**重放与缺项。** CodeBuddy 的本次真实回执离线重放三次仍为 0.69。本轮只有一条原生 Stage，实际修订未出现；同 Stage 覆盖更新和缺失 Credits 保留 unknown 的对照来自离线模型测试，13 项定向测试全部通过。Qoder 没有请求级用量事件，请求级重放记为未观察。Copilot 两份原生 checkpoint 重放三次仍只保留两个检查点，最新累计量保持 7,637,870,000；原生字段缺失时保留 null，显式的 0 单独保留。
+
+**Copilot 标识观察。** 恢复 Session 后，第二次执行的原生 turnId 再次为 `0`，两次采用不同 Run 和原生事件 ID。第二次另取得 interactionId 与 apiCallId，原生 result 确认了 Session ID。首次投影未保留调用 ID，该采集缺项在验证明细中单列。归集按原生事件及执行绑定区分，避免仅以 Session + turnId 合并两次工作。nano-AIU、Premium Request 计量与 Token 分别保留原生单位。
+
+**归档材料。** 环境信息、三份 JSONL 回执、原生用量的白名单投影、进程状态、Qoder package-lock.json、验证结果和 SHA-256 清单均已保存。完整压缩包仅包含这些材料。原生回合与离线重放使用独立记录；本轮没有再次运行 Qoder 或 CodeBuddy 来补 Copilot 数据。
+
+- [完整材料 ZIP](../../../artifacts/topic-04/mac-20261115-0350-with-copilot.zip)
+- [验证明细](../../../artifacts/topic-04/mac-20261115-0350/validation.json) · [SHA-256 清单](../../../artifacts/topic-04/mac-20261115-0350/SHA256SUMS.txt)
+- [Qoder 回执](../../../artifacts/topic-04/mac-20261115-0350/qoder-receipt.jsonl) · [CodeBuddy 回执](../../../artifacts/topic-04/mac-20261115-0350/codebuddy-receipt.jsonl) · [Copilot 回执](../../../artifacts/topic-04/mac-20261115-0350/copilot-receipt.jsonl)
+

@@ -1,0 +1,35 @@
+{
+  "provider": "github-copilot",
+  "snapshots": [
+    {
+      "run_id": "topic04-copilot-mac-20261115-0400",
+      "session_id": "c47b1162-2799-4521-93a4-d756f8a4a051",
+      "observed_at": "2026-11-15T04:02:36.364621+00:00",
+      "scope": "session_snapshot",
+      "native_fields": {
+        "totalNanoAiu": 7324050000,
+        "totalPremiumRequestCost": 1,
+        "totalUserRequests": 1,
+        "aiCreditsStatus": "complete",
+        "lastCallInputTokens": 29281,
+        "lastCallOutputTokens": 4,
+        "currentModel": "claude-sonnet-5.5"
+      }
+    },
+    {
+      "run_id": "topic04-copilot-mac-20261115-0400-turn2",
+      "session_id": "c47b1162-2799-4521-93a4-d756f8a4a051",
+      "observed_at": "2026-11-15T04:05:36.448044+00:00",
+      "scope": "session_snapshot",
+      "native_fields": {
+        "totalNanoAiu": 7637870000,
+        "totalPremiumRequestCost": 2,
+        "totalUserRequests": 2,
+        "aiCreditsStatus": "complete",
+        "lastCallInputTokens": 29346,
+        "lastCallOutputTokens": 4,
+        "currentModel": "claude-sonnet-5.5"
+      }
+    }
+  ]
+}

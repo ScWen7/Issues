@@ -1,0 +1,12 @@
+collected_at_utc=2026-11-15T04:07:58.754754+00:00
+runtime_version=GitHub Copilot CLI 1.0.107
+platform=Darwin x86_64
+node=v24.15.0
+extra_sdk=none
+runtime_entry=CLI JSON stream and native usage output file
+auto_update=disabled
+model=claude-sonnet-5.5
+source_namespace=dedicated local test session
+runtime_invocations=2 in one session; separate probe Run IDs
+model_calls_observed=2
+collection=whitelisted identifiers and numeric usage only

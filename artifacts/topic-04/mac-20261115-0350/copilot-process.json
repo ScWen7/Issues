@@ -1,0 +1,76 @@
+{
+  "successful_runtime_invocations": [
+    {
+      "provider": "github-copilot",
+      "runtime_version": "GitHub Copilot CLI 1.0.107.",
+      "run_id": "topic04-copilot-mac-20261115-0400",
+      "session_id": "c47b1162-2799-4521-93a4-d756f8a4a051",
+      "started_at": "2026-11-15T04:02:17.378342+00:00",
+      "finished_at": "2026-11-15T04:02:36.364621+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "stderr_seen": false,
+      "unparsed_stdout_lines": 0,
+      "event_counts": {
+        "commands.changed": 2,
+        "session.mcp_servers_loaded": 1,
+        "session.tools_updated": 1,
+        "instruction.update": 1,
+        "user.message": 1,
+        "assistant.turn_start": 1,
+        "model.call_start": 1,
+        "assistant.message_start": 1,
+        "assistant.message_delta": 1,
+        "model.call_finished": 1,
+        "assistant.message": 1,
+        "model.call_final_result": 1,
+        "assistant.turn_end": 1,
+        "session.usage_checkpoint": 1,
+        "assistant.idle": 1,
+        "result": 1
+      },
+      "receipt_rows": 4,
+      "usage_file_present": true,
+      "error_category": null,
+      "diagnostic_option_names": []
+    },
+    {
+      "provider": "github-copilot",
+      "runtime_version": "GitHub Copilot CLI 1.0.107.",
+      "run_id": "topic04-copilot-mac-20261115-0400-turn2",
+      "session_id": "c47b1162-2799-4521-93a4-d756f8a4a051",
+      "started_at": "2026-11-15T04:05:27.813290+00:00",
+      "finished_at": "2026-11-15T04:05:36.448044+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "stderr_seen": false,
+      "unparsed_stdout_lines": 0,
+      "event_counts": {
+        "session.skills_loaded": 1,
+        "session.mcp_servers_loaded": 1,
+        "session.tools_updated": 1,
+        "user.message": 1,
+        "assistant.turn_start": 1,
+        "model.call_start": 1,
+        "assistant.message_start": 1,
+        "assistant.message_delta": 1,
+        "model.call_finished": 1,
+        "assistant.message": 1,
+        "model.call_final_result": 1,
+        "assistant.turn_end": 1,
+        "session.usage_checkpoint": 1,
+        "assistant.idle": 1,
+        "result": 1
+      },
+      "receipt_rows": 8,
+      "usage_file_present": true,
+      "error_category": null,
+      "diagnostic_option_names": []
+    }
+  ],
+  "startup_checks_before_capture": {
+    "unsuccessful_attempts": 2,
+    "event_streams": 0,
+    "collector_correction": "replaced unsupported deny-tool wildcard with documented tool kinds"
+  }
+}

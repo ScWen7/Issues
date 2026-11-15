@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题四「成本、质量与自改进」V0.1 已建立 Codex / Claude Token 与 Qoder / CodeBuddy Credits 的 Runtime-only 计量原型。已生成 Qoder CLI 1.1.88、CodeBuddy Code CLI 2.181.0 的本机真实进程回环脚本与回执规范，等待成员机器执行；不调用企业 API、账户 Usage 页面或账单接口，Runtime 无用量上报就保持 unknown。[本机验证包](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md)。[专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
+专题四「成本、质量与自改进」V0.1 已建立 Codex / Claude Token 与 Qoder / CodeBuddy Credits 的 Runtime-only 计量原型。本机 Mac 实测已归档：Qoder CLI 1.1.88 为 PARTIAL，CodeBuddy CLI 2.181.0 为 PASS，补充的 Copilot CLI 1.0.107 为 PARTIAL。回执分别保留原生用量、身份、累计快照、缺项与进程状态，缺失值保持 unknown。[实测结果与完整材料](docs/research/topic-04/runtime-validation-1.1.88-2.181.0.md#8-本机-mac-实测记录2026-11-15) · [专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
 
 专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
 
