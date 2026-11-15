@@ -175,7 +175,7 @@ export function convertCreditsToMoney(usage, conversion) {
   };
 }
 
-export function aggregateRunCosts(entries, runIds, targetUnit) {
+export function aggregateRunCosts(entries, runIds, targetUnit = "USD") {
   const selected = new Set(runIds);
   const byKey = new Map();
   const conflicted = new Set();
