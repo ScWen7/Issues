@@ -2,11 +2,9 @@
 
 团队成员在项目中共同推进 Issue，在各自获准的本地 Agent 环境中完成研发工作。打开一个 Issue，接手者能找到目标、当前负责人、已交付的变更，以及接下来要谁作什么决定。仓库提供产品与架构设计、上游源码依据及研究原型。
 
-## 团队怎样工作
+## 核心架构
 
-成员可以从项目列表接下 Issue，也可以先在自己的工具中调查，再把选定的结论、变更或文件交回 Issue。自己负责时可在评论中请 Agent 协助。需要交出整项责任时使用原生指派。独立分工有自己的负责人和交付物，使用子 Issue。指派给 Squad 时，其 Leader 在获准的本地 Runtime 上组织协作。[工作生命周期](docs/architecture/01-unified-work-lifecycle.md)
-
-一次受管执行记为 Run。稳定的重复环节可以调用 SOP。成员在 Issue 中决定业务范围和接受哪次交付，后续工作可选用团队已审核的方法。提供机器、执行检查、接受业务结果是不同职责。[架构总览](docs/architecture/overview.md) · [工作台](docs/architecture/05-unified-workbench.md)
+从[架构总览](docs/architecture/overview.md)进入正式设计。它说明中心协作、成员本机和资料来源各自维护什么事实，五项核心职责怎样配合，以及一次工作从发起、执行到交付和后续改进的条件。[系统边界](docs/architecture/overview.md#1-系统边界) · [职责分层](docs/architecture/overview.md#2-核心职责分层) · [核心流程](docs/architecture/overview.md#3-一项工作的核心流程)
 
 ## 五个设计专题
 
@@ -22,4 +20,4 @@
 
 ## 查设计与依据
 
-产品范围及跨专题关系见[架构总览](docs/architecture/overview.md)，对象含义见[统一术语](CONTEXT.md)。Multica 已提供的能力和需要适配的部分见[底座能力与边界](docs/architecture/governance-baseline.md)。研究记录按源码版本、宿主入口和观察范围区分事实与假设。[源码与研究](docs/research) · [宿主能力矩阵](docs/architecture/execution-capabilities.md) · [交互原型](prototypes/topic-05/workbench.html)
+对象含义见[统一术语](CONTEXT.md)。Multica 原生覆盖、项目配置与需要补充的能力见[底座能力与边界](docs/architecture/governance-baseline.md)，各宿主可观察的事实见[宿主能力矩阵](docs/architecture/execution-capabilities.md)。源码核对、场景假设和历史实验按版本收录在[源码与研究](docs/research)。

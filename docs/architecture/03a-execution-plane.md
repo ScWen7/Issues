@@ -20,7 +20,7 @@
 
 ### 接手者取得哪一版工作
 
-成员可以从项目已关联的工程仓或本机绑定目录开工。交代码时，提交者注明工程仓和基准修订，引用可取得的提交，或在原 Issue 评论中上传补丁。交付区已有同名同类型文件的版本历史，接手者按具体附件版本取用补丁，用自己的仓库读权取得基准，再在自己的工作副本继续。某项检查只有成员说明时显示署名和结论。提供了报告时可打开对应版本，可核对来源 Run 时可打开相应执行记录。[Multica 交付区源码依据](../research/05-source-evidence.md) · [工作副本与跨机交接](../research/topic-03a/workspace-continuity.md)
+成员可以从项目已关联的工程仓或本机绑定目录开工。交代码时，提交者注明工程仓和基准修订，引用可取得的提交，或在原 Issue 评论中上传补丁。交付区已有同名同类型文件的版本历史，接手者按具体附件版本取用补丁，用自己的仓库读权取得基准，再在自己的工作副本继续。接手者按本项工作约定核对交付。成员自述保留署名，附带的检查报告指向当时的候选，有可核对的生产 Run 时引用原记录。某项必需检查缺少证据时，接手者可以使用获准的方法针对收到的候选补查，保留此次检查的实际来源。此前的执行过程按已获准的证据记录。[Multica 交付区源码依据](../research/05-source-evidence.md) · [工作副本与跨机交接](../research/topic-03a/workspace-continuity.md)
 
 仅存在原机的改动仍由能访问原机的成员补交。提交者可以在原 Issue 说明“另有修改待补”，接手者先使用已交回且可读的部分。外部仓库或报告的读权依各自来源检查，缺少所需材料时只显示该成员有权知道的缺项及可联系的人。分享补丁或获准的会话片段后，私人历史和原机输入控制仍按各自授权处理。[跨机交付实验](../research/topic-03a/machine-handoff.md) · [工作台上的接手操作](05-unified-workbench.md)
 
@@ -53,7 +53,7 @@ Multica 在准备环境时汇总 brief、Skill、MCP、版本与摘要。恢复�
 
 ## 4. 受管脚本与本地用量的能力边界
 
-**受管脚本。** SOP 选择固定脚本、输入、候选和输出要求。产品设计将命令交给 Multica Run 和 Daemon，沿原工作目录、取消通道及附件通道返回退出状态、报告与具名制品。固定版 Backend 工厂提供编码 Agent 协议。现有确定性脚本实验使用 TeamAI 命令驱动，其中一次退出码为零但报告指出订单权限检查失败。该实验支持脚本与交付契约的设计，直接经 Multica 托管通用命令属于扩展能力。[Backend 工厂](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L502-L564) · [脚本与工作簿实验](../research/topic-03a/order-export-workspace.md)
+**受管脚本。** SOP 选择固定脚本、输入、候选和输出要求。产品设计将命令交给 Multica Run 和 Daemon，沿原工作目录、取消通道及附件通道返回退出状态、报告与具名制品。固定版 Backend 工厂提供编码 Agent 协议。TeamAI 命令驱动的研究记录可用于核对脚本退出、制品交接和内容检查各自的结果。通过 Multica 托管通用命令属于执行层扩展。[Backend 工厂](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/agent.go#L502-L564) · [命令与交付回执](../research/topic-03a/order-export-workspace.md)
 
 **本地用量。** 中心 Task Usage 可存 Credits。固定版 Backend 与 Daemon 的本地用量结构尚缺 Credits，CodeBuddy 的适配器也尚缺 Stage 解析。设计通过对应 Backend、Daemon 和 Task Usage 回传原生计量身份、单位、覆盖和更正。成员使用的 Runtime 未报告某项费用时，该项显示未知。[Daemon 用量结构](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/types.go#L309-L322) · [分宿主与单位的计量规则](04-cost-quality-improvement.md)
 

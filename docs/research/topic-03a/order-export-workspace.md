@@ -1,6 +1,6 @@
 # 从两个 Git 工作副本核对订单导出 C1 与 C2
 
-专题一的 D1 指定 XLSX。D2 增加付款时间列，未付款留空，以 Asia/Shanghai 展示。A2 检查操作资格及订单可见范围，A3 检查文件可以打开、金额与时间正确。本次用三个合成订单、四种角色、两个实际提交构造案例，导出与核验分别使用 XlsxWriter 和 openpyxl。原始业务规则见[订单导出案例](../../architecture/01-unified-work-lifecycle.md#121-模拟约定)。
+固定样本的 D1 指定 XLSX。D2 增加付款时间列，未付款留空，以 Asia/Shanghai 展示。A2 检查操作资格及订单可见范围，A3 检查文件可以打开、金额与时间正确。本次用三个合成订单、四种角色、两个实际提交构造案例，导出与核验分别使用 XlsxWriter 和 openpyxl。样本约定见[订单导出案例](../topic-05/collaboration-scenario.md#模拟约定)。
 
 ## 工作副本、脚本与输出怎么关联
 

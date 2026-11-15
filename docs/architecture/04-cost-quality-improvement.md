@@ -45,8 +45,8 @@ Multica 的 Task Usage 按 Run 对应的 task、Provider 和 Model 保存累计�
 | Codex | Input / Output / Cached Tokens，Thread / Turn 与累计区间 | 复用现有适配器基线处理；历史重放按已覆盖区间核对 |
 | Claude Code | Token、请求级 Usage、部分 OTel request_id / message UUID | 复用现有消息去重；Hook、SDK、OTel、转录的重叠按原生请求关联 |
 | Qoder | Qoder Credits；Assistant 请求用量与 Session total_credits | Mac CLI 1.1.88 / SDK 1.0.59 未取得请求 Credits。Multica [ACP 当前解析](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/acp_usage.go#L167-L216)与本地上报链尚缺 Credits，目标 ACP 入口的请求级覆盖未知 |
-| CodeBuddy Code | Credits Stage、requestId、stage.id、Turn / Result snapshot | CLI 2.181.0 实测一个 Stage 为 0.69 Credits；[现有 Backend](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codebuddy.go#L655-L724)尚缺对应 Stage 解析与本地上报，见[协议研究](../research/04-source-evidence.md) |
-| GitHub Copilot CLI | nano-AIU、Premium Request cost、Tokens | Session checkpoint 为累计值；CLI 1.0.107 两次 invocation 的差额仅作派生观察，逐请求 nano-AIU 保持 unknown |
+| CodeBuddy Code | Credits Stage、requestId、stage.id、Turn / Result snapshot | CLI 2.181.0 的现场回执包含具名 Stage 的 Credits。[现有 Backend](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/agent/codebuddy.go#L655-L724)尚缺对应 Stage 解析与本地上报，见[协议研究](../research/04-source-evidence.md) |
+| GitHub Copilot CLI | nano-AIU、Premium Request cost、Tokens | Session checkpoint 为累计值；CLI 1.0.107 的实测差额仅作派生观察，逐请求 nano-AIU 保持 unknown |
 
 固定版本 [Task Usage](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/task_usage.sql#L10-L20)保存输入、输出、缓存读、缓存写四类 Token。目标宿主若报告推理 Token，记录原生值、单位及其与输出或总量的包含关系。缓存与推理明细已包含在总量时仅作拆分展示；字段缺失则标 unknown，关系不明时保留原值并标明不可相加。
 
@@ -73,7 +73,7 @@ Run 是实际执行的归属单位；Session 是连续性资源，可由多个 R
 
 实际费用、估算、仅 Token 和未知在同一周期分别列示。总计同时带已覆盖执行数与应覆盖执行数；已知部分的合计标为部分总量。真实零值须由明确上报与覆盖证明，字段缺失保留 unknown。固定[上报入口](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go#L5509-L5527)保留显式零 Credits，缺失或负值写为空；USD 仅正数被认作原生报价。旧记录的空 USD 无法区分免费与未上报，有费率依据时可另列估算。
 
-原生 Issue 摘要只在已开始且有结束时间的终态 Run 中统计上报覆盖：只要有一行 Usage，就计入 `metered_task_count`。分指标展示时按该单位适用的 Run 和实际覆盖区间计算分子与分母；只报 Token 的 Run 仍可能缺 Credits。固定版 Issue 执行日志可按供应商汇总已收到的 Credits。只报 24 个 Token 且费率未知的对照行，其原生金额格式化结果为 `$0.00`。产品应保留 Token 数、费用未知及覆盖范围。[可复跑的展示实验](../research/topic-05/codebuddy-display-replay.md)
+原生 Issue 摘要只在已开始且有结束时间的终态 Run 中统计上报覆盖：只要有一行 Usage，就计入 `metered_task_count`。分指标展示时按该单位适用的 Run 和实际覆盖区间计算分子与分母；只报 Token 的 Run 仍可能缺 Credits。固定版 Issue 执行日志可按供应商汇总已收到的 Credits。只有 Token 且无费率依据时，保留 Token 数和覆盖，费用记为未知。[可复跑的展示实验](../research/topic-05/codebuddy-display-replay.md)
 
 ### 3.5 汇总范围与重复引用
 
@@ -121,7 +121,7 @@ SOP 按已声明的修正与重试预算执行，真实已发生的各 Run 消�
 
 ### 3.8 Qoder 的本地计量边界
 
-Qoder CLI 1.1.88 / Agent SDK 1.0.59 的 Mac 记录覆盖 Query 结束、共享 Daemon 关闭、主进程退出和派生进程清理。该入口未取得 Assistant 请求事件与原生请求 ID。Result 的 `total_credits=0` 只描述 Session 累计快照，单次请求 Credits 显示未知。Multica 的 ACP 是另一入口，按该入口实际可见的请求与用量取证。独立宿主探针与平台真实入账分别注明来源。[本地 Runtime 记录](../research/topic-04/runtime-validation-1.1.88-2.181.0.md)
+Qoder CLI 1.1.88 / Agent SDK 1.0.59 的 Mac 记录覆盖 Query 结束、共享 Daemon 关闭、主进程退出和派生进程清理。该入口未取得 Assistant 请求事件与原生请求 ID。Result 的 `total_credits` 是 Session 累计快照，单次请求 Credits 显示未知。Multica 的 ACP 是另一入口，按该入口实际可见的请求与用量取证。独立宿主探针与平台真实入账分别注明来源。[本地 Runtime 记录](../research/topic-04/runtime-validation-1.1.88-2.181.0.md)
 
 ## 4. 质量评价机制
 
@@ -134,7 +134,7 @@ Qoder CLI 1.1.88 / Agent SDK 1.0.59 的 Mac 记录覆盖 Query 结束、共享 D
 | Model-based Evaluator | 目标覆盖、代码 / 文档质量及有证据支持的问题归因 | 获准的 Trace、制品、工作约定和固定评价提示版本 |
 | Human Review | 业务、架构、体验与其他需人工判断的质量 | Issue Decision、Review 和具名证据 |
 
-对象可为 Run、Issue 交付、Agent / Role、Squad、SOP、Skill / Rule 或 Project Workflow。评价项目工作流时固定项目、当时配置和生效范围，引用相应步骤的等待、责任交接、返工及验收事实。终态业务 Run 可发起事后评价，等待中的门禁检查按 SOP 预先声明的核验契约运行。评价器取得证据时复核当前读权及允许共享范围，来源撤回时按受影响证据标记待复核。
+对象可为 Run、Issue 交付、Agent / Role、Squad、SOP、Skill / Rule 或 Project Workflow。评价项目工作流时固定项目、当时配置和生效范围，引用相应步骤的等待、责任交接、返工及验收事实。SOP 到达已声明的质量门禁时，按本轮核验契约取得结论。工作结束后，负责人或维护者需要复盘交付质量、返工或执行消耗时，可在获准的资源与读取范围内针对终态 Run 发起独立评价。其结果回到被评对象，供有权成员决定后续处理。评价器取得证据时复核当前读权及允许共享范围，来源撤回时按受影响证据标记待复核。
 
 缺少必需证据时给出“待核验 / 证据不足”及具体缺项。执行过程能观察到的消息、动作和产物是评价依据，未采集的宿主内部过程保持未知。评价器独立版本化；重新评分产生新结论，旧评价及其输入范围继续可追溯。
 
@@ -152,7 +152,7 @@ Evaluation 记录被评对象和 Run / Issue / Asset 引用、工作约定及候
 
 在同一项工作中，核验者留下失败证据，当前负责人安排修正和复验。约定的范围、候选和预算决定哪些动作可以继续。修改完成标准或扩大权限由有权成员决定。
 
-跨工作改进从已有交付中提取有证据的问题，形成对知识、能力或流程的候选修改。维护者在获准的实验范围固定样本与成功标准，对照原版和候选版。失败或证据不足时修订或保留候选。通过后，资产负责人审核并发布；若改的是项目配置，由有权成员在对应项目采用。后续真实工作记录实际使用的版本和结果。
+若证据显示同一问题重复发生，或原因涉及多项工作共用的方法或配置，成员可据此提出改进，由相应维护者判断是否值得投入独立评价或候选对照。维护者在获准的实验范围固定样本与成功标准，对照原版和候选版。失败或证据不足时修订或保留候选。通过后，资产负责人审核并发布；若改的是项目配置，由有权成员在对应项目采用。后续真实工作记录实际使用的版本和结果。
 
 ### 5.2 根因与三层改进
 
@@ -174,7 +174,7 @@ Evaluation 记录被评对象和 Run / Issue / Asset 引用、工作约定及候
 
 ### 5.4 Benchmark 对照
 
-对照前固定任务输入与代码 / 文件基准、工作约定、样本集摘要、评价器 / rubric、权重、聚合方式、统计重复次数、成功标准和质量 / 成本退化阈值。模型、Runtime、工具链与 effort 等非实验因素尽量固定，记录环境和实际差异。被研究的变更作为显式实验变量，例如同一输入下比较旧 Skill 与候选 Skill；若实验变量是模型，模型作为两组差异，其余条件和解释范围固定。
+对照前固定任务输入与代码 / 文件基准、工作约定、样本集摘要、评价器 / rubric、权重、聚合方式、统计重复次数、成功标准和质量 / 成本退化阈值。模型、Runtime、工具链与 effort 等非实验因素尽量固定，记录环境和实际差异。将被研究的变更列为实验变量，以其余条件与覆盖范围确定哪些结果可以比较。
 
 观察目标达成率、客观测试、Findings 严重度、返工 / 重试 / 人工介入、执行耗时、工具调用、分单位用量、覆盖及恢复和制品完整性。未知费用单列；仅在覆盖与计量可比范围内比较成本。只在相同实验定义的可比组给出改善结论，其余结果附差异说明。回归集既包含提案所针对的失败，也包含其他代表工作，分别保留每项结果和总体聚合。
 
@@ -182,7 +182,7 @@ Evaluation 记录被评对象和 Run / Issue / Asset 引用、工作约定及候
 
 ### 5.5 发布后观察
 
-发布记录关联最终候选摘要、通过的 Benchmark、审核与生效范围。后续新工作显式选择该版本，在途工作继续使用实际固定版本；有权负责人决定迁移时，先识别受影响节点和重验要求。
+发布记录关联最终候选摘要、通过的 Benchmark、审核与生效范围。项目维护者可以把已审核版本纳入适用工作的方法配置，负责人也可在具体 Issue 中选用。新工作注明本次采用的版本及其来自项目配置还是本项选择。在途工作沿用已固定的版本，有权负责人决定迁移时，先识别受影响节点和重验要求。[项目采用与本项约定](03b-capability-governance.md#5-一次工作如何选择和投递能力)
 
 新版本按同类工作与实际覆盖观察质量、返工、消耗和人工介入，区分离线实验结论与真实工作结果。样本不足时保持待观察；出现退化时暂停默认选用或选择先前获准版本，并形成新提案，已发生执行、失败证据和已发布内容均保留。
 
@@ -190,17 +190,4 @@ Evaluation 记录被评对象和 Run / Issue / Asset 引用、工作约定及候
 
 在 Issue 看其直属工作或子树的结果与小计，可打开生产 Run、具体计量单元、核验报告和有效接受决定。打开项目比较时，显示纳入的对象、时间、用途、原生单位及覆盖率。一个已结束的 Run 若只有部分用量，执行终态照常呈现，对应指标则标明缺项。
 
-例如，三次 CodeBuddy 执行中，一次只报 Token，一次明确报告零 Credits，一次完全缺报。该范围的 Credits 已知小计为零，覆盖 1/3，另外两次未知。如果三次均无 Credits，直接显示未知。当前代码里“具有任一 Usage 行”的 Run 数只能支持有用量记录的执行覆盖率，不能解释为 Credits 覆盖率。[工作台展示与原生函数回放](../research/topic-05/codebuddy-display-replay.md)
-
-## 7. 订单批量导出贯穿案例
-
-设计案例中，订单导出按区域权限筛选，并按约定增加付款时间列。合成工作簿 C1 能正常生成，且付款时间内容通过检查，但区域权限测试失败。修正后的 C2 在这两项检查有通过回执。两份报告分别指向其候选、规则和验证输入。拒收报告后的复验有独立运行记录。订单的实际费用缺少证据，独立 CodeBuddy 探针测出的 0.69 Credits 只归该探针。[订单报告](../research/topic-03a/order-export-workspace.md) · [工具结果与后继复验](../research/topic-03b/existing-session.md) · [宿主计量记录](../research/topic-04/runtime-validation-1.1.88-2.181.0.md)
-
-| 对谁有用 | 在同一份工作中怎样判断 |
-|---|---|
-| 交付负责人 | 分开记录 C1 的权限失败、C2 的通过项和其余缺项。只把当前候选已取得的证据交给有权验收的人。 |
-| 项目负责人 | 业务成本包括开发、核验和返工。父 Issue、子 Issue、SOP 同时引用原 Run 时按唯一计量单元计一次；事后评价与 Benchmark 分列。 |
-| 能力维护者 | 可以从区域越界失败中提炼“用不同权限的账号核对导出集合”的方法，在源许可范围内准备候选。比较中既包含越界负例，也包含合法跨区的正例。 |
-| 下个项目的负责人 | 选用经过审核且适用于本项目的版本，按本项目规则检查输出。若只采用部分规则或继续使用旧 SOP，检查实际组合的对照证据；仅对未覆盖的影响做额外回归。 |
-
-把案例中的某个检查加入正式规则，须先完成相应候选的验证、审核与发布，再由具体 Issue 确定适用约定。是否改善后续工作的质量或成本，需要观察采用该版本的可比工作。[经验贡献](../research/topic-03b/knowledge-contribution.md) · [计量与质量的研究依据](../research/04-source-evidence.md)
+指标覆盖率以适用的执行为分母，以该指标实际取得可信用量的执行为分子。明确上报的零值计入覆盖，缺报记为未知。已有的 `metered_task_count` 计数的是具有任一用量记录的 Run。[工作台展示与原生函数回放](../research/topic-05/codebuddy-display-replay.md)
