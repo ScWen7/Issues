@@ -1,4 +1,4 @@
-Qoder Credit 与 CodeBuddy Credit 是不同单位，禁止相加或直接比较。只接受本地 Runtime 实际上报的原生 Credits，不通过企业 API、账户 Usage 页面或账单接口补数；没有可用的本地 Credits 字段时记录 unknown，不以 Token、余额、订阅额度或时长推算。# 专题四 · 成本、质量与自改进
+# 专题四 · 成本、质量与自改进
 
 V0.1 · 探索基线 · 2026-11-15
 
@@ -31,13 +31,9 @@ V0.1 · 探索基线 · 2026-11-15
 
 账本统一的是记录结构和归属规则，不是强迫所有宿主使用同一种单位。每条计量都必须携带 `provider`、`metric`、`unit`、`value`、来源命名空间、原生事件身份和计量覆盖范围。单位至少区分：
 
-| 宿主 / 来源 | 原生单位 | 可取得的证据 | 归属限制 |
-|---|---|---|---|
-| Codex | input / output / cached tokens | App Server 的 Thread / Turn / Usage 快照；部分 CLI 投影 | 累计快照必须先确定基线和独占区间 |
-| Claude Code | tokens、请求级 usage、SDK 估价 | Hooks、SDK 消息、OTel request_id / message UUID | 多轮累计与子代理覆盖要按请求 / 消息身份核对 |
 | 宿主 | 原生单位 | Runtime 可观测入口 | 归属边界 |
 |---|---|---|---|
 | Codex | input / output / cached tokens | App Server Thread / Turn / Usage；CLI JSON 投影 | 累计快照先确定基线和独占区间 |
 | Claude Code | tokens、请求级 usage | Hooks、SDK 消息、OTel request_id / message UUID | 按请求 / 消息身份去重，区分累计与增量 |
-| Qoder | Qoder Credits | 本地 Qoder Agent SDK Assistant 消息 `message.usage.credits`；Result 的 `total_credits` 仅作会话累计快照 | SDK 本地 Runtime 产生的请求用量可绑定 Run；缺字段保持 unknown。SDK 方式需要平台通过 Qoder Agent SDK 驱动本地 CLI，不能据此声称能读取任意已打开 IDE 会话 |
-| CodeBuddy Code | CodeBuddy Credits | 本地 CLI `--output-format stream-json` 的 `system/usage_update` | 以 `session_id + requestId + stage.id` upsert；snapshot 替代 stage 汇总，不能相加。仅能采集经该 Runtime 输出的 CLI 流；IDE 未暴露则 unknown |
+| Qoder | Qoder Credits | 本地 Qoder Agent SDK Assistant 消息 `message.usage.credits`；Result 的 `total_credits` 仅作会话累计快照 | 受管 SDK Runtime 产生的请求用量可绑定 Run；缺字段保持 unknown。不能据此声称能读取任意已打开 IDE 会话 |
+| CodeBuddy Code | CodeBuddy Credits | 本地 CLI `--output-format stream-json` 的 `system/usage_update` | 以 `session_id + requestId + stage.id` upsert；snapshot 替代 stage 汇总，不能相加。IDE 未暴露则 unknown |
