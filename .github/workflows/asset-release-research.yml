@@ -1,7 +1,7 @@
 name: AgentPlatform asset release research
 on:
   push:
-    branches: [research/3b-asset-release]
+    branches: [research/3b-asset-release, research/3b-knowledge-context]
     paths:
       - .github/workflows/asset-release-research.yml
       - prototypes/topic-03b/**
@@ -36,4 +36,13 @@ jobs:
         with:
           name: order-release-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/order-release/summary.json
+          retention-days: 7
+      - name: Verify role-scoped knowledge, revocation and reviewed contributions
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/knowledge/order_knowledge.py "$RUNNER_TEMP/project-knowledge" --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex"
+      - name: Retain the knowledge citations, host evidence and contribution decisions
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: project-knowledge-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/project-knowledge/summary.json
           retention-days: 7
