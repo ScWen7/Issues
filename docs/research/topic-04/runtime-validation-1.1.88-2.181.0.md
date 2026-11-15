@@ -206,7 +206,7 @@ codebuddy -p "Reply with exactly OK. Do not use tools, read files, or modify any
 
 对照 2026-11-15 可访问的官方协议文档，补充以下结论：
 
-**Qoder。** 官方 TypeScript SDK 类型定义中，Assistant 消息的 `message.message.usage.credits`、`original_credits`、`billable` 是可选的单次模型请求字段；Result 的 `total_credits` 与 `modelUsage[model].credits` 是当前 CLI Session 累计值。顶层 `request_id` 默认不暴露，需在 SDK options.env 中设置 `QODER_EXPOSE_REQUEST_ID='true'`。本次探针没有启用该选项，并把 `message.uuid` 写入回执的 `request_id` 列；这是投影字段误命名，不是原生 request_id。本次应解释为：SDK 消息事件 UUID 已观察，原生 request_id 未观察，Assistant 请求级 Credits 未观察。现存 JSONL 作为原始归档保留，不追改原始回执或其 SHA-256；后续探针应分开输出 `event_id=message.uuid` 与 `request_id=message.request_id ?? null`，再重新执行验证。
+**Qoder。** 官方 TypeScript SDK 类型定义中，Assistant 消息的 `message.message.usage.credits`、`original_credits`、`billable` 是可选的单次模型请求字段；Result 的 `total_credits` 与 `modelUsage[model].credits` 是当前 CLI Session 累计值。顶层 `request_id` 默认不暴露，需在 SDK options.env 中设置 `QODER_EXPOSE_REQUEST_ID='true'`。本次探针没有启用该选项，并把 `message.uuid` 写入回执的 `request_id` 列；这是投影字段误命名，不是原生 request_id。本次应解释为：SDK 消息事件 UUID 已观察，原生 request_id 未观察，Assistant 请求级 Credits 未观察。现存 JSONL 作为原始归档保留，不追改原始回执或其 SHA-256。已在提交 `6c5b34a` 修正探针：启用 `QODER_EXPOSE_REQUEST_ID=true`，分开输出 `event_id=message.uuid` 与 `request_id=message.request_id ?? null`。该修复尚未在目标 Mac 上重新执行，新的请求 ID / Credits 字段仍待真实回执确认。
 
 **CodeBuddy。** 官方 v2.181.0 Release Notes 明确说明 stream-JSON per-turn usage 完善并提供稳定 Stage identity。官方协议明确：frame `uuid` 是投递身份；`requestId` 是用户 Turn 身份；`stage.id` 是计量 Stage 稳定身份；同一 Stage 后续修订覆盖原值；Turn snapshot 与 Result 内 `turnUsage` 是同一份快照。真实 0.69 Stage 与两份 0.69 snapshot 一致，符合该口径。
 
