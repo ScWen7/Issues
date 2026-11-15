@@ -18,5 +18,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24
+      - name: Check local Runtime probe syntax
+        run: node --check prototypes/topic-04/qoder-sdk-runtime-probe.mjs && node --check prototypes/topic-04/codebuddy-stream-runtime-probe.mjs
       - name: Run deterministic cost ledger cases
         run: node --test prototypes/topic-04/*.test.mjs
