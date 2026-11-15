@@ -225,8 +225,70 @@ class Study:
         with closing(ADMISSION.connect(self.results)) as conn:
             return {table: conn.execute("SELECT COUNT(*) FROM " + table).fetchone()[0] for table in ("consumed", "artifact")}
 
+    def accepted_result(self, record, actual):
+        """Read the persisted result back, tracing its bytes to the native call and the node."""
+        value = actual["result"]
+        report = value["report"]
+        with closing(ADMISSION.connect(self.db)) as conn:
+            proof, = conn.execute("""
+                SELECT p.run, p.host, p.session, p.turn, p.call_id, p.receipt, e.service, e.result_hash
+                FROM host_proof p JOIN events e ON p.receipt=e.receipt AND p.run=e.run AND p.value_hash=e.result_hash
+                WHERE p.receipt=? AND e.outcome='ok'""", (value["receipt"],))
+            receipt, = conn.execute("SELECT run,slot,sha256,payload,placement FROM receipt")
+            consumed, = conn.execute("SELECT issue,node,attempt,run,verdict FROM consumed")
+            artifacts = [dict(row) for row in conn.execute(
+                "SELECT name,bytes,digest AS sha256 FROM artifact WHERE run=? ORDER BY name", (record.run,))]
+        assert (proof["run"], proof["call_id"], proof["service"]) == (record.run, actual["call_id"], PROJECT)
+        assert proof["result_hash"] == sha(encoded(value))
+        assert tuple(receipt) == (record.run, ADMISSION.SLOT, sha(encoded(report)), encoded(report), "current")
+        assert dict(consumed) == {key: report[key] for key in ("issue", "node", "attempt", "run", "verdict")}
+        assert artifacts == sorted(record.contract["artifacts"], key=lambda item: item["name"])
+        assert self.counts() == {"consumed": 1, "artifact": len(ADMISSION.FILES)}
+        return {"call": dict(proof), "slot": receipt["slot"], "report_sha256": receipt["sha256"],
+                "placement": receipt["placement"], "consumed": dict(consumed), "artifacts": artifacts}
+
     def summary(self):
         return {"cases": self.observations, "admission": self.decisions, "counts": self.counts()}
+
+
+def recover_blocked(study, origin_host, replacement_host, blocker):
+    """An otherwise authorized owner hands off immediately after a single capability failure."""
+    original = study.issue("original-" + origin_host, origin_host, 1)
+    if blocker == "missing":
+        blocked = study.invoke(original, origin_host, "project-tool-missing", missing=True)
+        assert blocked["status"] == "blocked" and blocked["model_requests"] == 0
+        assert blocked["configured_catalog"].get("personal_orders") == [TOOL]
+        assert blocked["reason"] == "required project tool unavailable" and blocked["call_id"] is None
+    elif blocker == "alias-collision":
+        assert study.invoke(original, origin_host, "project-alias-points-to-personal", collision=True) is None
+        observed = study.observations[-1]
+        assert observed["placement"] == "preflight" and observed["model_requests"] == 0
+        assert observed["reason"] == "project alias bound to different launch target"
+    else:
+        raise ValueError("unknown capability blocker")
+
+    with closing(ADMISSION.connect(study.db)) as conn:
+        before = {table: conn.execute("SELECT COUNT(*) FROM " + table).fetchone()[0]
+                  for table in ("events", "host_proof", "receipt", "consumed", "artifact")}
+        assert not any(before.values())
+        owner, = conn.execute("SELECT run FROM current_node")
+        assert owner["run"] == original.run
+        assert conn.execute("SELECT active FROM leases WHERE run=?", (original.run,)).fetchone()[0] == 1
+    replacement = study.issue("replacement-" + replacement_host, replacement_host, 2, prior=original)
+    with closing(ADMISSION.connect(study.db)) as conn:
+        prior, current = conn.execute("""
+            SELECT l.run,l.member,l.runtime,l.epoch,l.active,l.token_hash,l.contract,d.task_active
+            FROM leases l JOIN dispatch d USING(run) ORDER BY l.epoch""")
+        assert prior["run"] == original.run and current["run"] == replacement.run
+        assert [prior["active"], prior["task_active"], current["active"], current["task_active"]] == [0, 0, 1, 1]
+        assert all(prior[key] != current[key] for key in ("run", "member", "runtime", "token_hash"))
+        assert current["epoch"] == prior["epoch"] + 1 and prior["contract"] == current["contract"]
+        owner, = conn.execute("SELECT issue,node,run FROM current_node")
+        assert tuple(owner) == (original.contract["issue"], original.contract["node"], replacement.run)
+    actual = study.invoke(replacement, replacement_host, "replacement-project-tool")
+    assert study.submit(replacement, actual) == "current"
+    assert study.submit(replacement, actual) == "duplicate"
+    return {**study.summary(), "before_handoff": before, "accepted_result": study.accepted_result(replacement, actual)}
 
 
 def run(out, codex, claude):
@@ -303,12 +365,21 @@ def run(out, codex, claude):
     drift = inspect({**p, "artifacts": str(altered)}, {"candidate": "C2"})
     assert drift.keys() == {"receipt", "status"} and drift["status"] == "invalid_artifacts"
     negatives["changed-candidate-bytes"] = drift["status"]
-    report = {"hosts": {"codex": "0.144.6", "claude": "2.1.325"},
-              "contract": frozen_contract("C2"), "forward": forward.summary(), "reverse": reverse.summary(),
+    recoveries = {
+        "missing": recover_blocked(Study(out / "missing", orders, codex, claude), "codex", "claude", "missing"),
+        "alias-collision": recover_blocked(Study(out / "alias-collision", orders, codex, claude),
+                                          "claude", "codex", "alias-collision"),
+    }
+    report = {"hosts": {"codex": "0.144.6", "claude": "2.1.325"}, "contract": frozen_contract("C2"),
+              "forward": {**forward.summary(), "accepted_result": forward.accepted_result(b, replacement)},
+              "reverse": {**reverse.summary(), "accepted_result": reverse.accepted_result(a2, returned)},
+              "blocked_recovery": recoveries,
               "C1_control": baseline.summary(), "authority_controls": negatives, "stale_takeover": "dispatch owner changed"}
     write(out / "summary.json", report)
     print(json.dumps({"C2_forward": forward.counts(), "C2_reverse": reverse.counts(), "C1": "rework",
-                      "cases": sum(len(x.observations) for x in (forward, reverse, baseline))}))
+                      "blocked_recovery": {reason: evidence["counts"] for reason, evidence in recoveries.items()},
+                      "cases": sum(len(x.observations) for x in (forward, reverse, baseline))
+                               + sum(len(evidence["cases"]) for evidence in recoveries.values())}))
 
 
 if __name__ == "__main__":

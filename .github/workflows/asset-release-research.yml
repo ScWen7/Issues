@@ -68,3 +68,83 @@ jobs:
           name: cross-host-evidence-${{ github.run_attempt }}
           path: ${{ runner.temp }}/host-handoff/summary.json
           retention-days: 7
+  codex-sender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    outputs:
+      checkpoint_sha256: ${{ steps.checkpoint.outputs.sha256 }}
+      artifact_id: ${{ steps.publish.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare the pinned sender and XLSX tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install XlsxWriter==3.2.9 openpyxl==3.1.5
+          cd "$RUNNER_TEMP"
+          pkg=$(npm pack @openai/codex@0.144.6-linux-x64 --silent)
+          echo "b6752eb2e8c10e6fcc96ac5c1c8ad8342cdb9a74504fb84686addf081a7d2868  $pkg" | sha256sum -c -
+          tar -xzf "$pkg"
+      - name: Call the order tool in Codex and revoke the sender
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/cross-host/runner_handoff.py sender \
+            --work "$RUNNER_TEMP/sender-work" --transfer "$RUNNER_TEMP/order-transfer" \
+            --codex "$RUNNER_TEMP/package/vendor/x86_64-unknown-linux-musl/bin/codex"
+      - name: Record the checkpoint digest before publication
+        id: checkpoint
+        working-directory: ${{ runner.temp }}/order-transfer
+        run: |
+          for file in checkpoint.json east.xlsx west.xlsx cross.xlsx; do
+            test -f "$file" && test ! -L "$file" || exit 1
+          done
+          digest=$(sha256sum checkpoint.json | cut -d' ' -f1)
+          echo "sha256=$digest" >> "$GITHUB_OUTPUT"
+      - name: Transfer the synthetic checkpoint and three workbooks
+        id: publish
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: order-transfer-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/order-transfer/checkpoint.json
+            ${{ runner.temp }}/order-transfer/east.xlsx
+            ${{ runner.temp }}/order-transfer/west.xlsx
+            ${{ runner.temp }}/order-transfer/cross.xlsx
+          if-no-files-found: error
+          retention-days: 7
+
+  claude-receiver:
+    needs: codex-sender
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Download this sender's artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.codex-sender.outputs.artifact_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/order-transfer
+      - name: Prepare the pinned receiver and XLSX tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install XlsxWriter==3.2.9 openpyxl==3.1.5
+          "$RUNNER_TEMP/venv/bin/pip" install --only-binary=:all: --no-deps --target "$RUNNER_TEMP/claude-sdk" claude-agent-sdk==0.2.182
+          echo "0dc4f4a9a165fc60746d7ae8489712e5fc352f1e7ad4eb22e7141bd0812eb0cf  $RUNNER_TEMP/claude-sdk/claude_agent_sdk/_bundled/claude" | sha256sum -c -
+      - name: Verify the transfer and resume the original order node in Claude Code
+        env:
+          SENDER_CHECKPOINT_SHA256: ${{ needs.codex-sender.outputs.checkpoint_sha256 }}
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" prototypes/topic-03b/cross-host/runner_handoff.py receiver \
+            --work "$RUNNER_TEMP/receiver-work" --transfer "$RUNNER_TEMP/order-transfer" \
+            --transfer-sha256 "$SENDER_CHECKPOINT_SHA256" --summary "$RUNNER_TEMP/receiver-summary.json" \
+            --claude "$RUNNER_TEMP/claude-sdk/claude_agent_sdk/_bundled/claude"
+      - name: Retain the two-runner result and node receipts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cross-runner-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/receiver-summary.json
+          if-no-files-found: error
+          retention-days: 7

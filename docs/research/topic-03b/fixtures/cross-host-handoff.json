@@ -2,7 +2,7 @@
   "C1_control": {
     "admission": [
       {
-        "call_id": "toolu_98aa0fb15b7e42f5a5c6b2d68725d4f9",
+        "call_id": "toolu_64748f4d8173420ead25ed07dcd7fa4d",
         "disposition": "current",
         "source_run": "control-claude"
       }
@@ -47,7 +47,7 @@
             "run": "control-codex",
             "runtime": "member-runtime-codex"
           },
-          "call_id": "order-faef6b2da310405898f7d150e0b7a769",
+          "call_id": "order-a0c1b43850574662a822f173be8309f5",
           "configured_catalog": {
             "personal_orders": [
               "inspect_order"
@@ -81,7 +81,7 @@
           ],
           "result": {
             "provider": "orders/inspect-workbook@2",
-            "receipt": "d6bb5f5be85e4a4ab1ea1d0c22aacd45",
+            "receipt": "faab97da347541a78897f56dc5fb9dbd",
             "report": {
               "A2": false,
               "A3": true,
@@ -152,22 +152,22 @@
             },
             "status": "ok"
           },
-          "result_sha256": "b6322656d90a04240a6fe9eb57b00a29e37090311dc2e3c25f08439e68d692fc",
+          "result_sha256": "44bdeb28a79f77d18af72d9ee0b875e820abe3f09644f1cf35b7538e757a4539",
           "selected_tool": "mcp__project_orders.inspect_order",
           "status": "completed",
-          "thread_id": "01a1dcb7-0d75-7ba1-b5ff-d04d6e3abe6a",
-          "turn_id": "01a1dcb7-0da2-7583-b9bb-1bbc9a0fe309",
+          "thread_id": "01a1dcd2-899a-7f91-b42d-9fc7aafe9a20",
+          "turn_id": "01a1dcd2-89c4-7ca0-af6c-7399031c7752",
           "wire_request_sha256": [
-            "18251c137737bc121e0cc22d70cb10b2c27192b56b63648bf3f5ca551dab6821",
-            "ffc63a6c32db98bed7a4a0fa42ace378eb8705607675148ad3380da4180dd1a5"
+            "d5282a530629b5d9a4a9b2204b83a240ac7ec9f5eb16ad17ec93694140ce520f",
+            "7372cea1a4da09d04823ce7c6e86237b5179e47c47758181763b85f19901b5d0"
           ],
           "wire_tool_output_index": 4
         },
         "service_events": [
           {
             "outcome": "ok",
-            "receipt": "d6bb5f5be85e4a4ab1ea1d0c22aacd45",
-            "result_sha256": "b6322656d90a04240a6fe9eb57b00a29e37090311dc2e3c25f08439e68d692fc",
+            "receipt": "faab97da347541a78897f56dc5fb9dbd",
+            "result_sha256": "44bdeb28a79f77d18af72d9ee0b875e820abe3f09644f1cf35b7538e757a4539",
             "run": "control-codex",
             "service": "orders/inspect-workbook@2"
           }
@@ -206,7 +206,7 @@
             "run": "control-claude",
             "runtime": "member-runtime-claude"
           },
-          "call_id": "toolu_98aa0fb15b7e42f5a5c6b2d68725d4f9",
+          "call_id": "toolu_64748f4d8173420ead25ed07dcd7fa4d",
           "discovered": [
             "mcp__personal_orders__inspect_order",
             "mcp__project_orders__inspect_order"
@@ -218,10 +218,10 @@
             "mcp__project_orders__inspect_order"
           ],
           "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
-          "prompt_id": "a18ddc73-fa7f-4a2a-898c-cdc6939384cf",
+          "prompt_id": "9e92844c-ec0a-4375-8c22-725b264eee70",
           "result": {
             "provider": "orders/inspect-workbook@2",
-            "receipt": "20f524df89ed4d5e9e8167e456c2c44c",
+            "receipt": "3e35b92a85824a1588055cd03001e186",
             "report": {
               "A2": false,
               "A3": true,
@@ -293,7 +293,7 @@
             "status": "ok"
           },
           "result_path": "messages[2].content[0].content[0].text",
-          "result_text_sha256": "7e761abc06f2544c95e63ae74e29870d27593f4b3445185d2bcbb783bb323825",
+          "result_text_sha256": "2c3398fe91c6ac1ccab08f8634166b2d9e8c9dee33778d9ff86b81b875e44f26",
           "selected_tool": "mcp__project_orders__inspect_order",
           "server_info": {
             "name": "orders/inspect-workbook@2",
@@ -303,7 +303,7 @@
             "personal_orders": "connected",
             "project_orders": "connected"
           },
-          "session_id": "228ca263-7fdf-4873-a758-acf531b48e61",
+          "session_id": "044bc68f-a25a-4219-a538-0e4e841a2b6c",
           "source": "dynamic",
           "status": "completed",
           "tool_hooks": [
@@ -311,15 +311,15 @@
             "PostToolUse"
           ],
           "wire_sha256": [
-            "a2819d900d742cf06b46fd0850d3605285c689ecb619067e5e5c7bebf3aa567a",
-            "1ee26a004ba90ba1d3010c3b11b705fed53300712bca400eb30e907cd99ba23c"
+            "44bfbe33fa647b0d9e26abe9c54b673cc8473a80066fac40a1bbd873a63a322e",
+            "898152fa8563e6144547c1179e10006b2e43574e64cf6baa8e5a35d25f8a2a67"
           ]
         },
         "service_events": [
           {
             "outcome": "ok",
-            "receipt": "20f524df89ed4d5e9e8167e456c2c44c",
-            "result_sha256": "7e761abc06f2544c95e63ae74e29870d27593f4b3445185d2bcbb783bb323825",
+            "receipt": "3e35b92a85824a1588055cd03001e186",
+            "result_sha256": "2c3398fe91c6ac1ccab08f8634166b2d9e8c9dee33778d9ff86b81b875e44f26",
             "run": "control-claude",
             "service": "orders/inspect-workbook@2"
           }
@@ -338,6 +338,524 @@
     "other-credential": "denied",
     "wrong-candidate": "denied",
     "wrong-member": "denied"
+  },
+  "blocked_recovery": {
+    "alias-collision": {
+      "accepted_result": {
+        "artifacts": [
+          {
+            "bytes": 5534,
+            "name": "cross.xlsx",
+            "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+          },
+          {
+            "bytes": 5494,
+            "name": "east.xlsx",
+            "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+          },
+          {
+            "bytes": 5444,
+            "name": "west.xlsx",
+            "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+          }
+        ],
+        "call": {
+          "call_id": "order-e6b90654b08f42609b56e93286e31c78",
+          "host": "codex",
+          "receipt": "a3085ce704b4434682cd9a6c49954985",
+          "result_hash": "abb322f05cf736dbcd41e6a1bf652f81308d0407c2233a01e32288617fba2927",
+          "run": "replacement-codex",
+          "service": "orders/inspect-workbook@2",
+          "session": "01a1dcd2-9dbe-7422-8ba7-89d4e56458ba",
+          "turn": "01a1dcd2-9de9-76b0-8ba8-6d3b3217adfa"
+        },
+        "consumed": {
+          "attempt": 2,
+          "issue": "order-export-verification",
+          "node": "verify-order-export",
+          "run": "replacement-codex",
+          "verdict": "pass"
+        },
+        "placement": "current",
+        "report_sha256": "462a493414540c4c1e0a66cdfeb5f5d2c60af24ff44aeb6490b527f5595bc282",
+        "slot": "verification-report"
+      },
+      "admission": [
+        {
+          "call_id": "order-e6b90654b08f42609b56e93286e31c78",
+          "disposition": "current",
+          "source_run": "replacement-codex"
+        },
+        {
+          "call_id": "order-e6b90654b08f42609b56e93286e31c78",
+          "disposition": "duplicate",
+          "source_run": "replacement-codex"
+        }
+      ],
+      "before_handoff": {
+        "artifact": 0,
+        "consumed": 0,
+        "events": 0,
+        "host_proof": 0,
+        "receipt": 0
+      },
+      "cases": [
+        {
+          "binding": {
+            "attempt": 2,
+            "candidate": "C2",
+            "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+            "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+            "epoch": 1,
+            "issue": "order-export-verification",
+            "member": "order-member-B",
+            "node": "verify-order-export",
+            "rule": "D2",
+            "run": "original-claude",
+            "runtime": "member-runtime-claude"
+          },
+          "id": "project-alias-points-to-personal",
+          "model_requests": 0,
+          "placement": "preflight",
+          "reason": "project alias bound to different launch target"
+        },
+        {
+          "binding": {
+            "attempt": 2,
+            "candidate": "C2",
+            "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+            "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+            "epoch": 2,
+            "issue": "order-export-verification",
+            "member": "order-member-A",
+            "node": "verify-order-export",
+            "rule": "D2",
+            "run": "replacement-codex",
+            "runtime": "member-runtime-codex"
+          },
+          "host": "codex",
+          "id": "replacement-project-tool",
+          "native": {
+            "active_catalog": {
+              "personal_orders": [],
+              "project_orders": [
+                "inspect_order"
+              ]
+            },
+            "arguments": {
+              "candidate": "C2"
+            },
+            "binding": {
+              "attempt": 2,
+              "candidate": "C2",
+              "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+              "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+              "epoch": 2,
+              "issue": "order-export-verification",
+              "member": "order-member-A",
+              "node": "verify-order-export",
+              "rule": "D2",
+              "run": "replacement-codex",
+              "runtime": "member-runtime-codex"
+            },
+            "call_id": "order-e6b90654b08f42609b56e93286e31c78",
+            "configured_catalog": {
+              "personal_orders": [
+                "inspect_order"
+              ],
+              "project_orders": [
+                "inspect_order"
+              ]
+            },
+            "host": "codex-cli 0.144.6",
+            "id": "replacement-project-tool",
+            "model_requests": 2,
+            "native_status": "completed",
+            "observed_input_schema": {
+              "additionalProperties": false,
+              "properties": {
+                "candidate": {
+                  "enum": [
+                    "C1",
+                    "C2"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "candidate"
+              ],
+              "type": "object"
+            },
+            "offered_tools": [
+              "mcp__project_orders.inspect_order"
+            ],
+            "result": {
+              "provider": "orders/inspect-workbook@2",
+              "receipt": "a3085ce704b4434682cd9a6c49954985",
+              "report": {
+                "A2": true,
+                "A3": true,
+                "artifacts": [
+                  {
+                    "bytes": 5494,
+                    "name": "east.xlsx",
+                    "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+                  },
+                  {
+                    "bytes": 5444,
+                    "name": "west.xlsx",
+                    "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+                  },
+                  {
+                    "bytes": 5534,
+                    "name": "cross.xlsx",
+                    "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+                  }
+                ],
+                "attempt": 2,
+                "candidate": "C2",
+                "checks": {
+                  "cross": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "A-101",
+                      "A-102",
+                      "B-201"
+                    ],
+                    "workbook": true
+                  },
+                  "east": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "A-101",
+                      "A-102"
+                    ],
+                    "workbook": true
+                  },
+                  "viewer": {
+                    "A2": true,
+                    "exit": 3,
+                    "workbook": false
+                  },
+                  "west": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "B-201"
+                    ],
+                    "workbook": true
+                  }
+                },
+                "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+                "issue": "order-export-verification",
+                "node": "verify-order-export",
+                "rule": "D2",
+                "run": "replacement-codex",
+                "verdict": "pass",
+                "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c"
+              },
+              "status": "ok"
+            },
+            "result_sha256": "abb322f05cf736dbcd41e6a1bf652f81308d0407c2233a01e32288617fba2927",
+            "selected_tool": "mcp__project_orders.inspect_order",
+            "status": "completed",
+            "thread_id": "01a1dcd2-9dbe-7422-8ba7-89d4e56458ba",
+            "turn_id": "01a1dcd2-9de9-76b0-8ba8-6d3b3217adfa",
+            "wire_request_sha256": [
+              "219f59a9a660080be928c04e0901890c5be9242d933e17286823228f8d3375e7",
+              "230d3c1d37ae5b9d12bc891df5141f33f1032e63facfeefeb7e840c78b26e01b"
+            ],
+            "wire_tool_output_index": 4
+          },
+          "service_events": [
+            {
+              "outcome": "ok",
+              "receipt": "a3085ce704b4434682cd9a6c49954985",
+              "result_sha256": "abb322f05cf736dbcd41e6a1bf652f81308d0407c2233a01e32288617fba2927",
+              "run": "replacement-codex",
+              "service": "orders/inspect-workbook@2"
+            }
+          ]
+        }
+      ],
+      "counts": {
+        "artifact": 3,
+        "consumed": 1
+      }
+    },
+    "missing": {
+      "accepted_result": {
+        "artifacts": [
+          {
+            "bytes": 5534,
+            "name": "cross.xlsx",
+            "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+          },
+          {
+            "bytes": 5494,
+            "name": "east.xlsx",
+            "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+          },
+          {
+            "bytes": 5444,
+            "name": "west.xlsx",
+            "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+          }
+        ],
+        "call": {
+          "call_id": "toolu_4beb3b7a08a5484cb612bfefcdae4e7b",
+          "host": "claude",
+          "receipt": "51f7f50bd321452e9ab787ee80b5abf6",
+          "result_hash": "52f6125e78bec69d998e350a2c814336949e5e0257c8cb0f8c1a34480b800ce1",
+          "run": "replacement-claude",
+          "service": "orders/inspect-workbook@2",
+          "session": "e6636734-81bc-4cdc-a340-26a79192d80b",
+          "turn": "c2cd1959-88f8-483d-891d-0868b84aa018"
+        },
+        "consumed": {
+          "attempt": 2,
+          "issue": "order-export-verification",
+          "node": "verify-order-export",
+          "run": "replacement-claude",
+          "verdict": "pass"
+        },
+        "placement": "current",
+        "report_sha256": "9f54c03dc62797667603ef131adfb3705b6b6fb3453d233238c39bb5ed990ef4",
+        "slot": "verification-report"
+      },
+      "admission": [
+        {
+          "call_id": "toolu_4beb3b7a08a5484cb612bfefcdae4e7b",
+          "disposition": "current",
+          "source_run": "replacement-claude"
+        },
+        {
+          "call_id": "toolu_4beb3b7a08a5484cb612bfefcdae4e7b",
+          "disposition": "duplicate",
+          "source_run": "replacement-claude"
+        }
+      ],
+      "before_handoff": {
+        "artifact": 0,
+        "consumed": 0,
+        "events": 0,
+        "host_proof": 0,
+        "receipt": 0
+      },
+      "cases": [
+        {
+          "binding": {
+            "attempt": 2,
+            "candidate": "C2",
+            "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+            "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+            "epoch": 1,
+            "issue": "order-export-verification",
+            "member": "order-member-A",
+            "node": "verify-order-export",
+            "rule": "D2",
+            "run": "original-codex",
+            "runtime": "member-runtime-codex"
+          },
+          "host": "codex",
+          "id": "project-tool-missing",
+          "native": {
+            "arguments": null,
+            "binding": {
+              "attempt": 2,
+              "candidate": "C2",
+              "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+              "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+              "epoch": 1,
+              "issue": "order-export-verification",
+              "member": "order-member-A",
+              "node": "verify-order-export",
+              "rule": "D2",
+              "run": "original-codex",
+              "runtime": "member-runtime-codex"
+            },
+            "call_id": null,
+            "configured_catalog": {
+              "personal_orders": [
+                "inspect_order"
+              ]
+            },
+            "host": "codex-cli 0.144.6",
+            "id": "project-tool-missing",
+            "model_requests": 0,
+            "offered_tools": [],
+            "reason": "required project tool unavailable",
+            "result": null,
+            "selected_tool": null,
+            "status": "blocked",
+            "thread_id": null,
+            "turn_id": null
+          },
+          "service_events": []
+        },
+        {
+          "binding": {
+            "attempt": 2,
+            "candidate": "C2",
+            "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+            "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+            "epoch": 2,
+            "issue": "order-export-verification",
+            "member": "order-member-B",
+            "node": "verify-order-export",
+            "rule": "D2",
+            "run": "replacement-claude",
+            "runtime": "member-runtime-claude"
+          },
+          "host": "claude",
+          "id": "replacement-project-tool",
+          "native": {
+            "arguments": {
+              "candidate": "C2"
+            },
+            "binding": {
+              "attempt": 2,
+              "candidate": "C2",
+              "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+              "contract_sha256": "c72e6ef0a4a8a49eccff98d27847d163494b9e48340e945795858385c1af5972",
+              "epoch": 2,
+              "issue": "order-export-verification",
+              "member": "order-member-B",
+              "node": "verify-order-export",
+              "rule": "D2",
+              "run": "replacement-claude",
+              "runtime": "member-runtime-claude"
+            },
+            "call_id": "toolu_4beb3b7a08a5484cb612bfefcdae4e7b",
+            "discovered": [
+              "mcp__personal_orders__inspect_order",
+              "mcp__project_orders__inspect_order"
+            ],
+            "host": "Claude Code 2.1.325",
+            "is_error": false,
+            "model_requests": 2,
+            "offered_mcp": [
+              "mcp__project_orders__inspect_order"
+            ],
+            "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
+            "prompt_id": "c2cd1959-88f8-483d-891d-0868b84aa018",
+            "result": {
+              "provider": "orders/inspect-workbook@2",
+              "receipt": "51f7f50bd321452e9ab787ee80b5abf6",
+              "report": {
+                "A2": true,
+                "A3": true,
+                "artifacts": [
+                  {
+                    "bytes": 5494,
+                    "name": "east.xlsx",
+                    "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+                  },
+                  {
+                    "bytes": 5444,
+                    "name": "west.xlsx",
+                    "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+                  },
+                  {
+                    "bytes": 5534,
+                    "name": "cross.xlsx",
+                    "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+                  }
+                ],
+                "attempt": 2,
+                "candidate": "C2",
+                "checks": {
+                  "cross": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "A-101",
+                      "A-102",
+                      "B-201"
+                    ],
+                    "workbook": true
+                  },
+                  "east": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "A-101",
+                      "A-102"
+                    ],
+                    "workbook": true
+                  },
+                  "viewer": {
+                    "A2": true,
+                    "exit": 3,
+                    "workbook": false
+                  },
+                  "west": {
+                    "A2": true,
+                    "A3": true,
+                    "exit": 0,
+                    "ids": [
+                      "B-201"
+                    ],
+                    "workbook": true
+                  }
+                },
+                "commit": "005e558ad99a6def3f4dbb2c7a1ec56e71553bf7",
+                "issue": "order-export-verification",
+                "node": "verify-order-export",
+                "rule": "D2",
+                "run": "replacement-claude",
+                "verdict": "pass",
+                "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c"
+              },
+              "status": "ok"
+            },
+            "result_path": "messages[2].content[0].content[0].text",
+            "result_text_sha256": "52f6125e78bec69d998e350a2c814336949e5e0257c8cb0f8c1a34480b800ce1",
+            "selected_tool": "mcp__project_orders__inspect_order",
+            "server_info": {
+              "name": "orders/inspect-workbook@2",
+              "version": "1"
+            },
+            "server_status": {
+              "personal_orders": "connected",
+              "project_orders": "connected"
+            },
+            "session_id": "e6636734-81bc-4cdc-a340-26a79192d80b",
+            "source": "dynamic",
+            "status": "completed",
+            "tool_hooks": [
+              "PreToolUse",
+              "PostToolUse"
+            ],
+            "wire_sha256": [
+              "dd6c2d021819a92aafbdb6094094288b51a6855d579907e06ca507c8a97bcb44",
+              "c7151dc7b5025c6fd9835f9aeb31ff683dd6b582216fedb6b1dff1d6c6c3b6ff"
+            ]
+          },
+          "service_events": [
+            {
+              "outcome": "ok",
+              "receipt": "51f7f50bd321452e9ab787ee80b5abf6",
+              "result_sha256": "52f6125e78bec69d998e350a2c814336949e5e0257c8cb0f8c1a34480b800ce1",
+              "run": "replacement-claude",
+              "service": "orders/inspect-workbook@2"
+            }
+          ]
+        }
+      ],
+      "counts": {
+        "artifact": 3,
+        "consumed": 1
+      }
+    }
   },
   "contract": {
     "artifacts": [
@@ -370,29 +888,68 @@
     "verifier_sha256": "f7edf54a17140b44e6fa0d070e1eef4be39c50bfa99f509fa560445a8bfd8f9c"
   },
   "forward": {
+    "accepted_result": {
+      "artifacts": [
+        {
+          "bytes": 5534,
+          "name": "cross.xlsx",
+          "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+        },
+        {
+          "bytes": 5494,
+          "name": "east.xlsx",
+          "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+        },
+        {
+          "bytes": 5444,
+          "name": "west.xlsx",
+          "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+        }
+      ],
+      "call": {
+        "call_id": "toolu_9fd4f7a5dd6b4bf2963e367e8b44bb21",
+        "host": "claude",
+        "receipt": "f929e6406c9445a8bbc1cc1c1b78f6cd",
+        "result_hash": "be83473c7342df16ac7c9752d375639666d4c8aa0e1653d1cf0d1b9e38244d1b",
+        "run": "replacement-claude",
+        "service": "orders/inspect-workbook@2",
+        "session": "ea2be837-b8b6-4054-b5b7-41129060e86b",
+        "turn": "dbf8c0bb-57ac-4a87-8914-bfda39c50bb6"
+      },
+      "consumed": {
+        "attempt": 2,
+        "issue": "order-export-verification",
+        "node": "verify-order-export",
+        "run": "replacement-claude",
+        "verdict": "pass"
+      },
+      "placement": "current",
+      "report_sha256": "9f54c03dc62797667603ef131adfb3705b6b6fb3453d233238c39bb5ed990ef4",
+      "slot": "verification-report"
+    },
     "admission": [
       {
-        "call_id": "order-98e04945ce554f39ad82378ef61bcb93",
+        "call_id": "order-add54061577e47788e345a8d5c3eda71",
         "disposition": "no verified tool result",
         "source_run": "original-codex"
       },
       {
-        "call_id": "order-26241744632e4f07b5650508e53eff25",
+        "call_id": "order-51ea4025505a4e8ab8258701d13b1a1d",
         "disposition": "no verified tool result",
         "source_run": "replacement-claude"
       },
       {
-        "call_id": "order-26241744632e4f07b5650508e53eff25",
+        "call_id": "order-51ea4025505a4e8ab8258701d13b1a1d",
         "disposition": "access withdrawn",
         "source_run": "original-codex"
       },
       {
-        "call_id": "toolu_ef9e69af4b424bb7b5290605ff9c5f07",
+        "call_id": "toolu_9fd4f7a5dd6b4bf2963e367e8b44bb21",
         "disposition": "current",
         "source_run": "replacement-claude"
       },
       {
-        "call_id": "toolu_ef9e69af4b424bb7b5290605ff9c5f07",
+        "call_id": "toolu_9fd4f7a5dd6b4bf2963e367e8b44bb21",
         "disposition": "duplicate",
         "source_run": "replacement-claude"
       }
@@ -437,7 +994,7 @@
             "run": "original-codex",
             "runtime": "member-runtime-codex"
           },
-          "call_id": "order-26241744632e4f07b5650508e53eff25",
+          "call_id": "order-51ea4025505a4e8ab8258701d13b1a1d",
           "configured_catalog": {
             "personal_orders": [
               "inspect_order"
@@ -471,7 +1028,7 @@
           ],
           "result": {
             "provider": "orders/inspect-workbook@2",
-            "receipt": "e0f88ca44aa943ce9ba9779ee2ab1b6f",
+            "receipt": "8c327493690642bf82064d49207a519a",
             "report": {
               "A2": true,
               "A3": true,
@@ -541,22 +1098,22 @@
             },
             "status": "ok"
           },
-          "result_sha256": "f5c3345d778ee425200d12bdf70e3d814987a14954ad5cafac068dd03343da43",
+          "result_sha256": "b307a8eb16152f9db926e4bcf48d68cd98a597dfd9446e8440d5733bb1c2c91b",
           "selected_tool": "mcp__project_orders.inspect_order",
           "status": "completed",
-          "thread_id": "01a1dcb6-e868-7a33-ada8-c9e8bdbf0f67",
-          "turn_id": "01a1dcb6-e8a9-79d2-8d72-fc92be030557",
+          "thread_id": "01a1dcd2-63af-73b1-81f3-7cdb93c1712b",
+          "turn_id": "01a1dcd2-63e3-7cf3-8a16-4524a1d85492",
           "wire_request_sha256": [
-            "a12cdb650987931c28c660fc2284983635581597edefcf81c99356788768cee3",
-            "4a981b6ff7fbcfbeb44a6fd2e4f83fcb430357e193dfbcdeabaf4b143f9f6351"
+            "a393f5c560e58e344c62ce377a31d8e9fe6ba627b85f432f47a597f1847c47da",
+            "73881c6e5f3efb0e13511c8d8283cbe194ede4d846d89fc00ce4f8cb8839dbaf"
           ],
           "wire_tool_output_index": 4
         },
         "service_events": [
           {
             "outcome": "ok",
-            "receipt": "e0f88ca44aa943ce9ba9779ee2ab1b6f",
-            "result_sha256": "f5c3345d778ee425200d12bdf70e3d814987a14954ad5cafac068dd03343da43",
+            "receipt": "8c327493690642bf82064d49207a519a",
+            "result_sha256": "b307a8eb16152f9db926e4bcf48d68cd98a597dfd9446e8440d5733bb1c2c91b",
             "run": "original-codex",
             "service": "orders/inspect-workbook@2"
           }
@@ -689,7 +1246,7 @@
             "run": "original-codex",
             "runtime": "member-runtime-codex"
           },
-          "call_id": "order-56e63054872b4b389da07ab981d174c0",
+          "call_id": "order-5a6e064bf39c4f81bee45e27ea5e589a",
           "configured_catalog": {
             "personal_orders": [
               "inspect_order"
@@ -728,11 +1285,11 @@
           "result_sha256": null,
           "selected_tool": "mcp__personal_orders.inspect_order",
           "status": "completed",
-          "thread_id": "01a1dcb6-ee7a-74f0-865e-9f4948c93689",
-          "turn_id": "01a1dcb6-eeaf-7082-b457-e61f5154cff5",
+          "thread_id": "01a1dcd2-69a5-7b50-ab46-94d60339b580",
+          "turn_id": "01a1dcd2-69d3-7333-92bb-2bc31d704037",
           "wire_request_sha256": [
-            "44cb8bcce2f3916410279e59bec6347d02ecb2dcf067be62d09dea28f9773bf1",
-            "e7370d6ff16709f2f80569b77fa0ada3a9edbc03585be4a4fabc2b17b449691e"
+            "3632e5cb451c4b2e58996b2bab4565761058abe97f62d79f3b8c99a7061d249d",
+            "c3b6707db3508adf1047ccdca736bf5427eb7077162f1820460c58e81f4d08d5"
           ],
           "wire_tool_output_index": 4
         },
@@ -777,7 +1334,7 @@
             "run": "original-codex",
             "runtime": "member-runtime-codex"
           },
-          "call_id": "order-98e04945ce554f39ad82378ef61bcb93",
+          "call_id": "order-add54061577e47788e345a8d5c3eda71",
           "configured_catalog": {
             "personal_orders": [
               "inspect_order"
@@ -810,25 +1367,25 @@
             "mcp__project_orders.inspect_order"
           ],
           "result": {
-            "receipt": "523309e6bbc9472aaabee4d7a77c0a9c",
+            "receipt": "b31173193aa444f19f42b32af88ffad5",
             "status": "denied"
           },
-          "result_sha256": "20a31dc54755e6c9eb6f45bc9a9fd73fc808489478780ff283d73e663ef78833",
+          "result_sha256": "223f2460de14388c0588618c2caf05f7842d1564d0f2927852e6b3a27f1c34f2",
           "selected_tool": "mcp__project_orders.inspect_order",
           "status": "completed",
-          "thread_id": "01a1dcb6-f19e-7c40-9326-c5099d5b26d0",
-          "turn_id": "01a1dcb6-f1c7-7f62-acfb-3d0445aadb9d",
+          "thread_id": "01a1dcd2-6cec-7b63-b7de-2e6f4b6782ca",
+          "turn_id": "01a1dcd2-6d12-7592-9006-6d47991f63f4",
           "wire_request_sha256": [
-            "824b48d64ab0880199ba88de4b9750e7548abb3e25e0a0abded253beaf90c29b",
-            "3426f7a2ac58e739840cf63b016be3b6d6e97b52aa2c2a29241494b631494629"
+            "764aa750b083e53d4039d5f3116c0c5f4abe8f42eea0865ddfd3ab0dfefb9548",
+            "3d7b8a1f63195e3dea10d352c247640ff3c5d7764b8a5d4c55243515656e1019"
           ],
           "wire_tool_output_index": 4
         },
         "service_events": [
           {
             "outcome": "denied",
-            "receipt": "523309e6bbc9472aaabee4d7a77c0a9c",
-            "result_sha256": "20a31dc54755e6c9eb6f45bc9a9fd73fc808489478780ff283d73e663ef78833",
+            "receipt": "b31173193aa444f19f42b32af88ffad5",
+            "result_sha256": "223f2460de14388c0588618c2caf05f7842d1564d0f2927852e6b3a27f1c34f2",
             "run": "original-codex",
             "service": "orders/inspect-workbook@2"
           }
@@ -867,7 +1424,7 @@
             "run": "replacement-claude",
             "runtime": "member-runtime-claude"
           },
-          "call_id": "toolu_ef9e69af4b424bb7b5290605ff9c5f07",
+          "call_id": "toolu_9fd4f7a5dd6b4bf2963e367e8b44bb21",
           "discovered": [
             "mcp__personal_orders__inspect_order",
             "mcp__project_orders__inspect_order"
@@ -879,10 +1436,10 @@
             "mcp__project_orders__inspect_order"
           ],
           "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
-          "prompt_id": "784fc507-b3c7-4536-9cfd-9cc9e883b453",
+          "prompt_id": "dbf8c0bb-57ac-4a87-8914-bfda39c50bb6",
           "result": {
             "provider": "orders/inspect-workbook@2",
-            "receipt": "a9d81a3aec7543209daeff7932667b68",
+            "receipt": "f929e6406c9445a8bbc1cc1c1b78f6cd",
             "report": {
               "A2": true,
               "A3": true,
@@ -953,7 +1510,7 @@
             "status": "ok"
           },
           "result_path": "messages[2].content[0].content[0].text",
-          "result_text_sha256": "655291d61285fe0e7a1c50050db1944c17fd50c90cf09ea902ebf04500899c5d",
+          "result_text_sha256": "be83473c7342df16ac7c9752d375639666d4c8aa0e1653d1cf0d1b9e38244d1b",
           "selected_tool": "mcp__project_orders__inspect_order",
           "server_info": {
             "name": "orders/inspect-workbook@2",
@@ -963,7 +1520,7 @@
             "personal_orders": "connected",
             "project_orders": "connected"
           },
-          "session_id": "77ec851e-26ff-4211-8e48-93bd524a031e",
+          "session_id": "ea2be837-b8b6-4054-b5b7-41129060e86b",
           "source": "dynamic",
           "status": "completed",
           "tool_hooks": [
@@ -971,15 +1528,15 @@
             "PostToolUse"
           ],
           "wire_sha256": [
-            "5fe9631b095779304a30875d6d752b44751cadc15aa01b50429a726c38efd2bd",
-            "29f80370b233d37b839790b67df3496d459613db95d49f5a107c1fd916883323"
+            "d468c9cf55843a7aaa8b93218cb1d6f983a00eb0c9349d6627ac31d73cb4499f",
+            "691bc6059d0cba189a2d2e075914b7d9188fe09ffdf02ce801598fa0835918aa"
           ]
         },
         "service_events": [
           {
             "outcome": "ok",
-            "receipt": "a9d81a3aec7543209daeff7932667b68",
-            "result_sha256": "655291d61285fe0e7a1c50050db1944c17fd50c90cf09ea902ebf04500899c5d",
+            "receipt": "f929e6406c9445a8bbc1cc1c1b78f6cd",
+            "result_sha256": "be83473c7342df16ac7c9752d375639666d4c8aa0e1653d1cf0d1b9e38244d1b",
             "run": "replacement-claude",
             "service": "orders/inspect-workbook@2"
           }
@@ -996,19 +1553,58 @@
     "codex": "0.144.6"
   },
   "reverse": {
+    "accepted_result": {
+      "artifacts": [
+        {
+          "bytes": 5534,
+          "name": "cross.xlsx",
+          "sha256": "1a7ff30a4350a1dd8506b89ce285cf8b92769baf652eb17133a66b3073536ec9"
+        },
+        {
+          "bytes": 5494,
+          "name": "east.xlsx",
+          "sha256": "5784c6c9f6660ac89a3bd4188541f5bfaee85b2e21a39b47a55923983380e852"
+        },
+        {
+          "bytes": 5444,
+          "name": "west.xlsx",
+          "sha256": "f178f773de4ab73ac732a52e1dc0239dd052ba55b8f5513d46a28023fb7fe9c1"
+        }
+      ],
+      "call": {
+        "call_id": "order-03ed2fae203a47b9914fa08b86d2549c",
+        "host": "codex",
+        "receipt": "fdf8a8e6c3e8489ab9b30e77cc63a289",
+        "result_hash": "5dcd033bdd7ccfce63fc28c15ee18dacdd8a5af3a3c3998c74c571e57e6a4909",
+        "run": "replacement-codex",
+        "service": "orders/inspect-workbook@2",
+        "session": "01a1dcd2-85ac-75e2-a9be-79b31ba7c929",
+        "turn": "01a1dcd2-85d8-77a1-b099-f102ea0bc25d"
+      },
+      "consumed": {
+        "attempt": 2,
+        "issue": "order-export-verification",
+        "node": "verify-order-export",
+        "run": "replacement-codex",
+        "verdict": "pass"
+      },
+      "placement": "current",
+      "report_sha256": "462a493414540c4c1e0a66cdfeb5f5d2c60af24ff44aeb6490b527f5595bc282",
+      "slot": "verification-report"
+    },
     "admission": [
       {
-        "call_id": "toolu_da4806054d2c41a299b92770aaf421ec",
+        "call_id": "toolu_9523e92d7d794effb53e97cf00d42a23",
         "disposition": "no verified tool result",
         "source_run": "original-claude"
       },
       {
-        "call_id": "order-75208179280f4e1cb1a7757d376552ae",
+        "call_id": "order-03ed2fae203a47b9914fa08b86d2549c",
         "disposition": "current",
         "source_run": "replacement-codex"
       },
       {
-        "call_id": "order-75208179280f4e1cb1a7757d376552ae",
+        "call_id": "order-03ed2fae203a47b9914fa08b86d2549c",
         "disposition": "duplicate",
         "source_run": "replacement-codex"
       }
@@ -1133,7 +1729,7 @@
             "run": "original-claude",
             "runtime": "member-runtime-claude"
           },
-          "call_id": "toolu_20ffae1dc96741aa8d4045acceb64d57",
+          "call_id": "toolu_2690d816f17746c7982bc7542ee7d728",
           "discovered": [
             "mcp__personal_orders__inspect_order",
             "mcp__project_orders__inspect_order"
@@ -1145,7 +1741,7 @@
             "mcp__project_orders__inspect_order"
           ],
           "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
-          "prompt_id": "09edb955-5b31-4c5e-8618-8575a9a344ce",
+          "prompt_id": "494cd41e-cbb8-4be1-9765-27c8241d0354",
           "result": {
             "status": "host_rejected"
           },
@@ -1160,13 +1756,13 @@
             "personal_orders": "connected",
             "project_orders": "connected"
           },
-          "session_id": "8986bfff-10f4-4b52-9867-af024fe11938",
+          "session_id": "804b4f7b-0511-4ec6-b0e3-36784698ba6f",
           "source": "dynamic",
           "status": "completed",
           "tool_hooks": [],
           "wire_sha256": [
-            "71b0168d27270940771de95caece14c54ef90473d0e53468042bbcf5dec7e073",
-            "7a7f5fdc31dc7b4a0859ad255c57798f171861463679cc71dcbc860f7dee342b"
+            "916581f90371ca699ad9953b0e292707fa774f52cc7ccbf32e4e5c77635ae3c9",
+            "2b42f4f7d323d7390508b507d81be16365c770699d6071d0664d935b7e7e531c"
           ]
         },
         "service_events": []
@@ -1204,7 +1800,7 @@
             "run": "original-claude",
             "runtime": "member-runtime-claude"
           },
-          "call_id": "toolu_da4806054d2c41a299b92770aaf421ec",
+          "call_id": "toolu_9523e92d7d794effb53e97cf00d42a23",
           "discovered": [
             "mcp__personal_orders__inspect_order",
             "mcp__project_orders__inspect_order"
@@ -1216,13 +1812,13 @@
             "mcp__project_orders__inspect_order"
           ],
           "offered_schema_sha256": "955f3016b4c6cfa6accc97d6c910977241f73fc1acd7e77b0bd23a42a4550b73",
-          "prompt_id": "26bdf734-3307-4766-bb52-da8d7d2b0425",
+          "prompt_id": "0dd8960c-9bdc-40a1-9bcc-e5cd0f4028f1",
           "result": {
-            "receipt": "e6f8549a2fee43ecbe9d36267fa495e3",
+            "receipt": "0c9a60ec50024a8081ff97f9c30c4069",
             "status": "denied"
           },
           "result_path": "messages[2].content[0].content",
-          "result_text_sha256": "3a1556de290a1b34d8a9d1032140f5b84b2f575b5a43af20718538156625dd1d",
+          "result_text_sha256": "e24f28c5fb6d361a7fbb58f0486852fd0fd0be3758ef0ff0ad4e116efb3ae270",
           "selected_tool": "mcp__project_orders__inspect_order",
           "server_info": {
             "name": "orders/inspect-workbook@2",
@@ -1232,7 +1828,7 @@
             "personal_orders": "connected",
             "project_orders": "connected"
           },
-          "session_id": "df3aa727-0829-4130-88a8-bdbb57d5b580",
+          "session_id": "b233bd3b-1011-4bfa-a638-1595dd0fbbe7",
           "source": "dynamic",
           "status": "completed",
           "tool_hooks": [
@@ -1240,15 +1836,15 @@
             "PostToolUseFailure"
           ],
           "wire_sha256": [
-            "f4617ac177c202fa4c21c0b65a39e628685c347337af7e98d95d93583bd796fd",
-            "f331fc92ec99a7a512c85414be99e57cb5a7853ba30228fcfcf26cfcc79f03fa"
+            "15a8517b65c4947bdff4fe883bfb5dd3182600c4147682a90766d515aa14ee02",
+            "88e94e2dc5373435100c92253b6fe2a5d869aa84fc2bb78394935165ed9428aa"
           ]
         },
         "service_events": [
           {
             "outcome": "denied",
-            "receipt": "e6f8549a2fee43ecbe9d36267fa495e3",
-            "result_sha256": "3a1556de290a1b34d8a9d1032140f5b84b2f575b5a43af20718538156625dd1d",
+            "receipt": "0c9a60ec50024a8081ff97f9c30c4069",
+            "result_sha256": "e24f28c5fb6d361a7fbb58f0486852fd0fd0be3758ef0ff0ad4e116efb3ae270",
             "run": "original-claude",
             "service": "orders/inspect-workbook@2"
           }
@@ -1293,7 +1889,7 @@
             "run": "replacement-codex",
             "runtime": "member-runtime-codex"
           },
-          "call_id": "order-75208179280f4e1cb1a7757d376552ae",
+          "call_id": "order-03ed2fae203a47b9914fa08b86d2549c",
           "configured_catalog": {
             "personal_orders": [
               "inspect_order"
@@ -1327,7 +1923,7 @@
           ],
           "result": {
             "provider": "orders/inspect-workbook@2",
-            "receipt": "5b1d482a974346c3b4d96ff9d0e9ed6d",
+            "receipt": "fdf8a8e6c3e8489ab9b30e77cc63a289",
             "report": {
               "A2": true,
               "A3": true,
@@ -1397,22 +1993,22 @@
             },
             "status": "ok"
           },
-          "result_sha256": "77938bd520ffb0a90525e639006ebe9b82f9d71bed7ab10dc4743f1a7994852c",
+          "result_sha256": "5dcd033bdd7ccfce63fc28c15ee18dacdd8a5af3a3c3998c74c571e57e6a4909",
           "selected_tool": "mcp__project_orders.inspect_order",
           "status": "completed",
-          "thread_id": "01a1dcb7-0977-7072-a31a-0dfa6bbf4e38",
-          "turn_id": "01a1dcb7-09a6-7c11-9b71-2934815a45d0",
+          "thread_id": "01a1dcd2-85ac-75e2-a9be-79b31ba7c929",
+          "turn_id": "01a1dcd2-85d8-77a1-b099-f102ea0bc25d",
           "wire_request_sha256": [
-            "4514924bbe4eb751c88acd51243db853fdf6a7163e67b15738562484cbeedf64",
-            "8ae76a00ad6efa66d89ff2c0a3bdf0986890239090acb23ab156854ac6fe785b"
+            "8e683de3f46ab128e09e9a8c9187a613042a51630b894b04e4ff158b452ad6d0",
+            "9beb1489392965a33892e4871a455c1f8127221bb2f7f9815240c7ec707e44bb"
           ],
           "wire_tool_output_index": 4
         },
         "service_events": [
           {
             "outcome": "ok",
-            "receipt": "5b1d482a974346c3b4d96ff9d0e9ed6d",
-            "result_sha256": "77938bd520ffb0a90525e639006ebe9b82f9d71bed7ab10dc4743f1a7994852c",
+            "receipt": "fdf8a8e6c3e8489ab9b30e77cc63a289",
+            "result_sha256": "5dcd033bdd7ccfce63fc28c15ee18dacdd8a5af3a3c3998c74c571e57e6a4909",
             "run": "replacement-codex",
             "service": "orders/inspect-workbook@2"
           }
