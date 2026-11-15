@@ -90,9 +90,9 @@ V0.1 · 探索基线 · 2026-11-15
 
 ## 5. 异构 Credits 适配与验证
 
-原型实现两种本地 Runtime 解析器：Qoder Agent SDK Assistant message 读取请求级 `usage.credits`，Result `total_credits` 单独作为会话累计快照；CodeBuddy `usage_update` 解析 stage 与 terminal snapshot，按 `session_id + requestId + stage.id` 覆盖更新。记录保留宿主事件 ID、成员、Session / Turn、Run、Credits 数值与观察时间。显式 Run 绑定才归入 Run；没有 Credits 字段生成 `unknown`，不读取企业 API、账户 Usage 页面或账单补数。
+原型实现两种本地 Runtime 解析器：Qoder Agent SDK Assistant message 读取请求级 `usage.credits`，Result `total_credits` 单独作为会话累计快照；CodeBuddy `usage_update` 解析 stage 与 terminal snapshot，按 `session_id + requestId + stage.id` 覆盖更新。新增 8 项协议回归后，成本账本与评价总计 32 项测试在 Node 24.22.2 通过。[Runtime SDK / stream-json CI #14](https://github.com/ScWen7/Issues/actions/runs/43672399496)。记录保留宿主事件 ID、成员、Session / Turn、Run、Credits 数值与观察时间。显式 Run 绑定才归入 Run；没有 Credits 字段生成 `unknown`，不读取企业 API、账户 Usage 页面或账单补数。
 
-测试覆盖两类 Runtime Credits 的单位隔离、显式 Run 绑定、无用量上报时保持 unknown，以及不从订阅额度、账户余额或 Token 数推算 Credits。该原型不连接真实成员宿主，也不代表 Qoder / CodeBuddy 当前版本一定会向 Runtime 暴露 Credits；宿主不暴露就保持 unknown。
+测试覆盖两类 Runtime Credits 的单位隔离、显式 Run 绑定、无用量上报时保持 unknown，以及不从订阅额度、账户余额或 Token 数推算 Credits。当前 32 项 CI 是基于官方文档字段构造的确定性协议夹具，不是成员机器上安装版 Qoder / CodeBuddy 的真实进程回环；真实版本、IDE 会话旁路和宿主升级兼容仍待现场验收。Qoder SDK 方式需要平台 Runtime 启动 / 恢复由 SDK 管理的 qodercli；CodeBuddy 需要由 Runtime 启动 `--output-format stream-json` 的 CLI。成员仅打开 IDE 且未通过上述 Runtime 托管时，不宣称已采集 Credits，保持 unknown。
 
 ## 6. 成本账本原型首轮结果
 
