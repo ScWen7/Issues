@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题四「成本、质量与自改进」V0.1 已扩展异构计量：Codex / Claude Token、Qoder Credits 企业 Usage API、CodeBuddy Credits 成员 / 周期对账，统一记录但不混用单位。原型覆盖多路去重、Credits 事件 upsert、额度快照、显式 Run 关联和货币换算边界；27 项 Node 24 远端回归通过。真实账号接入仍需 Qoder 企业 API Key 与 CodeBuddy Usage 明细。[专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
+专题四「成本、质量与自改进」V0.1 已扩展异构计量：Codex / Claude Token、Qoder Credits 企业 Usage API、CodeBuddy Credits 成员 / 周期对账，统一记录但不混用单位。原型只接受 Runtime 实际上报的 Qoder / CodeBuddy Credits；不调用企业 API、账户 Usage 页面或账单接口。Runtime 无用量上报就保持 unknown。[专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
 
 专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
 
