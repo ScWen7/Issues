@@ -4,7 +4,7 @@
 
 ## 当前交付
 
-专题四「成本、质量与自改进」V0.1 探索已完成第一轮成本归属 / 去重、评价隔离与 Benchmark 可比性原型；20 项 Node 24 远端回归通过。下一步验证真实宿主用量归集与改进提案到资产发布的闭环。[专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
+专题四「成本、质量与自改进」V0.1 已扩展异构计量：Codex / Claude Token、Qoder Credits 企业 Usage API、CodeBuddy Credits 成员 / 周期对账，统一记录但不混用单位。原型覆盖多路去重、Credits 事件 upsert、额度快照、显式 Run 关联和货币换算边界；下一步验证真实账号数据接入与 Run 归属。[专题四设计](docs/architecture/04-cost-quality-improvement.md) · [源码与验证基线](docs/research/04-source-evidence.md)
 
 专题三 B「能力与知识治理」已完成 V0.5 设计收口。订单核验在已打开的 Codex 终端和 Claude Code 控制流里均能完成。历史共享范围、输入控制、工具来源和 Hook 效果决定沿用原会话还是另开。验证记录包含双客户端插入回合、派发后才加入的工具、Hook 改写返回及原节点复验。[3B 设计](docs/architecture/03b-capability-governance.md) · [成员原会话实测](docs/research/topic-03b/existing-session.md)
 
