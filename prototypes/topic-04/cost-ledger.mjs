@@ -29,6 +29,7 @@ export function reconcileObservations(observations) {
       return {
         key,
         runId: conflict ? null : (chosen.runId ?? null),
+        provider: chosen.provider ?? null,
         metric: chosen.metric,
         unit: chosen.unit,
         value: conflict ? null : chosen.value,
@@ -59,12 +60,92 @@ export function deltaFromCumulative(previous, current) {
   return { value: current.value - previous.value, status: "measured", reason: null };
 }
 
-export function aggregateRunCosts(entries, runIds) {
+export function normalizeQoderUsage(event, identity = {}) {
+  if (!event?.eventId || !Number.isFinite(event.credits)) {
+    throw new Error("Qoder usage requires stable eventId and numeric credits");
+  }
+  return {
+    source: "qoder-enterprise-usage-api",
+    sourceNamespace: identity.organizationId ?? "qoder-org-unresolved",
+    nativeRequestId: event.eventId,
+    provider: "qoder",
+    runId: identity.runId ?? null,
+    memberId: event.memberId ?? event.userId ?? null,
+    metric: "credits_consumed",
+    unit: "qoder_credit",
+    value: event.credits,
+    eventAt: event.beginAt ?? (event.timestamp ? new Date(event.timestamp).toISOString() : null),
+    finishAt: event.finishAt ?? null,
+    attributes: {
+      source: event.source ?? null,
+      operation: event.operation ?? null,
+      modelTier: event.modelTier ?? null
+    },
+    billingAdjustedCredits: Number.isFinite(event.cost) ? event.cost : null,
+    currency: null,
+    trustRank: 3
+  };
+}
+
+export function normalizeCodeBuddyUsage(input) {
+  if (!Number.isFinite(input?.credits) || !input.observedAt) {
+    throw new Error("CodeBuddy usage requires observed Credits and observation time");
+  }
+  return {
+    source: "codebuddy-account-usage",
+    sourceNamespace: input.teamId ?? input.memberId ?? "codebuddy-account-unresolved",
+    nativeRequestId: input.eventId ?? null,
+    provider: "codebuddy",
+    runId: input.runId ?? null,
+    memberId: input.memberId ?? null,
+    metric: "credits_consumed",
+    unit: "codebuddy_credit",
+    value: input.credits,
+    eventAt: input.eventAt ?? null,
+    observedAt: input.observedAt,
+    attributes: {
+      plan: input.plan ?? null,
+      packageType: input.packageType ?? null,
+      mode: input.mode ?? null
+    },
+    currency: null,
+    trustRank: input.eventId ? 2 : 1,
+    attributionStatus: input.eventId ? "provider_event" : "member_period_statement"
+  };
+}
+
+export function convertCreditsToMoney(usage, conversion) {
+  if (!usage || !conversion ||
+      conversion.provider !== usage.provider ||
+      conversion.unit !== usage.unit ||
+      !Number.isFinite(conversion.moneyPerCredit) ||
+      !conversion.currency ||
+      !conversion.validFrom ||
+      !conversion.sourceRef) {
+    return { amount: null, currency: null, status: "unpriced" };
+  }
+  if (usage.eventAt && usage.eventAt < conversion.validFrom) {
+    return { amount: null, currency: null, status: "rate_not_applicable" };
+  }
+  if (conversion.validUntil && usage.eventAt && usage.eventAt >= conversion.validUntil) {
+    return { amount: null, currency: null, status: "rate_not_applicable" };
+  }
+  return {
+    amount: usage.value * conversion.moneyPerCredit,
+    currency: conversion.currency,
+    status: "estimated",
+    conversionSource: conversion.sourceRef,
+    conversionVersion: conversion.version ?? null
+  };
+}
+
+export function aggregateRunCosts(entries, runIds, targetUnit) {
   const selected = new Set(runIds);
   const byKey = new Map();
   const conflicted = new Set();
   for (const entry of entries) {
-    if (!selected.has(entry.runId) || entry.status !== "reconciled" || entry.amount == null) continue;
+    if (!selected.has(entry.runId) || entry.status !== "reconciled" ||
+        entry.amount == null || entry.currency !== targetUnit) continue;
     const prior = byKey.get(entry.key);
     if (!prior) {
       byKey.set(entry.key, entry);
