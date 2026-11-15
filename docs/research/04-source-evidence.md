@@ -165,6 +165,6 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 
 ### 10.5 Qoder SDK Query 生命周期复核
 
-8.2 的 Qoder 修正版探针收到 Result 后仍等待异步流自然结束，180 秒后被采集器终止；该探针没有显式调用 Query 的 `q.close()`。Qoder 官方 Cost and usage 示例在完成用量读取后调用 `q.close()`，TypeScript SDK Reference 也提供 Query Session 的主动结束能力。因此，先前的超时不能直接归因为 CLI / SDK 执行失败。已在 `3d18c51` 修正探针：Result 到达后结束迭代，并在 `finally` 显式 `q.close()`。此修正等待 Mac 真实重跑，现阶段只将超时原因标为 `probe_lifecycle_unverified`；请求 Credits 仍为 unknown。
+8.2 的 Qoder 修正版探针收到 Result 后仍等待异步流自然结束，180 秒后被采集器终止；该探针没有显式调用 Query 的 `q.close()`。Qoder 官方 Cost and usage 示例在完成用量读取后调用 `q.close()`，TypeScript SDK Reference 也提供 Query Session 的主动结束能力。因此，先前的超时不能直接归因为 CLI / SDK 执行失败。已在 `d338cf5` 修正探针：Result 到达后结束迭代，并在 `finally` 显式 `q.close()`。此修正等待 Mac 真实重跑，现阶段只将超时原因标为 `probe_lifecycle_unverified`；请求 Credits 仍为 unknown。
 
 官方依据：[Qoder Cost and usage](https://docs.qoder.com/cli/sdk/cost-usage) · [Qoder TypeScript SDK references](https://docs.qoder.com/cli/sdk/references-typescript)。
