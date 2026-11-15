@@ -77,7 +77,7 @@ for await (const message of q) {
 } finally {
   // A Result message completes the task, but the local CLI session remains open
   // until the host explicitly closes the Query.
-  q.close();
+  await q.close();
 }
 if (assistantCount === 0 || resultCount === 0) {
   console.error(JSON.stringify({ provider: "qoder", status: "incomplete", assistantCount, resultCount }));
