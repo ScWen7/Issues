@@ -89,7 +89,7 @@ V0.1 · 探索基线 · 2026-11-15
 
 原型增加 Qoder Usage 事件归一化、CodeBuddy 成员 / 周期用量归一化、Qoder 额度包快照、显式 Run 关联和按版本换算货币金额。Qoder 的事件归一化保留 eventId、beginAt、finishAt、memberId、source、operation、modelTier、credits 与 billing-adjusted credits；没有显式 Run 绑定时状态保持 member_event_unallocated。CodeBuddy 在缺少事件 ID 时保持 member_period_statement，Run 为空。两者单位分别为 qoder_credit 与 codebuddy_credit，不可混加。
 
-测试覆盖事件更新身份、负 Credits、额度快照不作为执行用量、无显式绑定不归 Run、无换算依据不生成金额，以及不同厂商 Credits 隔离。该层仅是归一化与归属原型，不代表已连接成员真实账户；Qoder 企业 API 实际接入仍需组织 API Key，CodeBuddy 真实账单需取得成员提供的 Usage 明细。
+测试覆盖事件更新身份、负 Credits、额度快照不作为执行用量、无显式绑定不归 Run、无换算依据不生成金额，以及不同厂商 Credits 隔离。Qoder 的 Usage API 事件是供应商聚合用量记录，不应擅自解释成一条模型请求；eventId 用于事件幂等更新，成员 / source / operation / modelTier 是可审计维度。该层仅是归一化与归属原型，不代表已连接成员真实账户；Qoder 企业 API 实际接入仍需组织 API Key，CodeBuddy 真实账单需取得成员提供的 Usage 明细。
 
 ## 6. 成本账本原型首轮结果
 
@@ -101,7 +101,7 @@ V0.1 · 探索基线 · 2026-11-15
 
 新增独立评价原型：只对终态业务 Run 启动评价，评价记录引用原 Run、由独立 evaluation Run 承载；缺失证据返回 inconclusive 而不是低分；加权维度分必须带证据；事后评价默认 advisory-only，只有 SOP 明确声明门禁且 Run 与 scorer 版本匹配时才允许形成门禁结果。
 
-Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、effort、评分器版本、聚合方式、环境摘要和重复次数全部一致。改进评估只有在可比时才计算质量提升和成本变化；达到阈值只生成 candidate-for-review，不自动批准或发布。首次 CI 发现浮点输出精度断言过严，已将展示差值规范到六位小数，阈值判断仍使用未舍入原值。修正后成本与评价共 20 项回归在 Node 24.22.2 全部通过。[远端 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。
+Benchmark 可比性原型要求样本集摘要、rubric、工具链、模型、effort、评分器版本、聚合方式、环境摘要和重复次数全部一致。改进评估只有在可比时才计算质量提升和成本变化；达到阈值只生成 candidate-for-review，不自动批准或发布。首次 CI 发现浮点输出精度断言过严，已将展示差值规范到六位小数，阈值判断仍使用未舍入原值。修正后成本与评价共 20 项回归在 Node 24.22.2 全部通过。[远端 CI #6](https://github.com/ScWen7/Issues/actions/runs/43670657657)。加入 Qoder / CodeBuddy Credits 归一化、额度快照和显式 Run 归属后，远端 Node 24.22.2 共 27 项回归全部通过。[异构计量 CI #9](https://github.com/ScWen7/Issues/actions/runs/43671321296)。
 
 当前原型仍不实现评分任务调度、模型裁判调用、完整样本存储、人工审批 UI 或资产发布；它验证的是记录隔离、比较资格和决策边界。
 
