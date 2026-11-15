@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   reconcileObservations, deltaFromCumulative, aggregateRunCosts,
-  normalizeQoderUsage, normalizeCodeBuddyUsage, normalizeQoderPackage, bindUsageToRun, convertCreditsToMoney
+  normalizeRuntimeCreditObservation, creditsUnavailable
 } from "./cost-ledger.mjs";
 
 test("deduplicates multiple observers of one native request but retains evidence", () => {
@@ -91,93 +91,53 @@ test("a post-hook successor Run has its own additive cost while the rejected Run
   assert.equal(aggregateRunCosts(entries, ["post-hook-reverification"], "USD"), 0.02);
 });
 
-test("Qoder event normalization uses stable eventId and preserves mutable finishAt", () => {
-  const first = normalizeQoderUsage({
-    eventId: "evt-1", timestamp: 1000, beginAt: "2026-11-15T00:00:01Z",
-    finishAt: "2026-11-15T00:00:05Z", memberId: "member-1",
-    source: "CLI", operation: "Agent", modelTier: "Ultimate", credits: 12.5, cost: 10
-  }, { organizationId: "org-1", runId: "run-1" });
-  const update = normalizeQoderUsage({
-    eventId: "evt-1", timestamp: 1000, beginAt: "2026-11-15T00:00:01Z",
-    finishAt: "2026-11-15T00:00:08Z", memberId: "member-1",
-    source: "CLI", operation: "Agent", modelTier: "Ultimate", credits: 12.5, cost: 10
-  }, { organizationId: "org-1", runId: "run-1" });
-  assert.equal(first.nativeRequestId, update.nativeRequestId);
-  assert.equal(first.finishAt, "2026-11-15T00:00:05Z");
-  assert.equal(update.finishAt, "2026-11-15T00:00:08Z");
-  assert.equal(first.unit, "qoder_credit");
-  assert.equal(first.value, 12.5);
-  assert.equal(first.billingAdjustedCredits, 10);
+test("Qoder runtime-reported Credits retain native unit and Run binding", () => {
+  const usage = normalizeRuntimeCreditObservation({
+    provider: "qoder", credits: 12.5, observedAt: "2026-11-15T00:00:05Z",
+    eventId: "runtime-event-1", memberId: "member-1", runId: "run-1",
+    modelTier: "Ultimate", operation: "Agent", sessionId: "session-1", turnId: "turn-1"
+  });
+  assert.equal(usage.unit, "qoder_credit");
+  assert.equal(usage.value, 12.5);
+  assert.equal(usage.runId, "run-1");
+  assert.equal(usage.source, "runtime");
 });
 
-test("Qoder refunds or reversals remain signed credit observations", () => {
-  const refund = normalizeQoderUsage({
-    eventId: "evt-refund", beginAt: "2026-11-15T00:00:01Z",
-    credits: -2, cost: -2
-  }, { organizationId: "org-1" });
-  assert.equal(refund.value, -2);
-});
-
-test("CodeBuddy Credits remain distinct from Qoder Credits and support unattributed statements", () => {
-  const usage = normalizeCodeBuddyUsage({
-    credits: 30, observedAt: "2026-11-15T01:00:00Z",
-    memberId: "member-2", plan: "Team", packageType: "shared-team", mode: "Agent"
+test("CodeBuddy runtime-reported Credits remain separate from Qoder Credits", () => {
+  const usage = normalizeRuntimeCreditObservation({
+    provider: "codebuddy", credits: 30, observedAt: "2026-11-15T01:00:00Z",
+    memberId: "member-2", runId: "run-2", sessionId: "session-2"
   });
   assert.equal(usage.unit, "codebuddy_credit");
-  assert.equal(usage.nativeRequestId, null);
-  assert.equal(usage.attributionStatus, "member_period_statement");
-  assert.equal(usage.runId, null);
+  assert.equal(usage.value, 30);
+  assert.equal(usage.runId, "run-2");
 });
 
-test("credits cannot be converted to money without a versioned provider-specific rate", () => {
-  const usage = normalizeCodeBuddyUsage({
-    credits: 30, observedAt: "2026-11-15T01:00:00Z", memberId: "member-2"
+test("Credits remain unknown when runtime does not report them", () => {
+  const qoder = creditsUnavailable("qoder", "run-q");
+  const codebuddy = normalizeRuntimeCreditObservation({
+    provider: "codebuddy", observedAt: "2026-11-15T01:00:00Z", runId: "run-c"
   });
-  assert.equal(convertCreditsToMoney(usage, null).status, "unpriced");
-  const priced = convertCreditsToMoney(usage, {
-    provider: "codebuddy", unit: "codebuddy_credit",
-    moneyPerCredit: 0.01, currency: "USD",
-    validFrom: "2026-01-01T00:00:00Z", sourceRef: "invoice:123", version: "rate-v1"
-  });
-  assert.equal(priced.status, "estimated");
-  assert.equal(priced.amount, 0.3);
+  assert.equal(qoder.status, "unknown");
+  assert.equal(qoder.value, null);
+  assert.equal(qoder.unknownReason, "runtime_usage_unavailable");
+  assert.equal(codebuddy.status, "unknown");
+  assert.equal(codebuddy.value, null);
+  assert.equal(codebuddy.unknownReason, "runtime_did_not_report_credits");
 });
 
-test("Qoder and CodeBuddy credits cannot be mixed by unit conversion", () => {
-  const qoder = normalizeQoderUsage({ eventId: "q1", credits: 20 }, { organizationId: "org-1" });
-  const codebuddy = normalizeCodeBuddyUsage({ credits: 20, observedAt: "2026-11-15T01:00:00Z" });
+test("Credits are not converted to money or inferred from subscription quota", () => {
+  const usage = normalizeRuntimeCreditObservation({
+    provider: "qoder", credits: 20, observedAt: "2026-11-15T01:00:00Z"
+  });
+  assert.equal(usage.currency, null);
+  assert.equal(usage.unit, "qoder_credit");
+  assert.equal(usage.amount, undefined);
+});
+
+test("Qoder and CodeBuddy Credits cannot be mixed", () => {
+  const qoder = normalizeRuntimeCreditObservation({ provider: "qoder", credits: 20, observedAt: "2026-11-15T01:00:00Z" });
+  const codebuddy = normalizeRuntimeCreditObservation({ provider: "codebuddy", credits: 20, observedAt: "2026-11-15T01:00:00Z" });
   assert.notEqual(qoder.unit, codebuddy.unit);
   assert.notEqual(qoder.provider, codebuddy.provider);
-});
-
-test("Qoder usage events stay unallocated until an explicit Run binding exists", () => {
-  const usage = normalizeQoderUsage({
-    eventId: "evt-2", beginAt: "2026-11-15T00:00:01Z",
-    memberId: "member-1", source: "CLI", operation: "Agent", credits: 18
-  }, { organizationId: "org-1" });
-  assert.equal(usage.runId, null);
-  assert.equal(usage.attributionStatus, "member_event_unallocated");
-});
-
-test("Qoder package balances are quota snapshots, not execution usage", () => {
-  const pkg = normalizeQoderPackage({
-    id: "package-1", source: "purchased", status: "active",
-    limitValue: 1000, usedValue: 125.5, remainingValue: 874.5,
-    unit: "credits", expiresAt: "2027-01-01T00:00:00Z"
-  }, { organizationId: "org-1", observedAt: "2026-11-15T02:00:00Z" });
-  assert.equal(pkg.recordType, "quota_snapshot");
-  assert.equal(pkg.used, 125.5);
-  assert.equal(pkg.remaining, 874.5);
-  assert.equal(pkg.provider, "qoder");
-});
-
-test("Run attribution requires an explicit binding and evidence reference", () => {
-  const usage = normalizeQoderUsage({ eventId: "evt-3", credits: 8 }, { organizationId: "org-1" });
-  const unbound = bindUsageToRun(usage, { runId: "run-1", method: "time-window" });
-  assert.equal(unbound.runId, null);
-  const bound = bindUsageToRun(usage, {
-    runId: "run-1", method: "member-confirmed-event-link", evidenceRef: "receipt:member-confirmed"
-  });
-  assert.equal(bound.runId, "run-1");
-  assert.equal(bound.attributionStatus, "explicitly_attributed");
 });
