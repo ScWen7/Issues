@@ -1,5 +1,7 @@
 # 专题二 · 三套工作流的源码与验证
 
+> **架构治理说明（2026-11-15）：** 本文记录 Multica、TeamAI、LoopForge 的固定版本源码事实与历史设计推论。当前架构已明确以 Multica 为基座；文中曾提出的 Grant、Dispatch Control Binding、独立 SOP 控制事务等属于当时的候选设计，不是当前生产实现要求。应以 [专题二 V1.0](../architecture/02-sop-workflow.md) 和[架构治理基线](../architecture/governance-baseline.md)为准。上游源码证据与测试结果不因设计治理而失效。
+
 研究日期为 2026-11-14。起点是本项目远端 `master@00afb0c` 和原始设计输入的十一项问题。重新从三个上游的默认分支获取代码，按具体业务动作跟踪实现，分别与存储条件、失败分支和测试断言核对。[专题二设计](../architecture/02-sop-workflow.md)
 
 专题二 V0.3 的设计审查在 V0.1 上游源码与测试记录基础上完成；本轮四项修正属于平台设计收敛，没有新增上游源码版本或重跑上游测试。原型状态模型的设计级测试另见 [专题二原型验证记录](topic-02/prototype-validation.md)，配套测试代码位于 `prototypes/topic-02/state-model.test.mjs`。上游运行结果仍以表中固定提交和分册记录为准。
