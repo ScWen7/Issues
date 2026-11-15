@@ -25,6 +25,7 @@ const q = query({
 let sessionId = null;
 let assistantCount = 0;
 let resultCount = 0;
+try {
 for await (const message of q) {
   if (message.session_id) sessionId = message.session_id;
   if (message.type === "assistant") {
@@ -70,7 +71,13 @@ for await (const message of q) {
       observed_at: new Date().toISOString()
     };
     console.log(JSON.stringify(row));
+    break;
   }
+}
+} finally {
+  // A Result message completes the task, but the local CLI session remains open
+  // until the host explicitly closes the Query.
+  q.close();
 }
 if (assistantCount === 0 || resultCount === 0) {
   console.error(JSON.stringify({ provider: "qoder", status: "incomplete", assistantCount, resultCount }));
