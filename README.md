@@ -9,7 +9,7 @@
 - **改按钮文案。** 一名成员可以在原 Issue 完成修改并留下显示结果，也可以交给 Agent。开工时就能知道这次按项目既定检查完成，还是要交给指定成员看过后接受。[轻量工作的两种完成约定](docs/architecture/01-unified-work-lifecycle.md#125-最小路径修改导出按钮文案)
 - **跨成员交付订单导出。** 前端、后端、集成和验证各自交付，权限检查在验证子项内调用 SOP。第一次导出越过区域边界时，后端修正，集成和验证等新候选，其他有效成果保留。需要补证、调序或接管时，工作台指出涉及哪项工作、谁能处理。[订单与工作台](docs/architecture/05-unified-workbench.md)
 
-本版建议用 Issue 与子 Issue 表达独立工作。是否从原始设计中省去独立业务 Task，保留给产品决策。[设计基线与决策效力](docs/architecture/overview.md#设计基线与决策效力)
+平台采用 Issue 与子 Issue 表达工作和独立分工，省去独立业务 Task 层。[设计基线与决策效力](docs/architecture/overview.md#设计基线与决策效力)
 
 ## 当前架构基线
 

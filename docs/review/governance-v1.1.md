@@ -32,7 +32,7 @@
 
 ## 保留的决策事项
 
-Multica 底座方向继续作为当前架构基线。省去独立业务 Task 层沿用原待确认记录；本轮文档换版不新增用户业务决定。已有字段的具体存储映射、Script 的 Backend / 受管命令承载方式及部署选型进入后续实现设计，按本轮明确的行为验收。
+Multica 底座方向继续作为当前架构基线。本次交叉审查记录的是当时的工作对象提案。后续产品决定见[设计基线表](../architecture/overview.md#设计基线与决策效力)。已有字段的具体存储映射、Script 的 Backend / 受管命令承载方式及部署选型进入后续实现设计，按本轮明确的行为验收。
 
 ## 复核 V1.1 后的补正
 
@@ -47,7 +47,7 @@ Multica 底座方向继续作为当前架构基线。省去独立业务 Task 层
 | 陈旧基准仍可发布，可选方法冲突会停整个节点 | 重放核对原发布内容及来源，基准已变则重审。可选方法冲突时省略并记录，必需要求冲突才阻塞。厘清工作区 Skill 与 Plugin 的版本能力，补回代码知识图谱的来源及读权。[资产治理](../architecture/03b-capability-governance.md) |
 | 部分采用后沿用原组合的 Benchmark，工作流改进一律按 SOP 发布 | 按拟采用的实际依赖组合复用匹配证据，缺项补受影响回归。SOP 沿资产链发布，项目工作流和团队分工回到有权的 Multica 项目或 Issue 采用。[根因与三层改进](../architecture/04-cost-quality-improvement.md#52-根因与三层改进) |
 
-[项目说明](../../AGENTS.md)、[审查入口](../../README.md)、术语及研究索引同步到本次复核状态。专题一至四已有设计，专题五仍仅界定范围。是否省去独立业务 Task 层继续保留为用户待决事项。
+[项目说明](../../AGENTS.md)、[审查入口](../../README.md)、术语及研究索引同步到本次复核状态。截至该次复核，专题一至四已有设计，专题五仅界定范围。
 
 本次从审查提交重跑 17 项 [SOP 状态模型用例](../../prototypes/topic-02/state-model.test.mjs)、32 项 [成本](../../prototypes/topic-04/cost-ledger.test.mjs)与[评价](../../prototypes/topic-04/evaluation.test.mjs)用例，以及 5 项[单来源撤权回归](../../prototypes/topic-03b/knowledge/test_contribution.py)，合计 54 项通过。上述用例覆盖已有原型。新增的中断窗口、迟到回报、Credits 全链、真实组织权限与发布并发仍在对应专题的集成验收中。Qoder、CodeBuddy 和 Copilot 的宿主状态沿用各自的原始回执。
 
