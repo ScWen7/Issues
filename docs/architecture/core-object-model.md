@@ -77,9 +77,9 @@
 | 对象 | 定义 | 与其他对象的边界 |
 |---|---|---|
 | SOP Execution | 某个 Issue 调用某个 SOP 发布版本后产生的一次流程实例 | 归属于调用 Issue，不是新的业务工作 |
-| Node Activation | 某个流程节点在特定输入、候选和授权下的一次有效进入 | 区分同一节点的不同轮次，防止旧结果推进新一轮 |
+| Node Activation | 某个流程节点在固定工作约定、输入及授权下的一次有效进入；处理已有交付时绑定输入 Candidate | 本轮产出的 Candidate 属于输出；输入换版与重入按[激活规则](lifecycle-state-event-model.md#61-node-activation)区分轮次 |
 | Node Attempt | 节点在一次激活中的具体履行、修正或检查尝试 | 可关联一个或多个 Run，并保留各自结果 |
-| Human Gate | 流程请求有权成员针对具体问题和候选作决定的等待点 | 等待与决定归属原 Issue；不是需要伪造 Agent Run 的执行任务 |
+| Human Gate | 流程请求有权成员针对具体问题及适用的输入或候选作决定的等待点 | 等待与决定归属原 Issue；不是需要伪造 Agent Run 的执行任务 |
 | Sub-SOP | 被父流程引用的独立 SOP Execution 及其固定定义版本 | 保留自己的节点状态，结果由父节点按消费契约接收 |
 
 SOP 管理的是**被明确委托的流程范围**。它可以安排节点、判断依赖、消费结果、在授权内返工并交还结果；不能越过授权改变 Issue 的目标、业务责任或完成决定。
@@ -166,7 +166,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 1. 一个 Issue 在同一时点至多有一个当前 Assignee；可以有独立的 Accountable Member、Acceptor 和多个协作者。
 2. 一个业务工作只有一个权威 Issue 归属。子 Issue 是独立分工，不因父子关系复制同一份责任。
 3. SOP Execution 必须引用调用 Issue、SOP Definition 的固定版本和明确受托范围。
-4. Node Activation 必须能区分节点重入、候选变化和新一轮授权；迟到结果只能归属其原激活。
+4. Node Activation 必须能区分节点重入、输入候选变化和新一轮授权；本轮产出归原激活，迟到结果只能归属其原激活。
 5. Run 是实际执行记录。没有受管执行的人工工作可以有交付记录而没有 Run。
 6. Session 可以关联多个 Run；Session 相同不能证明 Run 相同，也不能证明工作归属相同。
 7. Artifact 的引用必须能定位具体来源版本；Candidate 必须固定其组成制品版本和适用工作约定。

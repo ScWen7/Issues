@@ -1,6 +1,7 @@
 # LoopForge SOP 形成、使用与演进机制调研
 
-> 研究对象：Tencent/LoopForge 当前主分支源码。  
+> 研究对象：Tencent/LoopForge 的 SOP 与 Main Bot 源码机制。
+> 本次源码复核基准（2026-11-16）：LoopForge `97b3cdc2f29a88e8767a8dc6c03bfb8865622653`。原稿未记录提交号，本文固定链接对应此次复核，不追认原始研究所用版本。
 > 研究用途：为 AgentPlatform 的 SOP 专题提供机制参考。本文记录 LoopForge 已实现的机制与对 AgentPlatform 的设计启发，不将其全部视为 AgentPlatform 已决策方案。
 
 ## 1. 核心认识
@@ -23,7 +24,7 @@ LoopForge 当前至少支持三条明确创建路径。
 ### 2.1 从模板复制
 
 - 内置通用模板和项目 SOP 可作为起点。
-- 创建向导要求填写名称、负责人、标签、说明，并选择模板或空白流程。
+- 创建向导提供名称、负责人、标签、说明和沙箱选择，可选择模板或空白流程；负责人等信息可留空。
 - 通用模板复制到具体项目时，不只复制节点图，还会把模板依赖的 Agent 角色复制到项目，并将节点的 agentId 重映射到项目角色。
 - 复制结果成为项目自己的 draft，可继续编辑；模板本身不因项目使用而被修改。
 - 复制时同时处理项目可用沙箱、模板声明的 requirements 和默认 MCP 依赖。
@@ -55,7 +56,7 @@ LoopForge 有专门的 AI Orchestrator：
 - AI 返回一个 `workflows_save` 草稿，内容是节点和边组成的完整 Workflow 定义。
 - 前端把草稿呈现在流程画布上；用户可以继续自然语言修改或手动调整。
 - 修改已有流程时要求保留未要求变更的节点、连线、ID 和脚本，做增量修改。
-- AI 编排使用确认模式，不直接发布 SOP。
+- 流程画布的 AI Orchestrator 请求显式使用确认模式，只接收 `workflows_save` 草稿；保存和发布沿设计器各自的入口进行。普通 Main Bot 对话另按所选审批模式处理写入。
 
 关键源码：
 - `web/orchestrate.js`：`aiOrchestratePrompt`、`runAIOrchestrator`、`completeAIEdit`
@@ -208,18 +209,23 @@ LoopForge 当前具备流程编辑、版本修订、Run Evaluation 和受限建�
 
 ## 9. 本文使用的源码入口
 
-- [LoopForge README](https://github.com/Tencent/LoopForge/blob/main/README.md)
-- [SOP Designer](https://github.com/Tencent/LoopForge/blob/main/web/app/flows.js)
-- [AI Orchestrator](https://github.com/Tencent/LoopForge/blob/main/web/orchestrate.js)
-- [Workflow Domain](https://github.com/Tencent/LoopForge/blob/main/internal/domain/workflow.go)
-- [Workflow Graph](https://github.com/Tencent/LoopForge/blob/main/internal/engine/workflow_graph.go)
-- [Run Start](https://github.com/Tencent/LoopForge/blob/main/internal/engine/run_start.go)
-- [Generic Workflow Adoption](https://github.com/Tencent/LoopForge/blob/main/internal/httpapi/generic_workflows.go)
-- [Workflow Catalog](https://github.com/Tencent/LoopForge/blob/main/internal/repo/catalog.go)
-- [Run Evaluation Prompt](https://github.com/Tencent/LoopForge/blob/main/internal/runeval/prompt.go)
-- [Run Evaluation Apply](https://github.com/Tencent/LoopForge/blob/main/internal/runeval/apply.go)
-- [Run Evaluation API](https://github.com/Tencent/LoopForge/blob/main/internal/httpapi/run_eval.go)
-- [Conversation Workspaces](https://github.com/Tencent/LoopForge/blob/main/docs/conversation-workspaces.md)
+本次复核核对了模板复制与角色重映射、创建 / 保存 / 发布、AI 画布草稿、执行快照及依赖判断、受限评价建议、Main Bot 推荐与审批模式。以下入口均存在于上述固定提交；本次取证为源码阅读，运行效果沿各专题的实验记录判断。
+
+- [LoopForge README](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/README.md)
+- [SOP Designer](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/web/app/flows.js)
+- [AI Orchestrator](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/web/orchestrate.js)
+- [Main Bot 推荐与审批协议](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/assistant.go#L1018-L1058)
+- [Issue dispatch 与直接启动](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/docs/api/orchestration.md#L90-L107)
+- [平台操作定义](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/application/operations.go)
+- [Workflow Domain](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/domain/workflow.go)
+- [Workflow Graph](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/workflow_graph.go)
+- [Run Start](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/engine/run_start.go)
+- [Generic Workflow Adoption](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/generic_workflows.go)
+- [Workflow Catalog](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/repo/catalog.go)
+- [Run Evaluation Prompt](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/prompt.go)
+- [Run Evaluation Apply](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/apply.go)
+- [Run Evaluation API](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/run_eval.go)
+- [Conversation Workspaces](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/docs/conversation-workspaces.md)
 
 
 ## 10. Main Bot 如何判断和使用 SOP
@@ -227,16 +233,16 @@ LoopForge 当前具备流程编辑、版本修订、Run Evaluation 和受限建�
 LoopForge 不只有 SOP 目录和手动启动入口。Main Bot 的自然语言助手还承担需求与 SOP 之间的匹配工作：
 
 - 根据需求性质和当前项目绑定情况，给出明确的 SOP 推荐。
-- 项目产品方案、前端交付、后端交付和缺陷修复有不同的通用模板；产品探索与编码交付并非同一种流程。
+- 提示词列出产品、前端、后端三套通用模板，并要求读取实际 SOP 定义后结合需求推荐；产品探索与编码交付分别选用适合的方法。
 - 前后端都需要时，Main Bot 的指引允许先用产品 SOP 定型，再分别派发前端和后端 SOP。
-- Main Bot 在把需求交给 SOP 前会询问用户；用户拒绝则不启动。
-- 用户明确要求执行或确认建议后，通过 Issue dispatch 启动与 Issue 关联的 SOP，而不是创建一个没有工作归属的孤立 Run。
+- Main Bot 的提示词要求用户明确请求执行后，按当前审批模式操作。确认模式提交待确认草稿；完全权限模式直接调用平台写入工具；“帮我批准”模式交独立审批判断，未获批的平台写入转为草稿。
+- 已保存为 Issue 的工作，接口文档指引优先用 Issue dispatch 建立工作关联；`runs_start` 同时保留直接启动 SOP 的入口。
 - Main Bot 仍可以在执行过程中读取状态、解释节点、暂停、恢复或接管工作区。
 
-这说明 SOP 使用不是简单的“有 Issue 就运行绑定工作流”。在自然语言交互中，Main Bot 先做工作类型判断和方法推荐，用户授权后才将适合的工作交给稳定流程。
+这说明 SOP 使用不是简单的“有 Issue 就运行绑定工作流”。在自然语言交互中，Main Bot 的指引将工作类型判断、方法推荐和获准执行分开。以上推荐和执行意图约束来自提示词；实际写入还取决于审批模式与工具结果。
 
 证据入口：
-- `internal/httpapi/assistant.go`：`assistantNativeSystemPrompt` / `assistantGeneralChatPrompt` 附近的 SOP 推荐与授权指引。
+- `internal/httpapi/assistant.go`：`assistantNativeSystemPrompt` 的 SOP 推荐、`assistantDraftProtocolPrompt` / `assistantAutoWriteProtocolPrompt` / `assistantAssistedProtocolPrompt` 的写入协议。
 - `docs/api/orchestration.md`：Issue dispatch 优先用于保存为 Issue 的工作，以建立 Task / Issue 关联。
 - `internal/application/operations.go`：`issues_dispatch`、`issues_save` 与 `runs_start` 的平台操作定义。
 - `docs/conversation-workspaces.md`：Main Bot 在 SOP 执行中介入的 pause / resume / takeover 语义。

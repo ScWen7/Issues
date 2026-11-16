@@ -1,7 +1,8 @@
 # SOP 如何从 Squad / Main Bot 动态协作中被发现和提炼
 
-> 研究范围：第一阶段“发现值得固化的方法”和第二阶段“从真实协作实践提炼流程”。  
-> 主要源码依据：Multica Squad Leader / Issue delegation；LoopForge Main Bot / Subagent activity。  
+> 研究范围：第一阶段“发现值得固化的方法”和第二阶段“从真实协作实践提炼流程”。
+> 主要源码依据：Multica Squad Leader / Issue delegation；LoopForge Main Bot / Subagent activity。
+> 本次源码复核基准（2026-11-16）：Multica `fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`；LoopForge `97b3cdc2f29a88e8767a8dc6c03bfb8865622653`。原稿未记录提交号，下列固定链接对应此次复核，不追认原始研究所用版本。
 > 本文是研究结论与候选设计，不表示这些机制已经全部进入 AgentPlatform 的正式架构决策。
 
 ## 1. 研究问题
@@ -65,7 +66,7 @@ LoopForge Main Bot 更开放：
 - 能收集角色声明的交付物；
 - 可根据需求推荐 SOP、启动 SOP，或在 SOP 运行中 pause / resume / takeover。
 
-`AssistantActivityEvent` 记录 `Parent`、`Subagent`、`Role`、`AgentID`、`Input`、`Output`、工具事件和失败状态；Parent 将 Subagent 的活动挂到产生它的 Agent Dispatch 下。前端 `collectSubagents` 将多次派发和产物按 Subagent 聚合。
+`AssistantActivityEvent` 记录 `Parent`、`Subagent`、`Role`、`AgentID`、`Input`、`Output`、工具事件和失败状态；Parent 将 Subagent 的活动挂到产生它的 Agent Dispatch 下。其中 Input 是交给子代理的任务，Output 是子代理返回的报告；事件保存用户可见执行流，原始工具参数和结果另需相应来源证据。前端 `collectSubagents` 按 `agentId` 或派发 ID 聚合活动，恢复同一代理的多次派发归入同一项，并整理已发布或按角色声明收集的交付物。
 
 相关源码：
 - `internal/domain/assistant.go`
@@ -438,16 +439,18 @@ Squad Leader 的动态协作更适合发现：
 
 ## 11. 源码依据
 
+本次复核核对了 Multica 的 Leader 协议、指派路由与领取时的 briefing 注入，以及 LoopForge 的活动字段、角色规则与 Skill 加载、会话恢复 ID、交付物收集和前端聚合。Leader 的委派、每轮记录和停止要求来自协议指令；LoopForge 的活动结构提供可关联的可见事实。Episode、发现信号和提炼步骤是本文的研究模型，按样本另行验证。
+
 ### Multica
-- [Squad Leader Protocol](https://github.com/multica-ai/multica/blob/main/server/internal/handler/squad_briefing.go)
-- [Issue Trigger](https://github.com/multica-ai/multica/blob/main/server/internal/handler/issue_trigger.go)
-- [Issue Trigger Service](https://github.com/multica-ai/multica/blob/main/server/internal/service/issue_trigger.go)
-- [Daemon Claim / Briefing Injection](https://github.com/multica-ai/multica/blob/main/server/internal/handler/daemon.go)
-- [Comment Trigger](https://github.com/multica-ai/multica/blob/main/server/internal/handler/comment.go)
-- [Squad Types](https://github.com/multica-ai/multica/blob/main/packages/core/types/squad.ts)
+- [Squad Leader Protocol](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/squad_briefing.go#L34-L105)
+- [Issue Trigger](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_trigger.go)
+- [Issue Trigger Service](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_trigger.go)
+- [Daemon Claim / Briefing Injection](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go)
+- [Comment Trigger](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go)
+- [Squad Types](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/core/types/squad.ts)
 
 ### LoopForge
-- [Assistant Activity Event](https://github.com/Tencent/LoopForge/blob/main/internal/domain/assistant.go)
-- [Subagent Integration](https://github.com/Tencent/LoopForge/blob/main/internal/httpapi/assistant_subagents.go)
-- [Activity Reconstruction](https://github.com/Tencent/LoopForge/blob/main/chatbot/src/activity.js)
-- [Conversation Workspaces](https://github.com/Tencent/LoopForge/blob/main/docs/conversation-workspaces.md)
+- [Assistant Activity Event](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/domain/assistant.go#L17-L42)
+- [Subagent Integration](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/assistant_subagents.go)
+- [Activity Reconstruction](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/chatbot/src/activity.js#L270-L316)
+- [Conversation Workspaces](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/docs/conversation-workspaces.md)
