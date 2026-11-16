@@ -10,7 +10,7 @@
 
 ## 五个设计专题
 
-LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究见[LoopForge SOP 生命周期研究](docs/research/loopforge-sop-lifecycle.md)；从 Squad / Main Bot 动态协作中发现和提炼 SOP 的研究见[SOP 发现与提炼机制](docs/research/sop-discovery-extraction.md)，以及[Main Bot 跨 Runtime 持续协调机制](docs/research/mainbot-runtime-coordination.md)。这些文档记录源码依据与研究结论，不替代本项目正式架构决策。
+LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究见[LoopForge SOP 生命周期研究](docs/research/loopforge-sop-lifecycle.md)；从 Squad / Main Bot 动态协作中发现和提炼 SOP 的研究见[SOP 发现与提炼机制](docs/research/sop-discovery-extraction.md)，以及[Main Bot 跨 Runtime 持续协调机制](docs/research/mainbot-runtime-coordination.md)和[Main Bot 的 Issue 工作组织模型](docs/research/mainbot-issue-operating-model.md)。这些文档记录源码依据与研究结论，不替代本项目正式架构决策。
 
 | 要了解的问题 | 设计正文 |
 |---|---|
