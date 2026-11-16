@@ -33,12 +33,12 @@
 
 | 一致性能力 | 当前可确认的依据 | 设计覆盖与待核实边界 |
 |---|---|---|
-| Issue / Project 条件写入 | 已有原生 Issue、指派和 Project Workflow 写入入口 | 尚未完成所有关键字段并发写入的原子条件、版本冲突和覆盖策略核查；不能假设所有入口已具备统一乐观并发控制 |
+| Issue / Project 条件写入 | 单项 Issue 更新支持可选的 `expected_revision`，在目标行写入时复核。看板移动委托到单项更新，批量操作逐项写，PR 自动推进有独立的条件写入。[已核对入口](../research/05-source-evidence.md#交付换版与验收写入) | 有版本验收约定时，各成功完成入口需核对当前候选、标准和有效决定。Project 及其他字段的具体并发策略仍按对应写入入口核对 |
 | SOP 节点代际隔离 | 固定版本步骤守卫仅比较步骤名，见上文源码 | 尚不能仅靠原生步骤守卫隔离同名步骤重入；需要在派发与结果消费链补足激活身份和当前代际校验 |
 | 派发幂等与重复投递 | 原生队列、领取和重试 / 重跑关系已存在 | 各入口重复提交、超时重发、并发领取是否统一返回原安排 / Run，需按 Agent 指派、评论、Workflow、手动及恢复入口分别核对 |
 | Outbox / Inbox 与动作恢复 | Issue Wakeup 在源事务内记录匹配回执，派发与入队一起提交。重复通知可合并，已处理回执有保留期。[回执保留语义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L363-L373) | 此结论限于已登记的回唤。委派、交付消费及其他跨层写入的恢复，要按各自的权威来源和操作身份核对 |
 | Runtime 租约与旧执行隔离 | Daemon、Runtime 和 Run 具备领取、执行、取消及回报链路 | 租约过期、Daemon 失联、旧进程仍存活时的 fencing 和写入隔离覆盖尚未确认；停止请求不能替代实际终态 |
-| Artifact / Candidate 版本引用 | 评论附件按文件名和规范化类型跨评论归组，可按附件 ID 定位某次上传。详情页复制的是按文件名查找最新上传的链接。[分组与版本定位](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/core/attachments/deliverables.ts#L31-L125) · [详情页复制链接](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/deliverables/deliverable-details.tsx#L101-L109) | 同一评论和各文件的最新版本都不足以确定一次验收的候选组合。交付要指明选定的附件或仓库修订。候选换版与接受并发时，检查、决定和后继消费如何固定组合与标准，仍需核对写入入口 |
+| Artifact / Candidate 版本引用 | 带附件的评论同事务发表，原交付区按附件 ID 定位历史上传，最新文件链接按文件名解析。原评论可更改附件集合，普通附件可被删除。[交付与换版源码](../research/05-source-evidence.md#交付换版与验收写入) | 在原 Issue 固定本次候选的附件 ID 或仓库修订，将检查、决定和后继取用关联到各自实际版本。验收与请求完成在写入时按[候选并发规则](core-consistency-concurrency.md#63-candidate-与验收竞争)核对 |
 | 结果消费与迟到回执 | Run 谱系和 SOP 结果消费已有专题研究 | 迟到结果能否被可靠限制在原节点激活、旧候选或旧工作约定，需核对所有结果写入方 |
 | Usage 更正与重复上报 | Task Usage 有原生写入和累计口径 | 多来源请求身份、重复事件去重、分指标更正和迟到快照的并发合并仍有明确扩展需求 |
 
