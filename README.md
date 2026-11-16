@@ -4,7 +4,7 @@
 
 ## 核心架构
 
-从[架构总览](docs/architecture/overview.md)进入正式设计。它说明中心协作、成员本机和资料来源各自维护什么事实，五项核心职责怎样配合，以及一次工作从发起、执行到交付和后续改进的条件。[系统边界](docs/architecture/overview.md#1-系统边界) · [职责分层](docs/architecture/overview.md#2-核心职责分层) · [核心流程](docs/architecture/overview.md#3-一项工作的核心流程)
+从[架构总览](docs/architecture/overview.md)进入正式设计；核心对象的权威定义见[核心对象模型](docs/architecture/core-object-model.md)。它说明中心协作、成员本机和资料来源各自维护什么事实，五项核心职责怎样配合，以及一次工作从发起、执行到交付和后续改进的条件。[系统边界](docs/architecture/overview.md#1-系统边界) · [职责分层](docs/architecture/overview.md#3-核心职责分层) · [核心流程](docs/architecture/overview.md#4-一项工作的核心流程)
 
 ## 五个设计专题
 
