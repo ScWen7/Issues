@@ -10,6 +10,8 @@
 
 ## 五个设计专题
 
+LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究见[LoopForge SOP 生命周期研究](docs/research/loopforge-sop-lifecycle.md)。该文记录上游实现事实与待研究问题，不替代本项目专题决策。
+
 | 要了解的问题 | 设计正文 |
 |---|---|
 | 谁负责、怎样分工、介入和完成？ | [工作生命周期](docs/architecture/01-unified-work-lifecycle.md) |
