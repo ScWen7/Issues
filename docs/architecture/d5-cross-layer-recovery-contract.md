@@ -34,7 +34,7 @@
 
 身份由以下事实共同确定：
 - Issue ID；
-- 本次有效指派 / 工作流进入的来源版本；
+- 导致本次持续委托生效的具体指派 / 工作流进入转换身份（不是任意 Issue revision）；
 - 目标 Main Bot Agent ID；
 - Work Agreement / Delegation Contract 的适用版本或授权代际。
 
@@ -113,6 +113,24 @@ Task 创建与业务来源保存关联可能跨越不同写入边界。若响应
 - 业务来源关联能明确记录本次意图由该 Task 覆盖。
 
 同一 Issue / Agent 的唯一待派槽位只防止某些并发重复任务，不足以证明不同业务意图可以合并。不同 HEAD blocker 不得静默覆盖；保留目标级阻塞义务，等待 blocker 状态变化后重新判断。
+
+### 5.4 Multica 原生 Task 来源证据的使用边界
+
+固定版本 Multica 已有以下可复用来源字段：
+- `trigger_comment_id` / `coalesced_comment_ids`：标识 Task 的评论触发输入；
+- `trigger_evidence_kind` / `trigger_evidence_ref_id`：自由文本类型 + 来源记录 ID，作为统一的直接触发证据引用；
+- `delegated_from_task_id`：记录执行归因链中的父 Task；
+- `retry_of_task_id` / `rerun_of_task_id`：区分系统 Retry 与人工 Rerun。
+
+依据：[Migration 184：Task 触发证据字段定义](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/migrations/184_agent_task_attribution.up.sql) · [Task 创建时写入来源证据](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go) · [评论目标归并与 planned comment](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go)
+
+这些字段能提供来源导航和审计线索，但不能直接当作通用派发幂等键：
+1. Migration 184 将 `trigger_evidence_kind/ref_id` 定义为归因 / 直接触发证据引用，并未因此建立通用唯一约束。
+2. 单一 UUID 来源引用不能天然表达同一 Node Attempt 的多次 Run 调用，也不能表达一条 Comment 面向多个目标的独立派发状态。
+3. 评论字段有助于评论触发的合并与回放，但不能覆盖 Main Bot 首次激活和 SOP Node Attempt 的全部身份。
+4. 同 Issue / Agent 的待派唯一约束只处理特定并发重复项，不证明两个业务意图相同。
+
+因此可复用这些原生字段作为来源导航；严格的同一业务意图只绑定一次 Task，仍须有来源侧稳定派发身份和原生派发边界的唯一查回能力。查回证据不足时保持 Unknown 并对账，不能按最近 Task、同 Issue / Agent 或同 Session 猜测。
 
 ## 6. 结果消费契约
 
