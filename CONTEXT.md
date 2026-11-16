@@ -1,6 +1,6 @@
 # 协作平台术语
 
-团队用 Issue 表达工作，用 Run 记录受管执行。会话、流程、交付和评价按各自的作用关联到工作。产品范围及各专题的职责见[架构总览](docs/architecture/overview.md)。
+团队用 Issue 表达工作，用 Run 记录受管执行。会话、流程、交付和评价按各自的作用关联到工作。产品范围及各专题的职责见[架构总览](docs/architecture/overview.md)。核心对象的权威定义、关系和事实归属见[核心对象模型](docs/architecture/core-object-model.md)；本文件维护术语释义，不另行定义对象关系。
 
 ## 工作与责任
 
