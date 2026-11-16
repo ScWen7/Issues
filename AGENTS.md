@@ -1,6 +1,6 @@
 # AgentPlatform 仓库维护
 
-`master` 是发布产品设计的默认分支。从 [README](README.md) 进入[架构总览](docs/architecture/overview.md)，按问题找到负责的专题。对象关系在 [核心对象模型](docs/architecture/core-object-model.md) 维护，生命周期和事件语义在 [统一生命周期、状态机与事件模型](docs/architecture/lifecycle-state-event-model.md) 维护，并发写入、结果消费和恢复规则在 [核心协作一致性与并发控制模型](docs/architecture/core-consistency-concurrency.md) 维护；术语在 [CONTEXT.md](CONTEXT.md) 维护，Multica 固定版本的覆盖范围见[底座能力与边界](docs/architecture/governance-baseline.md)。
+`master` 是发布产品设计的默认分支。从 [README](README.md) 进入[架构总览](docs/architecture/overview.md)，按问题找到负责的专题。对象关系在 [核心对象模型](docs/architecture/core-object-model.md) 维护，生命周期和事件语义在 [统一生命周期、状态机与事件模型](docs/architecture/lifecycle-state-event-model.md) 维护，并发写入、结果消费和恢复规则在 [核心协作一致性与并发控制模型](docs/architecture/core-consistency-concurrency.md) 维护，跨层业务契约在 [跨层业务契约与协作协议](docs/architecture/cross-layer-contracts.md) 维护；术语在 [CONTEXT.md](CONTEXT.md) 维护，Multica 固定版本的覆盖范围见[底座能力与边界](docs/architecture/governance-baseline.md)。
 
 - 直接更新定义该行为的正文。写清谁在什么情形下可以采取什么行动、结果记录在哪里、谁能接着工作。总览只维护跨专题关系；其他文档引用原定义。
 - 设计与实现以架构总览和对应专题的通用规则为准。案例专用的人名、业务术语、样本数据、演练流程及期望输出随研究或测试材料维护。研究材料用于解释证据与适用边界。系统字段、角色、默认流程、必填项和完成条件须能追溯到正式设计或实际项目配置。
