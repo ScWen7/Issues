@@ -172,7 +172,7 @@ expected_revision 解决“我读取的版本是否仍然有效”，不等于�
 |---|---|---|
 | Issue 更新触发 Agent | Issue 修订号条件写入；Task 入队有同 Issue / Agent 待派唯一约束 | Issue 写入与派发意图目前不是同一事务。为本次责任 / 状态变化保留稳定意图身份，确保入队失败或进程退出后可补投；只有实际 Task 创建或已有 Run 被证明覆盖后才记为已解决。 |
 | 评论 / @Agent / Main Bot Worker 委派 | 评论与随附附件原子提交；评论触发有待派合并、计划评论 ID 和 per-target outcome | 评论持久化与触发入队分开。用评论 ID 加目标 Agent 标识恢复触发；客户端重试需避免重复创建评论；不同 HEAD blocker 等未覆盖输入必须保留为待办，不能只写日志。 |
-| Issue Wakeup | Wakeup revision、receipt event key 去重；待处理 receipt 可扫描；Task 创建与 receipt 消费在同一事务 | 沿用该模式。另核实 Task 终态事件到 receipt 持久化的崩溃窗口；registration snapshot 只证明注册时可接住已终态来源，不自动证明所有事件通知都可 crash-replay。 |
+| Issue Wakeup | 源 Issue / Task / Comment 等已声明事件由数据库触发器在源写入事务内捕获；Wakeup revision、event key 去重；待处理 Receipt 可扫描；Task 创建与 Receipt 消费在同一事务 | 沿用该模式唤醒协调者重新读取权威事实。Receipt 可按同类事件合并并清理，不是永久事件日志，也不能替代首次激活、Worker 目标级委派或 SOP Node Attempt 的业务身份。精确 Task 订阅的注册时终态快照处理注册竞态。 |
 | SOP 节点派发 | Multica 提供 Task / Run、领取、Start 和运行回执；SOP 节点是平台侧业务对象 | Node Activation / Attempt 先固定输入、授权与输出契约，再留下可扫描派发意图。意图绑定唯一 Multica Task；Run 已创建但通知丢失时查回原 Task，Run 终态但未消费时重放消费。 |
 | Run 领取与启动 | Task 持久化；Claim 状态与 prepare lease；过期 dispatched 可重投同一 Task；Start 按 Task / Runtime / claim generation 锁定并支持 running replay | 沿用原生 Task 身份和 claim generation。不能因 Claim 或 Start 响应超时创建新 Run；新执行只来自明确的新业务 Attempt 或原生 Retry / Rerun 关系。 |
 | Run 结果与下游唤醒 | Task 终态由原 Task 记录；Wakeup 支持精确 Task 订阅和注册时终态快照 | 终态写入、事件捕获、回唤 receipt 和目标消费分别核对。未确认的事件捕获或消费应由持久化源记录补扫；不得把通知缺失当作 Run 未完成。 |
@@ -243,7 +243,7 @@ Task 创建与业务绑定之间可能出现响应丢失。恢复顺序必须固
 - 旧激活、旧授权或旧候选的结果保留为历史证据，不能推进新的业务激活。
 - 消费动作本身必须可幂等查回；消费响应丢失时重复消费只返回原结果，不重复推进节点、创建后继 Run 或重复产生外部副作用。
 
-场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)。
+场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)；三类身份、责任归属、派发绑定和结果消费的收敛契约见[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)。
 
 ## 6. 结果消费与交付一致性
 
