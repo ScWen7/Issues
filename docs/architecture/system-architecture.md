@@ -407,7 +407,7 @@ flowchart TB
 
 | 何时需要 | 编号与问题 | 要解决到什么程度 |
 |---|---|---|
-| 提交交付、改派或跨层派发时 | D5 写入与恢复 | D5 已收敛三类业务派发身份、执行绑定、恢复责任与结果消费边界：Issue 首次激活归 Issue 派发恢复入口；Comment 目标级委派归评论恢复入口；SOP Node Attempt 归流程推进器；Task Claim / Start 由 Multica 恢复；结果由原业务接收方消费。Multica 的 Issue 首次指派与 Run 入队分离，Handler 忽略 Agent 入队错误；评论保存与目标级 Worker 触发分离。Wakeup 源事实与 Receipt 同事务捕获，但 Receipt 可合并，不是业务命令档案。尚待工程实现 / 故障注入验证的缺口另行列明。[最小派发绑定与结果消费契约](../research/d5-minimum-dispatch-consumption-contract.md) · [业务触发与恢复闭环](../research/d5-business-trigger-recovery.md) · [Wakeup 源码取证](../research/d5-write-recovery-evidence.md) · [底座覆盖](governance-baseline.md#一致性与并发能力覆盖) |
+| 提交交付、改派或跨层派发时 | D5 写入与恢复 | D5 已收敛三类业务派发身份、执行绑定、恢复责任与结果消费边界：Issue 首次激活归 Issue 派发恢复入口；Comment 目标级委派归评论恢复入口；SOP Node Attempt 归流程推进器；Task Claim / Start 由 Multica 恢复；结果由原业务接收方消费。Multica 的 Issue 首次指派与 Run 入队分离，Handler 忽略 Agent 入队错误；评论保存与目标级 Worker 触发分离。Wakeup 源事实与 Receipt 同事务捕获，但 Receipt 可合并，不是业务命令档案。尚待工程实现 / 故障注入验证的缺口另行列明。[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md) · [业务触发与恢复闭环](../research/d5-business-trigger-recovery.md) · [Wakeup 源码取证](../research/d5-write-recovery-evidence.md) · [底座覆盖](governance-baseline.md#一致性与并发能力覆盖) |
 | **工作约定要求具名验收时** | D6 候选与成功完成 | 先有可定位的交付版本，再核对指定人按适用标准作出的有效决定，以及手动、批量和启用的 PR 自动完成入口在换版或重复提交时的结果。[候选与验收竞争](core-consistency-concurrency.md#63-candidate-与验收竞争) |
 | **启用受管 Agent 时** | D2 执行等待与恢复 | 一次协助即可用到。先区分收到请求、排队、真正开工与回报。要让成员干预目录占用、取消或恢复时，再核对宿主能回报哪些原因，以及谁有权看见。[并发名额与目录](core-consistency-concurrency.md#71-runtime-与执行容量) |
 | **持续委托或使用 SOP 时** | D9 委托与结果接收 | 接收结果时辨认本次委托、原分工或节点、已采用的版本。撤权、同一 Agent 再次获派、节点返工或候选换版时，沿原归属核对迟到结果。[受托工作与接管](02-sop-workflow.md#53-授权撤销和接管) |
