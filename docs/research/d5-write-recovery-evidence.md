@@ -153,7 +153,55 @@ SOP Execution、Node Activation、Node Attempt 是 AgentPlatform 的业务流程
 
 不得为了 SOP 恢复再建一套 Agent 队列、Run 或 Runtime。
 
-## 8. D5 后续验证问题
+## 8. Wakeup 能承担什么，不能承担什么
+
+Migration 518 / 520 / 530 证明了 Wakeup 的事件捕获和消费模型，但不能因此把它提升成所有跨层命令的通用总线。
+
+### 8.1 适合：让协调者因事实变化重新读取当前状态
+
+适合的场景：
+- Issue 的状态、负责人、范围或属性发生变化，Main Bot 需要重新判断下一步；
+- Worker Run 完成、失败或取消，Main Bot 需要消费结果；
+- 评论、回复或交付发生变化，协调者需要重新读取 Issue 的讨论和交付；
+- 多个快速连续变化可以合并，Agent 只需读取最新权威状态；
+- 同一事实可能从不同 Handler、后台任务或直接数据库写入产生，必须在源事务内可靠捕获。
+
+这与 Main Bot 的短 Turn 模型相容：Wakeup 负责让协调者有机会恢复；新 Turn 再读取 Issue、Run、Artifact 和授权的当前事实，而不是把一份事件 payload 当作完整工作上下文。
+
+### 8.2 不适合：每条都必须独立履行的业务命令
+
+以下场景不能只依赖 Wakeup：
+- 每条评论都代表一个独立且不可丢失的委派命令；
+- 每个 SOP 节点激活必须精确对应一个独立 Attempt；
+- 每次候选版本变化都必须分别完成核验；
+- 需要按原始顺序处理、且不能合并的外部副作用；
+- 需要永久审计的完整事件历史。
+
+原因是 Migration 530 对同一 Wakeup revision 下同一 event type 的待处理 Receipt 做合并。它会更新 Receipt 身份和 payload，保留合并数量、首次时间和最新来源，而不会把每条原始事实都保留为独立待处理命令。已处理 Receipt 也允许清理。
+
+### 8.3 对 AgentPlatform 的使用边界
+
+| 工作需求 | 是否可直接依赖 Wakeup | 必须额外保留什么 |
+|---|---|---|
+| Main Bot 需要知道 Issue 有变化 | 可以 | 重新读取 Issue 当前版本和未决工作 |
+| Main Bot 等待 Worker 终态 | 可以，优先订阅精确 Task ID | 原委派身份、实际 Task ID、结果消费记录 |
+| 评论触发 Main Bot 重新读取讨论 | 可以 | 评论本身和可分页读取的原始讨论记录 |
+| 一次 @Worker 要求一个独立交付 | 不能只依赖 | 委派记录、目标 Agent、输出要求、实际 Task ID 或被复用 Task 的证明 |
+| SOP Node Activation 启动一个 Attempt | 不能只依赖 | Node Activation / Attempt 与唯一 Task ID 的绑定 |
+| 每个 Candidate 版本都要有独立检查结果 | 不能只依赖 | Candidate 版本、检查输入和结果记录 |
+| 审计所有业务变更 | 不可以 | 对应权威对象的版本和审计记录 |
+
+**设计结论：Wakeup 是协调者的可靠唤醒入口；委派、SOP 激活和结果消费仍然必须有自己的权威业务身份。** 不为此复制 Run 队列，也不把 Wakeup Receipt 当作业务对象。
+
+### 8.4 对持续委托 Main Bot 的具体含义
+
+1. Main Bot 获得持续协调授权后，必须有可恢复的后续唤醒来源；它不能依赖当前 Session 一直在线。
+2. Main Bot 可以在当前 Turn 内登记精确 Worker Task 的终态 Wakeup；注册与源 Task 终态快照之间的竞态由 Multica 原生事务处理。
+3. Issue / Comment 的状态变化可用于唤醒 Main Bot，但合并后的 Receipt 只表示“有变化需要检查”，Main Bot 必须重新读取当前权威数据。
+4. 一次性 @Worker 的委派身份和结果不能只存在 Wakeup 中；Main Bot 必须能从原 Issue 找回这次委派及其实际执行结果。
+5. Main Bot 自身 Runtime 断联时，Issue、Wakeup 和 Worker Run 仍然存在。恢复后重新读取，不恢复旧 Session 的内存计划。
+
+## 9. D5 后续验证问题
 
 1. Wakeup 的 Receipt 已证明与源事实同事务。下一步核对其消费时的并发竞争、Receipt 合并后是否满足具体工作流的逐条处理语义，以及已消费 Receipt 的保留期是否满足审计需要。
 2. Issue 更新后的 Run 入队是否有可用的原生待办扫描或对账入口？如何在不重复 Run 的情况下补齐？
