@@ -68,6 +68,8 @@ Issue 表达业务工作，不表达 Agent 进程的运行情况。沿用项目�
 - 改派负责人本身不必改变 Issue 状态；负责人变化与执行处置是两个独立事实。
 - 子 Issue 独立推进。父 Issue 是否可完成，按父项工作约定消费子项交付，不由子项状态简单汇总推导。
 
+**持续协调委托。** 有权成员把 Issue 指派给承担 Main Bot 职责的 Agent，并确认范围后，委托可跨多个 Coordinator Turn（协调回合）持续。每个回合对应一次原生 Task / Run。等待 Worker 时，Main Bot 可结束当前回合，已派发的 Worker 按自己的授权和 Run 继续。改派、撤销、Issue 完成或取消结束当前委托。重新指派给同一 Agent 也须依据新的委托继续。
+
 ## 4. Project Workflow 生命周期
 
 Project Workflow 是项目定义的步骤和交接规则，不是每项工作都必须启动的独立流程引擎。
@@ -243,11 +245,16 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 7. **失败可恢复。** 状态写入与后续通知、派发分开处理。下游动作失败时，从已生效的权威状态恢复仍适用的动作，不能重复执行原业务转换。
 8. **保留未知。** 没有宿主回执、请求身份或用量证据时标为未知，不根据模型自述或 Session 推测补齐。
 
+### 10.4 Issue 回唤与结果消费
+
+协调方等待同一 Issue 的具体 Worker Run 时，可为该源 Task 登记 Issue Wakeup，匹配成功、失败或取消。原生派发可合并唤醒信号。收到信号的回合重新读取当前 Issue、原委派和相关 Run，逐项核对待消费结果。子 Issue 的交付、SOP 的出口以及针对 Candidate 的验收分别回到其权威记录核对。[Multica 回唤事件与投递语义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L124-L223)
+
 ## 11. 关键跨层转换
 
 | 触发事实 | 权威转换 | 允许的后续动作 | 不允许的推断 |
 |---|---|---|---|
-| Issue 指派给 Agent / Squad | Issue 负责人变化 | 按资格创建或恢复受管执行安排；Squad Leader 可组织协调 | 指派成功不代表 Run 已启动 |
+| Issue 指派给 Agent / Squad | Issue 负责人变化 | 按资格安排受管执行，受托 Main Bot 或被指派 Squad 的 Leader 按范围协调 | 指派生效只能证明责任发生变化 |
+| Worker 的终态或其他匹配事实触发已登记回唤 | 来源事实归原 Issue / Run，匹配回执供原生派发处理 | 现任协调方核对原委派、授权及结果版本，决定消费、补交、重排或交还 | 单次回唤不证明每份结果均已消费 |
 | SOP 节点满足前置 | Node Activation 进入 Ready | Agent / Script 节点请求原派发入口；人工节点在 Issue 等待决定 | Ready 不代表 Run 已存在 |
 | Runtime 领取执行 | Run 进入 Claimed | Daemon 准备环境并启动 | Claimed 不代表执行开始 |
 | 宿主确认开始 | Run 进入 Running | 收集可观察活动、结果和用量 | Session 或进程句柄不必然证明业务已开始 |

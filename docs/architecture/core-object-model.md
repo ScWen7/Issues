@@ -35,10 +35,12 @@
 | Project | 一组工作及其成员、工程资源、项目配置和工作约定的范围 | 不替代 Issue 成为单项工作的责任记录 |
 | Member | 真实人员，可承担工作、作出业务决定、提供 Runtime 或维护资产 | 身份本身不自动授予所有资源和业务权限 |
 | Agent | 可被指派或受邀参与工作的智能执行主体 | 不等于 Runtime，也不天然拥有业务决定权 |
+| Main Bot / Coordinator | 现有 Agent 在一个 Issue 上受托持续协调的角色，可自行执行、委派 Worker、选择方法和汇总交付 | 权限来自本项工作约定与当前指派 |
+| Worker | Agent 在某次委派中承担执行或核验的角色，按约定交回产物、证据或阻塞原因 | 其权限限于该次委派，业务验收权由工作约定确定 |
 | Squad | 可被指派为 Issue 负责人、由 Leader 组织协作的智能体小队 | 不是 Issue 的替代物，也不是每个 Issue 必须经过的编排层 |
 | Leader | 在授权范围内代表 Squad 理解工作、安排参与者、跟进和汇总的协调角色 | 不因协调身份自动获得超出 Issue 和资源授权的决定权 |
 
-Squad 被指派为 Issue 负责人时，Issue 仍是工作归属。Leader 的协调活动可产生 Run；专业分工如需独立责任和交付，使用子 Issue。被邀请协助的 Squad 不改变原 Issue 的负责人。
+持续协调可以直接指派给承载 Main Bot 职责的 Agent。项目选择原生 Squad 作为 Assignee 时，由其 Leader 在该项授权范围内承担协调。一个 Issue 在同一范围内只有一方负责协调。子 Issue 有独立指派，受邀协助的 Agent 或 Squad 按邀请的范围交付。
 
 ### 3.2 工作与责任对象
 
@@ -51,6 +53,8 @@ Squad 被指派为 Issue 负责人时，Issue 仍是工作归属。Leader 的协
 | Project Workflow | 项目层的 Issue 阶段、步骤指令和负责人交接规则 | 项目配置定义规则；具体 Issue 记录实际发生的阶段与交接 |
 
 **Issue 是业务工作与责任的权威归属。** 评论、通知、Run、SOP 和交付记录都可以关联 Issue，但不能自行改变 Issue 的业务事实，除非通过 Issue 的有效授权入口完成相应写入。
+
+持续委托由 Issue 上的有效指派和工作约定共同表达。约定标明人工总责人、可委派的工作与资源，以及哪些决定由谁保留。对某个 Agent 的一次提及只发出本次协助请求。改派、撤权或 Issue 结束后，原委托停止产生新的协调动作。后来再次委托同一 Agent 时，按新的授权判断历史结果能否采用。
 
 子 Issue 不是 SOP 节点的默认实现。只有当一段工作需要独立负责人、独立交付或独立生命周期时，才建立子 Issue。短时协助和同一责任下的步骤可以留在原 Issue。
 
@@ -99,7 +103,9 @@ Project Workflow 与 SOP 不同：
 | AgentObservation | 对宿主活动、消息或工具调用的有来源观察 | 缺乏身份和工作归属依据时，不能自动认定为某个 Run |
 | ContextReceipt | 某次执行上下文材料准备与投递的回执 | 证明材料被准备或投递，不自动证明模型逐项读取或实际采用 |
 
-Run 必须关联其实际执行者、派发来源、工作归属和可观察的执行结果。Run 可服务 Issue 的直接工作、Squad 协调、SOP 节点、评价或实验活动。一次 SOP 节点尝试可引用多个 Run；一个 Session 也可先后服务多个 Run。不得仅凭 Session 相同就合并执行身份、工作归属或成本。
+每轮协调（Coordinator Turn）和每次受管的 Worker 执行都沿 Multica 原生 Task / Run 派发链，分别记录执行者、来源、所属 Issue 和实际回执。协调轮次结束后，其他成员 Runtime 上的 Worker 可继续执行。下一轮通过原 Issue 的工作约定、在途 Run 及其谱系、交付与消费记录恢复。Session 可以接续上下文，同一 Session 中的各次执行仍按各自来源归属和计量。
+
+Run 也可服务 SOP 节点、评价或实验。一次 SOP 节点尝试可引用多个 Run。回唤登记将指定事件或时间条件关联到需恢复的 Agent。后续 Task 的排队回执说明协调已安排。Worker 的交付以实际制品和证据为准，Issue 完成时按工作约定核对当前候选及所需决定。
 
 ### 3.6 交付与证据对象
 
@@ -131,6 +137,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 核心关系可概括为：
 
 - Team 组织 Project 和参与主体；Project 组织 Issue、项目配置和资源。
+- Issue 的当前委托确定谁组织工作。Main Bot 的轮次归该 Issue，同项 Worker 的 Run 也归该 Issue；独立子项的 Run 归子项，父项按约定接收子项交付。SOP 受托范围内的节点结果先由该 SOP 消费。
 - Issue 可以有 Sub-Issue、Project Workflow 交接和 SOP Execution；这些关系不改变 Issue 作为业务工作归属的地位。
 - SOP Execution 固定引用 SOP Definition 版本，包含节点激活和尝试；就绪的执行节点沿 Multica 原派发链产生 Run。
 - Run 由 Agent 在获准 Runtime 上执行；Session 提供宿主连续性，但不拥有工作归属。
@@ -143,10 +150,11 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 | 需要回答的问题 | 权威对象或主体 | 规则 |
 |---|---|---|
 | 这项业务工作是什么、当前到哪里 | Issue | 工作目标、责任、业务状态和完成条件以 Issue 为准 |
-| 谁对当前工作负责 | Issue Assignee；必要时有 Accountable Member | Assignee 推进当前工作；Agent / Squad 主责时按工作约定保留人工总责 |
-| 谁协调 Squad | Squad Leader | 在 Squad 被指派或受邀的范围内协调，不因此成为所有子工作的负责人 |
+| 谁推进当前工作 | Issue Assignee | 同一时点至多一个，可为 Member、Agent 或 Squad，按有效指派交接 |
+| 谁对业务目标、范围和授权负责 | Accountable Member（Issue Owner） | Agent 或 Squad 受托时，由项目分工或 Issue 上单列的成员关系确定人工总责人 |
+| 谁协调这项委托 | 被指派且获持续协调授权的 Main Bot，或获指派 Squad 的 Leader | 在当前 Issue 的授权范围内组织、接收和汇总，保留事项按工作约定交给有权成员 |
 | 哪段流程被委托、走到哪里 | SOP Execution / Node Activation | 只控制明确受托的流程范围；节点进展不替代 Issue 状态 |
-| 谁实际执行、执行发生了什么 | Run 及其宿主来源 | 以真实派发、领取、启动和终态回执为依据 |
+| 谁实际执行、执行发生了什么 | Run 及其宿主来源 | 执行 Agent、Runtime 和宿主回执描述该次执行。Run 的 `accountable_user_id` 用于追溯该次执行的人员归因，Issue 总责人及验收人分别从工作约定读取 |
 | 哪个会话延续了上下文 | Session | 仅提供宿主连续性，不决定工作或成本归属 |
 | 实际交付了什么版本 | Artifact / Candidate / Delivery Record | 固定具体修订或附件版本，不以“最新”代替历史引用 |
 | 某项要求是否得到支持 | Evidence / Evaluation | Evidence 保留事实来源；Evaluation 给出有边界的判断 |
@@ -165,6 +173,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 8. Evidence 和 Evaluation 必须指向明确对象及版本；候选或标准变化后重新判断适用性。
 9. Evaluation 不等于 Decision；Release 不等于 Project Adoption；Project Adoption 不等于一次工作实际使用。
 10. 任何对象的状态变化只能由其权威主体或已授权机制写入，其他层通过引用和事件消费结果。
+11. 同一次委派使用一个有效派发入口。对同一结果的重复回唤可合并协调安排，各个 Worker 的结果仍按原委派和版本分别消费。旧委托产生的回唤仅供核对其原始事实。
 
 ## 7. 与其他架构专题的边界
 

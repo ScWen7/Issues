@@ -20,7 +20,7 @@ AgentPlatform 将团队成员、项目、Issue、Agent 与成员本地 Runtime �
 flowchart TB
   subgraph People["团队参与者与工作入口"]
     Member["成员"]
-    Agent["Agent"]
+    Agent["Agent · 协调或执行"]
     Squad["Squad / Leader"]
     UI["统一工作台"]
   end
@@ -102,9 +102,9 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 ### 3.2 模块边界的关键解释
 
 - **组织与项目范围**只回答谁属于哪个协作范围、哪些资源可在何种范围使用。它不拥有 Issue 的工作状态，也不因为成员注册了 Runtime 就自动授权所有项目使用。
-- **工作协作核心**是系统业务主线。Issue 是唯一业务工作归属。成员、Agent 或 Squad 可以承担责任或参与工作；工作负责人决定自主推进、邀请协助、拆分子 Issue，或委托 SOP。Project Workflow 管项目阶段与责任交接，不替代 SOP。
+- **工作协作核心**是系统业务主线。Issue 是唯一业务工作归属。成员可亲自推进，或指派一个 Agent 并把持续协调权交给它。这个 Agent 作为 Main Bot 自行执行、邀请 Worker、拆分子 Issue 或委托 SOP。选择 Squad 负责时由该队 Leader 协调。Project Workflow 管项目阶段与责任交接，不替代 SOP。
 - **方法与上下文**把可复用方法与本次工作实际使用分开。Skill、Rule、Playbook、SOP、知识和工具配置有自己的版本及适用范围；项目采用、本项选择、实际投递、宿主加载和实际使用分别留证。它不负责启动 Run。
-- **流程编排**只管理 Issue 明确委托的范围。Squad Leader 是受托协作主体，可以自主分析和组织 Agent；SOP 是可执行的依赖、节点、核验、返工和出口定义。Squad 不必经过 SOP；SOP 也不替代 Squad Leader 对未知问题的判断。
+- **流程编排**只管理 Issue 明确委托的范围。本次 SOP Execution 按固定定义判断节点就绪、核验、返工和出口。工作负责人或受托 Main Bot 接回其结果，并负责 SOP 范围以外的分工和决定请求。
 - **执行集成**把中心的授权安排交给 Multica 原生 Run / Daemon 链。Backend 适配具体宿主。Runtime 是执行资源，Agent 是执行主体，Session 是宿主连续性，三者不能合并。成员的私人活动只有在授权共享且来源可识别时才进入平台记录。
 - **交付与证据**将交付了什么和凭什么相信分开。Artifact 指向具体版本，Candidate 固定交付组合，Evidence 支持具体事实，Delivery Record 汇总接收方消费结果。生产方报告成功不代表接收方接受。
 - **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。Finding 可先帮助当前 Issue 修正，只有具有跨工作价值时才进入提案、对照、审核和发布。发布后由项目采用，后续工作记录实际使用和效果。
@@ -194,7 +194,6 @@ flowchart TB
   Member["Member"]
   Agent["Agent Identity"]
   Squad["Squad"]
-  Leader["Squad Leader"]
   Runtime["Member-owned Runtime"]
   Host["Host / Backend"]
   Issue["Issue"]
@@ -205,14 +204,15 @@ flowchart TB
   Team --> Member
   Team --> Squad
   Project -->|"成员参与 / 项目权限"| Member
+  Project -->|"组织工作"| Issue
   Project -->|"项目采用配置"| Agent
-  Squad -->|"由 Leader 协调"| Leader
-  Squad -->|"组织成员 Agent"| Agent
+  Squad -->|"成员与指定 Leader"| Agent
   Member -->|"拥有 / 授权"| Runtime
   Runtime --> Host
   Host -->|"提供宿主能力"| Agent
+  Issue -->|"人工总责人或约定验收人"| Member
   Issue -->|"负责人可为"| Member
-  Issue -->|"负责人可为"| Agent
+  Issue -->|"指派执行或明确委托持续协调"| Agent
   Issue -->|"负责人可为"| Squad
   Issue -->|"按需委托"| SOP
   Issue -->|"直接执行或派发"| Run
@@ -229,14 +229,14 @@ flowchart TB
 | Team | 组织成员、项目、团队级能力与 Squad | 不直接成为 Issue 的执行者 |
 | Project | 工作范围、参与成员、工程资源、项目配置与采用资产 | 不复制团队成员身份或成为单项工作 |
 | Member | 人员身份、项目参与、Runtime 所有权、业务决定权 | 不等于 Agent 或 Runtime |
-| Agent | 可被指派 / 邀请的执行主体，可在不同项目配置中采用 | 不与某台机器或某个 Session 一一绑定 |
+| Agent | 可被指派或邀请，按本 Issue 的委托执行或担任 Main Bot | 不与某台机器或某个 Session 一一绑定 |
 | Squad | 可被指派为 Issue 负责方的协作主体，由 Leader 组织 Agent 参与 | 不作为所有 Issue 的必经调度器 |
 | Runtime | 成员拥有并授权的执行资源，声明宿主、Backend 和能力覆盖 | 不成为业务负责人，也不等同于 Agent |
 | Host / Backend | 提供实际宿主协议、工具入口与运行能力 | 不决定 Issue 的业务状态 |
 | Session | 宿主内连续对话 / 线程身份，可被多个 Run 先后引用 | 不作为跨 Issue 的工作主键 |
 | Run | 一次实际受管执行，关联工作归属、Agent、Runtime、Session 和派发来源 | 不由 Agent 或 Runtime 静态拥有 |
 
-成员、Agent、Squad 的责任身份与 Runtime 资源授权必须分开判断。一个 Agent 可以在不同获准 Runtime 上执行；一个 Runtime 可以在授权范围内承载多个 Agent 或宿主；同一 Session 也可能跨越多个 Run。具体能否共享和接续，由宿主能力、授权与实际回执决定。
+首期每个 Agent Run 从目标 Agent 当时绑定的 Runtime 领取。Main Bot 可以把分工委派给分别绑定其他成员 Runtime 的 Worker。等待期间结束协调 Run，后续 Run 从原 Issue 的工作约定、决定和交付引用接续。接管或重绑由有权成员处理，在途 Run 的终态另行核对。
 
 ## 7. Multica、TeamAI、LoopForge 的融合关系
 
@@ -244,20 +244,21 @@ flowchart TB
 
 | 来源 | 在 AgentPlatform 中承担的角色 | 采用的机制 | 不引入的重复能力 |
 |---|---|---|---|
-| Multica | 协作与受管执行底座 | Issue、Assignee、评论协助、Project Workflow、Squad、Run、Runtime、Daemon、Backend、Session、原生 Usage | 不另建 Issue 系统、任务队列、Runtime 注册与第二套派发控制面 |
+| Multica | 协作与受管执行底座 | Issue、Assignee、评论协助、Issue Wakeup、Project Workflow、Squad、Run、Runtime、Daemon、Backend、Session、原生 Usage | 不另建 Issue 系统、任务队列、Runtime 注册与第二套派发控制面 |
 | TeamAI | 方法资产与 Agent 工作过程增强 | 项目作用域、Skill / Role / Principles、步骤驱动、Driver 协议、Observation 与知识资产治理经验 | 不把 Git 独立仓、CLI 或 TeamAI 的完整运行体系作为平台前置依赖 |
 | LoopForge | 稳定流程与交付质量增强 | SOP 依赖图、节点就绪、结果消费、条件判断、定向返工、执行评测与改进闭环 | 不另建与 Multica 冲突的 Issue / Run / Runtime 或第二个总协调 Agent |
 
 ~~~mermaid
 flowchart TB
-  Work["Multica · Issue / Project Workflow / Squad"]
+  Work["Multica · Issue / 指派 / Project Workflow"]
   Method["TeamAI 思路 · 项目方法 / Skill / Role / Driver"]
   SOP["LoopForge 思路 · SOP 依赖 / 节点核验 / 定向返工"]
   Run["Multica · Run / Runtime / Daemon / Backend"]
   Evidence["统一交付证据与 Usage"]
   Improve["LoopForge + TeamAI 思路<br/>Evaluation / Benchmark / 改进候选"]
   Release["审核发布 / 项目采用"]
-  Work -->|"负责人自主规划或明确委托"| SOP
+  Work -->|"工作负责人或 Main Bot 直接派发"| Run
+  Work -->|"委托稳定步骤"| SOP
   Work -->|"工作约定与责任"| Method
   Method -->|"选版与上下文投递"| Run
   SOP -->|"就绪节点请求执行"| Run
@@ -271,8 +272,8 @@ flowchart TB
 
 ### 7.2 关键融合约束
 
-- Multica 的 Issue 是工作主线，Squad 是否参与由 Issue 的负责人安排决定。
-- Squad Leader 在授权范围内自主规划；若遇到稳定且可定义的步骤，可以调用局部 SOP，不再由另一个总规划 Agent 重复规划。
+- Multica 的 Issue 保存有效委托。Main Bot 沿原生派发组织 Worker，以 Issue Wakeup 接续协调，再核对原 Run、候选和证据。
+- 选择原生 Squad 时由其 Leader 在同一范围统筹。两种组织方式均可把稳定步骤交给 SOP，超出委托的事项交回 Issue。
 - TeamAI 的 Driver 只负责约定步骤的领取、确认和报告；真实执行仍由 Multica 原 Run / Runtime 链承载。
 - LoopForge 的节点判断、结果消费和返工作用于 SOP Execution / Node Activation，不另建任务身份。
 - 执行计量沿原生产 Run 归集。评价和 Benchmark 产生自己的执行记录与成本，不回写污染生产执行成本。
@@ -421,13 +422,13 @@ flowchart TB
 |---|---|---|---|
 | D1 | 组织、项目、Agent、Squad 与成员身份在 Multica 中的映射边界 | 决定授权和跨项目复用 | 哪些原生实体可直接复用，哪些需增加关系或产品配置 |
 | D2 | Runtime 的所有权、共享授权、可见范围与并发容量 | 决定跨成员派发与故障接续 | Runtime 能否被多个项目 / Agent 使用，授权撤回如何影响在途 Run |
-| D3 | 多 Runtime、多宿主与 Agent 的选择策略 | 决定同一 Agent 在不同执行环境的可移植性 | 选择依据、优先级、故障转移和成员确认边界 |
+| D3 | 重绑或换用协调 Agent 时如何处置旧执行 | 决定原机长期离线时的接手条件 | 结合宿主回执确认旧写入和工作副本隔离，按成员授权选择接手资源 |
 | D4 | 逻辑模块与实际部署边界 | 决定工程组织与数据事务边界 | 首期是否沿 Multica 单体扩展，哪些能力需要独立进程或存储 |
 | D5 | 跨模块写入、事件投递、幂等与恢复的实现映射 | 决定状态一致性和故障恢复 | 逐项映射 Multica 现有事务、队列、回执与缺口，不预设新总线 |
 | D6 | Artifact / Candidate / Delivery 与 Multica 原生附件和仓库交付的映射 | 决定交付版本、检查和验收的权威引用 | 识别原生附件 ID、提交基准、候选组合及消费记录的最小扩展 |
 | D7 | Usage 原生单位、Credits、Stage 与多源观察的统一归集 | 决定成本覆盖率和去重 | 逐宿主确认上报字段、原生身份、修正语义；缺失值保持未知 |
 | D8 | TeamAI Driver 与各宿主的运行时支持范围 | 决定步骤协议能否跨 Codex、Claude Code、Qoder、CodeBuddy | 分宿主确认领取、确认、报告、取消与恢复能力 |
-| D9 | SOP 与 Squad 同时参与一个 Issue 时的协调权表达 | 决定是否发生双重编排 | 明确 Leader 的总协调范围与 SOP 的局部受托范围及冲突交还规则 |
+| D9 | 将 Issue 委托与在途回唤、SOP 出口的消费对应到现有写入入口 | 决定撤权、同一 Agent 再次获派或候选换版时哪些结果仍适用 | 核对各入口能否识别本次委托、原分工及已消费版本 |
 | D10 | Wiki、飞书、代码索引的连接器与索引部署策略 | 决定检索时效、权限和维护成本 | 先确定来源协议、修订定位、权限过滤和按需启用边界，再选底层实现 |
 | D11 | Evaluation / Benchmark 的触发策略和资源预算 | 决定是否干扰生产工作及成本 | 哪些情况自动建议评价，哪些必须由维护者发起，实验隔离如何落实 |
 | D12 | 工作台查询投影与权威数据的更新一致性 | 决定状态展示是否可信 | 明确投影延迟、版本标识、过期提示及写入后回读语义 |

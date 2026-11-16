@@ -21,7 +21,7 @@
 | Work Contract（工作契约） | 提出人、当前负责人及有权成员 | 成员、Agent、Squad、Project Workflow、SOP | Issue 与有效工作约定 | 这项工作要完成什么、谁负责、谁能决定 |
 | Context Contract（上下文契约） | Issue、项目配置、资料与工程来源维护者 | 当前执行者及接手者 | 原始来源及本次上下文准备记录 | 执行者能取得哪些有权使用的依据 |
 | Capability Contract（能力契约） | 团队 / 项目资产维护者，工作负责人选用 | Agent、Squad、SOP、执行宿主 | 资产发布版本、项目采用配置和本项选择记录 | 本次工作可以使用哪些方法、规则和工具 |
-| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Squad Leader、SOP Execution、受托成员 | Issue 上的委托决定与固定 SOP 版本 | 受托方能自主推进到什么边界，何时必须交还 |
+| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Main Bot、Squad Leader、SOP Execution、受托协作者 | Issue 上的委托决定，调用 SOP 时还包括固定的定义版本 | 受托方能自主推进到什么边界，何时必须交还 |
 | Execution Contract（执行契约） | 负责人或获授权的 SOP 节点 | Run 派发链、Daemon、Backend、Agent / Script | 本次执行安排及授权来源 | 一次实际执行允许做什么、输入输出是什么 |
 | Delivery Contract（交付契约） | 生产者与工作约定 / SOP 定义者 | 负责人、节点、检查者、验收人 | 工作约定、SOP 输出定义、Candidate 与 Evidence | 交付什么版本、怎样检查、接收方如何采用 |
 | Feedback Contract（反馈契约） | 执行者、检查者、评价器 | 当前负责人、资产维护者、项目维护者 | Run、Delivery Record、Evaluation、Finding、Proposal | 如何处理本次问题，以及何时形成跨工作改进 |
@@ -35,7 +35,7 @@ Work Contract 由 Issue 承载，是其他契约的上游依据。
 至少明确：
 
 - 目标与范围：希望改变什么，明确不包含什么。
-- 业务责任：当前 Assignee；需要时明确 Accountable Member、协作者和 Acceptor。
+- Issue 记录当前 Assignee。成员委托 Agent 持续协调时，工作约定保留具名的 Accountable Member（业务责任人）、授权范围，以及按需指定的 Acceptor（验收人）。
 - 完成条件：需要交付的结果、必需检查、是否需要独立审查或具名验收。
 - 约束：适用项目规则、风险限制、预算边界和不可执行动作。
 - 决定权：谁可以澄清范围、扩大授权、接受例外、验收和取消。
@@ -47,7 +47,8 @@ Work Contract 不规定必须采用哪种组织方式。当前负责人根据工
 
 | 组织方式 | 适用边界 | 责任结果 |
 |---|---|---|
-| 负责人自主推进 | 工作探索性强，分工仍需动态判断 | 当前 Issue 负责人持续承担组织责任 |
+| 负责人自主推进 | 当前负责人可直接完成或自行组织 | 当前 Issue 负责人持续承担组织责任 |
+| 委托 Main Bot 持续协调 | 有权成员将 Issue 指派给现有 Agent，并在工作约定中明确本次授权 | Main Bot 可自行执行或调用获准的 Worker，业务取舍仍归相应有权成员 |
 | Issue 内邀请协助 | 需要咨询、检查或短时操作，不产生独立交付责任 | 原负责人不变 |
 | 子 Issue 分工 | 一段工作有独立负责人、输入、交付和生命周期 | 子项负责人对该分工负责，父项负责人对整体目标负责 |
 | Squad 负责 | 明确将 Issue 指派给一个 Squad，希望 Leader 自主组织其内部协作 | Squad 作为当前负责人，Leader 在授权内协调 |
@@ -144,17 +145,13 @@ Delegation Contract 仅在负责人将工作交给 Squad、SOP 或其他受托�
 - 需要由谁决定的事项，以及交还触发条件；
 - 委托的版本、有效期和撤销方式。
 
-### 6.1 Squad 与 SOP 的不同职责
+### 6.1 Issue 协调与局部委托
 
-**Squad 是协作组织主体。** 当 Issue 负责人是 Squad 时，Leader 自主分析任务、判断是否需要成员或 Agent、建立独立分工、跟进结果并组织下一步。其规划不需要先由另一层 SOP 再规划一次。
+Issue 指派给 Agent 并明确持续协调范围后，该 Agent 作为 Main Bot 承担整体组织工作。Issue 直接指派给 Squad 时，由其 Leader 在该范围协调。同一范围只有一个协调方。评论中的一次性邀请只表达该次请求，执行仍按调用者权限与工作约定核准。
 
-**SOP 是受托流程机制。** 它依据已发布定义执行明确的依赖、节点、输出、检查、返工和出口规则。它不替代业务负责人探索未知方案，也不自动成为 Issue 的负责人。
+短时协助留在原 Issue，委派方说明 Worker、预期输出及回交位置，并关联实际 Run。需要独立责任或独立交付时，建立或复用子 Issue，父项按自己的工作约定消费子项交付。Worker 使用自身获准的 Runtime。
 
-两者可以组合，但必须指定谁拥有当前协调权：
-
-- Squad Leader 可决定在其授权范围内调用一个局部 SOP。
-- 完整交付 SOP 可以在授权内安排节点和子项；若 Issue 同时由 Squad 负责，SOP 的作用范围必须明确为该 Squad 委托的流程部分，不能另行争夺整个 Issue 的总协调权。
-- 任何超出委托范围的目标变更、预算扩大、业务例外和最终验收均回到 Issue 的有权主体。
+协调方可把稳定范围委托给 SOP。节点就绪、依赖、返工和出口由该 SOP Execution 决定。协调方消费交回的结果或将待决事项交给有权成员。目标变更、预算扩大、业务例外和具名验收按 Issue 的决定权处理。
 
 ## 7. Execution Contract：将工作安排转换为一次可执行授权
 
@@ -173,6 +170,8 @@ Execution Contract 是某次受管执行或可识别的本地执行段所遵守�
 - 回交对象：原 Issue、SOP 节点或指定接收方。
 
 Execution Contract 不保证宿主具备所有观察能力。实际输入、工具调用、模型用量和结果只能按宿主真实回执标记覆盖；成员自述不得提升为宿主确认事实。
+
+Main Bot 的每个协调回合沿普通 Task / Run 执行。需要等待时，协调方在原 Issue 留下等待对象、继续条件和待消费结果的来源，再结束当前回合。回唤提供继续处理的线索，后续回合按当前读权重取工作约定、决定、原委派与交付记录。
 
 执行开始前重新核对授权、工作约定版本、激活代际和资源资格。准备期间若 Issue、Candidate 或授权发生变化，必须重新判断是否仍可启动。执行中撤权时停止新的受影响动作，并核对已发生的外部副作用。
 
@@ -249,7 +248,7 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | 顺序 | 产生或消费的契约 | 负责方 | 继续条件 |
 |---|---|---|---|
 | 1. 建立工作 | Work Contract | 提出人、Issue 负责人及有权成员 | 目标、责任和完成要求足以开始；未决业务问题有明确处理人 |
-| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人或被指派 Squad Leader | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
+| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人，或承担协调职责的 Main Bot / Squad Leader | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
 | 3. 准备依据 | Context Contract / Capability Contract | 项目与资产配置、当前负责人、执行入口 | 必需输入有权、可读、版本固定；强制规则冲突已解决 |
 | 4. 授权执行 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
 | 5. 生产结果 | Execution Contract / Delivery Contract | 成员、Agent、Script、SOP 节点 | 实际结果与来源回执归回正确 Run / Attempt / Issue |
@@ -261,6 +260,7 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 
 人工介入不是流程之外的旁路。需要决定时，流程将候选、适用标准、问题、可选动作及后果交回原 Issue。决定记录在 Issue 后：
 
+- 委托仍有效时，Main Bot 可根据原 Issue 的有效决定恢复协调。若工作流已将 Assignee 交给其他主体，该主体负责后续安排。
 - SOP 在原授权和有效版本内继续，重新检查节点前置和预算。
 - 超出原授权时等待负责人调整 Work / Delegation Contract。
 - 责任变更时通过原 Issue 指派或 Project Workflow 交接。

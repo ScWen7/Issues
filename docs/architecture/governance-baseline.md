@@ -22,6 +22,7 @@
 | ContextReceipt | 原生准备与投递回执存在；恢复会话还会携带[回执列表之外的历史](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/context_receipt.go#L61-L77)。准备证据和每次模型调用的实际输入分别核验 | 沿原 Run 关联调用、材料版本及原生证据；保留换版前后记录，缺实际观察时标缺项 |
 | 验收资产固定版本 | 普通 Skill 缓存缺失时可接受服务端新版，原生删除会清除版本历史，见[固定源码与原生实验](../research/topic-03b/native-assets.md#multica) | 验收 Rule / Script 固定不可变内容引用并核对实际摘要；退役保留获准的历史内容或不变引用 |
 | 工作流重入与 SOP 前置 | [步骤守卫](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_workflow_entry.go#L118-L123)仅比较步骤名。[派发与 child_done 研究](../research/topic-02/multica.md)已记录多入口、阶段关闭和业务结果的差异 | 在 Multica 既有写入 / 派发链落实本轮激活、前置条件和结果消费检查；区分同名步骤的不同进入轮次、子项取消与交付合格，以及当前结果与迟到结果 |
+| 普通 Agent 回唤 | 同 Issue 可按具体 Worker Run 登记完成、失败与取消，登记时检查已终结的源 Run。原生回执支持合并，调度和领取复核相应权限。[订阅与过滤](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L99-L109) · [事务与入队](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L201-L235) | 按原委派找到实际 Run，恢复后核对当前授权、候选和已消费结果。跨 Issue 的条件、阻塞原因与业务决定各回到原记录确认。[回唤核查](../research/mainbot-lifecycle-and-progress.md#82-普通-agent-的原生回唤) |
 | Run 谱系 | [AgentTaskQueue](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/generated/models.go#L124-L185)已有父执行、委托、重试、重跑及触发证据等关联 | 逐字段核对现有写入方、含义和读取方，再映射 SOP / 评价关系；业务含义不同的轮次保留最小附属关联 |
 
 
@@ -34,7 +35,7 @@
 | Issue / Project 条件写入 | 已有原生 Issue、指派和 Project Workflow 写入入口 | 尚未完成所有关键字段并发写入的原子条件、版本冲突和覆盖策略核查；不能假设所有入口已具备统一乐观并发控制 |
 | SOP 节点代际隔离 | 固定版本步骤守卫仅比较步骤名，见上文源码 | 尚不能仅靠原生步骤守卫隔离同名步骤重入；需要在派发与结果消费链补足激活身份和当前代际校验 |
 | 派发幂等与重复投递 | 原生队列、领取和重试 / 重跑关系已存在 | 各入口重复提交、超时重发、并发领取是否统一返回原安排 / Run，需按 Leader、评论、Workflow、手动及恢复入口分别核对 |
-| Outbox / Inbox 与动作恢复 | 当前设计要求状态变化后的下游动作可恢复 | 固定版本是否具备等价持久化待办、接收去重、投递回执和重建能力尚未确认；不得宣称 Exactly-once |
+| Outbox / Inbox 与动作恢复 | Issue Wakeup 在源事务内记录匹配回执，派发与入队一起提交。重复通知可合并，已处理回执有保留期。[回执保留语义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L363-L373) | 此结论限于已登记的回唤。委派、交付消费及其他跨层写入的恢复，要按各自的权威来源和操作身份核对 |
 | Runtime 租约与旧执行隔离 | Daemon、Runtime 和 Run 具备领取、执行、取消及回报链路 | 租约过期、Daemon 失联、旧进程仍存活时的 fencing 和写入隔离覆盖尚未确认；停止请求不能替代实际终态 |
 | Artifact / Candidate 版本引用 | 评论附件可按附件 ID 打开具体版本 | 已知可固定附件引用；Candidate 组合、标准版本、接受与换版竞争的原子性仍需设计映射 |
 | 结果消费与迟到回执 | Run 谱系和 SOP 结果消费已有专题研究 | 迟到结果能否被可靠限制在原节点激活、旧候选或旧工作约定，需核对所有结果写入方 |

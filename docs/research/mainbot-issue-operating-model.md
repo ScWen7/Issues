@@ -6,14 +6,7 @@
 
 Main Bot 是 **Issue 级智能协调者**。Member 将 Issue 的执行协调工作委托给 Main Bot 后，Main Bot 负责理解目标、制定和调整工作安排、选择执行者和工作方法、消费结果、处理异常并向 Issue Owner 汇总交付。
 
-Main Bot 不是：
-- Issue 的业务 Owner；
-- 一个新的中央 Orchestrator 服务；
-- Squad 下一级的 Leader；
-- 独立于 Issue 的第二套任务系统；
-- 必须把所有工作变成 SOP 的固定工作流引擎。
-
-Main Bot 是由现有 Agent 承载的协调职责。首期以改造现有 Squad Leader Agent 的角色指令和运行约束实现，不新增一层 Agent 或调度服务。
+该职责由现有 Agent 在特定 Issue 上承担。团队可明确授权普通 Agent 持续协调，也可选择原生 Squad 由其 Leader 协调。一次委托范围内只有一个协调者。
 
 ## 2. Issue 的三种责任关系
 
@@ -21,7 +14,7 @@ Main Bot 是由现有 Agent 承载的协调职责。首期以改造现有 Squad 
 
 | 关系 | 回答的问题 | 责任 |
 |---|---|---|
-| Issue Owner / Accountable Member | 谁对这项业务工作负责？ | 目标、范围、授权、重大业务决定、最终验收 |
+| Issue Owner / Accountable Member | 谁对这项业务工作负责？ | 目标、范围、授权、重大业务决定，并在工作约定中明确完成条件与验收人 |
 | Main Bot / Coordinator | 谁负责组织和推进当前工作？ | 分析、规划、选择方法、委派、协调、结果消费、汇总 |
 | Worker / Executor | 谁实际完成某一项工作？ | 在受托范围内执行、验证并交付 |
 
@@ -31,10 +24,10 @@ Main Bot 是由现有 Agent 承载的协调职责。首期以改造现有 Squad 
 
 当 Member 决定把 Issue 的持续执行交给 Main Bot：
 - Member 继续作为 Accountable Member / Issue Owner；
-- Main Bot Agent 成为当前执行协调者，接收该 Issue 的协调触发；
+- Issue 的单一 Assignee 指向受托 Agent，Issue 工作约定载明委托范围；
 - Main Bot 可直接执行，也可委派多个 Worker Agent；
 - Worker 的实际执行仍沿 Multica 原生 Task / Run / Runtime 链；
-- 交付和待决事项回到原 Issue，由 Main Bot 汇总，Owner 作其保留的业务决定和验收。
+- 交付和待决事项回到原 Issue，由 Main Bot 汇总。业务决定按授权办理，验收依工作约定交由指定接收者。
 
 若 Member 只需要一次性答疑、代码解释或局部协助，不必把整个 Issue 的持续协调权交给 Main Bot；可继续通过原 Issue 评论 / mention 请求 Agent 协助。**一次性协助与持续 Main Bot 委托是不同意图。**
 
@@ -42,12 +35,12 @@ Main Bot 是由现有 Agent 承载的协调职责。首期以改造现有 Squad 
 
 建议复用 Multica 的 Agent 身份与执行能力：
 - Main Bot 由现有 Agent 承载，继续使用 Agent 的配置、权限、Runtime 绑定和真实 Run。
-- 原 Squad Leader Agent 是首选改造起点；其固定 Squad 成员边界和“必须委派、不得直接执行”的约束不再是 Main Bot 的默认约束。
+- 普通 Agent 作为 Main Bot 时可直接执行或调用本次获准的其他 Agent。
 - Main Bot 的逻辑身份在具体 Issue 上体现为当前受托协调角色；每个 Issue 的目标、授权、分工和结果仍归原 Issue。
 - 不要求每个 Issue 创建一个新的 Agent 实体，也不把一个 Agent Session 当成 Main Bot 的持久身份。
 - 首期一个 Main Bot Agent 绑定一个指定 Runtime；它可以派发多个绑定不同 Runtime 的 Worker Agent。
 
-Squad 不再是 Main Bot 的必经层。团队如果需要固定成员组合或能力集合，可以作为资源配置继续存在；但 Main Bot 可以直接选择本次获准的 Agent，不必先经过 Squad Leader。
+团队若把 Issue 指派给 Squad，其 Leader 按原生协议在该范围组织成员，并沿实际 Leader Run 留下决策记录。
 
 ## 4. Main Bot 的工作职责
 
@@ -62,7 +55,7 @@ Main Bot 在每个 Issue 上承担一个完整闭环：
 7. **调整推进**：根据新结果决定继续、并行、返工、等待、改派、暂停或请求 Owner 决定。
 8. **交付汇总**：向 Owner 汇总已完成内容、证据、未解决问题、风险、成本覆盖和待决定事项。
 
-Main Bot 负责协调整个 Issue，但不因此拥有 Owner 的业务决定权。目标变更、超授权范围、预算提升、风险豁免和最终验收由相应有权成员决定。
+Main Bot 负责协调整个 Issue，但不因此拥有 Owner 的业务决定权。目标变更、超授权范围、预算提升、风险豁免和验收决定按工作约定交由有权主体办理。
 
 ## 5. Main Bot 如何组织工作
 
@@ -124,7 +117,7 @@ flowchart TB
   MainTurn -->|"原生 Task / Run 派发"| WorkerB
   WorkerA -->|"Run 结果 / Artifact"| Issue
   WorkerB -->|"Run 结果 / Evidence"| Issue
-  Issue -->|"完成事件 / 唤醒义务"| MainTurn
+  Issue -->|"匹配订阅 / Issue Wakeup"| MainTurn
   MainTurn -->|"交付汇总"| Owner
 ```
 
@@ -136,7 +129,7 @@ flowchart TB
 - 做本轮需要的协调动作；
 - 记录必要的协作进展；
 - 在等待 Worker 或 Owner 时结束 Turn；
-- 新结果或决定到达后，再次唤醒并从原 Issue 继续。
+- 已登记的等待条件触发后，再从原 Issue 核实结果或决定并继续。
 
 持续的是 Issue 协调过程，不是某个 Agent 进程或 Session。
 
@@ -151,38 +144,32 @@ flowchart TB
 
 不把聊天记录、Session 或某个本地工作目录作为唯一恢复来源。首期不新增独立 Planner 数据库；若 Issue 时间线与 Run 谱系已足以重建，则不再增加检查点对象。只有在实际恢复场景证明现有事实无法表达必要的协调进度时，才设计最小补充。
 
-## 8. 必须补齐的底座协作能力
+## 8. 委派与回唤的工作约定
 
-Main Bot 的多 Runtime 协作不需要第二套执行引擎，但需要把 Squad 特例中的可靠回唤能力推广为普通 Coordinator 可用的通用机制。
-
-| 能力 | 目标行为 | 现有基础与缺口 |
+| 环节 | Multica 原生行为 | Main Bot 的职责 |
 |---|---|---|
-| Main Bot 触发 | Owner 将 Issue 委托给 Main Bot 后，沿现有 Agent Task / Run 入口触发 | 复用 Issue 指派、Task 创建和 Daemon Claim；明确持续委托与一次性 mention 的差异 |
-| Worker 派发 | Main Bot 直接选择本次获准 Agent，按其绑定 Runtime 派发 | 复用现有 Agent mention / 子 Issue 指派与 Runtime Claim；不依赖 Squad Roster |
-| Worker 完成回唤 | Worker 成功、失败、取消或阻塞后，可靠通知原 Main Bot | 当前 Squad Leader 有特殊回唤路径；普通 Main Bot 需要通用 Coordinator Wakeup |
-| 多结果合并 | 多 Worker 结果可合并为一次 Main Bot 恢复，但每个结果独立保留 | 复用 Task 终态、Issue 时间线和持久化恢复 / 去重模式 |
-| 迟到结果隔离 | 结果回到原委派和原候选，不误推进后来变更的工作 | 复用 Run / Task lineage、Candidate 和现有代际隔离原则 |
-| Main Bot 恢复 | Main Bot Runtime / Session 不可用时，工作事实仍可恢复 | 复用 Issue、Run、Artifact 和决定；Session 仅作上下文加速 |
-| Owner 接管 | Owner 可停止 Main Bot 后续委派并处理在途工作 | 复用 Issue 权限、停止 / 取消和接管规则，明确旧执行副作用 |
+| 委派 | 原 Issue 的结构化 Agent mention 可触发 Worker，已有待领 Run 可合并输入 | 保存原委派评论，确认逐目标受理结果和实际覆盖该评论的 Run |
+| 等待 Worker | Issue Wakeup 可按同一 Issue 的实际 Run 订阅成功、失败、取消；注册时检查已有终态 | 在等待期间结束本轮。恢复后核对实际尝试及重试链，分别处理每项未结委派 |
+| 等待成员或子工作 | 可按指定成员的评论变化唤回，也可观察子项收齐或另一个 Issue 的限定状态 | 回看评论中的实际决定，核对交付与当前候选；业务验收按工作约定办理 |
+| 合并或迟到 | 回唤可保留摘要或并入符合条件的待领 Run；接管前已派发的执行仍可能回报 | 写入前复核当前委托、候选版本和此前的消费记录。迟到结果归原 Run |
 
-Worker 成功回唤是本轮最关键的底座缺口。不能要求 Worker 依赖自然语言 @mention Main Bot 才完成核心回唤；平台应能从原始委派关系识别需要恢复的 Coordinator，并通过可恢复、幂等的方式投递。
+运行时不可用、SOP 出口、Candidate 或 Evidence 变化应先确定对应的权威记录及可用的唤回条件。没有对应原生信号时，在明确的交还入口或有期限的条件复核中读取事实。详细行为和源码见[生命周期与持续推进研究](mainbot-lifecycle-and-progress.md)。
 
 ## 9. 与现有 Multica 概念的映射
 
 | Multica 原生概念 | Main Bot 方向的处理 |
 |---|---|
 | Issue | 保留为唯一业务工作和协作时间线 |
-| Assignee | Main Bot 受托持续协调时，可指向承载 Main Bot 职责的 Agent |
-| Accountable Member / Owner | 保留成员的业务责任和验收权，不随 Main Bot 委托转移 |
-| Squad Leader Agent | 作为 Main Bot 的改造起点，放宽固定 Squad 委派约束 |
-| Squad | 不作为 Main Bot 必需的调度层；固定成员集合可选保留为资源配置 |
+| Assignee | 一个 Issue 至多一个当前 Assignee。普通 Agent 持续协调时指派给该 Agent，选择 Squad 时指派给该 Squad |
+| Accountable Member / Owner | Issue 工作约定明确业务责任人和验收安排。原生 Run 的 `accountable_user_id` 记录执行归因 |
+| Squad Leader Agent | 受托 Squad 中的协调者，沿原生 Leader Run 与团队协议执行 |
+| Squad | 可选的原生 Assignee 和团队组合，保留成员、Leader 与对应的执行语义 |
 | Agent | Main Bot 与 Worker 都由 Agent 身份承载，职责由本次授权和执行上下文决定 |
 | Runtime / Daemon / Backend | 完整复用，实际执行仍在成员本地 |
 | Task / Run / Session | 复用原生派发、执行和宿主连续性记录 |
 | Issue Comment / Activity | 保留可审计委派、反馈、决定和结果时间线 |
 | Project Workflow | 继续管理项目阶段和负责人交接，不替代 Main Bot 的动态协调 |
 
-不要求立即删除 Multica 的 Squad 数据模型或功能。产品是否继续展示 Squad，应与 Main Bot 主线分开评估；本阶段明确的是：Main Bot 不依赖 Squad 才能协作，不再让 Squad Leader 成为它下面的第二层调度者。
 
 ## 10. 关键场景检查
 
@@ -198,7 +185,7 @@ Worker 成功回唤是本轮最关键的底座缺口。不能要求 Worker 依�
 - Main Bot 在 Runtime A 运行一个短 Turn。
 - Backend Agent 在 Runtime B、QA Agent 在 Runtime C 分别执行。
 - Main Bot Turn 结束，两个 Worker 独立运行。
-- Worker 终态产生回唤义务；多个结果可合并触发 Main Bot 下一 Turn。
+- 对两个实际 Worker Run 分别登记终态等待。通知可合并，新的 Main Bot Turn 仍要逐项核对交付。
 - Main Bot 核对候选和证据后决定下一步。
 
 ### 场景 C：Main Bot 发现只有一段适合 SOP
@@ -222,34 +209,25 @@ Worker 成功回唤是本轮最关键的底座缺口。不能要求 Worker 依�
 - Main Bot 必须重新核对授权与受影响工作，不能沿旧计划继续扩大执行。
 - Owner 可以撤销 Main Bot 的后续协调权，独立处理在途 Worker 的停止、继续或结果接收。
 
-## 11. 本阶段推荐结论
+## 11. 设计结论
 
-1. Main Bot 是由现有 Agent 承载的 Issue 级智能协调者；优先将 Squad Leader Agent 改造成 Main Bot，而不是新增一个平台级 Agent 层。
-2. Issue Owner 与 Main Bot 分离：Owner 保留业务责任、授权和验收，Main Bot 承担受托协调。
-3. Main Bot 可以直接执行、直接委派任意获准 Agent、并行组织多个 Runtime、按需使用 SOP；不必经过 Squad Leader。
-4. Squad 不作为核心协作主线的必需概念；可以保留为可选资源组织配置，不拥有独立的第二层调度权。
-5. Main Bot 的持续性来自 Issue 上的工作事实和原生 Task / Run 关系，不来自常驻进程或单个 Session。
-6. 首期 Main Bot 只需绑定一个 Runtime；跨 Runtime 的重点是 Worker 执行和结果回唤，不提前做 Main Bot 多活热迁移。
-7. 最重要的底座扩展是通用 Coordinator Wakeup，其次是可靠的结果消费和 Main Bot 恢复；优先沿 Multica 原生机制扩展。
-8. 不新增第二套 Task / Run / Planner 数据库；只有实际恢复证据证明 Issue 时间线与原生执行谱系不足时，才补充最小结构化摘要。
+普通 Agent 受托持续协调、成员一次性请求 Agent 协助、显式使用原生 Squad，均可沿 Issue 与 Task / Run 组织。Main Bot 在有权协调时选择 Worker 或 SOP；每项结果带回原 Issue，按当期工作约定和交付版本处理。
 
-## 12. 尚未决策的问题
+## 12. 面向实现的核验事项
 
-- Main Bot Agent 是工作区级共享配置，还是允许项目指定不同的协调 Agent？首期建议先从一个可授权的 Main Bot Agent 配置开始，不做复杂 Agent Pool。
-- Main Bot 被指派为 Issue Assignee 时，Owner 如何通过独立 Accountable Member 关系保留？需按目标 Multica 版本核对具体字段与写入路径。
-- Member 保留当前 Assignee、只在评论中委托 Main Bot 时，是否需要支持持续委托语义，还是统一要求将当前协调责任转给 Main Bot Agent？
-- Main Bot 可以并行派发多个 Worker 时，如何限制每个 Issue 的协调并发和重复委派？
-- 通用 Coordinator Wakeup 应沿现有评论 / Task 关系扩展，还是采用平台内部事件加持久化待办？需以 Multica 现有事务与回收能力为依据选择最小实现。
-- Main Bot Runtime 长期失效时，首期采用 Owner 显式改绑 / 改派是否足够？
+- 在实际项目中核验 Issue 工作约定或成员属性如何保留独立业务责任人，以及工作流交接后旧协调写入如何受限。
+- 用同一 Issue 的两个 Worker 核对受理、实际 Run、迟到结果与重复唤醒，验证每项结果的消费记录可以重建。
+- 在 Main Bot 的 Runtime 离线、原 Session 不可用或成员接管时，从原 Issue 复原分工和在途任务。这些是待执行的验证场景。
 
 ## 13. 本阶段依据
 
-- [Multica Task Service](https://github.com/multica-ai/multica/blob/main/server/internal/service/task.go)
-- [Multica Issue Trigger](https://github.com/multica-ai/multica/blob/main/server/internal/handler/issue_trigger.go)
-- [Multica Comment Trigger / Routing](https://github.com/multica-ai/multica/blob/main/server/internal/handler/comment.go)
-- [Multica Daemon Claim](https://github.com/multica-ai/multica/blob/main/server/internal/handler/daemon.go)
-- [Multica Squad Leader Briefing](https://github.com/multica-ai/multica/blob/main/server/internal/handler/squad_briefing.go)
-- [Multica Agent Task Queries](https://github.com/multica-ai/multica/blob/main/server/pkg/db/queries/agent.sql)
+- [Multica Task Service](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go)
+- [Multica Issue Trigger](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_trigger.go)
+- [Multica Comment Trigger / Routing](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go)
+- [Multica Daemon Claim](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/daemon.go)
+- [Multica Squad Leader Briefing](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/squad_briefing.go)
+- [Multica Agent Task Queries](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql)
+- [Multica Issue Wakeup 合并与处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L201-L235)
 - [Main Bot 跨 Runtime 持续协调机制研究](mainbot-runtime-coordination.md)
 - [整体系统架构与模块边界](../architecture/system-architecture.md)
 - [研发工作生命周期](../architecture/01-unified-work-lifecycle.md)
