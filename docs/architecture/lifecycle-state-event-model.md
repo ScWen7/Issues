@@ -176,14 +176,15 @@ Candidate 的内容和组成版本一经创建即固定。后续变化形成新 
 |---|---|---|
 | Submitted | 候选已交回 Issue，等待处理 | 可进入检查、补充或验收 |
 | Under Review | 当前候选正在按约定检查 | 不改变候选内容 |
-| Accepted | 有权主体接受该候选及适用标准 | 满足 Issue 完成条件时可用于完成 |
+| Partially Accepted | 有权主体接受明确范围 / 用途，仍有必需范围未完成 | 记录已接受范围、剩余要求和责任人；默认不能据此完成整个 Issue |
+| Accepted | 有权主体接受该候选的全部必需范围及适用标准 | 仍需核对 Issue 的其他完成条件后才可完成 |
 | Rejected | 有权主体或约定检查流程指出未满足项 | 当前负责人按范围修正或重新提交 |
 | Superseded | 新候选替代其作为当前待处理版本 | 历史检查和决定仍指向旧候选 |
 | Withdrawn | 提交者或有权主体撤回候选 | 保留原因和已有检查；不得作为当前完成依据 |
 
 Candidate 的处置按具体版本保存。旧候选的 Accepted 不能自动接受新候选；旧报告是否可复用，由检查要求和变化范围决定。
 
-Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它可以逐步补全，不应把记录已生成当成完整交付。
+Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它可以逐步补全，不应把记录已生成当成完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
 
 ## 9. Evaluation 与 Improvement Proposal 生命周期
 
