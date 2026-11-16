@@ -78,7 +78,7 @@ TeamAI 的价值不在于复制 Git 独立知识库或 CLI，而是它对方法�
 
 后续工作要记录实际使用的资产版本和来源；不能只凭项目默认配置推断 Agent 已收到或实际采用。
 
-来源：[TeamAI 发布与选用实证](03b-source-evidence.md#三库实跑了什么) · [角色取材记录](03b-source-evidence.md#角色取材)。
+来源：[TeamAI 发布与选用实证](03b-source-evidence.md#三库实跑了什么)。
 
 ## 4. 映射到 AgentPlatform 的完整内循环
 
