@@ -1,6 +1,7 @@
 # SOP 与研发工作流
 
 SOP 委托与跨层交接遵循[跨层业务契约与协作协议](cross-layer-contracts.md)，节点状态与事件遵循[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)，节点重入、重复派发、迟到结果、跨层动作恢复和资源竞争遵循[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本专题维护 SOP 的具体行为与适用边界。LoopForge 对 SOP 的模板复制、人工设计、AI 编排、Run 使用和评价演进的源码研究见[LoopForge SOP 生命周期研究](../research/loopforge-sop-lifecycle.md)；该研究是上游机制依据，AgentPlatform 的形成与固化机制仍需本专题决策。
+从 Multica Squad Leader 与 LoopForge Main Bot 的动态协作中发现、提炼 SOP 的研究见[SOP 发现与提炼机制](../research/sop-discovery-extraction.md)。
 
 研发团队可以自主推进工作，也可以将稳定做法发布为 SOP（标准作业流程）。SOP 可以承担一次专业检查，也可以组织一份完整交付。成员在 Issue 调用选定版本，明确受托范围、所需结果和交还对象。项目工作流负责 Issue 的阶段与负责人，SOP 组织范围内的依赖、检查、返工和交付。[产品总览](overview.md) · [共享业务契约](overview.md#共享业务契约)
 
