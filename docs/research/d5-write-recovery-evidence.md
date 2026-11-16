@@ -100,9 +100,24 @@ Scheduler 扫描未处理的 Wakeup receipt。派发时锁定 Issue / Wakeup，�
 
 这条路径具备 D5 需要的几个关键性质：输入先持久化、事件去重、目标版本固定、待处理输入可扫描、创建执行与消费输入原子提交、权限在领取前再次核验。
 
-### 5.3 仍需核对的边界
+### 5.3 已核实：源事实与 Receipt 在同一数据库事务内捕获
 
-注册时的 terminal snapshot 能关闭“先完成、后登记”的竞态；它本身不证明所有运行中的 Task 终态事件都具有事务外通知丢失后的持久重放。需要进一步核对 Task terminal commit 到 Wakeup receipt 写入之间的故障窗口，以及 scheduler 是否存在基于终态源记录的补扫。未取得该证据前，不将其标为完全 crash-safe。
+进一步检查固定版本迁移源码后，前一版“Task 终态到 Receipt 的事件捕获仍待核实”需要修正。Multica 不依赖 Task 完成 Handler 在提交后再发布一个内存事件来驱动 Wakeup；它通过数据库触发器，在源记录写入的同一事务内生成匹配的 Wakeup Receipt。
+
+- [迁移 518：Task 终态、评论创建与 Issue 状态捕获](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/migrations/518_wakeup_event_capture.up.sql)
+- [迁移 520：扩展 Task 状态、评论生命周期、Issue 变更、Reaction、Attachment 的事务捕获](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/migrations/520_collaboration_wakeup_events.up.sql)
+- [迁移 530：同一事件类型的未处理 Receipt 合并、事件去重和容量保护](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/migrations/530_wakeup_bounded_capture.up.sql)
+- [事务回滚、真实写入覆盖和身份隔离测试](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_wakeup_collaboration_test.go)
+
+这带来一个重要结论：**对于 Multica 明确列入 WakeupTypes 的事实，源写入事务提交即意味着匹配订阅的 Receipt 已一并提交；源事务回滚则 Receipt 一并回滚。** 这覆盖 HTTP Handler、后台任务以及直接数据库写入等非单一入口，不依赖某个 Handler 成功运行到最后一步。
+
+迁移 520 的 `capture_issue_wakeup` 会把事件 ID、事件类型、发生时间、Workspace / Issue、来源 Task、Agent 和 Actor 写入 Receipt，并且只存引用与变更字段，不复制评论正文、附件 URL 或任意元数据值。迁移 530 对同一 Wakeup revision 下相同 event type 的待处理输入做合并，保留 coalesced_count、首次发生时间和最新来源；同一源事件通过稳定 event key 去重。该 Receipt 是待处理协作输入，不是永久事件档案。
+
+因此，Wakeup 这条链的核心捕获窗口已经闭合：源写入与 Receipt 同事务，后续 scheduler 只负责消费持久化 Receipt。剩余核验点不再是“是否漏捕获”，而是**消费、保留和下游 Run 的边界**：
+- 同一类型的多条输入可合并为一个 Receipt，因此它适合触发 Agent 重新读取当前状态，不适合承载必须逐条处理的业务命令或精确事件历史。
+- Receipt 只在规则有效、Issue 未关闭、事件类型匹配且过滤器匹配时捕获；规则创建之前的历史状态不会自动补发，只有精确 Task 订阅的注册时终态快照会接住已终态源 Task。
+- 事件 Receipt 有保留与清理策略，已处理输入可以清理；不能把 Wakeup Receipt 当作长期审计记录。
+- Scheduler 消费 Receipt 后，会在同一事务创建 / 复用 Task 并标记输入已消费；但仍须单独核对 Run 的实际启动和目标 Agent 是否真正处理了输入。
 
 ## 6. Run 队列、领取与 Start
 
@@ -140,7 +155,7 @@ SOP Execution、Node Activation、Node Attempt 是 AgentPlatform 的业务流程
 
 ## 8. D5 后续验证问题
 
-1. Issue terminal event 到 Wakeup receipt 的事件捕获是否存在持久化补扫；服务器在 commit 后、publish 前退出时能否恢复？
+1. Wakeup 的 Receipt 已证明与源事实同事务。下一步核对其消费时的并发竞争、Receipt 合并后是否满足具体工作流的逐条处理语义，以及已消费 Receipt 的保留期是否满足审计需要。
 2. Issue 更新后的 Run 入队是否有可用的原生待办扫描或对账入口？如何在不重复 Run 的情况下补齐？
 3. 评论创建后的触发是否能按 comment ID 补扫？不同 HEAD queued blocker 的 obligation 是否会在后续状态变化中自动恢复？
 4. Issue / Comment / Worker 委派入口是否能为调用者提供稳定 operation ID 和可查回的原结果？
