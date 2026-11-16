@@ -4,6 +4,8 @@
 
 ## 核心架构
 
+整体系统模块、中心与本地 Runtime 边界、五层映射及 Multica / TeamAI / LoopForge 融合关系见[整体系统架构与模块边界](docs/architecture/system-architecture.md)。
+
 从[架构总览](docs/architecture/overview.md)进入正式设计；核心对象的权威定义见[核心对象模型](docs/architecture/core-object-model.md)，其状态转换和跨层事件见[统一生命周期、状态机与事件模型](docs/architecture/lifecycle-state-event-model.md)，并发与恢复规则见[核心协作一致性与并发控制模型](docs/architecture/core-consistency-concurrency.md)，跨层协作约定见[跨层业务契约与协作协议](docs/architecture/cross-layer-contracts.md)。它说明中心协作、成员本机和资料来源各自维护什么事实，五项核心职责怎样配合，以及一次工作从发起、执行到交付和后续改进的条件。[系统边界](docs/architecture/overview.md#1-系统边界) · [职责分层](docs/architecture/overview.md#3-核心职责分层) · [核心流程](docs/architecture/overview.md#4-一项工作的核心流程)
 
 ## 五个设计专题
