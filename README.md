@@ -22,6 +22,10 @@ LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究�
 
 项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
 
+## 研究与架构治理
+
+后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。
+
 ## 查设计与依据
 
 对象含义见[统一术语](CONTEXT.md)。Multica 原生覆盖、项目配置与需要补充的能力见[底座能力与边界](docs/architecture/governance-baseline.md)，各宿主可观察的事实见[宿主能力矩阵](docs/architecture/execution-capabilities.md)。源码核对、场景假设和历史实验按版本收录在[源码与研究](docs/research)。
