@@ -147,109 +147,25 @@ Fencing 是安全语义要求，不预设一定由独立锁服务实现。
 
 ### 5.4 跨层操作的统一恢复契约
 
-前述 Outbox / Inbox 是产品语义，不要求另建全局消息总线。每条跨层链路必须能回答：原业务动作是否生效、下游动作是否已持久化、是否已有 Run 覆盖、执行是否真正开始、结果是否已被目标消费。恢复以权威对象和稳定操作身份为依据，不以 HTTP 响应、WebSocket 通知或本地内存状态为依据。
+恢复以权威对象和稳定操作身份为依据。每个可能重送的业务动作都要能区分目标对象、动作类型、发起来源和本次意图；重试同一意图沿用原身份。操作身份用于查重和查回，每次执行或补投仍核对当前权限、委托、资源资格及对象版本。
 
-**操作身份与权限分开。** 每个可能因超时而重送的业务动作，都要有稳定的操作身份，至少能区分目标权威对象、动作类型、发起来源和本次业务意图。调用方重试同一意图必须沿用同一身份；用户明确发起的新动作才产生新身份。操作身份只用于查重和查回，不授予权限。每次执行或补投仍须核对当前 Issue、委托、项目访问、Runtime 和对象版本。
+`expected_revision` 保护读取版本下的条件写入；操作身份用于证明本次请求是否已经生效。字段当前值相同、HTTP 响应或通知送达均不足以替代原操作的权威记录。重送前按最后已确认的边界处理：
 
-expected_revision 解决“我读取的版本是否仍然有效”，不等于操作幂等键。一个请求可能已经成功写入而响应丢失；此时不能仅凭相同字段再次提交，也不能仅凭字段当前值相同断言是本次请求写入。权威写入点应能按操作身份查回原结果，或由持久化意图 / 对账记录证明动作是否已生效。
+- 能证明写入回滚时，沿原操作身份重新校验并提交。
+- 写入已提交时，查回原结果，只接续尚待处理的下游动作。
+- 写入结果未知时，先查询权威对象、持久化意图和下游回执；证据不足则保留 Unknown，由有权主体核对。
+- 写入被明确拒绝时，记录拒绝原因；撤权、取消或换版使意图失效时，结束旧意图的后续派发。
 
-**先持久化业务事实和待办意图，再触发下游。** 当 Issue、评论、节点激活或其他权威对象的写入需要触发 Run、Wakeup、通知或消费动作时，应在同一权威事务中保存对应意图；如果无法同事务写入，则必须有等价的可扫描、可恢复记录。单纯发布内存事件、WebSocket 或调用下游 API 不构成持久化意图。下游失败不能回滚已生效的业务事实。
+网络重送沿用原操作身份；技术重试保留原生执行谱系；业务返工按变化后的目标、输入、候选或授权建立所需的新履行。HTTP 超时、通知丢失或 Runtime 暂时离线沿原身份恢复。
 
-**下游处理必须可查回、可幂等。** 每份意图的处理结果至少能区分：
+派发、宿主启动和结果消费分别以对应权威回执确认。具体业务规则统一在[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)维护：
 
-- pending：业务动作已生效，后续动作尚待处理；
-- resolved：已找到并关联一个新建或已有的 Task / Run，且能说明它为何覆盖本次意图；
-- blocked：已知因权限、资源、前置或输入条件不能执行，保留原因和恢复条件；
-- rejected：权威入口明确拒绝，业务动作未生效；
-- unknown：无法证明是否生效，必须先对账，不得盲目重试；
-- superseded / cancelled：原意图已被更新版本、撤权或明确取消取代，不能继续派发。
-
-同一目标已有 Run 时，只有在目标 Agent、输入版本、工作约定、授权范围和执行目的均能证明兼容时，才可记录为 resolved 并复用该 Run。仅因 Issue ID 或 Agent ID 相同，不足以证明已有 Run 覆盖新意图。不同 Candidate、不同 review HEAD、不同节点激活或不同授权代际不得误合并。
-
-**执行与消费分开确认。** Run 行已创建不等于已领取；已领取不等于已 Start；宿主终态不等于 SOP / Main Bot 已消费结果；通知送达不等于接收方已读取。每个下游边界保存其原生身份和确认结果。结果消费以目标消费者及其当前激活为幂等范围，重复事件只查回原消费记录，不重复推进业务状态。
-
-| 跨层路径 | 固定版 Multica 已有机制 | AgentPlatform 必须保证的接续 |
-|---|---|---|
-| Issue 更新触发 Agent | Issue 修订号条件写入；Task 入队有同 Issue / Agent 待派唯一约束 | Issue 写入与派发意图目前不是同一事务。为本次责任 / 状态变化保留稳定意图身份，确保入队失败或进程退出后可补投；只有实际 Task 创建或已有 Run 被证明覆盖后才记为已解决。 |
-| 评论 / @Agent / Main Bot Worker 委派 | 评论与随附附件原子提交；评论触发有待派合并、计划评论 ID 和 per-target outcome | 评论持久化与触发入队分开。用评论 ID 加目标 Agent 标识恢复触发；客户端重试需避免重复创建评论；不同 HEAD blocker 等未覆盖输入必须保留为待办，不能只写日志。 |
-| Issue Wakeup | 源 Issue / Task / Comment 等已声明事件由数据库触发器在源写入事务内捕获；Wakeup revision、event key 去重；待处理 Receipt 可扫描；Task 创建与 Receipt 消费在同一事务 | 沿用该模式唤醒协调者重新读取权威事实。Receipt 可按同类事件合并并清理，不是永久事件日志，也不能替代首次激活、Worker 目标级委派或 SOP Node Attempt 的业务身份。精确 Task 订阅的注册时终态快照处理注册竞态。 |
-| SOP 节点派发 | Multica 提供 Task / Run、领取、Start 和运行回执；SOP 节点是平台侧业务对象 | Node Activation / Attempt 先固定输入、授权与输出契约，再留下可扫描派发意图。意图绑定唯一 Multica Task；Run 已创建但通知丢失时查回原 Task，Run 终态但未消费时重放消费。 |
-| Run 领取与启动 | Task 持久化；Claim 状态与 prepare lease；过期 dispatched 可重投同一 Task；Start 按 Task / Runtime / claim generation 锁定并支持 running replay | 沿用原生 Task 身份和 claim generation。不能因 Claim 或 Start 响应超时创建新 Run；新执行只来自明确的新业务 Attempt 或原生 Retry / Rerun 关系。 |
-| Run 结果与下游唤醒 | Task 终态由原 Task 记录；Wakeup 支持精确 Task 订阅和注册时终态快照 | 终态写入、事件捕获、回唤 receipt 和目标消费分别核对。未确认的事件捕获或消费应由持久化源记录补扫；不得把通知缺失当作 Run 未完成。 |
-
-上述路径复核依据见[跨层写入与恢复取证](../research/d5-write-recovery-evidence.md)。本表区分已存在的上游机制与平台仍需补足的契约，不表示固定版 Multica 已经具备所有目标行为。
-
-### 5.5 响应丢失与重试判定
-
-| 最后可确认的边界 | 重试前必须做什么 | 允许的恢复动作 |
-|---|---|---|
-| 权威写入尚未提交，且能证明回滚 | 按原操作身份重新提交 | 重试原命令；重新校验权限和版本 |
-| 权威写入已提交，响应丢失 | 按操作身份查回权威对象和意图 | 复用已生效事实，补投尚待处理的下游动作 |
-| 写入结果未知 | 查询权威对象、意图记录及下游 Task / Run | 先对账；无法证明时保留 unknown 并转人工核对 |
-| Task 已创建，通知或 Claim 响应丢失 | 按 Task ID、Runtime 和 claim generation 查询 | 由原队列 / reclaim 机制重新投递同一 Task |
-| Run 已 Start，Start 响应丢失 | 按原 claim identity 查 Task 状态 | 对同一 running Task 安全重放 Start 响应，不创建新 Task |
-| Run 已终态，结果事件或消费回执缺失 | 查原 Run 终态、源结果版本及消费者当前激活 | 重放事件或结果消费；只创建消费回执，不重跑生产 |
-| 外部副作用是否发生未知 | 查询外部系统、宿主进程或可核对副作用证据 | 能证明未发生才重试；否则隔离或人工处理 |
-
-技术重试是对原执行的恢复关系；业务返工是新工作履行；同一命令的网络重送是原操作身份的重放。三者必须在记录中区分。只有业务目标、输入、候选、授权或受托范围发生了需要重新履行的变化，才创建新的业务 Attempt / 激活；HTTP 超时、通知丢失或 Agent Runtime 暂时离线本身不构成新业务 Attempt。
-
-### 5.6 三类业务激活的恢复身份
-
-稳定操作身份必须来自业务来源，不从 Task ID、Session ID 或一次 HTTP 请求临时生成后丢失。不同来源使用不同身份：
-
-| 业务触发 | 稳定身份 | 身份生效后必须绑定 | 禁止的替代判断 |
-|---|---|---|---|
-| Main Bot 首次激活 | Issue 当前指派 + 有效 Work Agreement / 持续授权代际 + 首次协调激活来源 | 唯一的首次协调 Task ID；如果已由兼容的现有 Task 覆盖，记录覆盖依据 | 仅凭 Issue 当前 Assignee 就推断 Main Bot 已启动；仅凭同 Agent 有一个旧 Task 就推断首次激活已完成 |
-| 一次性 Worker 委派 | 原 Comment ID + 目标 Agent ID + 触发类型 / 目标解析版本 | 该目标的 Task ID、被复用 Task 的覆盖证明、planned input 记录或明确阻塞结果 | 仅凭 Comment 已保存、Wakeup 已触发或评论 API 曾返回成功就推断 Worker 已接单 |
-| SOP 节点派发 | SOP Execution + Node Activation + Node Attempt + 本次 Run 调用身份 | 一个实际 Multica Task ID；同一 Node Attempt 可关联多个 Run，但每次 Run 调用各有自己的身份 | 仅凭 Node Activation 已 Ready 就推断 Run 已创建；仅凭 Run 终态就推断节点已消费结果 |
-
-**这三种身份不是三套新的任务系统。** 它们是已有业务权威对象上的派发来源身份。Main Bot 首次激活仍由 Issue 授权，Worker 委派仍由原 Comment 和当前授权决定，SOP 仍由 Node Activation / Attempt 决定。平台只需让“业务意图 → 原生 Task → 结果消费”的关联可持久查回。
-
-#### 5.6.1 派发与执行必须分开
-
-每种触发都必须能区分：
-
-1. 业务意图已生效；
-2. 派发意图已持久化；
-3. Multica Task 已创建或被证明由兼容 Task 覆盖；
-4. Task 已排队 / 已领取；
-5. Runtime 已实际 Start；
-6. 结果已由目标业务对象消费。
-
-前一状态不能替代后一状态。尤其是：
-- Issue 指派成功不是 Main Bot Run 已创建；
-- 评论创建成功不是每个 @Worker 已获得 Task；
-- SOP 节点 Ready 不是节点已执行；
-- Run completed 不是 Main Bot 或 Node Attempt 已消费；
-- Wakeup receipt 已消费不是被唤醒 Agent 已处理当前工作。
-
-#### 5.6.2 Task 创建后绑定回执丢失
-
-Task 创建与业务绑定之间可能出现响应丢失。恢复顺序必须固定：
-
-1. 先按业务来源身份查找已经绑定的 Task / Run。
-2. 若没有绑定，按 Multica 中已持久化的来源引用、触发评论、Agent、Issue、输入基准和授权代际查找候选 Task。
-3. 只有能证明唯一候选 Task 与本次业务意图完全匹配时，才补写绑定。
-4. 若存在多个候选、来源字段不足或版本不一致，保持 unknown 并对账；不能任选一个，也不能新建第二个。
-5. 只有能证明原 Task 未创建时，才用原业务身份重新派发。
-
-如果固定版 Multica 的 Task 字段和查询入口不足以查回稳定业务来源，必须在原生 Task 派发边界补足来源身份和唯一约束 / 查回能力；不在 AgentPlatform 再建一套 Run 队列。
-
-#### 5.6.3 结果消费是推进业务的唯一入口
-
-- Main Bot 消费 Worker 结果时，必须按原委派身份、目标 Agent、Task ID 和候选版本核对。一个 Wakeup 可合并多次状态变化，但 Main Bot 必须逐项核对尚未消费的委派。
-- Worker 结果迟到时归回原 Comment / 委派，不因 Issue 当前 Assignee 已变化而获得新授权。是否可采用由当前负责人按新工作约定决定。
-- SOP Node Attempt 消费结果时，必须匹配当前 Activation、Attempt、输入 Candidate 和执行契约。只有消费记录成功后才重新计算后继节点。
-- 旧激活、旧授权或旧候选的结果保留为历史证据，不能推进新的业务激活。
-- 消费动作本身必须可幂等查回；消费响应丢失时重复消费只返回原结果，不重复推进节点、创建后继 Run 或重复产生外部副作用。
-
-场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)；三类身份、责任归属、派发绑定和结果消费的收敛契约见[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)。
-
-### 5.7 原生 Task 来源证据的使用边界
-
-Multica 的 `trigger_evidence_kind / trigger_evidence_ref_id` 是 Task 的统一直接触发证据引用，可用于从 Run 导航回来源记录；`trigger_comment_id / coalesced_comment_ids` 则表达评论输入。它们是有价值的原生来源证据，但不能自动视为派发幂等键：字段没有因此具备通用唯一约束，单一 UUID 引用也不能完整表达一个来源面向多个目标或一个 Node Attempt 发起多次 Run 调用。
-
-因此，平台可复用这些字段作为 Task 的来源导航和审计线索；严格的“同一业务意图只绑定一次 Task”仍须由来源侧的稳定派发身份及原生派发边界的唯一查回能力共同保证。若底座无法按来源身份查回，状态必须保持 unknown 并对账，不能用最近 Task、同 Issue / Agent 或同 Session 猜测。具体字段依据及限制见[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md#54-multica-原生-task-来源证据的使用边界)。
+| 要核对的问题 | 规则正文 |
+|---|---|
+| 首次协调、评论目标及 SOP 调用如何区分身份，谁负责恢复 | [恢复责任](d5-cross-layer-recovery-contract.md#2-权威对象与恢复责任总表) · [三类业务派发身份](d5-cross-layer-recovery-contract.md#3-三类业务派发身份) |
+| 已安排、已领取、启动中、实际运行和已消费如何判定 | [派发与执行阶段](d5-cross-layer-recovery-contract.md#4-派发与执行的共同阶段) |
+| Task 如何绑定、查回和复用，原生来源字段能证明什么 | [Task 绑定与恢复](d5-cross-layer-recovery-contract.md#5-task-绑定与恢复规则) |
+| 谁消费结果，如何处理迟到、撤权及恢复中断 | [结果消费](d5-cross-layer-recovery-contract.md#6-结果消费契约) · [授权代际](d5-cross-layer-recovery-contract.md#7-授权代际与迟到结果) · [恢复责任矩阵](d5-cross-layer-recovery-contract.md#8-最小恢复责任矩阵) |
 
 ## 6. 结果消费与交付一致性
 

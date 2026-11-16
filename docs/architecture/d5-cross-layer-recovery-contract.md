@@ -1,7 +1,7 @@
 # D5-3 · 跨层派发、执行绑定与结果消费契约
 
 > 本文收敛 D5-1 / D5-2 的源码证据，定义 AgentPlatform 的跨层业务恢复契约。
-> Multica 取证基准：`0f3e15f1d9dca781155e2fe475161f8c5e499b44`；Wakeup 数据库事务捕获另见 [D5-1 固定版本证据](../research/d5-write-recovery-evidence.md)。
+> Multica 仓库基线为 `fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`；D5-2 另以 `0f3e15f1d9dca781155e2fe475161f8c5e499b44` 对照业务派发路径。两版逐项关系见 [D5 取证版本对照](../research/d5-write-recovery-evidence.md#取证版本对照)，各源码链接保留自己的固定提交。
 > 本文是产品与架构契约，不指定表结构、API、消息中间件或部署拓扑。
 
 ## 1. 设计结论
@@ -12,7 +12,7 @@
 2. **原生执行**：沿 Multica Task / Run / Runtime 执行，保存真实 Task ID 和宿主回执。
 3. **业务消费**：由发起该工作的业务层读取结果，确认它仍适用于当前激活，再决定是否推进。
 
-不增加第二套 Task、Run、Runtime、Coordinator Pool 或全局事件总线。也不建立一个独立的通用“操作中心”取代 Issue、Comment、Node Attempt。稳定派发身份和恢复状态附着在各自的业务权威来源及其关联记录上。
+不增加第二套 Task、Run、Runtime、Coordinator Pool 或全局事件总线。也不建立一个独立的通用“操作中心”取代 Issue、Comment、Node Attempt。稳定派发身份和恢复状态附着在各自的业务权威来源及其关联记录上。操作身份、写入重送与技术重试的通用规则遵循[跨层操作的统一恢复契约](core-consistency-concurrency.md#54-跨层操作的统一恢复契约)。
 
 **跨层恢复的责任归业务发起层；执行恢复的责任归 Multica；结果消费的责任归原业务接收方。** 不存在一个常驻中央 Agent 替所有业务对象恢复流程。
 
@@ -76,12 +76,13 @@ Node Attempt 可以引用多个 Run，例如一次执行、后续技术恢复或
 | Dispatch Pending | 派发责任已产生，等待执行层接收 | 可恢复的派发待办或等价的可扫描来源 | 不代表 Task 已创建 |
 | Task Bound | 已创建 Task 或已证明由兼容 Task 覆盖，并保存 Task ID | 业务来源到 Task 的持久关联及覆盖依据 | 不代表 Runtime 已领取 |
 | Queued / Dispatched | Multica Task 已排队或已领取 | 原生 Task 状态、claim generation | Dispatched 不代表 Start |
-| Running | Runtime 已确认 Start | 原生 Start 回执及当前 claim generation | 不代表业务结果已消费 |
+| Start Acknowledged / Starting | 中心已接受当前 claim 的 Start，Daemon 继续启动宿主 | 原生 Start 回执及当前 claim generation；中心 Task 可已标为 `running` | 宿主进程 / 会话尚待确认启动 |
+| Running | 宿主进程 / 会话已启动 | 对应 Task / Run 的 Backend、provider-session 或宿主启动回执 | 启动只确认执行边界，业务结果仍待消费 |
 | Awaiting Consumption | Run 已有终态，业务接收方尚未确认消费 | Task 终态、结果引用和目标业务激活 | 不代表节点成功或 Issue 完成 |
 | Consumed | 目标业务对象已按当前版本消费结果 | 消费记录 / Node Attempt 结果及版本 | 不代表更高层验收已通过 |
 | Blocked / Unknown / Superseded | 已知阻塞、结果无法证明或旧意图已失效 | 原因、最后确认边界、关联版本 | 不得伪装成成功，也不得盲目新建执行 |
 
-这些是跨层观察语义，不要求把它们做成一个跨对象共享的巨大状态机。Issue、Comment 委派关联、SOP Node Attempt 和 Multica Task 分别维护自己拥有的事实。
+这些是跨层观察语义，不要求把它们做成一个跨对象共享的巨大状态机。Issue、Comment 委派关联、SOP Node Attempt 和 Multica Task 分别维护自己拥有的事实。中心 Start 与宿主启动分开取证：只有前者时呈现“启动中”；启动失败按真实失败记录处理，缺少后者时保留宿主启动待确认。两版调用顺序和既有回归测试见[中心 Start 与宿主实际启动](../research/d5-write-recovery-evidence.md#63-中心-start-与宿主实际启动)。
 
 ## 5. Task 绑定与恢复规则
 
@@ -122,7 +123,7 @@ Task 创建与业务来源保存关联可能跨越不同写入边界。若响应
 - `delegated_from_task_id`：记录执行归因链中的父 Task；
 - `retry_of_task_id` / `rerun_of_task_id`：区分系统 Retry 与人工 Rerun。
 
-依据：[Migration 184：Task 触发证据字段定义](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/migrations/184_agent_task_attribution.up.sql) · [Task 创建时写入来源证据](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go) · [评论目标归并与 planned comment](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go)
+依据：[Migration 184：Task 触发证据字段定义](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/migrations/184_agent_task_attribution.up.sql#L35-L95) · [Task 创建时写入来源证据](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go#L1316-L1379) · [评论目标归并与 planned comment](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2080-L2189) · [评论归并的来源字段更新](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2448-L2464) · [原生 Retry / Rerun 谱系](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/pkg/db/queries/agent.sql#L515-L583)
 
 这些字段能提供来源导航和审计线索，但不能直接当作通用派发幂等键：
 1. Migration 184 将 `trigger_evidence_kind/ref_id` 定义为归因 / 直接触发证据引用，并未因此建立通用唯一约束。
@@ -200,7 +201,7 @@ Main Bot 消费的是 Worker 委派及其交付；SOP Node Attempt 消费的是�
 
 D5 的产品级设计在以下条件满足时可收敛：
 1. 三类业务派发身份已明确且互不混淆；
-2. Task 创建、绑定、Claim、Start、终态和消费有分离的确认边界；
+2. Task 创建、绑定、Claim、中心 Start、宿主启动、终态和消费有分离的确认边界；
 3. 每个中断都能确定由哪个既有业务层恢复；
 4. Unknown 时先对账，不盲目创建新 Run；
 5. 授权变化和迟到回报不会推进新激活；

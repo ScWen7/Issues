@@ -415,7 +415,8 @@ flowchart TB
 | **持续委托或使用 SOP 时** | D9 委托与结果接收 | 接收结果时辨认本次委托、原分工或节点、已采用的版本。撤权、同一 Agent 再次获派、节点返工或候选换版时，沿原归属核对迟到结果。[受托工作与接管](02-sop-workflow.md#53-授权撤销和接管) |
 | 需要在原执行可能仍写入时换机或接管 | D3 旧执行处置 | 取得实际退出或写入隔离的依据后，再按接手者授权继续修改。已共享材料可先由其他成员读取。[本地执行与工作交接](03a-execution-plane.md#3-执行回执与资源释放) |
 | 选用步骤驱动的方法 | D8 TeamAI Driver 与宿主 | 只为实际选用的宿主核对步骤领取、确认、报告、取消与恢复。普通规则和资料按项目适用版本及接收者权限提供。[方法选用与步骤驱动](03b-capability-governance.md#步骤驱动与观察) |
-| **项目需要形成跨工作改进时** | D7 持续改进内循环 | 从真实 Issue / Run / Candidate 取得证据，经过评价、Finding 分诊、候选改动、Benchmark、审核发布、项目采用和生产效果回收。成本是质量改进的一个维度，原生单位、覆盖和未知边界沿计量专题处理。[持续改进内循环契约](d7-continuous-improvement-loop.md) · [成本与质量计量](04-cost-quality-improvement.md) · [上游机制取证](../research/d7-continuous-improvement-evidence.md) |
+| **项目需要跨次或多来源比较用量时** | D13 多来源计量与 Credits | 沿 Backend → Daemon → Task Usage 补齐请求 / Stage 身份和本地 Credits 回传，明确多来源去重、分指标合并、累计快照与迟到更正，验证重复上报及 Token / Credits 分别到达时保留已确认值。按原生单位汇总并展示覆盖，缺失指标保持未知。[归并规则](04-cost-quality-improvement.md#31-原始观察到计量结论) · [宿主覆盖](04-cost-quality-improvement.md#32-原生单位与宿主覆盖) · [底座缺口](governance-baseline.md#固定版本的底座盘点) |
+| **项目需要形成跨工作改进时** | D7 持续改进内循环 | 从真实 Issue 及其交付、执行或成员反馈取得证据，经过评价、Finding 分诊、候选改动、Benchmark、审核发布、项目采用和生产效果回收。成本作为质量改进的一个维度；多来源计量扩展由 D13 单独收敛。[持续改进内循环契约](d7-continuous-improvement-loop.md) · [成本与质量计量](04-cost-quality-improvement.md) · [上游机制取证](../research/d7-continuous-improvement-evidence.md) |
 | 项目启用资料或代码 Wiki | D10 来源连接与索引 | 可先引用现有资料。需要自动接入或检索时，再确定修订定位、读取权限、时效和索引策略。[资料扩展](#8-团队-wiki项目资料与代码-wiki-的扩展接入) |
 | 团队需要规模化运行评价与 Benchmark 时 | D11 评价触发与资源预算 | D7 已定义评价与改进闭环；D11 进一步确定哪些工作必评、哪些按风险抽样、谁可发起、资源预算和停止条件，避免评价成本成为每项生产工作的强制税。[D7 内循环](d7-continuous-improvement-loop.md#32-评价触发应有选择) · [评价与改进机制](04-cost-quality-improvement.md#4-质量评价机制) |
 | 工程方案需要确定进程与存储边界 | D4 实际部署 | 用已明确的写入、权限及故障恢复要求判断哪些职责沿用 Multica 的现有部署，哪些需要独立承载。 |

@@ -1,8 +1,21 @@
 # D5 · 跨层写入、幂等与故障恢复取证
 
-> 取证基准：AgentPlatform 设计分支 `design/system-architecture-convergence`；Multica 固定提交 `fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`。
+> 取证基准：AgentPlatform 设计分支 `design/system-architecture-convergence`；Multica 仓库基线 `fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`。D5-2 的 `0f3e15f1d9dca781155e2fe475161f8c5e499b44` 是补充对照快照，逐项关系如下。
 > 目的：核对 Issue 写入、评论触发、Main Bot 委派、Issue Wakeup、SOP 节点和 Run 执行链在超时、重复投递及进程中断时的真实行为。
 > 边界：源码审阅，不把尚未验证的崩溃窗口标成已覆盖；本文是研究证据，产品规则以[核心协作一致性与并发控制模型](../architecture/core-consistency-concurrency.md)为准。
+
+## 取证版本对照
+
+下文主体取证链接沿用仓库基线 `fdfbfcd`；[业务触发与恢复闭环](d5-business-trigger-recovery.md)的源码链接固定到对照快照 `0f3e15f`。本节及 §6.3 并列两版链接供核对。本次以两版 Git 对象逐文件、逐相关函数核对，沿用关系如下；未据此替换仓库其他专题的取证基线。
+
+| 核对范围 | 两版实际关系 | 本专题采用的结论与定位 |
+|---|---|---|
+| Issue 写入与派发 | `handler/issue.go` 有实际修改：同项目更新的处理及批量更新 dry-run / 逐项结果等已变化；单项更新仍先写 Issue、后计算与调用派发。`issue_trigger.go` 与 `queries/issue.sql` 全文件相同。 | [基线单项派发](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue.go#L4323-L4425) · [对照单项派发](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/issue.go#L4338-L4440)；修订号保护和派发分离结论分别保留。 |
+| Issue Task 创建与来源字段 | `service/task.go` 有实际修改，包含直接聊天补充输入、终态处理和批量 Claim 缓存重查；Issue Task 创建函数及来源字段写入未变化。Migration 184 全文件相同。 | [基线创建字段](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L1316-L1379) · [对照创建字段](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go#L1316-L1379)；来源引用仍只提供归因证据。 |
+| 评论、目标触发与归并 | `handler/comment.go` 全文件相同。`queries/agent.sql` 有 CodeBuddy 恢复判据及旧查询移除等修改；评论归并 / planned-input SQL 内容未变化，行号前移。 | [共同的目标级处理](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2080-L2195) · [基线 planned input](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1885-L1926) · [对照 planned input](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/pkg/db/queries/agent.sql#L1875-L1916)；评论提交后触发与不同 HEAD blocker 缺口保留。 |
+| Wakeup 捕获与派发 | `service/issue_wakeup.go`、`queries/wakeup.sql`、Migration 518 / 520 / 530 及 `issue_wakeup_collaboration_test.go` 全文件相同。 | [基线派发事务](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_wakeup.go#L1335-L1399) · [对照派发事务](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/issue_wakeup.go#L1335-L1399)；事务捕获和 Receipt 合并按相同源码解释。 |
+| Claim / reclaim 与中心 Start | `queries/agent.sql` 的 Claim、reclaim 和锁定 Start 查询未变化。`service/task.go` 的批量 Claim 新增强制重查信号；`StartTaskForClaim` 函数内容相同，行号后移。 | [基线 Start](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4511-L4558) · [对照 Start](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go#L4628-L4675)；同 claim 的中心 Start 重放保证保留，批量 Claim 实现按各版区分。 |
+| 宿主实际启动 | `daemon.go` 有 Runtime 强制重查、项目归档与直接聊天补充输入等修改；两版均先请求中心 Start，再执行 Backend，成功后才记 runtime-started。`workdir_race_test.go` 全文件相同。 | 具体调用位置及既有失败路径测试见[中心 Start 与宿主实际启动](#63-中心-start-与宿主实际启动)。 |
 
 ## 1. 核心结论
 
@@ -24,14 +37,14 @@ Multica 已经提供若干可复用的可靠性机制，但它们不是一套自
 
 单项 `PUT /api/issues/:id` 可携带 `expected_revision`。Handler 先检查读取到的修订号，SQL 在真正更新目标行时再次比较修订号；并发写入等待后，旧修订的请求不能覆盖新值。源码：
 
-- [Issue Handler 的 expected_revision 检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue.go#L4053-L4068)
+- [Issue Handler 的 expected_revision 检查](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue.go#L4058-L4068)
 - [UpdateIssue SQL 的最终条件](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/issue.sql#L303-L316)
 
 Issue 更新后，Handler 根据当前指派、状态和项目工作流判断是否需要触发 Agent，并在后续调用 `dispatchIssueRun`。该函数调用 TaskService 入队时忽略了返回错误。Issue 更新事件先于入队动作发布，二者不在同一事务中：
 
-- [Issue 更新后计算触发并发布事件、再派发](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue.go#L4310-L4510)
+- [Issue 更新后计算触发并发布事件、再派发](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue.go#L4323-L4425)
 - [dispatchIssueRun 的入队调用](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/issue_trigger.go#L80-L105)
-- [TaskService 创建 Issue Run](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L1150-L1390)
+- [TaskService 创建 Issue Run](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L1281-L1390)
 
 Task 入队本身会持久化 `agent_task_queue`，并通过 `(issue, agent)` 待派唯一约束处理并发重复；已存在待派项时返回 `ErrDuplicatePendingTask`。这是队列插入的并发保护，不是对原始 Issue 更新命令的通用幂等键。
 
@@ -57,13 +70,13 @@ Task 入队本身会持久化 `agent_task_queue`，并通过 `(issue, agent)` �
 
 评论提交后，Handler 才发布评论事件、处理线程自动解除，并调用 `triggerTasksForComment` 计算和入队 Agent 触发。触发结果通过评论响应中的 `TriggerOutcomes` 返回：
 
-- [评论提交后执行 Agent 触发](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L1930-L2055)
-- [触发结果与队列处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L2055-L2190)
+- [评论提交后执行 Agent 触发](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L1930-L2011)
+- [触发结果与队列处理](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L2080-L2195)
 
 评论 ID 是评论持久化后的稳定来源身份。相同 Issue / Agent 的并发待派通过唯一约束收敛；评论可以合并进现有 queued Task，或登记为待回放评论。归并逻辑要求只有在评论已被持久化合并、登记为计划输入、或确认可由现有 Run 接手时，才返回 queued / coalesced / deferred 等成功形态。
 
-- [待派评论归并与边界说明](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L2180-L2320)
-- [评论计划 ID 与 Task 的归并字段](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql)
+- [待派评论归并与边界说明](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/handler/comment.go#L2102-L2137)
+- [评论计划 ID 与 Task 的归并字段](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L1807-L1954)
 
 ### 3.2 已确认的缺口
 
@@ -93,9 +106,10 @@ Issue Wakeup 在事务中锁定 Issue 和 Wakeup，保存订阅版本，并处�
 
 ### 5.2 Receipt 到 Task 的事务交接
 
-Scheduler 扫描未处理的 Wakeup receipt。派发时锁定 Issue / Wakeup，复核 Wakeup revision、启用状态、权限和目标 Agent。若已有合适的 queued / dispatched Task，可将证据合并到该 Task；否则创建新的 Wakeup Task。随后在同一事务中消费 receipts、更新 Wakeup 的 last task / fire count 等事实。事务提交后才广播和通知 Daemon。
+Scheduler 扫描未处理的 Wakeup receipt。派发时锁定 Issue / Wakeup，复核 Wakeup revision、启用状态、权限和目标 Agent。已有 queued Wakeup Task 可接收合并证据；dispatched Task 的输入已固定，新输入保留待处理，由原 Claim / prepare lease 恢复或后续交接。实际新建或合并 Task 的路径在同一事务中消费 receipts、更新 Wakeup 的 last task / fire count 等事实，提交后才广播和通知 Daemon。
 
-- [Wakeup dispatch 与 Task 创建 / receipt 消费](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_wakeup.go#L900-L1130)
+- [dispatched 输入保留](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_wakeup.go#L1150-L1169)
+- [Wakeup Task 创建 / receipt 消费与提交](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/issue_wakeup.go#L1335-L1399)
 - [Wakeup 任务创建、消费和扫描 SQL](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/wakeup.sql)
 
 这条路径具备 D5 需要的几个关键性质：输入先持久化、事件去重、目标版本固定、待处理输入可扫描、创建执行与消费输入原子提交、权限在领取前再次核验。
@@ -133,9 +147,20 @@ Issue Run 入队后成为持久化 `agent_task_queue` 记录。Daemon 通过原�
 Claim response 可能已在中心提交但未抵达 Daemon。Multica 在租约 / 恢复窗口过后重新投递同一 Task，并刷新 `dispatched_at` 作为新 claim generation。Start 时，Daemon 必须携带 Task ID、Runtime ID 和该次 `dispatched_at`；服务端锁定并核对三者。旧 claim 不能启动新 claim。若同一 claim 的 Start 响应丢失，而 Task 已是 running，重放会返回现有 Task，不重复执行 Start 副作用。
 
 - [LockAgentTaskStartClaim](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/pkg/db/queries/agent.sql#L985-L1030)
-- [StartTaskForClaim 的锁定、重放和事务提交](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4500-L4560)
+- [StartTaskForClaim 的锁定、重放和事务提交](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/service/task.go#L4511-L4558)
 
-### 6.3 对外执行结果
+### 6.3 中心 Start 与宿主实际启动
+
+中心接受 `StartTaskForClaim` 后，会把原生 Task 转为 `running` 并返回 Start 回执；Daemon 随后继续准备启动宿主。两版都在 `backend.Execute` 成功返回会话后才记录 `taskPhaseRuntimeStarted`。因此，中心 `running` / Start 回执与宿主启动是两个观察边界，产品的 Running 按后者取证。
+
+| 固定版本 | 中心 Start 与启动中进度 | 宿主执行与启动标记 | 既有失败路径测试 |
+|---|---|---|---|
+| `fdfbfcd` | [StartTask → Launching](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L8768-L8784) | [Backend.Execute → runtime-started](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/daemon.go#L9967-L9984) | [缺失二进制仍先经过 StartTask](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/server/internal/daemon/workdir_race_test.go#L120-L123) |
+| `0f3e15f` | [StartTask → Launching](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/daemon/daemon.go#L8929-L8945) | [Backend.Execute → runtime-started](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/daemon/daemon.go#L10128-L10145) | [缺失二进制仍先经过 StartTask](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/daemon/workdir_race_test.go#L120-L123) |
+
+上述既有测试以不存在的宿主二进制走过 Prepare → StartTask → ReportProgress，随后在实际启动时报错，直接说明 Start 成功后仍可启动失败。本次核对源码与测试定义，未重跑该测试。只有中心回执时，工作台显示“启动中”；宿主启动缺少回执时保留待确认，启动失败记录实际失败及原因。
+
+### 6.4 对外执行结果
 
 Run 的终态必须由原 Task 记录承载。技术重试、人工重跑和业务返工保留各自的原生关系；不能因通知重发而创建新的业务执行。终态之后的通知、Wakeup、SOP 消费和工作台刷新是下游动作，分别核对其权威来源与消费状态。Task 终态已写入但下游没有回执时，不能将 Run 改回 running，也不能直接再执行一遍；应查原 Task、下游待处理输入和已有消费记录。
 
@@ -209,4 +234,3 @@ Migration 518 / 520 / 530 证明了 Wakeup 的事件捕获和消费模型，但�
 4. Issue / Comment / Worker 委派入口是否能为调用者提供稳定 operation ID 和可查回的原结果？
 5. SOP Node Activation 到 Multica Task 的绑定，如何复用 Task 唯一约束与原生 Run 谱系，避免重复执行和错误合并？
 6. 取消、撤权、接管与迟到结果之间，所有写入点是否都核对当前授权代际？
-

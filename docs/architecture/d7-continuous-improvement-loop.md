@@ -2,7 +2,7 @@
 
 > 本文定义 AgentPlatform 如何从真实工作中发现问题、形成改进候选、验证、审核发布、实际采用并回收效果。
 > 既有对象定义见[核心对象模型](core-object-model.md)，评价与提案状态见[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)，计量与评价口径见[成本、质量评价与持续改进](04-cost-quality-improvement.md)。
-> LoopForge 的 Run Evaluation、受限建议应用、Benchmark 与自改进流程提供重要机制参考，见[LoopForge SOP 生命周期研究](../research/loopforge-sop-lifecycle.md#62-run-evaluation)。
+> LoopForge 的 Run Evaluation 与受限建议应用、TeamAI 的独立评分 Run、Benchmark 与自改进流程提供机制参考，见[LoopForge SOP 生命周期研究](../research/loopforge-sop-lifecycle.md#62-run-evaluation)与[TeamAI 流程、版本与评测研究](../research/topic-02/teamai.md)。
 > 本文定义产品和架构契约，不决定数据库表、API、模型供应商或部署结构。
 
 ## 1. 目标：让真实工作产生可验证的改进
@@ -13,7 +13,7 @@
 
 内循环必须同时满足：
 1. 改进来自真实工作中的可定位问题或可证明机会；
-2. 每项结论能够回到来源 Issue、Run、Candidate、Evidence 和实际采用版本；
+2. 每项结论能够回到来源 Issue 和可定位证据；涉及 Run、Candidate、Evaluation 或方法采用时，引用实际存在的对象和版本；
 3. 改动对象和适用范围明确，不把局部经验直接推广到团队；
 4. 候选先验证后发布，发布与采用分开；
 5. 后续效果以真实生产工作验证，不能只用生成它的同一评价器自证；
@@ -27,7 +27,7 @@
 | L2 · 单次执行评价 | 对有评价价值的 Run、Candidate、交付或流程实例发起独立 Evaluation；可由显式 SOP 质量门、抽样策略或负责人复盘触发 | 评价有明确结论、证据覆盖和缺项；结果回到原 Issue / SOP 或维护者 | 不把评分直接当验收；不把评价 Run 成本计入生产 Run |
 | L3 · 跨工作持续改进 | 重复 Finding、显著返工 / 成本异常、稳定的新做法或系统性缺口进入提案；维护者判断范围并组织候选与 Benchmark | 通过对照、审核、发布、采用和生产观察，形成可复核的效果结论 | 不让单个 Agent 自行修改团队默认 Skill / SOP / 工作流并立即生效 |
 
-三层之间不是必经审批链。L1 可以直接结束；L2 可以只用于观察和诊断；只有具有跨工作价值且证据足够的 Finding 才进入 L3。
+三层之间不是必经审批链。L1 可以直接结束；L2 可以只用于观察和诊断；具有跨工作价值且证据足够的问题或 Finding 可以进入 L3。
 
 ## 3. 从生产工作取得可信输入
 
@@ -56,7 +56,7 @@
 
 评价器可以有自己的 Multica Run，引用被评 Run / Candidate，但保留自己的执行身份、输入证据、评价器版本和 Usage。被评 Run 的生产事实不可被评分覆盖；评价失败只表示评价执行失败，证据不足也不等于被评工作失败。
 
-LoopForge 的可借鉴机制是：在已结算的生产执行之后启动独立评分 Run，评分读取具体执行、步骤和当时 scorer 版本；评分启动失败不伪装成生产失败，也不改写原 Run。AgentPlatform 应沿现有 Run 链承载评价执行，不新增评价专用 Runtime 或第二套任务系统。
+TeamAI 的可借鉴机制是：在已结算的生产 pass 之后启动独立评分 Run，评分读取具体 Run / Step / Pass 和当时 Scorer 版本；评分启动失败保留待处理，不改变原执行结论。LoopForge 则使用独立的 Run Evaluation 记录读取原 Run 的事实和轨迹，提供评价及受限建议。两者的具体实现见[上游机制取证](../research/d7-continuous-improvement-evidence.md)。AgentPlatform 沿现有 Run 链承载评价执行，不新增评价专用 Runtime 或第二套任务系统。
 
 ## 4. Evaluation 如何形成可行动的 Finding
 
@@ -98,13 +98,15 @@ Finding 应归类到可治理的原因，而不是直接归咎于模型：
 ### 5.2 提案必须固定什么
 
 Improvement Proposal 至少引用：
-- 来源 Finding、Issue、Run、Candidate 和 Evidence；
+- 来源 Issue 和支持问题的可定位证据；涉及 Finding、Run、Candidate、Evaluation 或 Evidence 记录时，引用相应对象及版本；
 - 根因假设、置信度与尚未验证的部分；
 - 拟修改的资产或配置及当前基线版本；
 - 预期改善的目标和可能退化；
 - 适用团队 / 项目 / 工作类型及不适用范围；
 - Benchmark 样本、评价器、成功标准和资源预算；
 - 来源授权、数据共享范围和审核责任人。
+
+人工工作中的问题或交付前的启动故障，可以依据原 Issue 的成员记录、决定、失败回执或其他可定位事实提出改进，无需先形成 Run、Candidate 或独立 Evaluation。缺少的观察与归因证据在提案中列明，再由维护者决定是否补充评价。
 
 提案可以包含多个变更，但每个变更要有明确对象和发布路径。重复提交同一候选沿用原提案；内容修改形成新候选修订，并绑定新的实验结果。
 

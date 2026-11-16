@@ -1,7 +1,7 @@
 # D5-2 · 业务触发与恢复闭环
 
 > 研究范围：Main Bot 首次激活、评论 / Worker 委派、SOP 节点派发与结果消费。
-> Multica 源码基准：`0f3e15f1d9dca781155e2fe475161f8c5e499b44`。本文件链接均固定到该提交。
+> Multica 仓库基线：`fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc`；本文补充核对快照为 `0f3e15f1d9dca781155e2fe475161f8c5e499b44`，源码链接固定到该快照。逐文件差异和结论沿用关系见[取证版本对照](d5-write-recovery-evidence.md#取证版本对照)。
 > 研究目标：确定业务动作已经生效、后续 Run 未创建或回执丢失时，如何恢复原意图而不创建重复执行。
 > 边界：产品和跨层契约研究，不决定数据库表、API 或部署实现。
 
@@ -23,9 +23,9 @@
 
 Issue 更新 Handler 在权威写入成功后，计算 `assigneeChanged`、`statusChanged` 和 Project Workflow handoff，调用统一的 `WillEnqueueRun` 判断。若需要启动 Agent，之后调用 `dispatchIssueRun`。
 
-- [Issue 更新后的触发判断和派发调用](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/issue.go#L4310-L4510)
+- [Issue 更新后的触发判断和派发调用](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/issue.go#L4338-L4440)
 - [dispatchIssueRun](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/issue_trigger.go#L65-L105)
-- [EnqueueTaskForIssue / enqueueIssueTask](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go#L1150-L1390)
+- [EnqueueTaskForIssue / enqueueIssueTask](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/service/task.go#L1281-L1390)
 
 关键事实：
 - Issue 写入完成后才进行 Run 入队，两者不是同一事务。
@@ -63,9 +63,9 @@ Issue 更新 Handler 在权威写入成功后，计算 `assigneeChanged`、`stat
 
 评论及其附件在同一事务内创建和关联。事务提交后 Handler 发布评论事件，再调用 `triggerTasksForComment`，逐个解析并派发目标 Agent。
 
-- [评论事务提交后的触发路径](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L1845-L2055)
-- [triggerTasksForComment / enqueueCommentAgentTriggers](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2055-L2190)
-- [评论与 Agent 触发归并逻辑](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2180-L2320)
+- [评论事务提交后的触发路径](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L1845-L1955)
+- [triggerTasksForComment / enqueueCommentAgentTriggers](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L1991-L2099)
+- [评论与 Agent 触发归并逻辑](https://github.com/multica-ai/multica/blob/0f3e15f1d9dca781155e2fe475161f8c5e499b44/server/internal/handler/comment.go#L2102-L2195)
 
 已经具备的能力比简单的“评论后 enqueue”更完整：
 - 评论 ID 是稳定来源身份；Task 使用 `trigger_comment_id` 和 `coalesced_comment_ids` 引用其触发输入。
@@ -136,7 +136,7 @@ LoopForge 的经验也说明 Definition、Run、NodeRun、Artifact、Evaluation 
 3. Task 创建后将真实 Task ID 绑定回原 Node Attempt。
 4. 如果 Task 已创建但绑定回执丢失，按稳定派发身份查回 Task 并补绑定。
 5. 同一派发身份的重复请求必须回到原 Task；若底座无法按身份查回，则保持 unknown 并先对账，不能直接创建第二个。
-6. Task 已排队但 Runtime 离线，节点仍是等待执行，不是 running；Task Start 回执才确认实际启动。
+6. Task 已排队但 Runtime 离线时，节点等待执行。中心 Start 回执确认原 claim 的状态转换，此后仍在启动宿主；取得对应 Backend / 宿主启动回执后，才确认实际开工。中心 Task 的原生 `running` 保留其本来含义，产品按已取得的启动证据呈现。两版调用位置及既有启动失败测试见[中心 Start 与宿主实际启动](d5-write-recovery-evidence.md#63-中心-start-与宿主实际启动)。
 
 一个 Node Attempt 可引用多个 Run，但每次实际 Run 调用必须有独立、可查回的派发身份；不能只用 Node Activation ID 把不同执行调用误合并。
 
@@ -174,7 +174,8 @@ Run 终态只是生产完成。节点推进还需要：
 | 意图来源 | Issue 当前指派 / 授权代际 | Comment + 目标 Agent | Node Activation / Attempt |
 | 意图生效 | Issue 指派已提交 | Comment 已提交且目标解析有效 | Node Attempt 已就绪且授权有效 |
 | 执行绑定 | 首次协调 Task ID | Worker Task ID 或被复用 Task ID | Node Attempt ↔ Task ID |
-| 实际启动 | 原 Task 的 Start | 原 Task 的 Start | 原 Task 的 Start |
+| 中心 Start 已确认 | 原 Task / claim 的 Start 回执 | 原 Task / claim 的 Start 回执 | 原 Task / claim 的 Start 回执 |
+| 实际启动 | 原 Task 对应的 Backend / 宿主启动回执 | 原 Task 对应的 Backend / 宿主启动回执 | 原 Task 对应的 Backend / 宿主启动回执 |
 | 结果来源 | Main Bot Run / 后续委派结果 | Worker Run / Candidate | 节点所引用的一个或多个 Run |
 | 结果消费 | Main Bot 读取当前 Issue 和交付 | Main Bot / Issue 接收该次委派结果 | Node Attempt 结果消费记录 |
 | 新一轮条件 | 新的指派 / 授权代际 | 新评论或明确新委派 | 新 Activation / Attempt |

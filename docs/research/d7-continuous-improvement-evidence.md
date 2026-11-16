@@ -1,14 +1,14 @@
 # D7 · 持续改进内循环的上游机制与平台映射
 
 > 本文从既有 LoopForge、TeamAI 和 AgentPlatform 源码研究中提炼 D7 机制，不重复抄录完整源码报告。
-> LoopForge 研究基准见[LoopForge SOP 生命周期研究](loopforge-sop-lifecycle.md)；TeamAI 真实宿主与资产发布实验见[专题三 B 实证](03b-source-evidence.md)；平台计量现状见[成本、质量评价与持续改进](../architecture/04-cost-quality-improvement.md)。
+> 机制基准：LoopForge `97b3cdc2f29a88e8767a8dc6c03bfb8865622653`，TeamAI CLI `556b5246f2c13ad28b8b79b5b513a78ed8ab9dae`，分别见[LoopForge SOP 生命周期研究](loopforge-sop-lifecycle.md)与[TeamAI 流程、版本与评测研究](topic-02/teamai.md)。TeamAI 真实宿主与资产发布实验见[专题三 B 实证](03b-source-evidence.md)；平台计量现状见[成本、质量评价与持续改进](../architecture/04-cost-quality-improvement.md)。
 
 ## 1. 结论
 
 三个来源提供的是不同环节的能力，不能整体照搬成一个产品：
 
-- **LoopForge** 证明流程执行可以产生独立评价；评价结果可以给出受限、可审查的局部建议；更大范围的流程改动需要固定样本、对照和新版本发布。
-- **TeamAI** 证明方法资产有明确版本、项目覆盖、发布与采用边界；实际宿主输入、来源修订、权限和交接都必须有证据，不能把本地文件变化当作所有 Agent 已经使用。
+- **LoopForge** 提供独立的 Run Evaluation 记录和受限、可审查的局部建议。更大范围的流程改动需要固定样本、对照和新版本发布，是研究提出的演进要求。
+- **TeamAI** 提供独立评分 Run、Benchmark 配对比较及默认自改进流程，也提供方法资产的版本、项目覆盖、发布与采用机制。实际宿主输入、来源修订、权限和交接都必须有证据，不能把本地文件变化当作所有 Agent 已经使用。
 - **AgentPlatform / Multica** 提供真实业务工作、Run、Runtime、Issue、Candidate、Usage 和项目责任的权威归属。评价和改进应沿这条主线接入，而不是再造一套执行队列。
 
 持续改进的核心不是“模型自动写 Skill”，而是**让真实工作形成可复核的证据，再让经过对照和审核的改变进入后续工作，最后从实际使用结果验证是否真的改善。**
@@ -17,17 +17,17 @@
 
 ### 2.1 Run Evaluation 与生产执行分离
 
-LoopForge 已完成 Run 可以独立发起 LLM 质量评价。评价输入读取具体 Run / Step / Pass 及对应 Scorer 版本，输出 Score、Dimensions、Findings 和 Recommendations。
+LoopForge 已完成 Run 可以独立发起 LLM 质量评价。平台先保存引用原 Run 的 RunEvalRecord，固定本次 Model 和评价 Policy，再读取原 Run 的节点、用量和轨迹事实，通过助手 CLI 执行评价，输出 Score、Dimensions、Findings 和 Recommendations。
 
 关键设计：
-- 评价有自己的执行和结果身份，不改写原生产 Run；
+- 评价有自己的记录身份和执行状态，不改写原生产 Run；
 - 评价启动失败与被评执行失败是两件事；
 - Findings 应指向具体节点和证据，不只给一个总体分；
 - 评价模型不是业务验收人，评分通过也不自动接受 Candidate。
 
-AgentPlatform 应复用 Multica 原生 Run 承载评价活动，引用被评 Run / Candidate；评价 Usage 归评价 Run，不计入生产 Run。
+AgentPlatform 借鉴其评价记录与生产事实分离、建议范围受限的机制；评价执行统一沿 Multica Run 承载。
 
-源码入口：internal/runeval/prompt.go、internal/runeval/apply.go、internal/httpapi/run_eval.go。详见[LoopForge Run Evaluation](loopforge-sop-lifecycle.md#62-run-evaluation)。
+源码入口：[评价记录与启动](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/run_eval.go#L128-L142) · [事实输入与助手 CLI 执行](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/run_eval.go#L481-L505)。详见[LoopForge Run Evaluation](loopforge-sop-lifecycle.md#62-run-evaluation)。
 
 ### 2.2 评价建议应用受限
 
@@ -50,17 +50,27 @@ LoopForge 的研究还表明，节点增删、依赖重构、并行关系改变�
 
 不能把 LoopForge 当前的受限建议应用夸大成全自动 DAG 重构和自动发布。其成熟启发恰恰是把局部建议和结构性演进分开。
 
-### 2.4 Benchmark 比较条件必须固定
+## 3. TeamAI 值得吸收的具体机制
 
-既有研究中的 Benchmark 先生成试验定义，再独立启动评分，最后汇总。配对比较会排除题目摘要变化；当双方均由模型判定时，还会核对 Rubric、工具、模型、effort 和评分方式。
+### 3.1 独立评分 Run 与固定 Scorer
+
+TeamAI 为符合条件的已结算 pass 启动单独的评分 Run。评分读取具体 Run / Step / Pass 及被评 Run 固定的 Scorer 版本；评分启动失败留待后续处理，原生产 Run 保留自己的执行结论。
+
+AgentPlatform 复用 Multica 原生 Run 承载评价活动，引用被评 Run / Candidate；评价 Usage 归评价 Run，不计入生产 Run。
+
+来源：[TeamAI T7 · 运行事实、质量评分和业务验收](topic-02/teamai.md#t7--运行事实质量评分和业务验收各有写入点) · [固定版本的评分触发](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/scorers/engine-hooks.ts#L20-L29) · [评分对象与版本](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/scorers/score-plan.ts#L201-L245)。
+
+### 3.2 Benchmark 比较条件必须固定
+
+TeamAI 的 Benchmark 先生成试验定义，再独立启动评分，最后汇总。配对比较会排除题目摘要变化；当双方均由模型判定时，还会核对 Rubric、工具、模型、effort 和评分方式。
 
 默认自改进流程从可复现、尚未被回归样本覆盖的失败中筛选输入，达到阈值后才在专用分支生成改动并交付 PR。失败样本应转成回归题，但题目质量与实际修改仍需独立判断。
 
 平台应把这套机制抽象为：固定基线、候选、样本、评价器、实验变量、成功标准和覆盖范围；不在不可比条件下宣称改善。
 
-源码与流程：workflows/teamai-benchmark.yaml、src/benchmark/pairing.ts、src/self-improvement.ts、workflows/teamai-self-improvement.yaml。详见[LoopForge T8](loopforge-sop-lifecycle.md#63-更大范围的流程演进)。
+源码与流程：[Benchmark 流程](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/workflows/teamai-benchmark.yaml#L7-L57) · [配对比较](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/benchmark/pairing.ts#L35-L44) · [失败样本筛选](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/self-improvement.ts#L79-L109) · [默认自改进流程](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/workflows/teamai-self-improvement.yaml#L7-L36)。详见[TeamAI T8 · 评测与改进流程](topic-02/teamai.md#t8--评测与改进同样用流程描述生效需要新版本)。
 
-## 3. TeamAI 值得吸收的具体机制
+### 3.3 方法资产的发布与实际采用
 
 TeamAI 的价值不在于复制 Git 独立知识库或 CLI，而是它对方法资产的版本、范围、发布、拉取、实际投递和使用证据的处理。
 
@@ -86,10 +96,10 @@ TeamAI 的价值不在于复制 Git 独立知识库或 CLI，而是它对方法�
 |---|---|---|---|
 | 真实生产 | SOP Run / NodeRun / Artifact | 工作流步骤与宿主活动 | Issue、Run、Node Activation / Attempt、Artifact / Candidate |
 | 事实观察 | Run 状态、节点结果、Trace | Driver / Observation / 实际输入回执 | Multica Run、宿主来源证据、Usage、Candidate / Evidence |
-| 单次评价 | Run Evaluation / Scorer | 可复用规则与核验方法 | 独立 Evaluation 及其 Run，引用被评对象 |
+| 单次评价 | Run Evaluation 记录与评价 Policy | 独立评分 Run、固定 Scorer 与被评 Run / Step / Pass | 独立 Evaluation 及其 Run，引用被评对象 |
 | 问题归纳 | Findings / Recommendations | 经验与方法资产治理 | Finding 归源 Issue / Run，维护者分诊 |
 | 候选修改 | 受限局部建议、流程候选 | 资产修订、项目覆盖 | Improvement Proposal + 候选资产修订 |
-| 对照验证 | Benchmark / 回归样本 | 实际版本投递与核对 | 固定样本、Rubric、环境、候选和成功标准 |
+| 对照验证 | 结构性变更需另行对照验证（研究启发） | Benchmark / 回归样本、实际版本投递与核对 | 固定样本、Rubric、环境、候选和成功标准 |
 | 发布 | 新 SOP / 资产版本 | 版本发布与审核 | 资产维护者发布不可变 Release |
 | 采用 | 新 Run 选择发布版本 | 项目默认或显式覆盖 | Project Adoption / Issue 选择，并记录实际投递版本 |
 | 效果回收 | 后续 Run 评价 | 真实使用与来源时效 | 后续生产 Issue / Run 的质量、返工、人工介入和可知成本 |
@@ -115,7 +125,7 @@ TeamAI 的价值不在于复制 Git 独立知识库或 CLI，而是它对方法�
 
 1. 生产 Run 与评价 / Benchmark Run 分开归属；
 2. Finding 必须引用真实来源和证据；
-3. Proposal 固定基线、候选、范围、预期改善和潜在退化；
+3. Proposal 引用来源 Issue 和可定位证据，按实际存在的对象关联 Finding / Run / Candidate / Evaluation；人工工作和交付前故障也可提出改进，再固定基线、候选、范围、预期改善和潜在退化；
 4. Benchmark 固定样本、Rubric、环境和可比性；
 5. Release、Adoption、实际 Usage 分开记录；
 6. 发布后按真实生产结果决定扩大、暂停或回退；
