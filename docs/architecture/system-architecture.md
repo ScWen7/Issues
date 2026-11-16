@@ -192,49 +192,33 @@ flowchart LR
 
 ~~~mermaid
 flowchart TB
-  Team["Team"]
+  Team["团队 · Workspace"]
+  Member["工作区成员"]
   Project["Project"]
-  Member["Member"]
-  Agent["Agent Identity"]
-  Runtime["Member-owned Runtime"]
-  Host["Host / Backend"]
   Issue["Issue"]
-  SOP["SOP Execution"]
-  Run["Run"]
-  Session["Host Session"]
-  Team --> Project
+  Agent["Agent"]
+  Runtime["成员的 Runtime"]
+  Run["受管 Run"]
   Team --> Member
-  Project -->|"成员参与 / 项目权限"| Member
-  Project -->|"组织工作"| Issue
-  Project -->|"项目采用配置"| Agent
-  Member -->|"拥有 / 授权"| Runtime
-  Runtime --> Host
-  Host -->|"提供宿主能力"| Agent
-  Issue -->|"人工总责人或约定验收人"| Member
-  Issue -->|"负责人可为"| Member
-  Issue -->|"指派执行或明确委托持续协调"| Agent
-  Issue -->|"按需委托"| SOP
-  Issue -->|"直接执行或派发"| Run
-  SOP -->|"就绪节点经原派发链"| Run
-  Agent -->|"实际执行主体"| Run
-  Runtime -->|"实际执行资源"| Run
-  Run -->|"宿主连续性"| Session
+  Team --> Project
+  Team --> Agent
+  Project -->|"工作与适用约定"| Issue
+  Member -->|"按项目读权参与或接手"| Issue
+  Issue -->|"指派或邀请"| Agent
+  Member -->|"机主决定共享范围"| Runtime
+  Agent -->|"当前绑定"| Runtime
+  Issue -->|"工作归属"| Run
+  Agent -->|"执行主体"| Run
+  Runtime -->|"实际领取"| Run
 ~~~
 
 ### 6.1 对象关系语义
 
-| 对象 | 所属 / 关联关系 | 不应采用的建模方式 |
-|---|---|---|
-| Team | 组织成员、项目及团队共享的能力 | 不直接成为 Issue 的执行者 |
-| Project | 工作范围、参与成员、工程资源、项目配置与采用资产 | 不复制团队成员身份或成为单项工作 |
-| Member | 人员身份、项目参与、Runtime 所有权、业务决定权 | 不等于 Agent 或 Runtime |
-| Agent | 可被指派或邀请，按本 Issue 的委托执行或担任 Main Bot | 不与某台机器或某个 Session 一一绑定 |
-| Runtime | 成员拥有并授权的执行资源，声明宿主、Backend 和能力覆盖 | 不成为业务负责人，也不等同于 Agent |
-| Host / Backend | 提供实际宿主协议、工具入口与运行能力 | 不决定 Issue 的业务状态 |
-| Session | 宿主内连续对话 / 线程身份，可被多个 Run 先后引用 | 不作为跨 Issue 的工作主键 |
-| Run | 一次实际受管执行，关联工作归属、Agent、Runtime、Session 和派发来源 | 不由 Agent 或 Runtime 静态拥有 |
+成员从项目打开 Issue，先取得本人可读的工作约定和已有交付。亲自推进时，沿原 Issue 提交结果。需要调用 Agent 时，项目配置可提供适用的方法、工具及 Agent 选择，指派或一次性协助仍在原 Issue 办理。团队、成员和项目的对应关系见[核心对象模型](core-object-model.md#31-组织与参与主体)。
 
-首期每个 Agent Run 从目标 Agent 当时绑定的 Runtime 领取。Main Bot 可以把分工委派给分别绑定其他成员 Runtime 的 Worker。等待期间结束协调 Run，后续 Run 从原 Issue 的工作约定、决定和交付引用接续。接管或重绑由有权成员处理，在途 Run 的终态另行核对。
+私有项目中的受管执行，分别核对本次发起人与 Agent 所有者的项目访问范围、发起者的 Agent 调用资格，以及所绑定 Runtime 对该 Agent 的使用授权。成员委托多个 Agent 时，每个实际执行者按自己的绑定领取工作。项目或资料来源对执行地点有要求时，只向符合本次要求的机器投递。受托 SOP 的就绪节点沿同一派发入口运行，实际宿主及 Session 按该次 Run 的回执追溯。[项目访问、调用与机器授权](../research/05-source-evidence.md#项目访问与执行资格)
+
+换人或换机时，接手者沿原 Issue 取得送交的候选、可访问的资料及工程修订，再在自己的工作副本继续。上一个 Daemon 的目录路径只在原机解释。缺少尚未共享的修改时，能取得修改的成员可以补交；其他已具备输入的工作可以继续。[能力与上下文](03b-capability-governance.md#1-issue-的上下文) · [交付与接手](05-unified-workbench.md#交付与接手)
 
 ## 7. Multica、TeamAI、LoopForge 的融合关系
 
@@ -423,8 +407,8 @@ flowchart TB
 
 | 编号 | 未决问题 | 为什么影响架构 | 下一步需要回答 |
 |---|---|---|---|
-| D1 | 组织、项目、Agent 与成员身份在 Multica 中的映射边界 | 决定授权和跨项目复用 | 哪些原生实体可直接复用，哪些需增加关系或产品配置 |
-| D2 | Runtime 的所有权、共享授权、可见范围与并发容量 | 决定跨成员派发与故障接续 | Runtime 能否被多个项目 / Agent 使用，授权撤回如何影响在途 Run |
+| D1 | 私有项目成员交接的写入覆盖 | 确保接手者能打开原 Issue | 对象映射见[组织与参与主体](core-object-model.md#31-组织与参与主体)。实现时核对建单、手动改派、工作流和批量写入均按目标项目校验成员读权，并覆盖授权并发变化 |
+| D2 | 多项工作同时使用同一 Runtime 或目录的容量与等待 | 决定哪些已授权工作能开工，哪项需等待 | 共享与绑定见[原生入口](../research/05-source-evidence.md#项目访问与执行资格)。需按 Runtime 容量、目录模式和实际占用核对不同项目及 Agent 的排队与恢复 |
 | D3 | 重绑或换用协调 Agent 时如何处置旧执行 | 决定原机长期离线时的接手条件 | 结合宿主回执确认旧写入和工作副本隔离，按成员授权选择接手资源 |
 | D4 | 逻辑模块与实际部署边界 | 决定工程组织与数据事务边界 | 首期是否沿 Multica 单体扩展，哪些能力需要独立进程或存储 |
 | D5 | 跨模块写入、事件投递、幂等与恢复的实现映射 | 决定状态一致性和故障恢复 | 逐项映射 Multica 现有事务、队列、回执与缺口，不预设新总线 |
