@@ -220,3 +220,37 @@ LoopForge 当前具备流程编辑、版本修订、Run Evaluation 和受限建�
 - [Run Evaluation Apply](https://github.com/Tencent/LoopForge/blob/main/internal/runeval/apply.go)
 - [Run Evaluation API](https://github.com/Tencent/LoopForge/blob/main/internal/httpapi/run_eval.go)
 - [Conversation Workspaces](https://github.com/Tencent/LoopForge/blob/main/docs/conversation-workspaces.md)
+
+
+## 10. Main Bot 如何判断和使用 SOP
+
+LoopForge 不只有 SOP 目录和手动启动入口。Main Bot 的自然语言助手还承担需求与 SOP 之间的匹配工作：
+
+- 根据需求性质和当前项目绑定情况，给出明确的 SOP 推荐。
+- 项目产品方案、前端交付、后端交付和缺陷修复有不同的通用模板；产品探索与编码交付并非同一种流程。
+- 前后端都需要时，Main Bot 的指引允许先用产品 SOP 定型，再分别派发前端和后端 SOP。
+- Main Bot 在把需求交给 SOP 前会询问用户；用户拒绝则不启动。
+- 用户明确要求执行或确认建议后，通过 Issue dispatch 启动与 Issue 关联的 SOP，而不是创建一个没有工作归属的孤立 Run。
+- Main Bot 仍可以在执行过程中读取状态、解释节点、暂停、恢复或接管工作区。
+
+这说明 SOP 使用不是简单的“有 Issue 就运行绑定工作流”。在自然语言交互中，Main Bot 先做工作类型判断和方法推荐，用户授权后才将适合的工作交给稳定流程。
+
+证据入口：
+- `internal/httpapi/assistant.go`：`assistantNativeSystemPrompt` / `assistantGeneralChatPrompt` 附近的 SOP 推荐与授权指引。
+- `docs/api/orchestration.md`：Issue dispatch 优先用于保存为 Issue 的工作，以建立 Task / Issue 关联。
+- `internal/application/operations.go`：`issues_dispatch`、`issues_save` 与 `runs_start` 的平台操作定义。
+- `docs/conversation-workspaces.md`：Main Bot 在 SOP 执行中介入的 pause / resume / takeover 语义。
+
+## 11. 对 AgentPlatform 的补充启发：SOP 选择也属于形成机制的一部分
+
+形成 SOP 不只包括“如何写出 WorkflowDefinition”，还包括“什么时候认为某类工作适合采用已有 SOP”。
+
+因此需要把以下动作分开：
+1. **识别工作类型**：从 Issue 目标、约束、资料和工作上下文判断它属于什么类型，确定是否稳定到适合使用 SOP。
+2. **推荐已有 SOP**：按项目采用范围、适用条件、所需能力和版本状态筛选候选。
+3. **解释匹配依据与差异**：说明候选流程覆盖了什么、没有覆盖什么、有哪些前置依赖。
+4. **获得使用授权**：需要时由 Issue 负责人确认采用；拒绝或不适用时回到动态协作。
+5. **启动既有版本**：在 Issue 上记录本次使用的 SOP 版本和授权范围，沿原 Run 链执行。
+6. **发现不适用并反馈**：若执行中出现偏离，记录原因和未覆盖工作；不要为迁就 SOP 而强行套用。
+
+因此 SOP 的完整生命周期至少包括：形成 / 提炼 → 审核固化 → 适用范围发布 → 工作识别与选择 → 授权执行 → 结果消费 → 评价反馈 → 修订与再发布。
