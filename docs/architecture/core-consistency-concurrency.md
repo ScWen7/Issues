@@ -249,7 +249,7 @@ Task 创建与业务绑定之间可能出现响应丢失。恢复顺序必须固
 
 Multica 的 `trigger_evidence_kind / trigger_evidence_ref_id` 是 Task 的统一直接触发证据引用，可用于从 Run 导航回来源记录；`trigger_comment_id / coalesced_comment_ids` 则表达评论输入。它们是有价值的原生来源证据，但不能自动视为派发幂等键：字段没有因此具备通用唯一约束，单一 UUID 引用也不能完整表达一个来源面向多个目标或一个 Node Attempt 发起多次 Run 调用。
 
-因此，平台可复用这些字段作为 Task 的来源导航和审计线索；严格的“同一业务意图只绑定一次 Task”仍须由来源侧的稳定派发身份及原生派发边界的唯一查回能力共同保证。若底座无法按来源身份查回，状态必须保持 unknown 并对账，不能用最近 Task、同 Issue / Agent 或同 Session 猜测。具体字段依据及限制见[最小派发绑定与结果消费契约](../research/d5-minimum-dispatch-consumption-contract.md#4-multica-原生字段的可复用边界)。
+因此，平台可复用这些字段作为 Task 的来源导航和审计线索；严格的“同一业务意图只绑定一次 Task”仍须由来源侧的稳定派发身份及原生派发边界的唯一查回能力共同保证。若底座无法按来源身份查回，状态必须保持 unknown 并对账，不能用最近 Task、同 Issue / Agent 或同 Session 猜测。具体字段依据及限制见[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md#54-multica-原生-task-来源证据的使用边界)。
 
 ## 6. 结果消费与交付一致性
 
