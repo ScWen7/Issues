@@ -7,7 +7,7 @@
 ## 1. 设计原则
 
 1. **从 Issue 的工作约定出发。** 所有参与者先明确本项目标、范围、责任和完成条件，不以 Run、SOP 或某个 Agent 的提示词代替业务约定。
-2. **按需组织工作。** 负责人可自主推进、邀请协助、拆分独立子 Issue，或把明确范围委托给 SOP。平台不强制每项工作都经过 Squad、SOP 或固定阶段。
+2. **按需组织工作。** 负责人可自主推进、邀请协助、拆分独立子 Issue，或把稳定环节委托给 SOP。
 3. **方法与执行分离。** Playbook 提供可选择的指导；Skill / Rule / Knowledge 提供能力和依据；SOP 定义可执行的依赖与结果规则；Run 才记录实际受管执行。
 4. **准备、投递、使用和结果分别举证。** 选择了能力不等于投递成功，投递成功不等于宿主实际读取，宿主读取不等于调用成功，调用成功不等于结果符合要求。
 5. **结果由接收方按自己的契约消费。** 生产者不能单方面宣布自己的结果已被所有下游接受。
@@ -18,10 +18,10 @@
 
 | 契约 | 主要提供方 | 主要消费方 | 权威来源 | 解决的问题 |
 |---|---|---|---|---|
-| Work Contract（工作契约） | 提出人、当前负责人及有权成员 | 成员、Agent、Squad、Project Workflow、SOP | Issue 与有效工作约定 | 这项工作要完成什么、谁负责、谁能决定 |
+| Work Contract（工作契约） | 提出人、当前负责人及有权成员 | 成员、Agent、Project Workflow、SOP | Issue 与有效工作约定 | 这项工作要完成什么、谁负责、谁能决定 |
 | Context Contract（上下文契约） | Issue、项目配置、资料与工程来源维护者 | 当前执行者及接手者 | 原始来源及本次上下文准备记录 | 执行者能取得哪些有权使用的依据 |
-| Capability Contract（能力契约） | 团队 / 项目资产维护者，工作负责人选用 | Agent、Squad、SOP、执行宿主 | 资产发布版本、项目采用配置和本项选择记录 | 本次工作可以使用哪些方法、规则和工具 |
-| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Main Bot、Squad Leader、SOP Execution、受托协作者 | Issue 上的委托决定，调用 SOP 时还包括固定的定义版本 | 受托方能自主推进到什么边界，何时必须交还 |
+| Capability Contract（能力契约） | 团队 / 项目资产维护者，工作负责人选用 | Agent、SOP、执行宿主 | 资产发布版本、项目采用配置和本项选择记录 | 本次工作可以使用哪些方法、规则和工具 |
+| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Main Bot、SOP Execution、受托协作者 | Issue 上的委托决定，调用 SOP 时还包括固定的定义版本 | 受托方能自主推进到什么边界，何时必须交还 |
 | Execution Contract（执行契约） | 负责人或获授权的 SOP 节点 | Run 派发链、Daemon、Backend、Agent / Script | 本次执行安排及授权来源 | 一次实际执行允许做什么、输入输出是什么 |
 | Delivery Contract（交付契约） | 生产者与工作约定 / SOP 定义者 | 负责人、节点、检查者、验收人 | 工作约定、SOP 输出定义、Candidate 与 Evidence | 交付什么版本、怎样检查、接收方如何采用 |
 | Feedback Contract（反馈契约） | 执行者、检查者、评价器 | 当前负责人、资产维护者、项目维护者 | Run、Delivery Record、Evaluation、Finding、Proposal | 如何处理本次问题，以及何时形成跨工作改进 |
@@ -41,7 +41,7 @@ Work Contract 由 Issue 承载，是其他契约的上游依据。
 - 决定权：谁可以澄清范围、扩大授权、接受例外、验收和取消。
 - 版本：本项工作当前有效的约定版本，以及发生变更的原因和影响范围。
 
-工作约定由有权成员在 Issue 上确认或修改。Agent、Squad、SOP 可以提出澄清和变更建议，但不能因为执行需要自行扩大目标、权限或完成条件。
+工作约定由有权成员在 Issue 上确认或修改。受托 Agent 可提出澄清和变更建议，SOP 可在约定节点请求决定。调整目标、权限或完成条件由有权成员确认。
 
 Work Contract 不规定必须采用哪种组织方式。当前负责人根据工作特点选择：
 
@@ -51,10 +51,9 @@ Work Contract 不规定必须采用哪种组织方式。当前负责人根据工
 | 委托 Main Bot 持续协调 | 有权成员将 Issue 指派给现有 Agent，并在工作约定中明确本次授权 | Main Bot 可自行执行或调用获准的 Worker，业务取舍仍归相应有权成员 |
 | Issue 内邀请协助 | 需要咨询、检查或短时操作，不产生独立交付责任 | 原负责人不变 |
 | 子 Issue 分工 | 一段工作有独立负责人、输入、交付和生命周期 | 子项负责人对该分工负责，父项负责人对整体目标负责 |
-| Squad 负责 | 明确将 Issue 指派给一个 Squad，希望 Leader 自主组织其内部协作 | Squad 作为当前负责人，Leader 在授权内协调 |
 | SOP 委托 | 输入、输出、依赖、失败处置和交还条件已经足够稳定 | SOP 只在明确受托范围内组织流程，范围外决定交还 Issue |
 
-以上方式可以组合，但每一份独立交付责任都必须有明确归属。SOP 节点不自动创建子 Issue；Squad 协调也不自动意味着启用 SOP。
+这些方式可以组合。独立交付有各自的负责人，受托 SOP 仅在明确范围内安排节点和返工。
 
 ## 4. Context Contract：准备可用且有权的工作依据
 
@@ -132,7 +131,7 @@ Capability Contract 解决“本项工作允许或要求采用哪些可复用能
 
 ## 6. Delegation Contract：明确委托边界
 
-Delegation Contract 仅在负责人将工作交给 Squad、SOP 或其他受托主体时需要。它把 Work Contract 中的一部分权限和责任明确委托出去，不转移超出声明范围的业务决定权。
+Delegation Contract 仅在负责人将协调、执行或一段流程委托出去时需要。它把 Work Contract 中的一部分权限和责任明确委托出去，不转移超出声明范围的业务决定权。
 
 至少明确：
 
@@ -147,7 +146,7 @@ Delegation Contract 仅在负责人将工作交给 Squad、SOP 或其他受托�
 
 ### 6.1 Issue 协调与局部委托
 
-Issue 指派给 Agent 并明确持续协调范围后，该 Agent 作为 Main Bot 承担整体组织工作。Issue 直接指派给 Squad 时，由其 Leader 在该范围协调。同一范围只有一个协调方。评论中的一次性邀请只表达该次请求，执行仍按调用者权限与工作约定核准。
+Issue 指派给 Agent 并明确持续协调范围后，该 Agent 作为 Main Bot 承担整体组织工作。同一 Issue 在同一范围只有一个协调方。评论中的一次性邀请只表达该次请求，执行仍按调用者权限与工作约定核准。
 
 短时协助留在原 Issue，委派方说明 Worker、预期输出及回交位置，并关联实际 Run。需要独立责任或独立交付时，建立或复用子 Issue，父项按自己的工作约定消费子项交付。Worker 使用自身获准的 Runtime。
 
@@ -248,7 +247,7 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | 顺序 | 产生或消费的契约 | 负责方 | 继续条件 |
 |---|---|---|---|
 | 1. 建立工作 | Work Contract | 提出人、Issue 负责人及有权成员 | 目标、责任和完成要求足以开始；未决业务问题有明确处理人 |
-| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人，或承担协调职责的 Main Bot / Squad Leader | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
+| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人（获持续协调授权的 Agent 担任 Main Bot） | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
 | 3. 准备依据 | Context Contract / Capability Contract | 项目与资产配置、当前负责人、执行入口 | 必需输入有权、可读、版本固定；强制规则冲突已解决 |
 | 4. 授权执行 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
 | 5. 生产结果 | Execution Contract / Delivery Contract | 成员、Agent、Script、SOP 节点 | 实际结果与来源回执归回正确 Run / Attempt / Issue |

@@ -269,7 +269,7 @@ Owner 根据原 Issue 工作约定：
 
 ## 12. 与正式架构的对应
 
-[核心对象模型](../architecture/core-object-model.md)与[工作生命周期](../architecture/01-unified-work-lifecycle.md)定义本次委托、人工业务责任、可选 Squad 和 Worker 的关系。[跨层契约](../architecture/cross-layer-contracts.md)定义谁能派发、谁能接收结果，以及何时交回决定。[状态与事件](../architecture/lifecycle-state-event-model.md)和[一致性规则](../architecture/core-consistency-concurrency.md)定义原生回唤后重新核对的事实、撤权和迟到结果的处理。
+[核心对象模型](../architecture/core-object-model.md)与[工作生命周期](../architecture/01-unified-work-lifecycle.md)定义人工总责、受托 Main Bot 与 Worker 分工的关系。[跨层契约](../architecture/cross-layer-contracts.md)定义谁能派发、谁能接收结果，以及何时交回决定。[状态与事件](../architecture/lifecycle-state-event-model.md)和[一致性规则](../architecture/core-consistency-concurrency.md)定义原生回唤后重新核对的事实、撤权和迟到结果的处理。
 
 ## 13. 下一步验证的边界
 
@@ -280,7 +280,7 @@ Owner 根据原 Issue 工作约定：
 满足以下条件，Main Bot 生命周期设计才算具备进入实现映射的基础：
 
 - Member 可以保留 Issue Owner，同时把持续协调委托给 Main Bot。
-- Main Bot 不依赖 Squad 也能直接执行或委派 Worker。
+- Main Bot 可在本次授权内直接执行或委派 Worker。
 - Main Bot 可以跨多个成员 Runtime 组织并行工作。
 - Main Bot Turn 可结束，Worker 仍独立执行。
 - 指定 Worker Run 的成功、失败与取消，以及用原生事实表达的等待条件，均有明确的继续入口。未获可靠终态的分工保留为待核实。

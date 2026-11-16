@@ -6,7 +6,7 @@
 
 Main Bot 是 **Issue 级智能协调者**。Member 将 Issue 的执行协调工作委托给 Main Bot 后，Main Bot 负责理解目标、制定和调整工作安排、选择执行者和工作方法、消费结果、处理异常并向 Issue Owner 汇总交付。
 
-该职责由现有 Agent 在特定 Issue 上承担。团队可明确授权普通 Agent 持续协调，也可选择原生 Squad 由其 Leader 协调。一次委托范围内只有一个协调者。
+该职责由现有 Agent 在特定 Issue 上承担。成员将当前工作指派给该 Agent，并约定它可以自行处理、委派和交还决定的范围。
 
 ## 2. Issue 的三种责任关系
 
@@ -39,8 +39,6 @@ Main Bot 是 **Issue 级智能协调者**。Member 将 Issue 的执行协调工�
 - Main Bot 的逻辑身份在具体 Issue 上体现为当前受托协调角色；每个 Issue 的目标、授权、分工和结果仍归原 Issue。
 - 不要求每个 Issue 创建一个新的 Agent 实体，也不把一个 Agent Session 当成 Main Bot 的持久身份。
 - 首期一个 Main Bot Agent 绑定一个指定 Runtime；它可以派发多个绑定不同 Runtime 的 Worker Agent。
-
-团队若把 Issue 指派给 Squad，其 Leader 按原生协议在该范围组织成员，并沿实际 Leader Run 留下决策记录。
 
 ## 4. Main Bot 的工作职责
 
@@ -160,10 +158,9 @@ flowchart TB
 | Multica 原生概念 | Main Bot 方向的处理 |
 |---|---|
 | Issue | 保留为唯一业务工作和协作时间线 |
-| Assignee | 一个 Issue 至多一个当前 Assignee。普通 Agent 持续协调时指派给该 Agent，选择 Squad 时指派给该 Squad |
+| Assignee | 产品工作可指派给成员或 Agent，同一时点至多一个当前 Assignee。持续委托时指派给承担 Main Bot 职责的 Agent |
 | Accountable Member / Owner | Issue 工作约定明确业务责任人和验收安排。原生 Run 的 `accountable_user_id` 记录执行归因 |
-| Squad Leader Agent | 受托 Squad 中的协调者，沿原生 Leader Run 与团队协议执行 |
-| Squad | 可选的原生 Assignee 和团队组合，保留成员、Leader 与对应的执行语义 |
+| Multica Squad / Leader | 上游支持将工作指派给固定小队，并为其 Leader 生成专用 Run。研究其短轮次分工和回报，用于理解受托协调 |
 | Agent | Main Bot 与 Worker 都由 Agent 身份承载，职责由本次授权和执行上下文决定 |
 | Runtime / Daemon / Backend | 完整复用，实际执行仍在成员本地 |
 | Task / Run / Session | 复用原生派发、执行和宿主连续性记录 |
@@ -211,7 +208,7 @@ flowchart TB
 
 ## 11. 设计结论
 
-普通 Agent 受托持续协调、成员一次性请求 Agent 协助、显式使用原生 Squad，均可沿 Issue 与 Task / Run 组织。Main Bot 在有权协调时选择 Worker 或 SOP；每项结果带回原 Issue，按当期工作约定和交付版本处理。
+成员可亲自处理、邀请 Agent 协助，或明确委托现有 Agent 担任 Main Bot。Main Bot 按本次授权选择 Worker 或 SOP。每项结果带回原 Issue，按当期工作约定和交付版本处理。
 
 ## 12. 面向实现的核验事项
 

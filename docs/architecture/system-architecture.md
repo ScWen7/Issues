@@ -9,7 +9,7 @@ AgentPlatform 将团队成员、项目、Issue、Agent 与成员本地 Runtime �
 1. **一个协作核心。** Project 与 Issue 是团队工作的组织入口和业务归属；Issue 维护目标、责任、决定和完成状态。
 2. **执行不等于协作。** Issue 决定谁对工作负责；SOP 只管理明确委托的流程范围；Run 记录实际受管执行。
 3. **中心不接管成员电脑。** 中心负责授权、派发、协调和接收回执；实际宿主、代码副本、Session、工具调用和未共享内容留在成员本机。
-4. **复用底座，不复制控制面。** Multica 继续提供 Issue、项目工作流、指派、Squad、Run、Runtime、Daemon、Backend、Session 与原生 Usage 等协作执行能力。AgentPlatform 在其上补足跨层业务语义和缺失能力，不另建平行 Issue、Run 或 Runtime 控制体系。
+4. **复用底座，不复制控制面。** Multica 继续提供 Issue、项目工作流、指派、Issue Wakeup、Run、Runtime、Daemon、Backend、Session 与原生 Usage 等协作执行能力。AgentPlatform 在其上补足跨层业务语义和缺失能力，不另建平行 Issue、Run 或 Runtime 控制体系。
 5. **扩展按需参与。** 团队 Wiki、项目资料、代码 Wiki、评测和改进不成为每项工作的必经阶段；由当前工作需要触发。
 6. **事实单一归属。** 各模块维护自己拥有的事实，其他模块通过引用、命令和事件协作。工作台与分析视图不成为第二权威数据源。
 7. **五层是职责视角。** 它们可以在同一中心应用或模块中协作，不等于五个服务，更不构成严格串行流水线。
@@ -21,7 +21,6 @@ flowchart TB
   subgraph People["团队参与者与工作入口"]
     Member["成员"]
     Agent["Agent · 协调或执行"]
-    Squad["Squad / Leader"]
     UI["统一工作台"]
   end
   subgraph Center["中心协作平台 · 权威共享事实"]
@@ -32,7 +31,7 @@ flowchart TB
     Delivery["交付与证据<br/>Artifact / Candidate / Evidence / Delivery"]
     Insight["度量、评价与改进<br/>Usage / Evaluation / Finding / Proposal / Release"]
     Read["工作台查询与视图"]
-    Multica["Multica 原生协作与执行底座<br/>Issue / Assignment / Workflow / Squad / Run / Runtime Registry / Usage"]
+    Multica["Multica 原生协作与执行底座<br/>Issue / Assignment / Workflow / Wakeup / Run / Runtime Registry / Usage"]
   end
   subgraph Local["成员本地执行环境"]
     Daemon["Daemon"]
@@ -50,7 +49,6 @@ flowchart TB
   end
   Member --> UI
   Agent --> UI
-  Squad --> UI
   UI --> Read
   Read --> Work
   Org --> Work
@@ -102,7 +100,7 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 ### 3.2 模块边界的关键解释
 
 - **组织与项目范围**只回答谁属于哪个协作范围、哪些资源可在何种范围使用。它不拥有 Issue 的工作状态，也不因为成员注册了 Runtime 就自动授权所有项目使用。
-- **工作协作核心**是系统业务主线。Issue 是唯一业务工作归属。成员可亲自推进，或指派一个 Agent 并把持续协调权交给它。这个 Agent 作为 Main Bot 自行执行、邀请 Worker、拆分子 Issue 或委托 SOP。选择 Squad 负责时由该队 Leader 协调。Project Workflow 管项目阶段与责任交接，不替代 SOP。
+- **工作协作核心**是系统业务主线。Issue 是唯一业务工作归属。成员可亲自推进，或指派一个 Agent 并把持续协调权交给它。这个 Agent 作为 Main Bot 自行执行、邀请 Worker、拆分子 Issue 或委托 SOP。Project Workflow 管项目阶段与责任交接，不替代 SOP。
 - **方法与上下文**把可复用方法与本次工作实际使用分开。Skill、Rule、Playbook、SOP、知识和工具配置有自己的版本及适用范围；项目采用、本项选择、实际投递、宿主加载和实际使用分别留证。它不负责启动 Run。
 - **流程编排**只管理 Issue 明确委托的范围。本次 SOP Execution 按固定定义判断节点就绪、核验、返工和出口。工作负责人或受托 Main Bot 接回其结果，并负责 SOP 范围以外的分工和决定请求。
 - **执行集成**把中心的授权安排交给 Multica 原生 Run / Daemon 链。Backend 适配具体宿主。Runtime 是执行资源，Agent 是执行主体，Session 是宿主连续性，三者不能合并。成员的私人活动只有在授权共享且来源可识别时才进入平台记录。
@@ -193,7 +191,6 @@ flowchart TB
   Project["Project"]
   Member["Member"]
   Agent["Agent Identity"]
-  Squad["Squad"]
   Runtime["Member-owned Runtime"]
   Host["Host / Backend"]
   Issue["Issue"]
@@ -202,18 +199,15 @@ flowchart TB
   Session["Host Session"]
   Team --> Project
   Team --> Member
-  Team --> Squad
   Project -->|"成员参与 / 项目权限"| Member
   Project -->|"组织工作"| Issue
   Project -->|"项目采用配置"| Agent
-  Squad -->|"成员与指定 Leader"| Agent
   Member -->|"拥有 / 授权"| Runtime
   Runtime --> Host
   Host -->|"提供宿主能力"| Agent
   Issue -->|"人工总责人或约定验收人"| Member
   Issue -->|"负责人可为"| Member
   Issue -->|"指派执行或明确委托持续协调"| Agent
-  Issue -->|"负责人可为"| Squad
   Issue -->|"按需委托"| SOP
   Issue -->|"直接执行或派发"| Run
   SOP -->|"就绪节点经原派发链"| Run
@@ -226,11 +220,10 @@ flowchart TB
 
 | 对象 | 所属 / 关联关系 | 不应采用的建模方式 |
 |---|---|---|
-| Team | 组织成员、项目、团队级能力与 Squad | 不直接成为 Issue 的执行者 |
+| Team | 组织成员、项目及团队共享的能力 | 不直接成为 Issue 的执行者 |
 | Project | 工作范围、参与成员、工程资源、项目配置与采用资产 | 不复制团队成员身份或成为单项工作 |
 | Member | 人员身份、项目参与、Runtime 所有权、业务决定权 | 不等于 Agent 或 Runtime |
 | Agent | 可被指派或邀请，按本 Issue 的委托执行或担任 Main Bot | 不与某台机器或某个 Session 一一绑定 |
-| Squad | 可被指派为 Issue 负责方的协作主体，由 Leader 组织 Agent 参与 | 不作为所有 Issue 的必经调度器 |
 | Runtime | 成员拥有并授权的执行资源，声明宿主、Backend 和能力覆盖 | 不成为业务负责人，也不等同于 Agent |
 | Host / Backend | 提供实际宿主协议、工具入口与运行能力 | 不决定 Issue 的业务状态 |
 | Session | 宿主内连续对话 / 线程身份，可被多个 Run 先后引用 | 不作为跨 Issue 的工作主键 |
@@ -244,7 +237,7 @@ flowchart TB
 
 | 来源 | 在 AgentPlatform 中承担的角色 | 采用的机制 | 不引入的重复能力 |
 |---|---|---|---|
-| Multica | 协作与受管执行底座 | Issue、Assignee、评论协助、Issue Wakeup、Project Workflow、Squad、Run、Runtime、Daemon、Backend、Session、原生 Usage | 不另建 Issue 系统、任务队列、Runtime 注册与第二套派发控制面 |
+| Multica | 协作与受管执行底座 | Issue、Assignee、评论协助、Issue Wakeup、Project Workflow、Run、Runtime、Daemon、Backend、Session、原生 Usage | 不另建 Issue 系统、任务队列、Runtime 注册与第二套派发控制面 |
 | TeamAI | 方法资产与 Agent 工作过程增强 | 项目作用域、Skill / Role / Principles、步骤驱动、Driver 协议、Observation 与知识资产治理经验 | 不把 Git 独立仓、CLI 或 TeamAI 的完整运行体系作为平台前置依赖 |
 | LoopForge | 稳定流程与交付质量增强 | SOP 依赖图、节点就绪、结果消费、条件判断、定向返工、执行评测与改进闭环 | 不另建与 Multica 冲突的 Issue / Run / Runtime 或第二个总协调 Agent |
 
@@ -273,7 +266,7 @@ flowchart TB
 ### 7.2 关键融合约束
 
 - Multica 的 Issue 保存有效委托。Main Bot 沿原生派发组织 Worker，以 Issue Wakeup 接续协调，再核对原 Run、候选和证据。
-- 选择原生 Squad 时由其 Leader 在同一范围统筹。两种组织方式均可把稳定步骤交给 SOP，超出委托的事项交回 Issue。
+- Main Bot 可将稳定步骤委托给既有 SOP，接收该次流程的出口结果。超出授权的决定交给 Issue 上约定的成员。
 - TeamAI 的 Driver 只负责约定步骤的领取、确认和报告；真实执行仍由 Multica 原 Run / Runtime 链承载。
 - LoopForge 的节点判断、结果消费和返工作用于 SOP Execution / Node Activation，不另建任务身份。
 - 执行计量沿原生产 Run 归集。评价和 Benchmark 产生自己的执行记录与成本，不回写污染生产执行成本。
@@ -344,7 +337,7 @@ flowchart TB
 
 ### 9.2 成本归属原则
 
-- 生产活动的 Usage 归属实际生产 Run，并可按 Issue、父项、Project、Squad 等关系汇总；不得因同一执行被多个系统观察而重复计费。
+- 生产活动的 Usage 归属实际生产 Run，可按 Issue、父项和 Project 汇总。同一执行的多份观察使用同一计量归属。
 - 原生供应商单位分别记录，例如 Token、Credits、请求数或其他原生计量；只有来源真实上报才展示数值。
 - Runtime 未上报的费用或无法映射的活动保持未知，不从耗时、模型名或订阅套餐推算。
 - Evaluation、Benchmark、知识整理和改进任务有自己的执行来源与消耗，不混入生产 Issue 的成本。
@@ -420,7 +413,7 @@ flowchart TB
 
 | 编号 | 未决问题 | 为什么影响架构 | 下一步需要回答 |
 |---|---|---|---|
-| D1 | 组织、项目、Agent、Squad 与成员身份在 Multica 中的映射边界 | 决定授权和跨项目复用 | 哪些原生实体可直接复用，哪些需增加关系或产品配置 |
+| D1 | 组织、项目、Agent 与成员身份在 Multica 中的映射边界 | 决定授权和跨项目复用 | 哪些原生实体可直接复用，哪些需增加关系或产品配置 |
 | D2 | Runtime 的所有权、共享授权、可见范围与并发容量 | 决定跨成员派发与故障接续 | Runtime 能否被多个项目 / Agent 使用，授权撤回如何影响在途 Run |
 | D3 | 重绑或换用协调 Agent 时如何处置旧执行 | 决定原机长期离线时的接手条件 | 结合宿主回执确认旧写入和工作副本隔离，按成员授权选择接手资源 |
 | D4 | 逻辑模块与实际部署边界 | 决定工程组织与数据事务边界 | 首期是否沿 Multica 单体扩展，哪些能力需要独立进程或存储 |
@@ -438,8 +431,8 @@ flowchart TB
 本架构进入详细技术设计前，应能对以下问题给出一致答案：
 
 - 一项工作只有一个 Issue 作为业务归属；任何 Run、SOP、交付和评价都能追溯到来源工作或明确的独立活动。
-- 成员、Agent、Squad 的责任身份与 Runtime、Session 的执行资源身份没有混淆。
-- 负责人自主推进、邀请协助、子 Issue 分工、Squad 负责和 SOP 委托可以按需组合，不存在默认双重协调者。
+- 能从 Issue 的指派和委托确认成员与 Agent 各自的责任，从 Run 确认其实际 Runtime 和 Session。
+- 负责人可以自主推进或按需委托。采用同项 Worker 协助、独立子 Issue 或 SOP 时，可查明每份交付由谁安排、由谁接收。
 - 中心协作不依赖某一成员的 Runtime 在线；本地执行失联不会抹掉共享工作事实。
 - 任一执行请求都沿 Multica 原派发链，能核对授权、实际启动、结果、取消和迟到回报。
 - 方法和资料从来源到选择、投递、使用均保留相应证据；没有证据的层级保持未知。

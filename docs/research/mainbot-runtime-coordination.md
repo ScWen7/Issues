@@ -50,7 +50,7 @@ flowchart TB
   MainBot --> Owner
 ```
 
-Main Bot 可以委派不同 Agent，而这些 Agent 的 Runtime 可以分别位于不同成员机器。它们不需要加入一个固定 Squad，也不需要由第二个 Leader 转派。
+Main Bot 可以委派不同 Agent，而这些 Agent 的 Runtime 可以分别位于不同成员机器。Main Bot 按该 Issue 的委托范围直接选择 Worker。
 
 ## 3. Multica 现有能力与真实约束
 
@@ -59,7 +59,7 @@ Main Bot 可以委派不同 Agent，而这些 Agent 的 Runtime 可以分别位�
 | Multica 能力 | 当前机制 | Main Bot 的用法 |
 |---|---|---|
 | Issue 触发 | Issue 指派、评论、状态和工作流入口触发 Agent Task | 将 Main Bot Agent 作为该 Issue 的协调执行主体 |
-| Agent 委派 | Issue 评论中的明确 Agent mention、子 Issue 指派 | Main Bot 直接选择获准 Agent，不必经过 Squad Leader |
+| Agent 委派 | Issue 评论中的明确 Agent mention、子 Issue 指派 | Main Bot 直接选择本次获准的 Agent |
 | 多 Runtime 执行 | 不同 Agent 分别绑定 Runtime；Daemon 按 Runtime 领取任务 | 不同 Worker Agent 可以在不同成员本地 Runtime 并行执行 |
 | Run / Task | Task 记录实际 Agent、Runtime、Issue、触发来源和结果 | 每次 Coordinator Turn 和 Worker 执行均有真实执行记录 |
 | Session | Task 完成后保存宿主 Session / Workdir 等连续性信息 | 尽可能续接同一 Agent 的宿主会话，但不把 Session 当作协调状态 |
@@ -74,11 +74,11 @@ Main Bot 可以委派不同 Agent，而这些 Agent 的 Runtime 可以分别位�
 - `server/internal/handler/daemon.go`：Daemon claim、Leader briefing 注入、Session 恢复
 - `server/pkg/db/queries/agent.sql`：`CreateAgentTask`、`ClaimAgentTask`
 
-### 3.2 两种协调入口
+### 3.2 普通 Agent 的协调入口
 
-团队将普通 Agent 指派为 Issue 的 Main Bot，并在工作约定中明确协调范围。它可直接执行、委派获准的 Worker，或选择局部 SOP。若团队明确把 Issue 指派给 Squad，则由原生 Leader 在该范围按 Squad 协议协调。两条入口共用 Issue 与 Task / Run。
+AgentPlatform 用普通 Agent 指派承载 Issue 的持续协调委托。获授权的 Agent 担任 Main Bot，可直接执行、委派 Worker 或调用局部 SOP。协调回合沿该 Agent 的普通 Task / Run 执行。
 
-原生 Leader 通常按 roster 分工，在一条委派评论中可明确提及多个成员，并记录当轮 Squad Activity。普通 Main Bot 使用普通 Agent Run 的权限与指令，`is_leader_task` 保留给实际 Leader Run。
+在 Multica 的另一条原生路径中，指派 Squad 会触发其 Leader，按 roster 分工，在一条评论中可提及多个成员，并记录 Squad Activity。`is_leader_task` 标记这种原生执行。
 
 ## 4. 跨 Runtime 动态委派
 
@@ -260,7 +260,7 @@ Main Bot 的 Agent 身份目前绑定一个 Runtime。把同一个 Agent 的任�
 
 ## 9. 与整体设计的衔接
 
-普通 Agent 的持续委托、可选 Squad Leader、Worker Run 和交付消费接入同一套对象关系。Issue 上记录当前授权及其范围，派发交给原生 Task / Run 与 Runtime。会改变后续工作的动作按当前授权与交付版本复核。具体次序见[生命周期与持续推进研究](mainbot-lifecycle-and-progress.md)。
+Issue 的工作约定记录 Main Bot 当前承担的协调范围。每个 Worker Run 可追溯到所属分工，派发和领取沿原生 Task / Run 与 Runtime。会改变后续工作的动作按当前授权与交付版本复核。具体次序见[生命周期与持续推进研究](mainbot-lifecycle-and-progress.md)。
 
 ## 10. 必须验证的场景
 

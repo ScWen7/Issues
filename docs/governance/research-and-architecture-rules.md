@@ -19,7 +19,7 @@ AgentPlatform 的目标是：成员把工作交给平台后，Main Bot 能利用
 ## 3. 保持职责与事实归属清晰
 
 - Issue 是业务工作和责任的权威归属。
-- Issue Owner 对目标、授权范围、业务决定和最终验收负责。
+- Issue Owner 对目标、授权范围和保留的业务决定负责。需要具名验收时，由工作约定指定的成员接受或退回交付。
 - Main Bot 是 Issue 级智能协调者，负责理解、规划、组织、委派、选择方法、持续推进和交付汇总。
 - Worker Agent 是受托执行主体；其权限和交付范围来自有效授权。
 - Runtime 是本地执行资源，不是业务负责人或协调者。
@@ -27,15 +27,11 @@ AgentPlatform 的目标是：成员把工作交给平台后，Main Bot 能利用
 - SOP 是可复用工作方法，不是 Assignee、额外协调者或所有 Issue 的必经模式。
 - 评价结论、交付证据和业务验收决定不能互相替代。
 
-一个 Issue 可以由 Member 负责，同时委托 Main Bot 协调；Owner、Coordinator、Executor 可以是不同主体。
+成员可以自行推进 Issue。委托 Agent 持续协调时，成员保留业务总责，将 Issue 指派给该 Agent 并明确授权。
 
 ## 4. Main Bot 是统一协调主体，不叠加调度层
 
-Main Bot 是当前产品目标中的 Issue 级主要协调者。它可以直接执行、委派一个或多个 Agent、跨 Runtime 组织工作、选择或组合 SOP，并根据结果重新规划。
-
-不得在 Main Bot 下面为了沿用旧概念而强制增加 Squad Leader 或第二层总协调者。Multica 现有 Squad Leader 的 Issue 触发、唤醒、任务领取和回报能力可以被改造复用；其固定 Squad Roster、必须委派、不得直接执行等约束不能未经论证地继承。
-
-Squad 是否保留为资源组织概念，不能预设为协作主线必需对象。不得为保留 Squad 而制造另一层调度权。
+Main Bot 是现有 Agent 在具体 Issue 上受托承担的协调职责。它在每轮执行中选择自行处理、委派获准的 Worker、拆分独立子 Issue 或调用 SOP，并根据实际结果安排下一步。派发、回唤和回报沿 Multica 的普通 Agent 与 Issue 入口。上游组织模型的行为和适用边界记录在[底座能力与边界](../architecture/governance-baseline.md)。
 
 ## 5. 优先复用 Multica，不复制控制平面
 

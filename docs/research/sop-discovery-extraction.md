@@ -75,7 +75,7 @@ LoopForge Main Bot 更开放：
 
 ### 2.4 角色边界
 
-| 维度 | Main Bot | Squad Leader |
+| 维度 | LoopForge Main Bot | Multica Squad Leader |
 |---|---|---|
 | 作用域 | 用户对话及关联工作 | 一个 Squad 获得的工作 |
 | 自己执行 | 可以 | Squad 设计原则上应委派，不能替代成员 |
@@ -84,7 +84,7 @@ LoopForge Main Bot 更开放：
 | 持续性 | Conversation / Workspace / Subagent Session | Issue / Task / Comment / Squad Activity |
 | 最有价值的观察 | 规划变化、工具使用、角色派发、结果消费 | 能力匹配、任务切分、委派、等待、反馈、再委派 |
 
-对 AgentPlatform 的启发：同一个 Coordinator 职责可以有开放式和 Squad 式两种运行模式，但它们的授权范围、可执行动作、工作上下文和观察事件不同。提炼机制应兼容两种模式，不能把其中一种当作唯一工作范式。
+AgentPlatform 可以从两种上游机制中提炼同一项工作的经验。对 Main Bot 组织的一次协作，沿 Issue、委派和实际 Run 查明谁作了分工、依据什么结果调整、哪个交接可以复用。比较两种上游实现时，保留各自的权限边界和证据来源。
 
 ## 3. 第一阶段：发现值得固化的方法
 
@@ -258,7 +258,7 @@ flowchart TD
 | Agent A（后端开发） | Backend Implementer |
 | Agent B（代码评审） | Independent Reviewer |
 | Agent C（测试） | Verification Engineer |
-| Squad Leader | Coordinator / Workflow Owner |
+| 在 Issue 上组织该项协作的 Agent | Coordinator |
 | 项目负责人 | Business Approver |
 
 角色需要描述：
@@ -324,8 +324,8 @@ Squad Leader 的动态协作更适合发现：
 - 来源 Issue；
 - 目标与验收要求；
 - Project / 工作类型；
-- Coordinator 类型及身份；
-- 参与成员、Agent、Squad；
+- 承担协调的成员或受托 Agent 及其授权范围；
+- 实际参与的成员、Agent 与各自分工；
 - 开始和结束边界；
 - 结果状态及其证据；
 - 是否存在授权和共享限制。
@@ -413,8 +413,8 @@ Squad Leader 的动态协作更适合发现：
 
 ## 9. 对 AgentPlatform 的阶段性设计启发
 
-1. **从 Issue 协作中观察，而不是另建一套独立的 Agent 过程采集系统。** 优先复用 Multica 的 Issue、Task、评论、Squad Activity、成员关系和执行记录，以及 Runtime 实际可回报的事实。
-2. **Main Bot 与 Squad Leader 都是重要的经验来源。** 前者更容易暴露动态规划和工具选择，后者更容易暴露角色分工、交接和反馈循环。
+1. **从 Issue 协作中观察。** 优先读取 Issue 上的委托、评论、Run、交付以及 Runtime 能实际回报的事实。
+2. **围绕分工与结果提炼方法。** 对比 Main Bot 如何选择工具、分配工作、处理 Worker 的反馈，找出在不同 Issue 中能复现的做法。
 3. **观察和提炼分离。** 原始工作事实先被保存；分析过程再将其转成 Episode、共同结构和候选流程。
 4. **不要求每个 Issue 都产出候选。** 大多数工作只需要正常完成；只有出现稳定重复模式或明确改进价值时才进入提炼。
 5. **候选 SOP 必须保留证据和反例。** 不能只展示成功样本，也要说明什么条件下不适用。

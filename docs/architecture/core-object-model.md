@@ -6,7 +6,7 @@
 
 1. **一项业务工作的唯一归属是 Issue。** 工作目标、范围、当前责任、业务决定和完成状态以 Issue 为准。
 2. **组织协作、流程编排和实际执行是不同维度。** Issue、SOP Execution、Run 不是三种可互换的任务。
-3. **责任主体不等于执行主体。** Member、Agent、Squad 可以承担不同责任或参与方式；Runtime 和 Session 是执行资源，不是负责人。
+3. **工作责任与执行资源分别记录。** 成员承担业务责任，成员或 Agent 可接手具体工作。Run 记录实际执行者、Runtime 和宿主 Session。
 4. **结果不等于证据，评价不等于验收。** 制品说明交付了什么；证据说明某项事实得到什么支持；评价给出分析结论；验收是有权主体对当前候选作出的业务决定。
 5. **定义、实例、版本和使用记录分开。** SOP、Skill、Rule 等定义可发布多个版本；一次工作固定实际采用的版本，后续变更不改写历史。
 6. **同一事实只由其权威来源维护。** 工作台汇集和呈现对象关系，不复制各来源的决定权。
@@ -15,7 +15,7 @@
 
 | 对象组 | 核心对象 | 主要职责 |
 |---|---|---|
-| 组织与范围 | Team、Project、Member、Agent、Squad | 界定协作范围、参与主体及组织关系 |
+| 组织与范围 | Team、Project、Member、Agent | 界定协作范围、参与主体及组织关系 |
 | 工作与责任 | Issue、工作约定、Decision、Project Workflow | 承载业务目标、责任、决定和工作生命周期 |
 | 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool 配置、Knowledge | 定义可复用的方法、规则、能力和资料 |
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
@@ -29,7 +29,7 @@
 
 ### 3.1 组织与参与主体
 
-| 对象 | 定义 | 不负责什么 |
+| 对象或职责 | 定义 | 边界 |
 |---|---|---|
 | Team | 人员、Agent、共享能力和项目的组织范围 | 不直接承载某项工作的业务生命周期 |
 | Project | 一组工作及其成员、工程资源、项目配置和工作约定的范围 | 不替代 Issue 成为单项工作的责任记录 |
@@ -37,10 +37,8 @@
 | Agent | 可被指派或受邀参与工作的智能执行主体 | 不等于 Runtime，也不天然拥有业务决定权 |
 | Main Bot / Coordinator | 现有 Agent 在一个 Issue 上受托持续协调的角色，可自行执行、委派 Worker、选择方法和汇总交付 | 权限来自本项工作约定与当前指派 |
 | Worker | Agent 在某次委派中承担执行或核验的角色，按约定交回产物、证据或阻塞原因 | 其权限限于该次委派，业务验收权由工作约定确定 |
-| Squad | 可被指派为 Issue 负责人、由 Leader 组织协作的智能体小队 | 不是 Issue 的替代物，也不是每个 Issue 必须经过的编排层 |
-| Leader | 在授权范围内代表 Squad 理解工作、安排参与者、跟进和汇总的协调角色 | 不因协调身份自动获得超出 Issue 和资源授权的决定权 |
 
-持续协调可以直接指派给承载 Main Bot 职责的 Agent。项目选择原生 Squad 作为 Assignee 时，由其 Leader 在该项授权范围内承担协调。一个 Issue 在同一范围内只有一方负责协调。子 Issue 有独立指派，受邀协助的 Agent 或 Squad 按邀请的范围交付。
+成员可自行组织工作。需要 Agent 持续协调时，有权成员在该 Issue 指派并授权一个 Agent 担任 Main Bot。Main Bot 按每份工作的需要选择获准的 Worker。同一 Agent 可以在一个 Issue 担任 Main Bot，在另一份委派中担任 Worker，权限分别取自相应工作约定。
 
 ### 3.2 工作与责任对象
 
@@ -150,9 +148,9 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 | 需要回答的问题 | 权威对象或主体 | 规则 |
 |---|---|---|
 | 这项业务工作是什么、当前到哪里 | Issue | 工作目标、责任、业务状态和完成条件以 Issue 为准 |
-| 谁推进当前工作 | Issue Assignee | 同一时点至多一个，可为 Member、Agent 或 Squad，按有效指派交接 |
-| 谁对业务目标、范围和授权负责 | Accountable Member（Issue Owner） | Agent 或 Squad 受托时，由项目分工或 Issue 上单列的成员关系确定人工总责人 |
-| 谁协调这项委托 | 被指派且获持续协调授权的 Main Bot，或获指派 Squad 的 Leader | 在当前 Issue 的授权范围内组织、接收和汇总，保留事项按工作约定交给有权成员 |
+| 谁推进当前工作 | Issue Assignee | 同一时点至多一个，可为 Member 或 Agent，按有效指派交接 |
+| 谁对业务目标、范围和授权负责 | Accountable Member（Issue Owner） | Agent 受托时，由项目分工或 Issue 上单列的成员关系确定人工总责人 |
+| 谁协调这项委托 | 受托持续协调的 Main Bot | 在当前 Issue 的授权范围内组织、接收和汇总，保留事项按工作约定交给有权成员 |
 | 哪段流程被委托、走到哪里 | SOP Execution / Node Activation | 只控制明确受托的流程范围；节点进展不替代 Issue 状态 |
 | 谁实际执行、执行发生了什么 | Run 及其宿主来源 | 执行 Agent、Runtime 和宿主回执描述该次执行。Run 的 `accountable_user_id` 用于追溯该次执行的人员归因，Issue 总责人及验收人分别从工作约定读取 |
 | 哪个会话延续了上下文 | Session | 仅提供宿主连续性，不决定工作或成本归属 |

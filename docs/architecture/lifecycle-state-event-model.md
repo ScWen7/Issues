@@ -253,7 +253,7 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 
 | 触发事实 | 权威转换 | 允许的后续动作 | 不允许的推断 |
 |---|---|---|---|
-| Issue 指派给 Agent / Squad | Issue 负责人变化 | 按资格安排受管执行，受托 Main Bot 或被指派 Squad 的 Leader 按范围协调 | 指派生效只能证明责任发生变化 |
+| Issue 指派给 Agent | Issue 负责人变化 | 按资格安排受管执行。工作约定授予持续协调权时，由该 Agent 担任 Main Bot | 指派生效只能证明责任发生变化 |
 | Worker 的终态或其他匹配事实触发已登记回唤 | 来源事实归原 Issue / Run，匹配回执供原生派发处理 | 现任协调方核对原委派、授权及结果版本，决定消费、补交、重排或交还 | 单次回唤不证明每份结果均已消费 |
 | SOP 节点满足前置 | Node Activation 进入 Ready | Agent / Script 节点请求原派发入口；人工节点在 Issue 等待决定 | Ready 不代表 Run 已存在 |
 | Runtime 领取执行 | Run 进入 Claimed | Daemon 准备环境并启动 | Claimed 不代表执行开始 |
