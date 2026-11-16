@@ -1,6 +1,6 @@
 # 成员本地执行与工作交接
 
-本专题涉及对象的状态语义、转换条件和跨层事件遵循[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)。本专题维护具体行为与适用边界，不另行定义冲突的状态体系。 Runtime 租约、旧 Daemon 隔离、取消回执、Run 幂等重取和接管遵循[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。
+上下文投递和执行授权遵循[跨层业务契约与协作协议](cross-layer-contracts.md)，Run 状态与事件遵循[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)，Runtime 租约、旧 Daemon 隔离、取消回执、Run 幂等重取和接管遵循[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本专题维护成员本地执行的具体行为与适用边界。
 
 在工作台把 Issue 指派给 Agent 后，由该 Agent 获准使用的本地 Runtime 领取并执行。成员也可以先在自己的 CLI 或 IDE 工作，在支持的入口中关联后续执行，或事后把选定的变更和报告交给团队。三种入口汇合到同一 Issue。Multica Run 记录一次受管执行，宿主 Session 负责对话连续性。团队按实际来源查看交付，每个成员以自己的身份和工具授权接续工作。[宿主能力矩阵](execution-capabilities.md)
 
