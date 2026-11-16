@@ -193,6 +193,58 @@ expected_revision 解决“我读取的版本是否仍然有效”，不等于�
 
 技术重试是对原执行的恢复关系；业务返工是新工作履行；同一命令的网络重送是原操作身份的重放。三者必须在记录中区分。只有业务目标、输入、候选、授权或受托范围发生了需要重新履行的变化，才创建新的业务 Attempt / 激活；HTTP 超时、通知丢失或 Agent Runtime 暂时离线本身不构成新业务 Attempt。
 
+### 5.6 三类业务激活的恢复身份
+
+稳定操作身份必须来自业务来源，不从 Task ID、Session ID 或一次 HTTP 请求临时生成后丢失。不同来源使用不同身份：
+
+| 业务触发 | 稳定身份 | 身份生效后必须绑定 | 禁止的替代判断 |
+|---|---|---|---|
+| Main Bot 首次激活 | Issue 当前指派 + 有效 Work Agreement / 持续授权代际 + 首次协调激活来源 | 唯一的首次协调 Task ID；如果已由兼容的现有 Task 覆盖，记录覆盖依据 | 仅凭 Issue 当前 Assignee 就推断 Main Bot 已启动；仅凭同 Agent 有一个旧 Task 就推断首次激活已完成 |
+| 一次性 Worker 委派 | 原 Comment ID + 目标 Agent ID + 触发类型 / 目标解析版本 | 该目标的 Task ID、被复用 Task 的覆盖证明、planned input 记录或明确阻塞结果 | 仅凭 Comment 已保存、Wakeup 已触发或评论 API 曾返回成功就推断 Worker 已接单 |
+| SOP 节点派发 | SOP Execution + Node Activation + Node Attempt + 本次 Run 调用身份 | 一个实际 Multica Task ID；同一 Node Attempt 可关联多个 Run，但每次 Run 调用各有自己的身份 | 仅凭 Node Activation 已 Ready 就推断 Run 已创建；仅凭 Run 终态就推断节点已消费结果 |
+
+**这三种身份不是三套新的任务系统。** 它们是已有业务权威对象上的派发来源身份。Main Bot 首次激活仍由 Issue 授权，Worker 委派仍由原 Comment 和当前授权决定，SOP 仍由 Node Activation / Attempt 决定。平台只需让“业务意图 → 原生 Task → 结果消费”的关联可持久查回。
+
+#### 5.6.1 派发与执行必须分开
+
+每种触发都必须能区分：
+
+1. 业务意图已生效；
+2. 派发意图已持久化；
+3. Multica Task 已创建或被证明由兼容 Task 覆盖；
+4. Task 已排队 / 已领取；
+5. Runtime 已实际 Start；
+6. 结果已由目标业务对象消费。
+
+前一状态不能替代后一状态。尤其是：
+- Issue 指派成功不是 Main Bot Run 已创建；
+- 评论创建成功不是每个 @Worker 已获得 Task；
+- SOP 节点 Ready 不是节点已执行；
+- Run completed 不是 Main Bot 或 Node Attempt 已消费；
+- Wakeup receipt 已消费不是被唤醒 Agent 已处理当前工作。
+
+#### 5.6.2 Task 创建后绑定回执丢失
+
+Task 创建与业务绑定之间可能出现响应丢失。恢复顺序必须固定：
+
+1. 先按业务来源身份查找已经绑定的 Task / Run。
+2. 若没有绑定，按 Multica 中已持久化的来源引用、触发评论、Agent、Issue、输入基准和授权代际查找候选 Task。
+3. 只有能证明唯一候选 Task 与本次业务意图完全匹配时，才补写绑定。
+4. 若存在多个候选、来源字段不足或版本不一致，保持 unknown 并对账；不能任选一个，也不能新建第二个。
+5. 只有能证明原 Task 未创建时，才用原业务身份重新派发。
+
+如果固定版 Multica 的 Task 字段和查询入口不足以查回稳定业务来源，必须在原生 Task 派发边界补足来源身份和唯一约束 / 查回能力；不在 AgentPlatform 再建一套 Run 队列。
+
+#### 5.6.3 结果消费是推进业务的唯一入口
+
+- Main Bot 消费 Worker 结果时，必须按原委派身份、目标 Agent、Task ID 和候选版本核对。一个 Wakeup 可合并多次状态变化，但 Main Bot 必须逐项核对尚未消费的委派。
+- Worker 结果迟到时归回原 Comment / 委派，不因 Issue 当前 Assignee 已变化而获得新授权。是否可采用由当前负责人按新工作约定决定。
+- SOP Node Attempt 消费结果时，必须匹配当前 Activation、Attempt、输入 Candidate 和执行契约。只有消费记录成功后才重新计算后继节点。
+- 旧激活、旧授权或旧候选的结果保留为历史证据，不能推进新的业务激活。
+- 消费动作本身必须可幂等查回；消费响应丢失时重复消费只返回原结果，不重复推进节点、创建后继 Run 或重复产生外部副作用。
+
+场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)。
+
 ## 6. 结果消费与交付一致性
 
 ### 6.1 生产与消费分离
