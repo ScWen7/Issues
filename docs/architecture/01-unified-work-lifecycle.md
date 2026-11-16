@@ -1,6 +1,6 @@
 # 研发工作的生命周期
 
-本专题涉及对象的状态语义、转换条件和跨层事件遵循[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)。本专题维护具体行为与适用边界，不另行定义冲突的状态体系。 涉及并发改派、候选换版与验收竞争、接管和旧执行隔离时，遵循[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。
+本专题中的工作约定和责任交接遵循[跨层业务契约与协作协议](cross-layer-contracts.md)，对象状态遵循[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)，并发改派、候选换版与验收竞争、接管和旧执行隔离遵循[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本专题维护 Issue 责任与工作生命周期的具体规则。
 
 团队在 Issue 上明确目标、负责人、分工和交付。成员可以从平台接下工作，也可以在本机开展调查后，把选定的结论、变更或报告交给团队。接手者在同一 Issue 找到现在要完成什么、哪些结果能用、还需要谁决定什么。[产品总览](overview.md) · [工作台入口](05-unified-workbench.md)
 
