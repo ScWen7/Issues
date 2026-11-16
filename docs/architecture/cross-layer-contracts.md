@@ -174,6 +174,8 @@ Main Bot 的每个协调回合沿普通 Task / Run 执行。需要等待时，�
 
 执行开始前重新核对授权、工作约定版本、激活代际和资源资格。准备期间若 Issue、Candidate 或授权发生变化，必须重新判断是否仍可启动。执行中撤权时停止新的受影响动作，并核对已发生的外部副作用。
 
+跨层派发不另建统一任务系统。Issue 首次协调激活、Comment 目标级 Worker 委派和 SOP Node Attempt 各自以原业务对象为权威来源，沿 Multica 原生 Task / Run 执行。三者的稳定来源身份、Task 绑定、Unknown 对账、恢复责任和结果消费按[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)执行。Main Bot 首次激活由 Issue 派发恢复入口接续；一次性 Worker 委派由评论目标恢复入口逐项接续；SOP 节点由流程推进器接续；Claim / Start 由 Multica 原生机制恢复；Run 终态由原业务接收方消费。Wakeup 只提供协调唤醒，不替代这些业务身份。
+
 ## 8. Delivery Contract：生产者如何交付，接收方如何消费
 
 Delivery Contract 定义生产者必须交付什么，以及接收方凭什么采用。它由 Work Contract 的完成要求和 / 或 SOP 节点的输出定义共同确定。
