@@ -38,7 +38,7 @@
 | 派发幂等与重复投递 | 原生队列、领取和重试 / 重跑关系已存在 | 各入口重复提交、超时重发、并发领取是否统一返回原安排 / Run，需按 Agent 指派、评论、Workflow、手动及恢复入口分别核对 |
 | Outbox / Inbox 与动作恢复 | Issue Wakeup 在源事务内记录匹配回执，派发与入队一起提交。重复通知可合并，已处理回执有保留期。[回执保留语义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L363-L373) | 此结论限于已登记的回唤。委派、交付消费及其他跨层写入的恢复，要按各自的权威来源和操作身份核对 |
 | Runtime 租约与旧执行隔离 | Daemon、Runtime 和 Run 具备领取、执行、取消及回报链路 | 租约过期、Daemon 失联、旧进程仍存活时的 fencing 和写入隔离覆盖尚未确认；停止请求不能替代实际终态 |
-| Artifact / Candidate 版本引用 | 评论附件可按附件 ID 打开具体版本 | 已知可固定附件引用；Candidate 组合、标准版本、接受与换版竞争的原子性仍需设计映射 |
+| Artifact / Candidate 版本引用 | 评论附件按文件名和规范化类型跨评论归组，可按附件 ID 定位某次上传。详情页复制的是按文件名查找最新上传的链接。[分组与版本定位](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/core/attachments/deliverables.ts#L31-L125) · [详情页复制链接](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/packages/views/issues/components/deliverables/deliverable-details.tsx#L101-L109) | 同一评论和各文件的最新版本都不足以确定一次验收的候选组合。交付要指明选定的附件或仓库修订。候选换版与接受并发时，检查、决定和后继消费如何固定组合与标准，仍需核对写入入口 |
 | 结果消费与迟到回执 | Run 谱系和 SOP 结果消费已有专题研究 | 迟到结果能否被可靠限制在原节点激活、旧候选或旧工作约定，需核对所有结果写入方 |
 | Usage 更正与重复上报 | Task Usage 有原生写入和累计口径 | 多来源请求身份、重复事件去重、分指标更正和迟到快照的并发合并仍有明确扩展需求 |
 

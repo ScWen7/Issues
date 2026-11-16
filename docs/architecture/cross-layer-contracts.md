@@ -180,7 +180,7 @@ Delivery Contract 定义生产者必须交付什么，以及接收方凭什么�
 
 ### 8.1 生产者交付
 
-生产者提交：
+成员可以直接从 Issue 提交所选材料，受管执行沿原 Run 回报。提交多份材料时，生产者在本次交付中指明同一候选的组成，检查者和下游据此引用当时的组合。
 
 - 具体 Candidate 及其组成 Artifact 版本；
 - 每个制品的生产者、来源、版本 / 摘要、代码或文件基准；
@@ -231,11 +231,11 @@ Delivery Contract 定义生产者必须交付什么，以及接收方凭什么�
 
 只有当发现具备复用价值，才进入改进提案：
 
-1. 引用原 Issue、Run、Candidate、Evidence、Evaluation 和 Finding。
+1. 指向来源 Issue 和支撑发现的具体证据。涉及受管执行、候选或独立评价时，引用相应 Run、Candidate 或 Evaluation。
 2. 说明根因假设及拟修改的知识、能力、SOP 或项目工作流。
-3. 资产维护者判断是否投入候选、回归样本和 Benchmark。
+3. 相应维护者判断是否投入候选、回归样本和 Benchmark。
 4. 候选在固定样本、标准和环境下与当前版本比较。
-5. 有权维护者审核并发布资产版本；项目维护者决定是否采用。
+5. 方法资产由维护者审核发布，项目可设为默认，负责人也可在授权内为本项选用。工作流或分工配置由有权成员在原项目或 Issue 决定生效范围及在途安排。
 6. 后续工作分别记录选择、投递、实际使用和结果，观察真实效果。
 
 Evaluation 只提供证据和结论，不自动生成提案、不自动发布资产，也不自动改变项目配置。
@@ -249,11 +249,11 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | 1. 建立工作 | Work Contract | 提出人、Issue 负责人及有权成员 | 目标、责任和完成要求足以开始；未决业务问题有明确处理人 |
 | 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人（获持续协调授权的 Agent 担任 Main Bot） | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
 | 3. 准备依据 | Context Contract / Capability Contract | 项目与资产配置、当前负责人、执行入口 | 必需输入有权、可读、版本固定；强制规则冲突已解决 |
-| 4. 授权执行 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
-| 5. 生产结果 | Execution Contract / Delivery Contract | 成员、Agent、Script、SOP 节点 | 实际结果与来源回执归回正确 Run / Attempt / Issue |
+| 4. 派发受管执行时 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
+| 5. 交回结果 | Delivery Contract | 成员或受管执行者 | 成员提交的选定版本和署名说明归原 Issue。受管执行附实际 Run，涉及 SOP 时关联本轮尝试 |
 | 6. 消费结果 | Delivery Contract | SOP 后继节点、子 Issue 负责人或原 Issue 负责人 | 当前消费者独立确认版本、输入条件、证据和缺项 |
 | 7. 决定与交接 | Work Contract / Delivery Contract | Issue 有权主体、Project Workflow | 接受、退回、例外或责任交接明确；完成条件满足才完成 Issue |
-| 8. 评价与改进 | Feedback Contract | 负责人、评价器、资产和项目维护者 | 本次问题已处理；跨工作改进经过审核、发布和项目采用 |
+| 8. 需要反馈时 | Feedback Contract | 负责人、受托节点、评价器或相应维护者 | 本项发现回到当前负责人或受托节点修正。跨工作改进按变更对象审核发布或调整配置，供后续工作选用并验证效果 |
 
 ### 10.1 人工介入与自动接续
 

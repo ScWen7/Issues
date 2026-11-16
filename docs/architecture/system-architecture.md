@@ -49,6 +49,7 @@ flowchart TB
   end
   Member --> UI
   Agent --> UI
+  UI -->|"创建或关联 Issue"| Work
   UI --> Read
   Read --> Work
   Org --> Work
@@ -69,9 +70,13 @@ flowchart TB
   Observation --> Daemon
   Daemon -->|"Run 回执 / Usage / Artifact"| Multica
   Multica --> Delivery
+  Work -->|"成员提交所选版本与署名说明"| Delivery
+  Delivery -->|"节点核对本轮候选与证据"| Flow
+  Flow -->|"交还出口或请求决定"| Work
   Delivery -->|"当前工作消费"| Work
   Delivery -->|"按需评价"| Insight
-  Insight -->|"审核发布、项目采用"| Method
+  Insight -->|"资产维护者审核发布方法"| Method
+  Insight -->|"有权成员在项目内采用配置变更"| Org
   Insight --> Read
   Delivery --> Read
   Work --> Read
@@ -105,7 +110,7 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 - **流程编排**只管理 Issue 明确委托的范围。本次 SOP Execution 按固定定义判断节点就绪、核验、返工和出口。工作负责人或受托 Main Bot 接回其结果，并负责 SOP 范围以外的分工和决定请求。
 - **执行集成**把中心的授权安排交给 Multica 原生 Run / Daemon 链。Backend 适配具体宿主。Runtime 是执行资源，Agent 是执行主体，Session 是宿主连续性，三者不能合并。成员的私人活动只有在授权共享且来源可识别时才进入平台记录。
 - **交付与证据**将交付了什么和凭什么相信分开。Artifact 指向具体版本，Candidate 固定交付组合，Evidence 支持具体事实，Delivery Record 汇总接收方消费结果。生产方报告成功不代表接收方接受。
-- **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。Finding 可先帮助当前 Issue 修正，只有具有跨工作价值时才进入提案、对照、审核和发布。发布后由项目采用，后续工作记录实际使用和效果。
+- **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。当前 Issue 可依据发现直接修正。跨工作改进经对照和审核，按对象发布方法或调整项目配置。效果从后续工作实际使用的版本和交付中核对。
 - **工作台与查询**是统一入口而不是新业务核心。展示状态、等待原因和下一责任人；所有写操作回到拥有该事实决定权的模块或 Multica 原生入口。
 
 ## 4. 五层职责与模块映射
@@ -120,7 +125,7 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 | 第四层：执行与回报 | E 执行集成、I 宿主适配、Multica | Run / Runtime / Session / Observation / Usage 原始记录 | Issue 或 SOP 授权、上下文、Runtime 资格 |
 | 第五层：度量、评价与改进 | F 交付证据、G 度量改进 | Artifact / Candidate / Evidence / Delivery / Evaluation / Release | Run、工作约定、检查标准、授权与来源 |
 
-交付与证据 F 是第四层结果进入业务消费和第五层评价的共同边界，不是独立的第六条工作流。工作台 H 横跨五层读取与呈现，但不拥有任何一层的业务决定权。
+成员提交的成果和第四层回报的执行结果，经 F 形成可交接的候选与证据，供 Issue、受托 SOP 和第五层评价分别取用。工作台 H 横跨五层读取与呈现，但不拥有任何一层的业务决定权。
 
 ## 5. 中心协作与成员本地 Runtime 边界
 
@@ -233,7 +238,7 @@ flowchart TB
 
 ## 7. Multica、TeamAI、LoopForge 的融合关系
 
-### 7.1 三者不是三套平行平台
+### 7.1 三个上游的分工
 
 | 来源 | 在 AgentPlatform 中承担的角色 | 采用的机制 | 不引入的重复能力 |
 |---|---|---|---|
@@ -243,35 +248,31 @@ flowchart TB
 
 ~~~mermaid
 flowchart TB
-  Work["Multica · Issue / 指派 / Project Workflow"]
-  Method["TeamAI 思路 · 项目方法 / Skill / Role / Driver"]
-  SOP["LoopForge 思路 · SOP 依赖 / 节点核验 / 定向返工"]
-  Run["Multica · Run / Runtime / Daemon / Backend"]
-  Evidence["统一交付证据与 Usage"]
-  Improve["LoopForge + TeamAI 思路<br/>Evaluation / Benchmark / 改进候选"]
-  Release["审核发布 / 项目采用"]
-  Work -->|"工作负责人或 Main Bot 直接派发"| Run
-  Work -->|"委托稳定步骤"| SOP
-  Work -->|"工作约定与责任"| Method
-  Method -->|"选版与上下文投递"| Run
-  SOP -->|"就绪节点请求执行"| Run
-  Run --> Evidence
-  Evidence -->|"当前工作消费"| Work
-  Evidence -->|"按需评价"| Improve
-  Improve --> Release
-  Release --> Method
-  Release --> Work
+  Work["Multica · Project / Issue"]
+  Method["TeamAI 机制 · 项目方法与获准上下文"]
+  SOP["LoopForge 机制 · 受托 SOP"]
+  Run["Multica · Run / 成员 Runtime"]
+  Delivery["候选交付与检查证据"]
+  Method -->|"本项适用的规则与资料"| Work
+  Method -->|"选定版本及授权输入"| Run
+  Work -->|"成员提交所选本地成果"| Delivery
+  Work -->|"负责人安排受管执行"| Run
+  Work -->|"委托明确的工作范围"| SOP
+  SOP -->|"就绪节点沿原入口派发"| Run
+  Run -->|"回报成果与来源"| Delivery
+  Delivery -->|"节点按本轮尝试核验或返工"| SOP
+  SOP -->|"交还出口或请求决定"| Work
+  Delivery -->|"按工作约定接收或转交验收"| Work
 ~~~
 
 ### 7.2 关键融合约束
 
-- Multica 的 Issue 保存有效委托。Main Bot 沿原生派发组织 Worker，以 Issue Wakeup 接续协调，再核对原 Run、候选和证据。
-- Main Bot 可将稳定步骤委托给既有 SOP，接收该次流程的出口结果。超出授权的决定交给 Issue 上约定的成员。
+- Multica 的 Issue 保存工作约定和责任。成员可以从中心开工，也可从本地关联工作或事后交回获准共享的成果。接手者从同一 Issue 找到所用版本、检查结果和待决事项，按自己的权限取用。
+- 工作负责人可直接推进或把稳定步骤交给 SOP。Issue 指派给 Agent 并授予持续协调权时，由该 Agent 担任 Main Bot，自行安排执行、协助、子项或 SOP。需要接续已登记的协调时，沿原生 Issue Wakeup 重读委托与结果。
 - TeamAI 的 Driver 只负责约定步骤的领取、确认和报告；真实执行仍由 Multica 原 Run / Runtime 链承载。
 - LoopForge 的节点判断、结果消费和返工作用于 SOP Execution / Node Activation，不另建任务身份。
 - 执行计量沿原生产 Run 归集。评价和 Benchmark 产生自己的执行记录与成本，不回写污染生产执行成本。
-- 评测结果先服务当前交付；跨工作方法改进必须有候选版本、可比样本、成功标准、审核和发布。
-- 发布的 Skill、Rule、Playbook、SOP 或流程配置由项目采用；后续 Issue 记录实际使用版本和结果。
+- 当前交付的检查和评价供负责人或受托节点处理本项问题。有跨工作价值的发现才进入候选对照，按变更对象决定发布或配置生效。后续实际效果见下文第 9 节。
 
 ## 8. 团队 Wiki、项目资料与代码 Wiki 的扩展接入
 
@@ -315,25 +316,32 @@ flowchart TB
   Proposal["跨工作 Improvement Proposal"]
   Benchmark["固定样本与标准的 Benchmark"]
   Release["审核发布 Release"]
-  Adoption["项目采用"]
-  Next["后续 Issue 固定实际使用版本"]
+  Change["有权成员调整项目工作流或分工"]
+  Next["后续 Issue 的实际使用记录"]
   Outcome["观察真实质量与成本效果"]
-  Issue --> Run --> Delivery --> Consume
+  Issue -->|"成员提交所选成果"| Delivery
+  Issue -->|"受管执行"| Run --> Delivery
+  Delivery --> Consume
   Consume -->|"缺陷或缺项"| Finding
   Finding -->|"本项修正"| Issue
   Delivery -->|"有评价价值时"| Evaluation
   Run -->|"评价输入"| Evaluation
   Evaluation --> Finding
   Finding -->|"有跨工作价值时"| Proposal
-  Proposal --> Benchmark --> Release --> Adoption --> Next --> Outcome
-  Outcome -->|"形成新证据"| Proposal
+  Proposal --> Benchmark
+  Benchmark -->|"方法资产通过审核"| Release
+  Benchmark -->|"项目配置获准变更"| Change
+  Release -->|"按项目默认或本项选择实际使用"| Next
+  Change -->|"适用的工作按新配置推进"| Next
+  Next --> Outcome
+  Outcome -->|"有新的跨工作发现时"| Proposal
 ~~~
 
 ### 9.1 三种不同粒度
 
 1. **本次交付反馈。** 发现问题后，当前负责人或受托 SOP 决定修正、返工、等待或接受例外。无需先建立改进项目。
 2. **单次执行评价。** 对 Run、Candidate 或交付做按需评价，结果作为当前负责人和维护者的证据。评价不是业务验收。
-3. **跨工作自改进。** 重复出现或有推广价值的问题形成 Proposal；固定候选、依赖、Benchmark 样本、评价器和成功标准，比较后由维护者审核发布；项目决定是否采用，后续工作验证实际效果。
+3. **跨工作自改进。** 重复出现或有推广价值的问题形成 Proposal；维护者固定候选、样本和成功标准进行对照。团队方法由资产维护者审核发布，项目可设为默认，负责人也可为本项选用获准版本。工作流或分工配置由有权成员在原项目或 Issue 指明生效范围并安排在途工作。后续按实际使用的版本或配置核对质量、返工和可获知的成本。
 
 ### 9.2 成本归属原则
 
@@ -366,10 +374,12 @@ flowchart TB
   Context --> Execution
   Workflow -->|"仅就绪节点"| Execution
   Execution --> Delivery
+  Work -->|"成员的直接交付"| Delivery
   Delivery --> Work
   Delivery --> Workflow
   Delivery --> Improve
-  Improve -->|"审核发布与项目采用"| Context
+  Improve -->|"已审核发布的方法"| Context
+  Improve -->|"有权成员变更项目配置"| Org
   Improve -->|"效果反馈"| Work
   Adapters --> Context
   Adapters --> Execution
@@ -389,7 +399,7 @@ flowchart TB
 - 方法与上下文依赖组织范围和 Issue 工作约定；不直接改变 Issue 状态或启动执行。
 - 流程编排依赖 Issue 的明确委托、固定 SOP 版本和交付契约；只能通过原派发入口请求执行。
 - 执行集成依赖有效授权与上下文引用；只报告执行事实，不决定业务验收。
-- 交付与证据消费执行结果；不能替生产方制造执行事实，也不能替 Issue 决定接受。
+- 交付与证据接收成员署名提交和受管执行结果，按具体版本交给 Issue 或受托节点，由接收方核验。
 - 度量评价与改进读取生产记录和交付证据；不能成为生产派发的必经中间层。
 - 工作台不直接写其他模块的存储，不在 UI 中重实现业务规则；命令交给权威入口。
 - 来源与宿主适配只负责连接、协议转换和来源证据；不拥有 Issue、Candidate 或 Release 的业务决定权。
@@ -418,7 +428,7 @@ flowchart TB
 | D3 | 重绑或换用协调 Agent 时如何处置旧执行 | 决定原机长期离线时的接手条件 | 结合宿主回执确认旧写入和工作副本隔离，按成员授权选择接手资源 |
 | D4 | 逻辑模块与实际部署边界 | 决定工程组织与数据事务边界 | 首期是否沿 Multica 单体扩展，哪些能力需要独立进程或存储 |
 | D5 | 跨模块写入、事件投递、幂等与恢复的实现映射 | 决定状态一致性和故障恢复 | 逐项映射 Multica 现有事务、队列、回执与缺口，不预设新总线 |
-| D6 | Artifact / Candidate / Delivery 与 Multica 原生附件和仓库交付的映射 | 决定交付版本、检查和验收的权威引用 | 识别原生附件 ID、提交基准、候选组合及消费记录的最小扩展 |
+| D6 | Artifact / Candidate / Delivery 与 Multica 原生附件和仓库交付的映射 | 决定交付版本、检查和验收的权威引用 | 单份附件可按 ID、仓库内容可按修订定位。需核对组合候选换版与接受并发时，各写入入口如何把检查、决定和后继消费固定到当时的材料及标准 |
 | D7 | Usage 原生单位、Credits、Stage 与多源观察的统一归集 | 决定成本覆盖率和去重 | 逐宿主确认上报字段、原生身份、修正语义；缺失值保持未知 |
 | D8 | TeamAI Driver 与各宿主的运行时支持范围 | 决定步骤协议能否跨 Codex、Claude Code、Qoder、CodeBuddy | 分宿主确认领取、确认、报告、取消与恢复能力 |
 | D9 | 将 Issue 委托与在途回唤、SOP 出口的消费对应到现有写入入口 | 决定撤权、同一 Agent 再次获派或候选换版时哪些结果仍适用 | 核对各入口能否识别本次委托、原分工及已消费版本 |
@@ -434,7 +444,7 @@ flowchart TB
 - 能从 Issue 的指派和委托确认成员与 Agent 各自的责任，从 Run 确认其实际 Runtime 和 Session。
 - 负责人可以自主推进或按需委托。采用同项 Worker 协助、独立子 Issue 或 SOP 时，可查明每份交付由谁安排、由谁接收。
 - 中心协作不依赖某一成员的 Runtime 在线；本地执行失联不会抹掉共享工作事实。
-- 任一执行请求都沿 Multica 原派发链，能核对授权、实际启动、结果、取消和迟到回报。
+- 成员直接交付时能核对署名、选交版本和可读材料。受管执行请求沿 Multica 原派发链，能核对授权、实际启动、结果、取消和迟到回报。
 - 方法和资料从来源到选择、投递、使用均保留相应证据；没有证据的层级保持未知。
 - 交付、证据、评价、验收、发布和采用是不同事实，候选换版不污染旧结果。
 - 团队 Wiki、项目资料和代码 Wiki 可以独立启用，不成为普通协作的基础设施前置条件。

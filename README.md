@@ -4,13 +4,11 @@
 
 ## 核心架构
 
-整体系统模块、中心与本地 Runtime 边界、五层映射及 Multica / TeamAI / LoopForge 融合关系见[整体系统架构与模块边界](docs/architecture/system-architecture.md)。
+从[一项工作的核心流程](docs/architecture/overview.md#4-一项工作的核心流程)看成员怎样发起或接回工作、取用项目方法、提交成果，以及下一位负责人怎样检查和接手。成员可以亲自推进，也可以将持续协调委托给一个 Agent，由它在授权内选择执行、分工或使用 SOP。工作台贯穿这些环节。
 
-从[架构总览](docs/architecture/overview.md)进入正式设计；核心对象的权威定义见[核心对象模型](docs/architecture/core-object-model.md)，其状态转换和跨层事件见[统一生命周期、状态机与事件模型](docs/architecture/lifecycle-state-event-model.md)，并发与恢复规则见[核心协作一致性与并发控制模型](docs/architecture/core-consistency-concurrency.md)，跨层协作约定见[跨层业务契约与协作协议](docs/architecture/cross-layer-contracts.md)。它说明中心协作、成员本机和资料来源各自维护什么事实，五项核心职责怎样配合，以及一次工作从发起、执行到交付和后续改进的条件。[系统边界](docs/architecture/overview.md#1-系统边界) · [职责分层](docs/architecture/overview.md#3-核心职责分层) · [核心流程](docs/architecture/overview.md#4-一项工作的核心流程)
+[架构总览](docs/architecture/overview.md)说明中心、成员本机和资料来源各自维护哪些事实。[整体系统架构与模块边界](docs/architecture/system-architecture.md)说明五项职责如何结合 Multica、TeamAI 和 LoopForge 的机制。对象、状态、并发和交接分别见[核心对象模型](docs/architecture/core-object-model.md)、[统一生命周期](docs/architecture/lifecycle-state-event-model.md)、[协作一致性与并发控制](docs/architecture/core-consistency-concurrency.md)和[跨层业务契约](docs/architecture/cross-layer-contracts.md)。
 
 ## 五个设计专题
-
-LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究见[LoopForge SOP 生命周期研究](docs/research/loopforge-sop-lifecycle.md)；从实际 Agent 分工与交付中发现和提炼 SOP 的研究见[SOP 发现与提炼机制](docs/research/sop-discovery-extraction.md)，以及[Main Bot 跨 Runtime 持续协调机制](docs/research/mainbot-runtime-coordination.md)和[Main Bot 的 Issue 工作组织模型](docs/research/mainbot-issue-operating-model.md)，以及[Main Bot 生命周期与持续推进模型](docs/research/mainbot-lifecycle-and-progress.md)。这些文档记录源码依据与研究结论，不替代本项目正式架构决策。
 
 | 要了解的问题 | 设计正文 |
 |---|---|
@@ -29,3 +27,5 @@ LoopForge 的 SOP 形成、AI 编排、执行消费与评价演进源码研究�
 ## 查设计与依据
 
 对象含义见[统一术语](CONTEXT.md)。Multica 原生覆盖、项目配置与需要补充的能力见[底座能力与边界](docs/architecture/governance-baseline.md)，各宿主可观察的事实见[宿主能力矩阵](docs/architecture/execution-capabilities.md)。源码核对、场景假设和历史实验按版本收录在[源码与研究](docs/research)。
+
+流程研究涵盖 [SOP 的发现与提炼](docs/research/sop-discovery-extraction.md)及 [LoopForge SOP 生命周期](docs/research/loopforge-sop-lifecycle.md)。持续委托的研究涵盖 [Issue 内的分工](docs/research/mainbot-issue-operating-model.md)、[跨 Runtime 协调](docs/research/mainbot-runtime-coordination.md)及[等待与回唤](docs/research/mainbot-lifecycle-and-progress.md)。

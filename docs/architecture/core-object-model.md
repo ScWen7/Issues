@@ -114,7 +114,7 @@ Run 也可服务 SOP 节点、评价或实验。一次 SOP 节点尝试可引用
 | Evidence | 对某项要求、对象或执行事实的可核查观察 | 记录来源、主体、时间、环境、方法、适用版本和结论 |
 | Delivery Record | 一次可追溯的交付记录，组合引用 Candidate、适用要求、制品、检查结论、缺项和决定 | 回答交付了什么、依据什么、由谁生产、当前是否被接受 |
 
-Artifact 可以被多个工作引用，但每次消费都要保留原生产归属和版本。Candidate 不是某个文件名或最新附件，而是明确版本的交付组合。Candidate 变化后，原 Evidence 和检查报告仍指向旧对象；是否适用于新候选必须重新判断。
+成员或受管执行交付时，按本次工作约定指明哪些附件 ID、仓库修订或其他制品版本共同组成 Candidate。每个接收方记录自己实际取用的候选及用途。同一 Artifact 可被多个工作引用，并保留原生产归属。候选换版后，既有检查和决定仍指向原组合，接收方按变化范围判断哪些依据可继续使用。
 
 Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录、文件回读、确定性检查、独立审查和业务决定分别标明来源，不得互相冒充。
 
@@ -141,7 +141,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 - Run 由 Agent 在获准 Runtime 上执行；Session 提供宿主连续性，但不拥有工作归属。
 - Run 或成员工作可产生 Artifact；Artifact 的具体版本组成 Candidate。
 - Evidence 针对 Candidate、要求或执行事实；Delivery Record 汇总交付、证据、缺项和决定。
-- Evaluation 引用 Run、Candidate 或资产；Finding 可产生 Improvement Proposal，经 Benchmark 和审核形成 Release，再由 Project 采用。
+- Evaluation 引用 Run、Candidate 或资产。具备复用价值的 Finding 可形成 Improvement Proposal。经对照和审核后，资产维护者发布新版本，供项目或具体 Issue 按权限选用。涉及项目工作流或分工的变更由有权成员在原项目配置或 Issue 决定中采用。
 
 ## 5. 工作归属、执行归属与决定权
 
@@ -157,7 +157,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 | 实际交付了什么版本 | Artifact / Candidate / Delivery Record | 固定具体修订或附件版本，不以“最新”代替历史引用 |
 | 某项要求是否得到支持 | Evidence / Evaluation | Evidence 保留事实来源；Evaluation 给出有边界的判断 |
 | 是否接受本项交付 | Issue 上有权的接受主体及 Decision | 按当前 Candidate 和有效工作约定作决定 |
-| 哪个方法可以供后续使用 | 资产维护者发布的 Release、项目采用记录 | 发布、采用和实际使用分别记录 |
+| 哪个方法可以供后续使用 | 资产维护者发布的 Release、项目配置及本项选择 | 后续工作可追溯项目默认或本项选用的版本，并按证据记录实际使用 |
 
 ## 6. 必须保持的对象不变量
 

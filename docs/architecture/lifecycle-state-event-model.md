@@ -210,7 +210,7 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Adopted | 项目已决定在声明范围采用该版本或配置 |
 | Rejected / Withdrawn | 提案被拒绝或撤回，保留依据 |
 
-Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用。实际选择、投递和使用在对应工作与执行记录中体现。
+方法资产获批后由维护者发布，项目可将它设为默认，工作负责人也可在授权范围内为本项选用。若批准的是项目工作流或分工配置，有权成员直接在原项目或 Issue 记录生效范围及在途安排。后续工作分别记录本次选择、投递和可核对的实际使用。
 
 ## 10. 跨对象事件模型
 
@@ -258,13 +258,15 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 | SOP 节点满足前置 | Node Activation 进入 Ready | Agent / Script 节点请求原派发入口；人工节点在 Issue 等待决定 | Ready 不代表 Run 已存在 |
 | Runtime 领取执行 | Run 进入 Claimed | Daemon 准备环境并启动 | Claimed 不代表执行开始 |
 | 宿主确认开始 | Run 进入 Running | 收集可观察活动、结果和用量 | Session 或进程句柄不必然证明业务已开始 |
+| 成员从本地交付 | 原 Issue 记录提交者、所选材料及对应版本 | 接收方按自己的读权取用并核对本项要求 | 成员署名只证明本次提交，关联宿主活动须另有来源依据 |
 | Run 产生终态 | Run 记录真实终态 | 对应 Attempt 接收结果，节点按契约判断；负责人可检查 Candidate | Run 成功不代表节点成功、候选接受或 Issue 完成 |
 | 节点结果满足契约 | Node Activation 进入 Succeeded | 激活满足依赖的后继节点，或准备 SOP 出口 | 不能完成超出 SOP 授权范围的 Issue |
 | SOP 出口交回 | SOP Execution 进入 Returned 或 Completed | Issue 负责人或 Project Workflow 消费结果并安排下一责任 | SOP 返回不自动改变 Issue 为 Done |
 | Candidate 被接受 | Issue 记录针对当前候选的有效 Decision | 满足全部完成条件时，Issue 可完成 | 旧候选的接受不能用于新候选 |
 | Issue 被取消 | Issue 记录业务取消决定 | 撤销后续派发并分别处理在途 SOP / Run | Issue Cancelled 不代表所有 Run 已 Cancelled |
 | Evaluation 完成 | Evaluation 保存独立结论 | 维护者评估是否提出改进 | Evaluation 通过不自动发布资产 |
-| Release 发布并被项目采用 | 资产发布和 Project Adoption 分别记录 | 新工作按适用范围选用版本 | 采用不证明每个工作都已投递或使用 |
+| 方法资产发布 | Release 固定审核通过的版本和适用范围 | 项目可设为默认，或由负责人在获准 Issue 内选用 | 发布和选版均不证明实际使用 |
+| 项目批准工作流或分工变更 | 有权成员在原配置或 Issue 记录范围及在途安排 | 适用工作按该决定继续，并记录实际使用的配置 | 新配置不自动改变既有交付或验收 |
 
 ## 12. 重试、返工、取消与接管
 
