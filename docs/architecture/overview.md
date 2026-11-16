@@ -14,7 +14,7 @@ AgentPlatform 面向使用各自本地 Agent 工具的研发团队。团队在�
 
 ## 2. 核心对象模型
 
-系统对象按组织与范围、工作与责任、方法与能力、流程实例、执行资源与记录、交付与证据、评价与演进划分。**Issue 是业务工作与责任的权威归属；SOP Execution 管明确受托的流程范围；Run 记录真实受管执行；Session 只提供宿主连续性。** Artifact、Candidate、Evidence、Delivery Record、Evaluation 和 Decision 分别表达交付内容、交付组合、事实依据、交付汇总、评价结论和业务决定，不能互相替代。完整定义、对象关系、事实归属和不变量见[核心对象模型](core-object-model.md)。对象各自的生命周期、状态转换、事件因果和跨层联动见[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)。
+系统对象按组织与范围、工作与责任、方法与能力、流程实例、执行资源与记录、交付与证据、评价与演进划分。**Issue 是业务工作与责任的权威归属；SOP Execution 管明确受托的流程范围；Run 记录真实受管执行；Session 只提供宿主连续性。** Artifact、Candidate、Evidence、Delivery Record、Evaluation 和 Decision 分别表达交付内容、交付组合、事实依据、交付汇总、评价结论和业务决定，不能互相替代。完整定义、对象关系、事实归属和不变量见[核心对象模型](core-object-model.md)。对象各自的生命周期、状态转换、事件因果和跨层联动见[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)。多主体并发、跨层动作恢复、版本消费和旧执行隔离见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。
 
 ## 3. 核心职责分层
 
