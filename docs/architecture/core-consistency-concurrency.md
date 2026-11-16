@@ -243,7 +243,7 @@ Task 创建与业务绑定之间可能出现响应丢失。恢复顺序必须固
 - 旧激活、旧授权或旧候选的结果保留为历史证据，不能推进新的业务激活。
 - 消费动作本身必须可幂等查回；消费响应丢失时重复消费只返回原结果，不重复推进节点、创建后继 Run 或重复产生外部副作用。
 
-场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)；三类身份、责任归属、派发绑定和结果消费的收敛契约见[最小派发绑定与结果消费契约](../research/d5-minimum-dispatch-consumption-contract.md)。
+场景取证和故障矩阵见[业务触发与恢复闭环](../research/d5-business-trigger-recovery.md)；三类身份、责任归属、派发绑定和结果消费的收敛契约见[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)。
 
 ### 5.7 原生 Task 来源证据的使用边界
 
