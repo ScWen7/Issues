@@ -152,7 +152,7 @@ Evaluation 是业务评价记录，Evaluation Run 是实际执行。Evaluation �
 | VS-1 · 委派与执行 | Main Bot 首次激活、一次 Worker 委派、原生 Task / Run | 真实 Runtime Start、Task ID 绑定、断联恢复不重复创建 | 委派身份、Task 谱系、回执 |
 | VS-2 · 交付与验收 | Artifact、Candidate manifest / Generation、Evidence Applicability、Acceptance Decision、Completion Gate | 固定版本可回读；Candidate 替代、验收、权限撤销、PR 集合变化和 Issue Done 竞争只有一个符合条件的结果 | 旧 Candidate、旧 Evidence、旧 Decision、来源失效记录 |
 | VS-3 · 评价与预算 | 固定目标快照的 Evaluation、全范围预算预留、独立治理用途 Task / Run、Finding 消费 | 真实 Runtime 执行；Evaluation 与 Task 双向查回；不污染生产 coalescing / Session / Wakeup；预算、Usage 和 Finding 幂等 | Evaluation 输入、预算预留 / 结算、Task / Run / Usage 与 Finding 归属 |
-| VS-4 · 改进发布与采用 | Proposal、固定样本 Benchmark、Release、Project Adoption | 有权审核；后续工作实际投递 / 使用版本可核对 | 候选、实验、审核、发布和采用历史 |
+| VS-4 · 改进发布与采用 | Proposal Candidate Revision、固定样本 / 双臂 Benchmark、不可变 Release、Project Adoption、Actual Usage 与生产 Observation | 可比配对与硬门槛有效；有权审核；后续生产工作证明实际选择 / 投递 / 使用；退化可回退且保留历史 | 候选修订、实验 / Trial、Release、Adoption、Usage 与生产效果证据 |
 
 先完成 VS-0 到 VS-2，证明平台真实工作链；再接 VS-3；最后接 VS-4。VS-4 不是首个工作交付的阻断前置，但它是完整持续改进闭环的最终验证。
 
@@ -201,6 +201,6 @@ Evaluation 是业务评价记录，Evaluation Run 是实际执行。Evaluation �
 
 当前已经具备进入详细技术设计的统一边界，但还不能据此宣称已完成可直接开发的数据库 / API 方案。
 
-VS-0 / VS-1 的逻辑接口、事务边界、故障恢复和验收条件见[业务意图身份、Task 绑定与执行恢复契约](vs0-vs1-dispatch-binding-contract.md)。VS-2 的 Artifact、Candidate、Evidence、Acceptance 与 Completion Gate 技术契约见[VS-2 技术承载契约](vs2-candidate-acceptance-technical-contract.md)，其 Multica 当前附件 / PR 路径证据见[VS-2 源码取证](../research/vs2-multica-delivery-source-evidence.md)。VS-3 的 Evaluation 身份、独立 Task / Run、治理用途隔离、预算预留 / 结算和 Finding 消费契约见[VS-3 技术承载契约](vs3-evaluation-technical-contract.md)，Multica pending 去重、Session 恢复、Wakeup 和 Usage 的适配缺口见[VS-3 源码取证](../research/vs3-evaluation-multica-runtime-evidence.md)。下一步进入 VS-4：Benchmark、Release、Project Adoption 与后续实际使用证据。
+VS-0 / VS-1 的逻辑接口、事务边界、故障恢复和验收条件见[业务意图身份、Task 绑定与执行恢复契约](vs0-vs1-dispatch-binding-contract.md)。VS-2 的 Artifact、Candidate、Evidence、Acceptance 与 Completion Gate 技术契约见[VS-2 技术承载契约](vs2-candidate-acceptance-technical-contract.md)，其 Multica 当前附件 / PR 路径证据见[VS-2 源码取证](../research/vs2-multica-delivery-source-evidence.md)。VS-3 的 Evaluation 身份、独立 Task / Run、治理用途隔离、预算预留 / 结算和 Finding 消费契约见[VS-3 技术承载契约](vs3-evaluation-technical-contract.md)，Multica pending 去重、Session 恢复、Wakeup 和 Usage 的适配缺口见[VS-3 源码取证](../research/vs3-evaluation-multica-runtime-evidence.md)。VS-4 的 Benchmark、Release、Project Adoption、Actual Usage 和生产效果回收契约见[VS-4 技术承载契约](vs4-benchmark-release-adoption-technical-contract.md)，上游实验比较机制见[TeamAI Benchmark 源码取证](../research/vs4-teamai-benchmark-source-evidence.md)。D5 / D6 / D7 / D11 纵向契约现已齐备；下一步进入整体技术方案一致性审查和最小实现切片选择，不再扩展新的架构专题。
 
 不应并行让多个 Agent 各自设计 D5、D6、D7 的数据库表；先确定共用的身份、版本、授权和恢复基础，再按业务域细化持久化和接口。
