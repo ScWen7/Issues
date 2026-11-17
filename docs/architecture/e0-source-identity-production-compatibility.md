@@ -1,7 +1,7 @@
 # E0 · 来源身份查回与生产兼容设计
 
 > 本文定义 E0 在进入 Schema / API 设计前必须成立的来源身份、原生 Task 绑定、普通生产兼容和故障恢复契约。它细化 VS-5，不替代 VS-0 / VS-1 的业务规则。
-> 目标 Multica 基准：`71683141a764ed3b1620db4bc26a2d0a098f135c`。进入实现前必须对实际集成目标分支重新核对；本文不把该提交以后的能力推定为已存在。
+> 源码审查已对照 Multica `main` @ `b70c8b96d0c638e73802336063abfe3734f69f65`；此前 VS-0 / VS-5 基准 `71683141a764ed3b1620db4bc26a2d0a098f135c` 落后 46 个提交。完整源码事实与扩展建议见 [E0 Multica 派发来源审查](../research/e0-multica-dispatch-source-audit.md)。进入实现前仍必须对用户确定的实际集成目标分支重新核对。
 > 本文不决定数据库表、API 路径、部署形态或具体代码扩展位置。
 
 ## 1. E0 要解决的核心问题
@@ -103,6 +103,8 @@ Production 是执行用途；一次性执行、Main Bot 协调和 SOP 节点是�
 6. 授权或来源已失效时 Supersede / Cancel，不再派发；
 7. Task 已终态但结果未消费时，恢复业务结果消费，不重跑生产。
 
+源码审查与最小扩展方向见 [E0 Multica 派发来源审查](../research/e0-multica-dispatch-source-audit.md)。
+
 ## 6. Multica 复用与最小扩展边界
 
 ### 6.1 直接复用
@@ -128,7 +130,7 @@ Production 是执行用途；一次性执行、Main Bot 协调和 SOP 节点是�
 
 E0 扩展不得破坏现有 Production 行为：
 
-- 既有 (Issue, Agent) pending 去重继续作为并发保护，但不作为业务意图身份。
+- 保留 Multica 当前按 Issue、Agent、Comment Thread 及特定 deferred 状态构成的 pending 槽位语义；它是队列并发保护，不是业务意图身份。
 - Comment coalescing 只在输入、目标、授权和执行范围兼容且有真实合并回执时复用；不兼容输入不得静默吸收。
 - Main Bot 后续回合继续使用 Multica 原生 Wakeup / Task 链；Wakeup 只触发重新读取，不替代来源身份或结果消费。
 - Production Session continuity 保持原语义；E0 不提前引入 Governance Session 策略，但用途字段设计不能阻碍 E3 将其隔离。
