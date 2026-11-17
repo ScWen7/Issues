@@ -147,11 +147,11 @@ Benchmark 结果按预先声明的门槛输出：
 
 ### 4.1 沿 Multica 原生执行
 
-每个 Trial 使用独立 Multica Task / Run，并标记治理用途 Benchmark。Task 来源指向 Experiment + Trial 身份；保留 Baseline / Candidate、Sample、Arm 等归属。
+每个 Trial 使用独立 Multica Task / Run，并标记统一 Execution Purpose = Governance、子用途 = Benchmark。Task 来源指向 Experiment + Trial 身份；保留 Baseline / Candidate、Sample、Arm 等归属。
 
 - Benchmark 不创建新的 Runtime / Daemon / Task 队列；
 - Baseline 与 Candidate Trial 不共享可变工作目录或 Session；
-- Benchmark Task 不进入普通生产 coalescing、Main Bot Session 恢复或 Worker Wakeup；
+- Benchmark Task 遵循与 Evaluation 相同的治理用途隔离：不进入普通生产 coalescing、Main Bot Session 恢复或 Worker Wakeup；
 - 所有 Trial 的真实 Usage 归原生 Task；治理成本与生产成本分开；
 - 同一 Trial 的重复派发按稳定 Trial Intent 查回同一个 Task；
 - 自动 retry 沿原生 retry 谱系，结果归原 Trial，不重复计为一个新样本。
@@ -383,8 +383,10 @@ Benchmark Passed 只能支持进入 Release 审核，不能直接把生产效果
 8. Release、Adoption、Selected、Delivered、Loaded / Observed、Used 分别记录，不能互相冒充。
 9. 后续生产效果来自实际使用候选版本的生产工作，并有可比基线、观察窗口和最低样本要求。
 10. 回退通过新的 Adoption / 撤回决定完成，历史 Release、Usage 和在途版本不被覆盖。
-11. Benchmark / Improvement Task 的执行、Usage 和恢复复用 Multica，不建立第二套控制面。
+11. Benchmark / Improvement Task 的执行、Usage 和恢复复用 Multica，并遵循统一 Governance Purpose 隔离，不建立第二套控制面。
 12. 同一操作重放、进程中断、响应丢失、并发 Adoption、投递失败和迟到观察均可恢复且不重复产生业务副作用。
+
+Benchmark Trial 的治理用途、来源身份、预算和结果消费必须与 Evaluation 共用 Multica 原生执行隔离语义，不单独设计 Benchmark Task 类型或队列；统一规则见[VS-5 整体技术方案一致性审查](vs5-overall-technical-consistency-review.md)。
 
 ## 12. VS-4 收敛后的整体技术审查
 
