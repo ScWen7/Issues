@@ -199,6 +199,16 @@ Multica 源码复核固定基准：71683141a764ed3b1620db4bc26a2d0a098f135c。VS
 - 由工作台维护的第二套 Issue / Candidate / Evaluation 状态机；
 - 用一个通用 Intent、Candidate 或 Event 对象取代各自业务来源和权威事实。
 
+## 8.1 源码基准与证据边界
+
+| 专题 / 研究 | 固定源码基准 | 本轮如何使用 |
+|---|---|---|
+| D5 早期派发与回唤研究 | Multica fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc；另有 0f3e15f1d9dca781155e2fe475161f8c5e499b44 对照 | 保留原研究结论和各自源码链接；不能当成 VS-0 / VS-1 当前 Task 创建路径已在 7168314 上全部复核 |
+| VS-0 / VS-1、VS-2、VS-3、VS-5 跨层复核 | Multica 71683141a764ed3b1620db4bc26a2d0a098f135c | 作为当前 Task、附件 / PR、Session、Wakeup、Usage 等共性边界的统一复核基准 |
+| VS-4 Benchmark 机制研究 | TeamAI 556b5246f2c13ad28b8b79b5b513a78ed8ab9dae | 只用于 Benchmark Plan、Trial、配对可比性和自改进阈值机制参考，不代表 AgentPlatform 发布 / 采用机制已由上游提供 |
+
+进入 E0 时，必须以实际目标 Multica 分支重新核对 D5 三类派发路径和 VS-3 / VS-4 共用的 Task 创建、去重、Session、Wakeup、Usage 路径。不同提交的源码证据只对各自版本负责；不能拼接成一个未经验证的“当前 Multica 实现”。
+
 ## 9. 实施依赖与最小工程切片
 
 ### 9.1 先做底座兼容，不先铺开全部业务模块
