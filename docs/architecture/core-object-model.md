@@ -21,7 +21,7 @@
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
 | 执行资源与记录 | Host、Runtime、Daemon、Backend、Session、Run | 提供本地执行能力并记录真实受管执行 |
 | 交付与证据 | Artifact、Candidate、Evidence、Delivery Record | 表达交付内容、版本、检查依据和交接结果 |
-| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark、Release | 评价实际结果，审核和发布可复用改进 |
+| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark、Release、Project Adoption | 评价实际结果，审核和发布可复用改进，记录项目采用决定 |
 
 这些分组是概念边界，不要求对应独立服务、数据库或部署单元。
 
@@ -126,9 +126,14 @@ Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录�
 |---|---|---|
 | Evaluation | 使用明确评价器和输入证据，对 Run、Candidate、资产或流程作出的评价记录 | 为负责人、维护者或质量门禁提供依据；本身不等于业务验收 |
 | Finding | Evaluation 中一条有定位、有依据的问题或观察 | 可被当前 Issue 修正，也可成为改进提案的来源 |
-| Improvement Proposal | 对方法、能力、知识或流程提出的可审查变更 | 引用源工作、Finding、拟改资产、预期效果和验证方式 |
+| Improvement Proposal | 对方法、能力、知识或流程提出的可审查变更 | 引用源工作、Finding、拟改资产、基线、预期效果和验证方式；其候选修订属于提案内容，不是交付 Candidate |
 | Benchmark | 在固定输入、环境、评价标准和候选版本下进行的可比对照 | 证明候选在声明范围内的实验结果，不替代真实业务效果 |
 | Release | 经审核发布的不可变资产版本 | 可供项目采用；发布不等于项目已采用或后续工作已使用 |
+| Project Adoption | 有权项目成员对某个 Release 或项目级流程 / 分工配置作出的采用决定，记录适用范围与生效安排 | 项目配置保存当前有效采用结果，历史决定保留；采用不证明后续工作已实际投递或使用该版本 |
+
+改进提案中的候选内容称为**改进候选修订**，由 Proposal 固定其变更对象、基线、依赖和内容摘要，并关联 Benchmark。它不是 D6 的交付 Candidate：交付 Candidate 固定一次工作送审的 Artifact 组合；改进候选修订固定拟发布的方法 / 能力 / 流程变更。两者不可互相替代，也不需要再建立一个全局通用 Candidate 对象。
+
+Project Adoption 是项目配置中的有权决定记录，不是另一套资产仓库或执行对象。它引用已发布 Release，或明确的项目级工作流 / 分工配置版本，记录采用范围、生效条件、在途工作处理和替代关系。项目当前有效配置决定当前采用什么；历史采用决定不可覆盖。后续 Work / Run 的资产选择与实际投递回执，才证明具体工作使用了哪个版本。
 
 Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adoption 是不同事实。一个评分通过不自动完成 Issue；一个 Issue 验收通过也不自动发布新方法。
 
