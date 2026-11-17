@@ -29,7 +29,7 @@ flowchart TB
     Method["方法与上下文<br/>Skill / Rule / Playbook / SOP Definition"]
     Flow["受托流程编排<br/>SOP Execution / Node Activation"]
     Delivery["交付与证据<br/>Artifact / Candidate / Evidence / Delivery"]
-    Insight["度量、评价与改进<br/>Usage / Evaluation / Finding / Proposal / Benchmark"]
+    Insight["度量、评价与改进<br/>Usage / Evaluation Policy / Finding / Proposal / Benchmark"]
     Read["工作台查询与视图"]
     Multica["Multica 原生协作与执行底座<br/>Issue / Assignment / Workflow / Wakeup / Run / Runtime Registry / Usage"]
   end
@@ -97,7 +97,7 @@ flowchart TB
 | D. 流程编排 | SOP Definition 的流程语义、SOP Execution、Node Activation、Node Attempt | Issue 的明确委托、节点结果、人工决定 | 对 Multica 原派发入口的执行请求、结果交还 |
 | E. 执行集成 | Run 的业务扩展关联、宿主能力映射、执行契约、观察来源与覆盖 | Multica 派发、Daemon / Backend 回执 | 执行结果、Usage、Artifact、Observation |
 | F. 交付与证据 | Artifact 引用、Candidate、Evidence、Delivery Record 及消费关系 | Run 回报、成员提交、检查结果 | Issue / SOP 消费、Evaluation 输入 |
-| G. 度量、评价与改进 | Usage 归集视图、Evaluation、Finding、Improvement Proposal、Benchmark 与效果观察 | 原生产 Run、交付证据、评价任务、真实采用效果 | 评价结论、候选验证证据与改进建议，交由资产维护者或项目有权成员决定发布 / 采用 |
+| G. 度量、评价与改进 | Usage 归集视图、Evaluation Policy、Evaluation、Finding、Improvement Proposal、Benchmark 与效果观察 | 原生产 Run、交付证据、评价任务、真实采用效果 | 评价结论、候选验证证据与改进建议，交由资产维护者或项目有权成员决定发布 / 采用 |
 | H. 工作台与查询 | 不拥有业务权威事实；维护查询投影、视图和操作入口 | 各模块的可读事实 | 成员查看状态、发起有权操作 |
 | I. 来源与宿主适配 | 连接器和宿主协议的映射、同步游标、能力覆盖与来源标识 | 外部资料、代码仓、宿主协议 | C、E 的标准化输入与证据 |
 
@@ -324,7 +324,7 @@ flowchart TB
   Outcome -->|"有新的跨工作发现时"| Proposal
 ~~~
 
-D7 的内循环由现有 Issue、Run、Candidate、Evidence、Evaluation、Improvement Proposal、Benchmark、Release 和 Project Adoption 连接形成；不新增平行执行引擎。评价和 Benchmark 的采样、资源预算及停止策略仍作为 D11 的后续专题收敛。
+D7 的内循环由现有 Issue、Run、Candidate、Evidence、Evaluation、Improvement Proposal、Benchmark、Release 和 Project Adoption 连接形成；D11 通过 Team / Project 配置中的 Evaluation Policy 管理评价触发与资源边界，不新增平行执行引擎。
 
 ### 9.1 三种不同粒度
 
