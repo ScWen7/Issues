@@ -295,14 +295,15 @@ VS-5 架构一致性审查达到以下条件：
 
 ## 12. 当前工程阶段
 
-当前推进 **E0 · 来源查回与生产兼容设计**。逻辑设计入口为 [E0 来源身份与生产兼容设计](e0-source-identity-production-compatibility.md)。
+当前推进 **E0 · 来源查回与生产兼容设计**。设计入口为 [E0 来源身份与生产兼容设计](e0-source-identity-production-compatibility.md)，源码审查见[Multica 派发来源审查](../research/e0-multica-dispatch-source-audit.md)。
 
-E0 已明确覆盖四类 Production 来源：普通 Issue Agent 指派、Main Bot 首次激活、Comment 目标级协助和 SOP Node Attempt。普通 Agent 指派是完整的一次性交付模式，不因 Assignee 身份自动获得持续协调权；同一 Agent 后续转为 Main Bot 必须产生新的授权代际、来源意图和主 Task。
+已对照 Multica `main` @ `b70c8b96d0c638e73802336063abfe3734f69f65` 完成关键路径复核。确认普通 Agent 指派在 Issue 写入后异步 enqueue，Agent 派发分支忽略 enqueue 错误；现有 `trigger_evidence_kind/ref_id` 只承担来源导航；当前 pending 索引按 Issue、Agent、Comment Thread 及特定 deferred 状态保护队列槽位，不能替代业务来源身份；合法 Retry 必须与主 Task 唯一性分开处理。
 
-当前仍需完成的工程前置：
-1. 对实际集成目标 Multica 分支重新取证，固定目标提交及扩展维护 / 上游同步策略；
-2. 证明稳定来源身份与原生主 Task 创建 / 查回的最小扩展边界；
-3. 核对普通指派、Comment coalescing、Main Bot 后续回合及历史 Task 的兼容行为；
-4. 形成迁移兼容方案、生产回归和真实故障注入验收记录。
+E0 的最小扩展方向已收敛：业务来源侧先保存可恢复的来源转换 / 目标身份；原生 Task 创建边界写入主来源身份并提供幂等查回；来源侧与 Task 侧双向关联；pending 冲突只有在证明输入、授权和覆盖范围兼容时才能复用已有 Task。具体字段与事务实现仍待实际集成目标分支复核。
 
-因此 E0 仍处于设计推进中，尚未达到可进入工程修改的退出条件。Governance Task 的完整隔离仍在 E3 启用前实施与验收。
+当前仍需完成：
+1. 确定实际集成 Multica 仓库 / 分支及扩展维护方式；
+2. 对该目标 SHA 复核 Issue 写入、Task 创建、Retry、Comment coalescing 和历史兼容；
+3. 形成最小迁移 / 回滚方案及真实故障注入验收步骤。
+
+E0 尚未达到工程修改准入，不进入 Schema / API 实现。治理执行隔离仍在 E3 启用前实施与验收。
