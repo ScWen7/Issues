@@ -59,7 +59,7 @@ AgentPlatform 的技术承载不是重新实现一套协作系统，而是在 Mu
 | Main Bot 首次激活 / Worker 委派意图 | AgentPlatform 对应业务来源记录 | 绑定一个真实 Multica Task；Wakeup 只唤醒，不替代意图 |
 | Task / Run / Claim / Start / Runtime | Multica 原生执行入口 | SOP / Evaluation / Benchmark 保存 Task / Run 引用，不复制执行状态 |
 | SOP Definition / Execution / Node Activation / Attempt | AgentPlatform 流程域 | Node Attempt 绑定实际 Task / Run，消费原结果 |
-| Artifact / Candidate / Evidence / Acceptance Decision | AgentPlatform 交付域；Issue 的业务完成仍经统一权威入口 | 工作台和流程只引用具体版本和决定 |
+| Artifact / Candidate / Evidence / Acceptance Decision | AgentPlatform 交付域；Issue 的业务完成仍经统一权威入口 | 不可变 Locator / Digest、Candidate Manifest / Generation、Evidence Applicability、追加式 Decision 与统一 Completion Gate |
 | Evaluation Policy / Evaluation / Finding | Team / Project 配置及 AgentPlatform 评价域 | 评价执行通过 Multica Task / Run，结果回原目标 |
 | Improvement Proposal / Benchmark | AgentPlatform 改进治理域 | Benchmark 执行沿 Multica Run；提案不改变生产默认资产 |
 | Release | 对应资产维护者的发布入口 | 项目可选用，不自动生效 |
@@ -150,7 +150,7 @@ Evaluation 是业务评价记录，Evaluation Run 是实际执行。Evaluation �
 |---|---|---|---|
 | VS-0 · 身份与关联 | Issue、授权代际、Comment 目标、Node Attempt、Evaluation 目标都有稳定来源身份 | 任一来源能查到授权版本、对象版本和目标 Agent | 来源记录、Unknown 原因 |
 | VS-1 · 委派与执行 | Main Bot 首次激活、一次 Worker 委派、原生 Task / Run | 真实 Runtime Start、Task ID 绑定、断联恢复不重复创建 | 委派身份、Task 谱系、回执 |
-| VS-2 · 交付与验收 | Artifact、Candidate manifest、Evidence、Acceptance Decision | 固定版本可回读；换版与验收竞争只有一个当前有效结果 | 旧 Candidate、旧 Evidence、决定历史 |
+| VS-2 · 交付与验收 | Artifact、Candidate manifest / Generation、Evidence Applicability、Acceptance Decision、Completion Gate | 固定版本可回读；Candidate 替代、验收、权限撤销、PR 集合变化和 Issue Done 竞争只有一个符合条件的结果 | 旧 Candidate、旧 Evidence、旧 Decision、来源失效记录 |
 | VS-3 · 评价与预算 | Evaluation Policy、一次独立 Evaluation Run、Finding | 重复触发幂等；预算耗尽与证据不足行为符合 D11 | Evaluation 输入、预算和 Run 归属 |
 | VS-4 · 改进发布与采用 | Proposal、固定样本 Benchmark、Release、Project Adoption | 有权审核；后续工作实际投递 / 使用版本可核对 | 候选、实验、审核、发布和采用历史 |
 
@@ -201,6 +201,6 @@ Evaluation 是业务评价记录，Evaluation Run 是实际执行。Evaluation �
 
 当前已经具备进入详细技术设计的统一边界，但还不能据此宣称已完成可直接开发的数据库 / API 方案。
 
-VS-0 / VS-1 的逻辑接口、事务边界、故障恢复和验收条件已细化见[业务意图身份、Task 绑定与执行恢复契约](vs0-vs1-dispatch-binding-contract.md)。后续在此契约下继续确定具体接口和持久化承载，再设计 Candidate / Acceptance 的权威写入，最后设计 Evaluation Policy 预算预留与结果消费。
+VS-0 / VS-1 的逻辑接口、事务边界、故障恢复和验收条件见[业务意图身份、Task 绑定与执行恢复契约](vs0-vs1-dispatch-binding-contract.md)。VS-2 的 Artifact、Candidate、Evidence、Acceptance 与 Completion Gate 技术契约见[VS-2 技术承载契约](vs2-candidate-acceptance-technical-contract.md)，其 Multica 当前附件 / PR 路径证据见[VS-2 源码取证](../research/vs2-multica-delivery-source-evidence.md)。下一步进入 VS-3：把 D11 Evaluation Policy、预算预留、独立 Evaluation Run 和结果消费接入同一条工作链。
 
 不应并行让多个 Agent 各自设计 D5、D6、D7 的数据库表；先确定共用的身份、版本、授权和恢复基础，再按业务域细化持久化和接口。
