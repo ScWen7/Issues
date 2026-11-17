@@ -152,7 +152,13 @@ flowchart TB
 | 多来源成本采集 | 宿主请求身份、Credits / Token 覆盖、迟到更正 | 已明确真实来源与 unknown 原则；适配覆盖可逐宿主演进 |
 | 部署与运行形态 | 哪些模块合并部署、存储和扩展边界 | 逻辑职责和权威事实已明确，可在技术方案阶段按负载与维护成本决定 |
 
-## 8. 架构审查结论
+## 8. 技术方案推进状态
+
+整体架构审查后，技术方案按纵向切片推进：VS-0 / VS-1 已形成业务意图身份、Task 绑定与恢复契约；VS-2 已形成 Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate 契约。Multica 当前附件、Issue revision 与 PR 自动完成路径的真实边界见[VS-2 源码取证](vs2-multica-delivery-source-evidence.md)。
+
+当前仍未确定数据库表、API 路径、事务实现和附件快照存储产品；这些需在共用身份与权威写入边界确认后设计。下一阶段为 VS-3：Evaluation Policy、预算预留、独立 Evaluation Run 与结果消费。
+
+## 9. 架构审查结论
 
 当前架构的核心对象、权威事实、生命周期、模块依赖和跨层业务链可以互相解释，D5 / D6 / D7 已经组成从工作发起到持续改进的闭环，D11 已补齐评价触发和资源治理规则。当前没有需要通过增加新领域对象或第二套控制平面才能解决的结构性断点。
 
