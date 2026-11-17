@@ -121,10 +121,10 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 | 五层职责 | 主要模块 | 权威事实 | 主要依赖 |
 |---|---|---|---|
 | 第一层：工作协作 | A 组织范围、B 工作协作 | Team / Project / Issue / Decision / Project Workflow | 组织身份、权限、项目配置 |
-| 第二层：能力与上下文 | C 方法与上下文、I 来源适配 | 资产版本、项目采用、工作约定引用、ContextReceipt | Issue、项目范围、成员读权、来源系统 |
+| 第二层：能力与上下文 | A 组织范围、C 方法与上下文、I 来源适配 | 不可变 Release、Project Adoption、工作约定引用、ContextReceipt、实际选择与投递记录 | Issue、项目范围、成员读权、来源系统 |
 | 第三层：流程编排 | D 流程编排 | SOP Definition / Execution / Node Activation / Attempt | Issue 委托、能力版本、交付消费契约 |
 | 第四层：执行与回报 | E 执行集成、I 宿主适配、Multica | Run / Runtime / Session / Observation / Usage 原始记录 | Issue 或 SOP 授权、上下文、Runtime 资格 |
-| 第五层：度量、评价与改进 | F 交付证据、G 度量改进 | Artifact / Candidate / Evidence / Delivery / Evaluation / Release | Run、工作约定、检查标准、授权与来源 |
+| 第五层：度量、评价与改进 | F 交付证据、G 度量改进 | Artifact / Candidate / Evidence / Delivery / Evaluation / Finding / Proposal / Benchmark / 效果观察 | Run、工作约定、检查标准、授权与来源 |
 
 成员提交的成果和第四层回报的执行结果，经 F 形成可交接的候选与证据，供 Issue、受托 SOP 和第五层评价分别取用。工作台 H 横跨五层读取与呈现，但不拥有任何一层的业务决定权。
 
