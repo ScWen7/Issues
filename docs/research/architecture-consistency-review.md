@@ -164,6 +164,16 @@ VS-4 明确离线 Benchmark Passed 只支持 Release 审核，不等于项目采
 
 D5 / D6 / D7 / D11 的纵向技术契约现已齐备。当前仍未确定数据库表、API 路径、具体事务实现、预算锁和存储产品；下一步应做整体技术方案一致性审查，统一核对身份、权限、版本、写入竞争、恢复、Task Purpose、Usage 和来源保留，再选择最小可验证实现切片。
 
+## 9. 技术方案一致性审查
+
+VS-0 到 VS-4 的纵向契约已经形成完整链路。横向审查进一步统一了四项共性要求：
+- Multica Task 具有可查询的 Execution Purpose；Production 与 Governance 在现有执行模型中隔离，Evaluation、Benchmark、Improvement、Calibration 不各自建设队列。
+- Main Bot、Worker、SOP、Evaluation、Benchmark Trial 等来源保留各自稳定业务身份；原生 Task 创建必须支持来源身份查回。
+- Issue、Project、Asset、Budget、Multica Task / Run、Usage 各自维护权威事实；跨对象最终一致，不依赖全局事务。
+- Candidate 指针与 Candidate 实体、Release 与 Adoption、Adoption 与实际使用分别归属；预算全范围预留在预算权威边界内全成或全败。
+
+完整审查结果、写入边界矩阵、Multica 复用 / 扩展清单和 E0–E4 实施顺序见[VS-5 整体技术方案一致性审查](../architecture/vs5-overall-technical-consistency-review.md)。下一阶段只进入 E0：Multica 原生执行兼容设计。
+
 ## 9. 架构审查结论
 
 当前架构的核心对象、权威事实、生命周期、模块依赖和跨层业务链可以互相解释，D5 / D6 / D7 已经组成从工作发起到持续改进的闭环，D11 已补齐评价触发和资源治理规则。当前没有需要通过增加新领域对象或第二套控制平面才能解决的结构性断点。
