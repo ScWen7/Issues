@@ -201,7 +201,7 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。Arti
 | Failed | 评价执行本身失败，不能把它当成被评对象失败 |
 | Cancelled | 评价任务被撤销 |
 
-评价器执行自身可有 Run；Run 终态与 Evaluation 结论分别记录。Evaluation 固定触发类型、Team / Project Evaluation Policy 版本、Work Agreement 版本、评价器版本、输入快照和资源预算。Requested 可表示已获准但等待预算 / Runtime 的评价；尚未被策略选中的工作不创建 Evaluation。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。触发、抽样、重试和预算耗尽规则见[D11 评价触发与资源预算治理](d11-evaluation-trigger-budget-policy.md)。
+评价器执行自身可有独立 Multica Task / Run；Run 终态与 Evaluation 结论分别记录。Model-based Evaluation Task 使用治理用途标识和独立 Session，不进入普通生产 Session 恢复或 Worker Wakeup 消费路径。Evaluation 固定目标版本、触发类型、Team / Project Evaluation Policy 版本、Work Agreement 版本、评价器版本、输入快照和资源预算。Requested 可表示已获准但等待预算 / Runtime 的评价；尚未被策略选中的工作不创建 Evaluation。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。触发、抽样、重试和预算耗尽规则见[D11 评价触发与资源预算治理](d11-evaluation-trigger-budget-policy.md)。
 
 ### 9.2 Improvement Proposal
 
@@ -228,7 +228,7 @@ Proposal 的 Approved / Applied 只表示提案自身的审核与变更执行进
 | SOP | SOPInvoked、SOPPrepared、NodeReady、NodeActivated、NodeResultReceived、HumanDecisionRequested、HumanDecisionRecorded、SOPReturned、SOPCompleted、SOPFailed、SOPCancelled | SOP Execution 及其权威状态变化 |
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
 | Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、EvidenceApplicabilityRecorded、AcceptanceDecisionRecorded、DeliveryReturned | 生产者与交付通道 |
-| Evaluation | EvaluationRequested、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、FindingRecorded | 评价任务及结果 |
+| Evaluation | EvaluationRequested、EvaluationTaskBound、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、EvaluationResultConsumed、FindingRecorded | 评价任务及结果 |
 | Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 提案审核、资产发布、项目采用分别由各自权威记录产生 |
 
 事件名称表示语义类别，不要求直接作为 API 名称或消息 Topic。实现可沿用 Multica 原生事件，并映射到这些语义。
