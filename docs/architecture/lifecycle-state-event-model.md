@@ -172,7 +172,7 @@ Run 是实际受管执行记录。状态名称以 Multica 固定版本及具体 
 
 ## 8. Candidate、Delivery Record 与验收
 
-Candidate 的内容和组成版本一经创建即固定。后续变化形成新 Candidate 或新版本引用，不覆盖旧内容。
+Candidate 的 Manifest、Candidate Generation、Work Agreement、Artifact Locator / Digest、送审范围和适用标准一经创建即固定。候选替换必须在 Issue / Acceptance Channel 的权威写入边界比较预期当前 Candidate；Issue revision 不是 Candidate 身份。后续变化形成新 Candidate，不覆盖旧内容。
 
 | 处置 | 含义 | 影响 |
 |---|---|---|
@@ -184,9 +184,9 @@ Candidate 的内容和组成版本一经创建即固定。后续变化形成新 
 | Superseded | 新候选替代其作为当前待处理版本 | 历史检查和决定仍指向旧候选 |
 | Withdrawn | 提交者或有权主体撤回候选 | 保留原因和已有检查；不得作为当前完成依据 |
 
-Candidate 的处置按具体版本保存。旧候选的 Accepted 不能自动接受新候选；旧报告是否可复用，由检查要求和变化范围决定。
+Candidate 的处置按具体版本保存。Acceptance Decision 追加保存并绑定 Candidate ID、Generation、Manifest Digest、标准版本、决定者权限和 Evidence。旧候选的 Accepted 不能自动接受新候选；旧 Evidence 默认不适用于新候选，复用须有明确 Applicability 依据。
 
-Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它可以逐步补全，不应把记录已生成当成完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
+Delivery Record 汇总候选、要求、制品、证据、缺项和决定。Artifact 的来源版本、内容完整性、可取得性和读取授权分别判断；来源失效不改变历史引用。它可以逐步补全，不应把记录已生成当成完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
 
 ## 9. Evaluation 与 Improvement Proposal 生命周期
 
@@ -227,7 +227,7 @@ Proposal 的 Approved / Applied 只表示提案自身的审核与变更执行进
 | Workflow | WorkflowStepEntered、WorkflowHandoffRequested、WorkflowHandoffCompleted、WorkflowStepReturned | Project Workflow 与 Issue 交接记录 |
 | SOP | SOPInvoked、SOPPrepared、NodeReady、NodeActivated、NodeResultReceived、HumanDecisionRequested、HumanDecisionRecorded、SOPReturned、SOPCompleted、SOPFailed、SOPCancelled | SOP Execution 及其权威状态变化 |
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
-| Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、DeliveryReturned | 生产者与交付通道 |
+| Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、EvidenceApplicabilityRecorded、AcceptanceDecisionRecorded、DeliveryReturned | 生产者与交付通道 |
 | Evaluation | EvaluationRequested、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、FindingRecorded | 评价任务及结果 |
 | Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 提案审核、资产发布、项目采用分别由各自权威记录产生 |
 
