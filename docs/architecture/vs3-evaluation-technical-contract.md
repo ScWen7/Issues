@@ -78,9 +78,11 @@ Evaluation 的执行方式由方法决定，不是所有评价都启动 Agent。
 - Task 使用实际获准执行评价的 Agent 和 Runtime；
 - Task 有自己的 Task ID、Claim / Start / 终态、Session、Trace 和 Usage；
 - Task 明确属于原 Issue（若评价目标属于 Issue），以便沿用 Issue 访问、运行权限和原生 Usage 查询；
-- Task 的直接触发证据指向 Evaluation ID，建议使用自由文本 evidence kind 标记 evaluation，ref 指向 Evaluation ID；
+- Task 的直接触发证据指向 Evaluation ID，使用自由文本 evidence kind 标记 evaluation，ref 指向 Evaluation ID；
 - Evaluation 记录该 Task ID；Task 记录 Evaluation 来源引用，形成双向可核对关系；
-- Target Production Task / Run 通过 Evaluation 记录关联，不将其伪装成 parent_task_id、retry_of_task_id 或 rerun_of_task_id。
+- Task 必须带有明确的治理用途标识（Evaluation Purpose / Execution Lane），不能只靠 prompt 或 trigger summary 猜测；
+- Target Production Task / Run 通过 Evaluation 记录关联，不将其伪装成 parent_task_id、retry_of_task_id 或 rerun_of_task_id；
+- Evaluation Task 即使归属同一 Issue，也不能与普通生产 Task 共用 pending coalescing 槽位、Session 恢复池或普通 Worker Wakeup 消费路径。
 
 Multica 的 parent_task_id、retry / rerun 字段具有既定执行谱系语义。评价不是生产任务的重试或委派，不得滥用这些字段表达“被评对象”。
 
@@ -92,6 +94,19 @@ Multica 的 parent_task_id、retry / rerun 字段具有既定执行谱系语义�
 - Evaluation Task 是评价执行。
 
 Issue 下 Task Usage 的原生汇总仍会包含该评价 Task，这是底座按 Issue 聚合的事实；AgentPlatform 的生产成本视图必须按 Task 的业务来源 / 角色分开归集，不得把评价费用算作生产 Run 成本。团队总资源统计则应同时纳入两者。
+
+### 4.3.1 Evaluation Purpose 必须贯穿 Multica 原生执行语义
+
+源码复核发现，普通 Issue Task 的 pending 唯一约束按 Issue / Agent 竞争；Comment 路径还会将新输入 coalesce 到同一 Agent 的 pending Task。普通 Session 恢复会选择同 Agent / Issue 的最近终态 Session（目前显式排除 Triage）。Issue Wakeup 也可能按事件类型捕获同 Issue Task 的终态；Issue Usage 查询会聚合该 Issue 下所有 Task。
+
+因此，仅设置 trigger_evidence_kind = evaluation 不足以实现隔离。Multica 适配必须在现有 Task / Run 中提供可查询的 Task Purpose / Execution Lane，并保证：
+- Evaluation Task 不被普通生产 Task 的 pending 唯一约束 / Comment coalescing 合并；同一 Evaluation ID 仍有唯一 Task 绑定；
+- Evaluation Task 使用隔离上下文和新 Session，且被普通 Main Bot / Worker 的 Session 恢复查询排除；
+- 普通 Issue Wakeup 默认不把 Evaluation Task 终态当作 Worker 结果；Evaluation 结果成功消费后，才通过 Evaluation 业务通知唤醒对应负责人；
+- Task 原生事件和 Usage 仍保留在 Multica；AgentPlatform 的生产成本视图按 Purpose / 来源身份排除治理 Task，团队治理总成本仍纳入；
+- 普通生产 Task 的 coalescing、Session continuity、Wakeup 和 Usage 语义保持不变。
+
+这是复用 Multica 控制面的必要适配，不是第二套执行队列。具体源码证据见[VS-3 Multica Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md)。
 
 ### 4.3 不用 Agent 身份伪装 Scorer 身份
 
@@ -304,7 +319,7 @@ Task Completed 事件只触发结果消费。消费者必须：
 2. 一份 Evaluation 固定唯一目标版本、策略版本、Scorer / Rubric 和输入快照。
 3. Deterministic / Trace / Model-based / Human Review 按需选择；不是所有评价都强制创建 Agent Task。
 4. Model-based Evaluation 使用独立 Multica Task / Run，Task 来源指向 Evaluation；不滥用 parent / retry / rerun 谱系字段。
-5. Evaluation 与 Task 双向可核对，创建和查回幂等。
+5. Evaluation 与 Task 双向可核对，创建和查回幂等；Evaluation Purpose 隔离 pending coalescing、Session 恢复和普通 Worker Wakeup。
 6. 单次、Issue、Project、Team 预算全范围原子预留；不能部分扣额。
 7. 可观测的 Run 数、时长、并发与原生单位分别记账；未知 Credits / Token / USD 保持 Unknown。
 8. Task Usage 的累计快照和更正按覆盖语义处理，不重复累加。
