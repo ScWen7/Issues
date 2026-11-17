@@ -29,7 +29,7 @@ flowchart TB
     Method["方法与上下文<br/>Skill / Rule / Playbook / SOP Definition"]
     Flow["受托流程编排<br/>SOP Execution / Node Activation"]
     Delivery["交付与证据<br/>Artifact / Candidate / Evidence / Delivery"]
-    Insight["度量、评价与改进<br/>Usage / Evaluation / Finding / Proposal / Release"]
+    Insight["度量、评价与改进<br/>Usage / Evaluation / Finding / Proposal / Benchmark"]
     Read["工作台查询与视图"]
     Multica["Multica 原生协作与执行底座<br/>Issue / Assignment / Workflow / Wakeup / Run / Runtime Registry / Usage"]
   end
@@ -75,8 +75,9 @@ flowchart TB
   Flow -->|"交还出口或请求决定"| Work
   Delivery -->|"当前工作消费"| Work
   Delivery -->|"按需评价"| Insight
-  Insight -->|"资产维护者审核发布方法"| Method
-  Insight -->|"有权成员在项目内采用配置变更"| Org
+  Insight -->|"候选验证证据与发布建议"| Method
+  Insight -->|"提供配置变更证据与建议"| Org
+  Org -->|"Project Adoption / 当前有效配置"| Method
   Insight --> Read
   Delivery --> Read
   Work --> Read
@@ -90,13 +91,13 @@ flowchart TB
 
 | 模块 | 维护的权威事实 | 主要输入 | 主要输出 / 协作者 |
 |---|---|---|---|
-| A. 组织与项目范围 | Team、Project、成员参与关系、项目配置、资源授权范围 | 成员与项目管理动作 | Work、Capability、Runtime 授权 |
+| A. 组织与项目范围 | Team、Project、成员参与关系、项目配置（含 Project Adoption 决定）、资源授权范围 | 成员与项目管理动作、已审核资产 / 配置候选 | Work、Capability、Runtime 授权；决定项目采用哪些已发布版本 |
 | B. 工作协作核心 | Issue、Work Agreement、负责人、业务决定、项目阶段与交接 | 工作发起、评论、指派、决定 | Context、Workflow、Execution、Delivery |
-| C. 方法与上下文 | 资产定义与版本、适用范围、项目采用、来源引用、选择与投递记录 | 团队 / 项目维护、Issue 约定、资料来源 | 执行输入、SOP 定义、评价规则 |
+| C. 方法与上下文 | 资产定义、不可变 Release、适用范围、来源引用、工作选择与实际投递记录 | 团队 / 资产维护、Project 当前采用配置、Issue 约定、资料来源 | 执行输入、SOP 定义、评价规则 |
 | D. 流程编排 | SOP Definition 的流程语义、SOP Execution、Node Activation、Node Attempt | Issue 的明确委托、节点结果、人工决定 | 对 Multica 原派发入口的执行请求、结果交还 |
 | E. 执行集成 | Run 的业务扩展关联、宿主能力映射、执行契约、观察来源与覆盖 | Multica 派发、Daemon / Backend 回执 | 执行结果、Usage、Artifact、Observation |
 | F. 交付与证据 | Artifact 引用、Candidate、Evidence、Delivery Record 及消费关系 | Run 回报、成员提交、检查结果 | Issue / SOP 消费、Evaluation 输入 |
-| G. 度量、评价与改进 | Usage 归集视图、Evaluation、Finding、Proposal、Benchmark、Release 与效果观察 | 原生产 Run、交付证据、评价任务 | 工作判断、候选改进、已发布方法 |
+| G. 度量、评价与改进 | Usage 归集视图、Evaluation、Finding、Improvement Proposal、Benchmark 与效果观察 | 原生产 Run、交付证据、评价任务、真实采用效果 | 评价结论、候选验证证据与改进建议，交由资产维护者或项目有权成员决定发布 / 采用 |
 | H. 工作台与查询 | 不拥有业务权威事实；维护查询投影、视图和操作入口 | 各模块的可读事实 | 成员查看状态、发起有权操作 |
 | I. 来源与宿主适配 | 连接器和宿主协议的映射、同步游标、能力覆盖与来源标识 | 外部资料、代码仓、宿主协议 | C、E 的标准化输入与证据 |
 
@@ -106,11 +107,11 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 
 - **组织与项目范围**只回答谁属于哪个协作范围、哪些资源可在何种范围使用。它不拥有 Issue 的工作状态，也不因为成员注册了 Runtime 就自动授权所有项目使用。
 - **工作协作核心**是系统业务主线。Issue 是唯一业务工作归属。成员可亲自推进，或指派一个 Agent 并把持续协调权交给它。这个 Agent 作为 Main Bot 自行执行、邀请 Worker、拆分子 Issue 或委托 SOP。Project Workflow 管项目阶段与责任交接，不替代 SOP。
-- **方法与上下文**把可复用方法与本次工作实际使用分开。Skill、Rule、Playbook、SOP、知识和工具配置有自己的版本及适用范围；项目采用、本项选择、实际投递、宿主加载和实际使用分别留证。它不负责启动 Run。
+- **方法与上下文**把可复用方法与本次工作实际使用分开。Skill、Rule、Playbook、SOP、知识和工具配置有自己的版本及适用范围；资产维护者负责发布不可变 Release，后续项目采用决定由组织与项目范围模块记录；本项选择、实际投递、宿主加载和实际使用分别留证。它不负责启动 Run。
 - **流程编排**只管理 Issue 明确委托的范围。本次 SOP Execution 按固定定义判断节点就绪、核验、返工和出口。工作负责人或受托 Main Bot 接回其结果，并负责 SOP 范围以外的分工和决定请求。
 - **执行集成**把中心的授权安排交给 Multica 原生 Run / Daemon 链。Backend 适配具体宿主。Runtime 是执行资源，Agent 是执行主体，Session 是宿主连续性，三者不能合并。成员的私人活动只有在授权共享且来源可识别时才进入平台记录。
 - **交付与证据**将交付了什么和凭什么相信分开。Artifact 指向具体版本，Candidate 固定交付组合，Evidence 支持具体事实，Delivery Record 汇总接收方消费结果。生产方报告成功不代表接收方接受。
-- **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。当前 Issue 可依据发现直接修正。跨工作改进经对照和审核，按对象发布方法或调整项目配置。效果从后续工作实际使用的版本和交付中核对。
+- **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。当前 Issue 可依据发现直接修正。跨工作改进经对照和审核后，将候选验证证据交给资产维护者发布 Release，或交给项目有权成员决定项目配置 / Adoption。效果从后续工作实际使用的版本和交付中核对。
 - **工作台与查询**是统一入口而不是新业务核心。展示状态、等待原因和下一责任人；所有写操作回到拥有该事实决定权的模块或 Multica 原生入口。
 
 ## 4. 五层职责与模块映射
