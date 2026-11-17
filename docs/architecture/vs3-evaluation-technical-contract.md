@@ -95,18 +95,18 @@ Multica 的 parent_task_id、retry / rerun 字段具有既定执行谱系语义�
 
 Issue 下 Task Usage 的原生汇总仍会包含该评价 Task，这是底座按 Issue 聚合的事实；AgentPlatform 的生产成本视图必须按 Task 的业务来源 / 角色分开归集，不得把评价费用算作生产 Run 成本。团队总资源统计则应同时纳入两者。
 
-### 4.3.1 Evaluation Purpose 必须贯穿 Multica 原生执行语义
+### 4.3.1 Governance Purpose 必须贯穿 Multica 原生执行语义
 
 源码复核发现，普通 Issue Task 的 pending 唯一约束按 Issue / Agent 竞争；Comment 路径还会将新输入 coalesce 到同一 Agent 的 pending Task。普通 Session 恢复会选择同 Agent / Issue 的最近终态 Session（目前显式排除 Triage）。Issue Wakeup 也可能按事件类型捕获同 Issue Task 的终态；Issue Usage 查询会聚合该 Issue 下所有 Task。
 
-因此，仅设置 trigger_evidence_kind = evaluation 不足以实现隔离。Multica 适配必须在现有 Task / Run 中提供可查询的 Task Purpose / Execution Lane，并保证：
-- Evaluation Task 不被普通生产 Task 的 pending 唯一约束 / Comment coalescing 合并；同一 Evaluation ID 仍有唯一 Task 绑定；
-- Evaluation Task 使用隔离上下文和新 Session，且被普通 Main Bot / Worker 的 Session 恢复查询排除；
-- 普通 Issue Wakeup 默认不把 Evaluation Task 终态当作 Worker 结果；Evaluation 结果成功消费后，才通过 Evaluation 业务通知唤醒对应负责人；
+因此，仅设置 Task 来源证据为 evaluation 不足以实现隔离。Multica 适配必须在现有 Task / Run 中提供统一可查询的 Execution Purpose，并以 Governance 子用途区分 Evaluation、Benchmark、Improvement 和 Calibration；所有治理用途共同满足以下隔离要求：
+- Governance Task 不被普通生产 Task 的 pending 唯一约束 / Comment coalescing 合并；同一 Evaluation ID 仍有唯一 Task 绑定，Benchmark Trial 和 Improvement 执行也使用各自来源身份查回；
+- Governance Task 使用隔离上下文和新 Session，且被普通 Main Bot / Worker 的 Session 恢复查询排除；
+- 普通 Issue Wakeup 默认不把 Governance Task 终态当作 Worker 结果；Evaluation / Trial 结果成功消费后，才通过对应业务通知唤醒负责人；
 - Task 原生事件和 Usage 仍保留在 Multica；AgentPlatform 的生产成本视图按 Purpose / 来源身份排除治理 Task，团队治理总成本仍纳入；
 - 普通生产 Task 的 coalescing、Session continuity、Wakeup 和 Usage 语义保持不变。
 
-这是复用 Multica 控制面的必要适配，不是第二套执行队列。具体源码证据见[VS-3 Multica Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md)。
+这是复用 Multica 控制面的必要适配，不是第二套执行队列。统一用途边界由[VS-5 整体技术一致性审查](vs5-overall-technical-consistency-review.md)定义。具体源码证据见[VS-3 Multica Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md)。
 
 ### 4.3 不用 Agent 身份伪装 Scorer 身份
 
@@ -319,7 +319,7 @@ Task Completed 事件只触发结果消费。消费者必须：
 2. 一份 Evaluation 固定唯一目标版本、策略版本、Scorer / Rubric 和输入快照。
 3. Deterministic / Trace / Model-based / Human Review 按需选择；不是所有评价都强制创建 Agent Task。
 4. Model-based Evaluation 使用独立 Multica Task / Run，主 Task 来源指向 Evaluation，原生 retry 子 Task 继承来源并保留真实 retry 谱系；不滥用 parent / rerun 字段。
-5. Evaluation 与 Task 双向可核对，创建和查回幂等；Evaluation Purpose 隔离 pending coalescing、Session 恢复和普通 Worker Wakeup。
+5. Evaluation 与 Task 双向可核对，创建和查回幂等；Governance Purpose 隔离 pending coalescing、Session 恢复和普通 Worker Wakeup。
 6. 单次、Issue、Project、Team 预算全范围原子预留；不能部分扣额。
 7. 可观测的 Run 数、时长、并发与原生单位分别记账；未知 Credits / Token / USD 保持 Unknown。
 8. Task Usage 的累计快照和更正按覆盖语义处理，不重复累加。
