@@ -201,6 +201,6 @@ Evaluation 是业务评价记录，Evaluation Run 是实际执行。Evaluation �
 
 当前已经具备进入详细技术设计的统一边界，但还不能据此宣称已完成可直接开发的数据库 / API 方案。
 
-下一步应优先把 VS-0 / VS-1 的跨层写入与恢复契约进一步细化为接口级设计：明确来源身份、授权代际、原生 Task 创建 / 查回、目标级委派状态、Claim / Start 回执和恢复责任。之后再设计 Candidate / Acceptance 的权威写入，再设计 Evaluation Policy 预算预留与结果消费。
+VS-0 / VS-1 的逻辑接口、事务边界、故障恢复和验收条件已细化见[业务意图身份、Task 绑定与执行恢复契约](vs0-vs1-dispatch-binding-contract.md)。后续在此契约下继续确定具体接口和持久化承载，再设计 Candidate / Acceptance 的权威写入，最后设计 Evaluation Policy 预算预留与结果消费。
 
 不应并行让多个 Agent 各自设计 D5、D6、D7 的数据库表；先确定共用的身份、版本、授权和恢复基础，再按业务域细化持久化和接口。
