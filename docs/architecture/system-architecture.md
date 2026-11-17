@@ -96,7 +96,7 @@ flowchart TB
 | C. 方法与上下文 | 资产定义、不可变 Release、适用范围、来源引用、工作选择与实际投递记录 | 团队 / 资产维护、Project 当前采用配置、Issue 约定、资料来源 | 执行输入、SOP 定义、评价规则 |
 | D. 流程编排 | SOP Definition 的流程语义、SOP Execution、Node Activation、Node Attempt | Issue 的明确委托、节点结果、人工决定 | 对 Multica 原派发入口的执行请求、结果交还 |
 | E. 执行集成 | Run 的业务扩展关联、宿主能力映射、执行契约、观察来源与覆盖 | Multica 派发、Daemon / Backend 回执 | 执行结果、Usage、Artifact、Observation |
-| F. 交付与证据 | Artifact 引用、Candidate、Evidence、Delivery Record 及消费关系 | Run 回报、成员提交、检查结果 | Issue / SOP 消费、Evaluation 输入 |
+| F. 交付与证据 | Artifact 引用、Candidate、Evidence、消费关系及 Delivery Record 聚合视图 | Run 回报、成员提交、检查结果 | Issue / SOP 消费、Evaluation 输入 |
 | G. 度量、评价与改进 | Usage 归集视图、Evaluation Policy、Evaluation、Finding、Improvement Proposal、Benchmark 与效果观察 | 原生产 Run、交付证据、评价任务、真实采用效果 | 评价结论、候选验证证据与改进建议，交由资产维护者或项目有权成员决定发布 / 采用 |
 | H. 工作台与查询 | 不拥有业务权威事实；维护查询投影、视图和操作入口 | 各模块的可读事实 | 成员查看状态、发起有权操作 |
 | I. 来源与宿主适配 | 连接器和宿主协议的映射、同步游标、能力覆盖与来源标识 | 外部资料、代码仓、宿主协议 | C、E 的标准化输入与证据 |
@@ -110,7 +110,7 @@ A–G 是业务领域模块；H 是横向呈现；I 是横向适配。它们是�
 - **方法与上下文**把可复用方法与本次工作实际使用分开。Skill、Rule、Playbook、SOP、知识和工具配置有自己的版本及适用范围；资产维护者负责发布不可变 Release，后续项目采用决定由组织与项目范围模块记录；本项选择、实际投递、宿主加载和实际使用分别留证。它不负责启动 Run。
 - **流程编排**只管理 Issue 明确委托的范围。本次 SOP Execution 按固定定义判断节点就绪、核验、返工和出口。工作负责人或受托 Main Bot 接回其结果，并负责 SOP 范围以外的分工和决定请求。
 - **执行集成**把中心的授权安排交给 Multica 原生 Run / Daemon 链。Backend 适配具体宿主。Runtime 是执行资源，Agent 是执行主体，Session 是宿主连续性，三者不能合并。成员的私人活动只有在授权共享且来源可识别时才进入平台记录。
-- **交付与证据**将交付了什么和凭什么相信分开。Artifact 指向具体版本，Candidate 固定交付组合，Evidence 支持具体事实，Delivery Record 汇总接收方消费结果。生产方报告成功不代表接收方接受。
+- **交付与证据**将交付了什么和凭什么相信分开。Artifact 指向具体版本，Candidate 固定交付组合，Evidence 支持具体事实，Delivery Record 从原对象与 Issue 交付注记重建交付过程和接收方消费结果。生产方报告成功不代表接收方接受。
 - **度量、评价与改进**消费原 Run、Usage、Candidate 和 Evidence。成本首先归属实际生产 Run；评价、Benchmark 和改进自身的执行消耗另行归集。当前 Issue 可依据发现直接修正。跨工作改进经对照和审核后，将候选验证证据交给资产维护者发布 Release，或交给项目有权成员决定项目配置 / Adoption。效果从后续工作实际使用的版本和交付中核对。
 - **工作台与查询**是统一入口而不是新业务核心。展示状态、等待原因和下一责任人；所有写操作回到拥有该事实决定权的模块或 Multica 原生入口。
 
@@ -406,29 +406,28 @@ flowchart TB
 | 观察器直接创建新的生产 Run | 多源观察会造成执行与成本重复 | 将 Observation 映射到已知 Run；无法证明归属时独立标记 |
 | 项目配置直接改变在途工作已固定版本 | 破坏历史可追溯与执行一致性 | 显式决定迁移范围并重验受影响部分 |
 
-## 11. 尚未解决的架构决策
+## 11. 架构专题与工程推进状态
 
-责任交接的生效条件、私有 Issue 接收者读权、交付提交中断后的查回，以及旧通知和项目入口回到当前 Issue 的规则，见[工作生命周期](01-unified-work-lifecycle.md#62-状态推进与负责人交接)、[统一工作台](05-unified-workbench.md#交接确认与旧入口接续)和[底座覆盖边界](governance-baseline.md#一致性与并发能力覆盖)。下表只保留仍需单独收敛的架构问题。
+责任交接与工作台回读的产品规则见[工作生命周期](01-unified-work-lifecycle.md#62-状态推进与负责人交接)和[统一工作台](05-unified-workbench.md#交接确认与旧入口接续)。下表区分已定义的契约与待细化的工程工作；各行为正文在对应专题维护，实施依赖统一以 [VS5](vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)为准。
 
-| 何时需要 | 编号与问题 | 要解决到什么程度 |
+| 专题 | 当前状态 | 工程入口与下一步 |
 |---|---|---|
-| 提交交付、改派或跨层派发时 | D5 写入与恢复 | D5 已收敛三类业务派发身份、执行绑定、恢复责任与结果消费边界：Issue 首次激活归 Issue 派发恢复入口；Comment 目标级委派归评论恢复入口；SOP Node Attempt 归流程推进器；Task Claim / Start 由 Multica 恢复；结果由原业务接收方消费。Multica 的 Issue 首次指派与 Run 入队分离，Handler 忽略 Agent 入队错误；评论保存与目标级 Worker 触发分离。Wakeup 源事实与 Receipt 同事务捕获，但 Receipt 可合并，不是业务命令档案。尚待工程实现 / 故障注入验证的缺口另行列明。[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md) · [业务触发与恢复闭环](../research/d5-business-trigger-recovery.md) · [Wakeup 源码取证](../research/d5-write-recovery-evidence.md) · [底座覆盖](governance-baseline.md#一致性与并发能力覆盖) |
-| **工作约定要求具名验收时** | D6 候选与成功完成 | Artifact 是具体来源版本，Candidate 固定本次送审组合，Evidence 绑定候选与标准，Decision 由有权主体按明确范围作出。Multica 原生交付区按文件名 / 类型聚合上传版本，Issue revision 提供条件写入，PR 自动完成复核所有关联 PR，但不核对验收人、Candidate 或验收标准。平台必须统一约束换版、部分接受、例外放行、具名验收和所有 Issue 完成入口。[候选交付与验收契约](d6-delivery-acceptance-contract.md) · [源码取证](../research/d6-delivery-acceptance-evidence.md) · [候选与验收竞争](core-consistency-concurrency.md#63-candidate-与验收竞争) |
-| **启用受管 Agent 时** | D2 执行等待与恢复 | 一次协助即可用到。先区分收到请求、排队、真正开工与回报。要让成员干预目录占用、取消或恢复时，再核对宿主能回报哪些原因，以及谁有权看见。[并发名额与目录](core-consistency-concurrency.md#71-runtime-与执行容量) |
-| **持续委托或使用 SOP 时** | D9 委托与结果接收 | 接收结果时辨认本次委托、原分工或节点、已采用的版本。撤权、同一 Agent 再次获派、节点返工或候选换版时，沿原归属核对迟到结果。[受托工作与接管](02-sop-workflow.md#53-授权撤销和接管) |
-| 需要在原执行可能仍写入时换机或接管 | D3 旧执行处置 | 取得实际退出或写入隔离的依据后，再按接手者授权继续修改。已共享材料可先由其他成员读取。[本地执行与工作交接](03a-execution-plane.md#3-执行回执与资源释放) |
-| 选用步骤驱动的方法 | D8 TeamAI Driver 与宿主 | 只为实际选用的宿主核对步骤领取、确认、报告、取消与恢复。普通规则和资料按项目适用版本及接收者权限提供。[方法选用与步骤驱动](03b-capability-governance.md#步骤驱动与观察) |
-| **项目需要跨次或多来源比较用量时** | D13 多来源计量与 Credits | 沿 Backend → Daemon → Task Usage 补齐请求 / Stage 身份和本地 Credits 回传，明确多来源去重、分指标合并、累计快照与迟到更正，验证重复上报及 Token / Credits 分别到达时保留已确认值。按原生单位汇总并展示覆盖，缺失指标保持未知。[归并规则](04-cost-quality-improvement.md#31-原始观察到计量结论) · [宿主覆盖](04-cost-quality-improvement.md#32-原生单位与宿主覆盖) · [底座缺口](governance-baseline.md#固定版本的底座盘点) |
-| **项目需要形成跨工作改进时** | D7 持续改进内循环 | 从真实 Issue 及其交付、执行或成员反馈取得证据，经过评价、Finding 分诊、候选改动、Benchmark、审核发布、项目采用和生产效果回收。成本作为质量改进的一个维度；多来源计量扩展由 D13 单独收敛。[持续改进内循环契约](d7-continuous-improvement-loop.md) · [成本与质量计量](04-cost-quality-improvement.md) · [上游机制取证](../research/d7-continuous-improvement-evidence.md) |
-| 项目启用资料或代码 Wiki | D10 来源连接与索引 | 可先引用现有资料。需要自动接入或检索时，再确定修订定位、读取权限、时效和索引策略。[资料扩展](#8-团队-wiki项目资料与代码-wiki-的扩展接入) |
-| 团队需要规模化运行评价与 Benchmark 时 | D11 评价触发与资源预算 | 通过版本化 Evaluation Policy 定义必需门禁、风险触发、分层抽样、评价器范围、原生单位预算、重试和停止条件；预算耗尽不能静默跳过强制门禁，抽样则停止新增。实际抽样比例和预算阈值由运行数据校准。[D11 治理契约](d11-evaluation-trigger-budget-policy.md) · [上游机制取证](../research/d11-evaluation-policy-evidence.md) |
-| 工程方案需要确定进程与存储边界 | D4 实际部署 | 用已明确的写入、权限及故障恢复要求判断哪些职责沿用 Multica 的现有部署，哪些需要独立承载。 |
-| 设计第一条真实执行链时 | VS-0 / VS-1 派发绑定 | 先固定业务意图身份、授权代际、Task 幂等查回、目标级委派状态和事务后恢复；复用 Multica Claim / Start / Reclaim，不新建 Run 控制面。[派发绑定契约](vs0-vs1-dispatch-binding-contract.md) |
-| 设计交付与验收的权威写入时 | VS-2 Candidate / Acceptance | Artifact 固定不可变来源版本；Candidate Manifest / Generation 与 Issue revision 分离；Evidence 不可改写且复用需 Applicability；Acceptance、换版和 Issue Done 服从统一 Completion Gate，PR 自动完成不得旁路。[VS-2 技术契约](vs2-candidate-acceptance-technical-contract.md) · [Multica 源码取证](../research/vs2-multica-delivery-source-evidence.md) |
-| 接入独立评价与质量反馈时 | VS-3 Evaluation 技术承载 | Evaluation 固定被评目标版本和输入快照；Model-based 评价沿 Multica 创建独立治理用途 Task / Run，完成预算预留、双向关联、结果消费和 Finding 回写；治理 Task 必须隔离普通生产 coalescing、Session 恢复和 Worker Wakeup。[VS-3 技术契约](vs3-evaluation-technical-contract.md) · [Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md) |
-| 验证改进并推广到项目时 | VS-4 Benchmark / Release / Adoption | 固定 Proposal Candidate Revision、Baseline、样本和双臂 Trial；先核验配对可比性与硬门槛，再由资产维护者发布不可变 Release，项目有权成员独立 Adoption；后续 Work 记录 Selected / Delivered / Loaded / Used，生产效果不足保持待观察，退化通过新 Adoption 决定回退。[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md) · [TeamAI 源码取证](../research/vs4-teamai-benchmark-source-evidence.md) |
-| VS-0 到 VS-4 技术契约完成后 | VS-5 整体技术方案一致性审查 | 统一 Task Purpose、业务来源身份、权威写入矩阵、预算原子预留、事件恢复语义及 Multica 扩展边界；按 E0–E4 的依赖顺序选择最小工程切片。[VS-5 审查](vs5-overall-technical-consistency-review.md) |
-| 进入详细技术方案与最小验证时 | 技术方案准备与纵向切片 | 先按[技术方案准备与最小纵向切片](technical-solution-readiness.md)收敛 VS-0 / VS-1 的来源身份、授权代际、原生 Task 查回与恢复契约；再推进 D6 和 D7 的技术承载。当前仍不预设数据库、API 或部署拆分。 |
+| D5 派发与恢复 | 产品契约已定义，待实现验证 | [D5 正文](d5-cross-layer-recovery-contract.md)；E0 / E1 落实来源查回、授权、派发与受控消费 |
+| D6 候选与成功完成 | 产品契约已定义，待实现验证 | [D6 正文](d6-delivery-acceptance-contract.md)；E2 落实不可变交付、验收竞争与完成入口 |
+| D2 执行等待与恢复 | 按启用入口细化 | [目录与容量规则](core-consistency-concurrency.md#71-runtime-与执行容量)；E1 先核对所选 Runtime 的等待与恢复回执 |
+| D9 持续委托与 SOP 接收 | 持续委托先落地，SOP 后续单列 | [受托工作与接管](02-sop-workflow.md#53-授权撤销和接管)；E1 / E2 验证 Main Bot 消费，SOP 按后续运行时切片接入 |
+| D3 旧执行处置 | 随换机 / 接管入口细化 | [执行与交接](03a-execution-plane.md#3-执行回执与资源释放)；按实际宿主证明退出或写入隔离 |
+| D8 TeamAI Driver 与宿主 | 按实际选用方式接入 | [步骤驱动与观察](03b-capability-governance.md#步骤驱动与观察)；只验证所选 Driver 和宿主 |
+| D13 多来源计量与 Credits | 归并规则已定义，采集适配待验证 | [计量归并](04-cost-quality-improvement.md#31-原始观察到计量结论) · [宿主覆盖](04-cost-quality-improvement.md#32-原生单位与宿主覆盖)；逐宿主补请求身份、Credits 回传与更正 |
+| D7 持续改进内循环 | 产品契约已定义，分阶段启用 | [D7 正文](d7-continuous-improvement-loop.md)；E3 / E4 接入评价、候选验证与发布采用 |
+| D10 来源连接与索引 | 按团队资料需要接入 | [资料扩展](#8-团队-wiki项目资料与代码-wiki-的扩展接入)；确定来源权限、版本、时效与检索方式 |
+| D11 评价触发与预算 | 策略契约已定义，阈值待运行校准 | [D11 正文](d11-evaluation-trigger-budget-policy.md)；E3 按试点范围配置额度并验证适用预算原子性 |
+| D4 部署与维护 | 随工程切片明确 | E0 先确认 Multica 扩展维护与升级方式，各阶段按权威提交点确定事务、进程和存储方案 |
+| VS0 / VS1 派发绑定 | 逻辑契约已定义 | [派发绑定契约](vs0-vs1-dispatch-binding-contract.md)；对应 E0 / E1 |
+| VS2 交付与验收 | 逻辑契约已定义 | [交付验收契约](vs2-candidate-acceptance-technical-contract.md)；对应 E2 |
+| VS3 评价与预算 | 逻辑契约已定义 | [评价契约](vs3-evaluation-technical-contract.md)；对应 E3，治理隔离在启用前验收 |
+| VS4 发布采用 | 逻辑契约已定义 | [发布采用契约](vs4-benchmark-release-adoption-technical-contract.md)；对应 E4 |
+| VS5 横向一致性 | 权威边界与阶段范围已定义 | [工程前置与顺序](vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)；当前进入 E0 来源查回与生产兼容设计 |
 
 ## 12. 架构验收标准
 

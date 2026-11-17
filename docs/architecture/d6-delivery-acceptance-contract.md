@@ -51,7 +51,7 @@ Candidate 创建时固定：
 6. 本次送审范围、变更摘要和已知缺项；
 7. 本次适用的检查要求 / 验收标准版本。
 
-Candidate 清单一经提交不可原地改组成。新增、删除或替换 Artifact，只要改变本次送审内容，就形成新 Candidate。仅补充解释性说明且不改变送审内容时，可追加到 Delivery Record，不得暗中改变 Candidate manifest。
+Candidate 清单一经提交不可原地改组成。新增、删除或替换 Artifact，只要改变本次送审内容，就形成新 Candidate。仅补充解释性说明时，由有权提交者在原 Issue 追加交付注记，可沿原评论入口承载；注记固定 Candidate ID、作者、时间和来源操作身份，纠正说明继续追加并引用原注记。Delivery Record 聚合这些来源记录，重建后仍能读回说明。送审范围、标准或工作约定改变时形成新 Candidate，解释性注记保留原候选归属。
 
 ### 2.3 文件最新版本不等于 Candidate 最新版本
 
@@ -211,7 +211,7 @@ PR / CI 是工程来源与证据：
 - **Evidence**：针对具体要求、候选和标准的可核查事实。
 - **Evaluation**：基于证据的评价结论。
 - **Acceptance Decision**：有权主体对具体 Candidate 和范围作出的决定。
-- **Delivery Record**：汇总交付、证据、缺项、决定和交接过程。
+- **Delivery Record**：从原对象及 Issue 交付注记重建的交付过程视图，汇总证据、缺项、决定和交接；追加内容写入对应权威来源。
 - **Issue**：唯一业务工作权威，维护当前候选、有效决定、责任与完成状态。
 
 这些对象有明确关系，但不应把它们合并成一个万能 Delivery 状态对象。

@@ -21,7 +21,7 @@
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
 | 执行资源与记录 | Host、Runtime、Daemon、Backend、Session、Run | 提供本地执行能力并记录真实受管执行 |
 | 交付与证据 | Artifact、Candidate、Evidence、Delivery Record | 表达交付内容、版本、检查依据和交接结果 |
-| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark | 评价实际结果，形成可审查的改进提案并验证候选变更 |
+| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark、Budget Reservation | 评价实际结果，验证改进候选，并在统一预算权威边界管理治理资源预留与结算 |
 
 这些分组是概念边界，不要求对应独立服务、数据库或部署单元。
 
@@ -51,13 +51,15 @@
 | Work Agreement | 某一时点有效的目标、范围、完成要求、责任与约束 | 由有权成员在所属 Issue 上确认或变更；历史版本可追溯 |
 | Decision | 对工作范围、授权、例外、接管、门禁或验收作出的明确决定 | 由对应事项的有权主体作出，记录对象、适用版本、范围和后果 |
 | Project Workflow | 项目层的 Issue 阶段、步骤指令和负责人交接规则 | 项目配置定义规则；具体 Issue 记录实际发生的阶段与交接 |
-| Project Adoption | 有权项目成员对已发布 Release 或项目级流程 / 分工配置版本作出的采用决定 | 作为 Project 配置中的不可变决定记录，固定范围、生效条件、在途工作处理及替代关系；当前配置表达有效采用 |
+| Project Adoption | 有权项目成员对已发布 Release 或项目级流程 / 分工配置版本作出的采用决定 | 归组织与项目范围模块，作为 Project 配置中的不可变决定记录，固定范围、生效条件、在途工作处理及替代关系；当前配置表达有效采用 |
 
 **Issue 是业务工作与责任的权威归属。** 评论、通知、Run、SOP 和交付记录都可以关联 Issue，但不能自行改变 Issue 的业务事实，除非通过 Issue 的有效授权入口完成相应写入。
 
 持续委托由 Issue 上的有效指派和工作约定共同表达。约定标明人工总责人、可委派的工作与资源，以及哪些决定由谁保留。对某个 Agent 的一次提及只发出本次协助请求。改派、撤权或 Issue 结束后，原委托停止产生新的协调动作。后来再次委托同一 Agent 时，按新的授权判断历史结果能否采用。
 
 子 Issue 不是 SOP 节点的默认实现。只有当一段工作需要独立负责人、独立交付或独立生命周期时，才建立子 Issue。短时协助和同一责任下的步骤可以留在原 Issue。
+
+派发意图（Dispatch Intent）是附着原业务来源的恢复记录，保存稳定来源身份、目标、适用版本 / 授权和主 Task / Retry 关联。Issue 首次激活、Comment 目标级委派、SOP Attempt、Evaluation 和 Benchmark Trial 分别保留自己的来源身份；不把这些记录提升为新的通用任务对象或执行队列。状态与查回要求见[派发绑定契约](vs0-vs1-dispatch-binding-contract.md)及[横向来源约定](vs5-overall-technical-consistency-review.md#4-统一身份与版本关联模型)。
 
 ### 3.3 方法与能力对象
 
@@ -70,6 +72,7 @@
 | Role | 定义 Agent 在某项工作中的职责边界和预期行为 | 被工作或流程选用，不是独立执行实例 |
 | Tool / Harness Configuration | 定义可用工具、宿主能力和执行环境配置 | 受项目、成员、Runtime 和本次授权共同约束 |
 | Knowledge | 有来源、适用范围和有效版本的可复用知识 | 按读权和工作上下文需要被检索、引用和使用 |
+| Release | 资产维护者审核发布的不可变资产版本，归方法与上下文模块维护 | 供项目或具体工作按权限选用；发布事实不代表项目已采用或工作已使用 |
 
 团队或项目可以维护、发布和采用这些资产。**资产定义不等于一次工作已经使用它。** 必须区分已发布、已采用、已选择、已投递、宿主实际使用等不同事实，并保留各自证据。
 
@@ -115,13 +118,15 @@ Run 也可服务 SOP 节点、评价或实验。一次 SOP 节点尝试可引用
 | Artifact | 可引用的输入或输出，如代码修订、补丁、报告、文档、样例或附件 | 标识生产者、来源类型、不可变 Locator / Digest、可取得性和当前读取授权 |
 | Candidate | 一份待检查、接受或退回的具体交付组合 | 绑定一个工作约定版本和一组确定的 Artifact 版本 |
 | Evidence | 对某项要求、对象或执行事实的不可改写观察 | 记录来源、主体、时间、环境、方法、精确适用版本和结论；复用于其他 Candidate 时另有 Evidence Applicability 依据 |
-| Delivery Record | 一次可追溯的交付记录，组合引用 Candidate、适用要求、制品、检查结论、缺项和决定 | 回答交付了什么、依据什么、由谁生产、当前是否被接受 |
+| Delivery Record | 可重建的交付过程视图，聚合 Candidate、适用要求、制品、检查结论、缺项、决定和原 Issue 的交付注记 | 从各权威来源回答交付了什么、依据什么、由谁生产、当前是否被接受；不单独承接业务写入 |
 
 成员或受管执行交付时，按本次工作约定指明哪些附件 ID、仓库修订或其他制品版本共同组成 Candidate。Candidate 固定一次送审组合，不等同于交付区按文件名聚合的最新版本。每个接收方记录自己实际取用的候选及用途。同一 Artifact 可被多个工作引用，并保留原生产归属。候选换版后，既有检查和决定仍指向原组合，接收方按变化范围判断哪些依据可继续使用。[候选交付与验收契约](d6-delivery-acceptance-contract.md)
 
 Artifact 的版本身份、内容完整性、可取得性和当前读取授权是不同事实。Candidate 固定 Artifact 的来源版本；来源删除或失权不能改写历史 Locator，也不能静默替换为最新内容。Evidence 始终引用原 Candidate / Artifact 和标准版本；复用到新 Candidate 必须显式记录适用性与影响分析。
 
-Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录、文件回读、确定性检查、独立审查和业务决定分别标明来源，不得互相冒充。
+Acceptance Channel 是 Issue 内声明的验收范围，Candidate Generation 是该范围当前候选的并发代际。它们属于 Issue 验收与 Candidate 关联的属性，用于候选替换、接受决定和完成资格的条件核对；不因命名为 Channel 或 Generation 而另建领域对象，也不以 Issue revision 替代候选代际。
+
+Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录、文件回读、确定性检查、独立审查和业务决定分别标明来源，不得互相冒充。解释性补充追加到原 Issue 的交付注记，可沿原评论承载，固定 Candidate ID、作者、时间和源操作身份；Delivery Record 聚合这些事实，具体规则见[D6 交付契约](d6-delivery-acceptance-contract.md)。
 
 ### 3.7 评价与改进对象
 
@@ -131,13 +136,15 @@ Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录�
 | Finding | Evaluation 中一条有定位、有依据的问题或观察 | 可被当前 Issue 修正，也可成为改进提案的来源 |
 | Improvement Proposal | 对方法、能力、知识或流程提出的可审查变更 | 引用源工作、Finding、拟改资产、基线、预期效果和验证方式；其候选修订属于提案内容，不是交付 Candidate |
 | Benchmark | 在固定输入、环境、评价标准和候选版本下进行的可比对照 | 证明候选在声明范围内的实验结果，不替代真实业务效果 |
-| Release | 经审核发布的不可变资产版本 | 可供项目采用；发布不等于项目已采用或后续工作已使用 |
+| Budget Reservation | Evaluation / Benchmark 等治理活动启动前，对所有适用范围一次性取得的资源预留资格 | 由统一预算权威边界管理预留、结算、释放与更正；引用活动身份、策略版本、周期及原生计量单位，不代替 Multica Usage 的实际消耗 |
 
 改进提案中的候选内容称为**改进候选修订**，由 Proposal 固定其变更对象、基线、依赖和内容摘要，并关联 Benchmark。它不是 D6 的交付 Candidate：交付 Candidate 固定一次工作送审的 Artifact 组合；改进候选修订固定拟发布的方法 / 能力 / 流程变更。两者不可互相替代，也不需要再建立一个全局通用 Candidate 对象。
 
 Project Adoption 归 Project 配置与决定权，不属于评价或资产发布过程。它引用已发布 Release，或明确的项目级工作流 / 分工配置版本，记录采用范围、生效条件、在途工作处理和替代关系。项目当前有效配置决定当前采用什么；历史采用决定不可覆盖。后续 Work / Run 的资产选择与实际投递回执，才证明具体工作使用了哪个版本。
 
 Evaluation Policy 是 Team / Project 配置中的版本化治理规则，定义必需门禁、风险触发、抽样范围、可用评价器、资源预算和停止条件。Work Agreement 可以增加本项要求但不能降低团队或项目的强制底线。它不产生独立执行实例；每份 Evaluation 固定实际采用的策略版本。Scorer / Rubric 由资产维护者版本化，策略制定者与评价器维护者的职责分开。
+
+技术契约中的 Candidate Revision 属于 Improvement Proposal 的不可变组成；Experiment、Sample、Arm、Trial 和 Result 属于 Benchmark 的定义与结果组成；Adoption Generation 是 Project Adoption 的版本属性，资产 Pin 和实际投递 / 使用回执属于 Work / Run 的关联记录。Evidence Applicability 记录原 Evidence 对其他候选的适用性，Completion Gate 是 Issue 完成入口的校验规则。这些名称不另设平行的工作或执行对象。
 
 治理 Task（Evaluation、Benchmark、Improvement、Calibration 等）是 Governance Purpose 的受管执行，不是生产 Worker 委派。它保留自己的 Task / Run / Session / Usage，并通过各自业务来源身份双向关联；普通生产 Task 的 pending coalescing、Session 恢复和 Worker Wakeup 不得将其视为生产执行。团队总资源统计纳入治理消耗，生产成本视图单独识别并排除治理 Task。
 
@@ -155,6 +162,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 - Run 或成员工作可产生 Artifact；Artifact 的具体版本组成 Candidate。
 - Evidence 针对 Candidate、要求或执行事实；Delivery Record 汇总交付、证据、缺项和决定。
 - Evaluation 引用 Run、Candidate 或资产。具备复用价值的 Finding 可形成 Improvement Proposal。经对照和审核后，资产维护者发布新版本，供项目或具体 Issue 按权限选用。涉及项目工作流或分工的变更由有权成员在原项目配置或 Issue 决定中采用。
+- Evaluation / Benchmark 通过 Budget Reservation 取得治理资源资格；统一预算权威边界原子核对全部适用范围。实际 Task / Usage 仍读取 Multica，预留不会成为第二套成本账本。
 
 ## 5. 工作归属、执行归属与决定权
 
@@ -167,10 +175,11 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 | 哪段流程被委托、走到哪里 | SOP Execution / Node Activation | 只控制明确受托的流程范围；节点进展不替代 Issue 状态 |
 | 谁实际执行、执行发生了什么 | Run 及其宿主来源 | 执行 Agent、Runtime 和宿主回执描述该次执行。Run 的 `accountable_user_id` 用于追溯该次执行的人员归因，Issue 总责人及验收人分别从工作约定读取 |
 | 哪个会话延续了上下文 | Session | 仅提供宿主连续性，不决定工作或成本归属 |
-| 实际交付了什么版本 | Artifact / Candidate / Delivery Record | 固定具体修订或附件版本，不以“最新”代替历史引用 |
+| 实际交付了什么版本 | Artifact / Candidate；Delivery Record 聚合展示 | 固定具体修订或附件版本，不以“最新”代替历史引用；视图不成为第二权威来源 |
 | 某项要求是否得到支持 | Evidence / Evaluation | Evidence 保留事实来源；Evaluation 给出有边界的判断 |
 | 是否接受本项交付 | Issue 上有权的接受主体及 Decision | 按当前 Candidate 和有效工作约定作决定 |
 | 哪个方法可以供后续使用 | 资产维护者发布的 Release、项目配置及本项选择 | 后续工作可追溯项目默认或本项选用的版本，并按证据记录实际使用 |
+| 治理活动是否取得资源资格 | Budget Reservation 及统一预算权威边界 | 全范围预留成功后才允许创建治理 Task；结算与释放保留原活动身份，不改写原生 Usage |
 
 ## 6. 必须保持的对象不变量
 
@@ -193,8 +202,9 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 | [工作生命周期](01-unified-work-lifecycle.md) | Issue、责任、分工、业务状态、验收与完成 |
 | [SOP 与工作流](02-sop-workflow.md) | SOP Definition、Execution、节点激活、尝试、依赖、返工和出口 |
 | [本地执行](03a-execution-plane.md) | Runtime、Daemon、Backend、Session、Run、观察与回报 |
-| [能力与上下文](03b-capability-governance.md) | 资产定义、发布、适用范围、项目采用、选择与投递 |
-| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark 与 Release |
+| [能力与上下文](03b-capability-governance.md) | 资产定义、Release 发布与撤回、适用范围，以及采用后的[解析、选择与投递](03b-capability-governance.md#5-一次工作如何选择和投递能力)；Release 归方法与上下文模块 |
+| [项目采用决定](vs4-benchmark-release-adoption-technical-contract.md#6-project-adoption项目独立决定采用) | Project Adoption 的范围、权限、Generation、生效与回退；决定归 Project 权威域及项目有权成员，专题归口不改变领域所有权 |
+| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark、Budget Reservation 与效果观察；向资产发布或项目采用提供验证依据 |
 | [统一工作台](05-unified-workbench.md) | 从各权威来源读取对象，呈现判断并调用拥有决定权的入口 |
 
 如果专题需要引入新对象，必须说明它属于哪一组、由谁维护事实、与现有对象的关系，以及为什么不能沿用现有对象。不得仅为页面、按钮或某个案例增加新的领域对象。

@@ -6,7 +6,7 @@
 
 上游系统证明了“评价应有独立身份、固定输入和明确触发资格”，但没有一个项目完整提供 AgentPlatform 所需的跨团队风险分层、抽样治理和多原生单位预算闭环。
 
-- **LoopForge**：已完成 Run 才能发起 Run Evaluation；评价事实提取、Scorer 版本和建议应用有明确入口。建议应用受限，不能把模型评价等同于自动发布。它提供终态评价与受控建议机制，不代表已有通用风险抽样调度器或团队预算管理器。
+- **LoopForge**：已完成 Run 才能发起 Run Evaluation；独立 RunEvalRecord 固定 Model 和评价 Policy，评价事实提取和建议应用有明确入口。建议应用受限，不能把模型评价等同于自动发布。它提供终态评价与受控建议机制，不代表已有通用风险抽样调度器或团队预算管理器。
 - **TeamAI**：符合条件的已结算 pass 可触发独立评分 Run；评分引用原 Run / Step / Pass 和 Scorer 版本。Benchmark 固定实验定义并核对比较条件；自改进以可复现失败为入口，需达到阈值后才生成候选改动。它证明了 pass 级评价与实验比较机制，不等于为所有 AgentPlatform 工作设定统一采样比例。
 - **Multica**：提供原生 Task / Run、Runtime、Usage 和执行恢复链。评价与 Benchmark 应复用该链，不再建立评价专用执行队列。当前不同 Runtime 的用量覆盖不一致，预算必须允许原生单位缺失，不能统一换算成虚构 USD。
 
@@ -15,11 +15,11 @@
 固定源码：LoopForge 97b3cdc2f29a88e8767a8dc6c03bfb8865622653。
 
 - Run Evaluation 的入口检查被评 Run 是否已完成，随后提取 NodeRun、返工、工具重复、错误、耗时和 Artifact 等事实。
-- 评价由独立请求与评价过程产生，保留 Scorer / 评价输入，不改写生产 Run 的终态。
+- 评价由独立请求与评价过程产生，RunEvalRecord 保存 Model、包含版本与维度的 RunEvalPolicy 及提取的评价事实，不改写生产 Run 的终态；TeamAI 的独立 Scorer / 评分 Run 机制另见下一节。
 - Findings 需定位节点和证据；Recommendations 的可应用范围受限制，用户选择后才写回支持的局部参数或 Agent 指令。
 - 评价 API 可由用户主动调用；不能据此宣称 LoopForge 已实现跨项目的风险分层随机抽样、预算预留或防递归策略。
 
-源码入口：[Run Evaluation API](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/run_eval.go) · [事实与评价提示](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/prompt.go) · [受限建议应用](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/apply.go)。
+源码入口：[评价记录固定 Model / Policy](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/httpapi/run_eval.go#L128-L142) · [Policy 版本与维度](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/domain/run_eval.go#L17-L32) · [事实与评价提示](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/prompt.go) · [受限建议应用](https://github.com/Tencent/LoopForge/blob/97b3cdc2f29a88e8767a8dc6c03bfb8865622653/internal/runeval/apply.go)。
 
 ## 3. TeamAI：已结算 Pass 触发、独立 Scorer 和 Benchmark
 

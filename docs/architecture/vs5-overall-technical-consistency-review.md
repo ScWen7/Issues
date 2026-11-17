@@ -6,7 +6,7 @@
 
 ## 1. 审查结论
 
-**VS-0 到 VS-4 的业务链可以组成一套完整架构，但进入工程实现前还必须统一四项横向契约：**
+**VS-0 到 VS-4 按以下四项横向契约衔接；工程先验证 E0–E2 的生产工作链，再接入评价与改进：**
 
 1. 所有受管 Task 必须有明确的执行用途；生产协调 / Worker 与 Evaluation、Benchmark、Improvement 等治理执行不能混用生产执行语义。
 2. 各业务来源使用自己的稳定意图身份；Multica Task 创建必须能按来源身份查回，不能把 Task 来源证据、Issue revision 或 (Issue, Agent) pending 唯一约束误当成通用幂等键。
@@ -53,7 +53,7 @@ Main Bot / Worker / SOP Node 是执行角色或业务关系，不是 Execution P
 
 Execution Purpose 不能只写进 Prompt、Task Summary 或 Task 来源证据。它必须在 Multica 原生 Task 创建后可查询，并贯穿：
 
-1. **Pending 去重与 Coalescing**：治理 Task 不与生产 Task 竞争同一个 (Issue, Agent) pending 槽位，也不能被生产 Comment coalescing 吸收。相同治理来源身份仍须唯一查回。
+1. **Pending 去重与 Coalescing**：治理 Task 不与生产 Task 竞争同一个 (Issue, Agent) pending 槽位，也不能被生产 Comment coalescing 吸收。相同治理来源身份查回唯一主 Task 及其合法 Retry 谱系。
 2. **Session 恢复**：普通生产 Main Bot / Worker 的历史 Session 查询必须排除 Governance；治理 Task 使用隔离上下文和独立 Session。治理 Task 的 Retry 沿原生 retry 谱系，不进入生产恢复池。
 3. **Issue Wakeup**：普通 Worker Wakeup 默认不消费 Governance Task 的终态。治理结果先由对应 Evaluation / Trial 消费器写入业务结果，再通过明确的业务通知唤醒负责人。
 4. **Task 事件消费**：通用 Task 终态事件仍由 Multica 产生；业务消费者按 Purpose + 来源身份路由，不能把治理 Task 当成 Worker 交付。
@@ -80,7 +80,7 @@ Task 来源证据继续作为来源导航和审计引用；稳定业务来源身
 
 | 来源场景 | 稳定业务身份 | 必须固定的版本 | 原生 Task / Run 关系 |
 |---|---|---|---|
-| Main Bot 首次激活 | Issue 指派 / 持续授权转换 ID + 授权代际 + 目标 Agent | Work Agreement / Delegation 版本 | 一个 Production Task；后续唤醒沿原生 Wakeup |
+| Main Bot 首次激活 | Issue 指派 / 持续授权转换 ID + 授权代际 + 目标 Agent | Work Agreement / Delegation 版本 | 一个 Production 主 Task 及原生 Retry 谱系；后续唤醒沿原生 Wakeup |
 | Worker 委派 | Comment ID + Target Agent + 目标解析版本 | Comment 输入、目标解析和授权判定 | 每个目标独立绑定 Production Task，兼容合并须保存覆盖依据 |
 | SOP 节点执行 | SOP Execution + Node Activation + Node Attempt + 本次调用 ID | SOP Definition、Work Agreement、输入 Candidate / Artifact、授权代际 | 一个或多个 Production Task / Run，分别保留真实执行谱系 |
 | Evaluation | Evaluation ID + 固定目标版本 + 触发身份 | Policy、Work Agreement、Scorer / Rubric、Evidence Snapshot | Governance Task；Retry 归同一 Evaluation |
@@ -90,9 +90,9 @@ Task 来源证据继续作为来源导航和审计引用；稳定业务来源身
 所有业务关联遵循同一最低要求：
 - 业务来源可以查回实际 Task / Run；
 - Task 可以反查其业务来源、Purpose 和输入版本；
-- 来源身份重复提交只查回原业务操作与原 Task；
+- 来源身份重复提交只查回原业务操作与主 Task；主 Task 的合法 Retry 子项通过原生谱系查回，每个子项保留独立执行事实；
 - 来源已失效时不得创建新执行；
-- 证据不足或出现多个候选时保持 Unknown 并对账，不猜测绑定。
+- 证据不足或出现多个互不相属的主 Task 候选时保持 Unknown 并对账；同一主 Task 的合法 Retry 子项按谱系识别。
 
 ## 5. 权威事实与写入边界总表
 
@@ -134,7 +134,7 @@ VS-0 到 VS-4 不要求 Issue、Multica Task、Artifact、Evaluation、Budget、
 ### 6.2 必须具备的本地原子边界
 
 1. **Issue 授权 / 指派**：Issue 当前指派、授权代际和首次激活意图必须一起生效；之后 Task 派发可异步恢复。
-2. **Task 创建 / 查回**：同一业务来源身份只能绑定一个兼容的原生 Task；Task 来源身份与 Task 创建必须在 Multica 原生写入边界一起可查回。
+2. **Task 创建 / 查回**：同一业务来源身份只建立一个兼容的主 Task。来源身份与主 Task 创建在 Multica 原生写入边界共同可查回；原生 Retry 可创建继承同一来源的子 Task，以 retry 谱系区分各次执行。同一派发请求重送返回主 Task 及其已存在的 Retry 链，同一次 Retry 的重送按原生重试关系查回子项。
 3. **Candidate / Acceptance / Done**：Candidate 实体先固定；Issue 当前候选指针更新、Acceptance 生效、Issue 完成资格在 Issue 权威边界按预期 Candidate / Generation 条件竞争。若 Acceptance 与 Done 分次发生，Done 再次核对。
 4. **Evaluation / Finding 消费**：同一 Task 终态重放只能生成一份有效结果和对应 Finding；通知失败只重投通知。
 5. **Budget Reservation**：单次、Issue、Project、Team 所有适用额度一次性预留成功或全部不占用。预留和 Evaluation / Experiment 的稳定身份绑定，重复请求查回原预留。
@@ -142,6 +142,10 @@ VS-0 到 VS-4 不要求 Issue、Multica Task、Artifact、Evaluation、Budget、
 7. **Release**：发布身份、候选 Digest、依赖和审核决定必须共同可查回；发布响应丢失不能重复产生不同 Release。
 8. **Project Adoption**：Project + Asset + Scope 的当前 Generation 条件写入与 Adoption 决定共同生效；重复提交查回原决定。
 9. **Actual Usage / Observation**：实际使用证据追加，不回写或覆盖 Release、Adoption 或历史 Run。
+
+E0 的集成方案必须能承接上述 Issue 权威提交。扩展事实可直接登记在 Multica 的 Issue 事务内；若由外部域保存，则先固定不可变版本，再由 Issue 权威入口原子生效相关引用、代际、指派和可恢复意图。外部记录的准备成功不使委托或候选生效。先分别写外部状态、再调用普通 Issue 更新的多次独立提交，缺少这里要求的原子生效点。
+
+所有能改变正式责任、指派、当前候选或完成资格的原生入口，都须接入同一权威校验：包含 UI / CLI / API 的单项与批量更新、Project Workflow 及自动完成路径。采用受控入口时，原生路径也必须经过公共校验或受相应写入限制，保留可旁路的原生写入不满足本契约。标题、描述及联系人属性按[工作约定的来源规则](cross-layer-contracts.md#31-正式工作约定与责任引用)保持识别、背景或投影用途，普通编辑沿原权限进行，执行目标由正式约定决定。
 
 ### 6.3 预算原子性与全局事务的关系
 
@@ -180,6 +184,9 @@ Multica 源码复核固定基准：71683141a764ed3b1620db4bc26a2d0a098f135c。VS
 | 能力 | 复用现有能力 | 必须补充 / 验证 |
 |---|---|---|
 | Issue / Project / Comment / PR | 原生对象、权限、工作流、评论与 PR 关联 | Issue 授权变更与首次激活意图的可恢复写入；统一 Completion Gate 接入所有完成入口 |
+| 原生指派及 Workflow 交接入口 | 单项、批量和自动交接已有写入路径 | 指派、正式委托代际与首次激活在同一 Issue 权威提交生效；各路径接入公共校验或受控入口，验证旁路写入受约束 |
+| Issue 标题 / 描述与上下文准备 | 原生编辑和描述取材 | 标题用于识别，描述作背景 / 变更建议；派发及继续执行投递正式 Work Agreement 正文、版本和授权代际，描述编辑不静默替换执行目标 |
+| 通用 `actor` 属性 | 联系人字段和展示信息 | 正式总责及验收人读取 Work Agreement；属性修改只影响联系人 / 展示，不改变正式责任或权限 |
 | Task / Run / Runtime / Daemon | 原生队列、Claim / Start / Retry / Reclaim、Run 事实 | 稳定来源身份唯一查回；Task Purpose / Governance Sub-purpose 可查询并贯穿执行语义 |
 | Pending 去重 / Comment coalescing | 保留 Production 现有行为 | Governance Task 不与 Production 竞争槽位或被吸收 |
 | Session continuity | 保留生产 Main Bot / Worker 的原生恢复 | 普通生产恢复排除治理用途 Session；治理执行独立上下文 |
@@ -199,7 +206,7 @@ Multica 源码复核固定基准：71683141a764ed3b1620db4bc26a2d0a098f135c。VS
 - 由工作台维护的第二套 Issue / Candidate / Evaluation 状态机；
 - 用一个通用 Intent、Candidate 或 Event 对象取代各自业务来源和权威事实。
 
-## 8.1 源码基准与证据边界
+### 8.2 源码基准与证据边界
 
 | 专题 / 研究 | 固定源码基准 | 本轮如何使用 |
 |---|---|---|
@@ -207,43 +214,55 @@ Multica 源码复核固定基准：71683141a764ed3b1620db4bc26a2d0a098f135c。VS
 | VS-0 / VS-1、VS-2、VS-3、VS-5 跨层复核 | Multica 71683141a764ed3b1620db4bc26a2d0a098f135c | 作为当前 Task、附件 / PR、Session、Wakeup、Usage 等共性边界的统一复核基准 |
 | VS-4 Benchmark 机制研究 | TeamAI 556b5246f2c13ad28b8b79b5b513a78ed8ab9dae | 只用于 Benchmark Plan、Trial、配对可比性和自改进阈值机制参考，不代表 AgentPlatform 发布 / 采用机制已由上游提供 |
 
-进入 E0 时，必须以实际目标 Multica 分支重新核对 D5 三类派发路径和 VS-3 / VS-4 共用的 Task 创建、去重、Session、Wakeup、Usage 路径。不同提交的源码证据只对各自版本负责；不能拼接成一个未经验证的“当前 Multica 实现”。
+进入 E0 时，以实际目标 Multica 分支核对主 Task 来源查回、Retry 谱系及生产派发相关路径；Governance 的 coalescing、Session、Wakeup 和 Usage 隔离在 E3 启用前完成专项核验。各阶段保留所用提交与取证路径，旧研究继续按其固定版本解释。
 
 ## 9. 实施依赖与最小工程切片
 
-### 9.1 先做底座兼容，不先铺开全部业务模块
+### 9.1 工程依赖与启用顺序
 
-最小工程顺序应按共性依赖推进：
+先交付 E0–E2 的生产工作链；治理执行在 E3 隔离验收后启用。
 
-| 顺序 | 工程切片 | 包含内容 | 通过标准 | 未通过时不进入 |
+| 顺序 | 工程切片 | 包含内容 | 通过标准 | 后继 |
 |---|---|---|---|---|
-| E0 · 原生执行兼容 | Task Purpose、来源身份查回、治理执行隔离 | 在 Multica 原生 Task / Run 上增加可查询用途和稳定来源关联；保持 Production 既有 coalescing、Session、Wakeup 不变 | Production 回归通过；Evaluation / Benchmark Governance Task 不串生产；重复来源只查回同一 Task | E1 |
-| E1 · Issue 派发闭环 | Issue 授权代际、Main Bot 首次激活、Comment 目标级 Worker Intent | Issue 提交与首次 Intent 同权威提交；Task 异步创建 / 查回；断联恢复 | 真实 Runtime Claim / Start / 终态；Task 创建响应丢失、并发恢复、撤权均无重复执行 | E2 |
-| E2 · 交付验收闭环 | Artifact、Candidate Manifest / Generation、Evidence、Acceptance、Completion Gate | 固定附件 / Commit / PR 版本；统一完成资格；PR 自动完成接入 | Candidate / Accept / Done 并发、无关 revision、PR 集合变化和附件失效按契约处理 | E3 |
-| E3 · 评价与预算 | Evaluation、全范围 Reservation、Governance Task、Finding | 先预留后派发；真实 Usage 结算；结果消费幂等 | 并发预算全成全败；评价失败不污染生产；回写重放不重复 Finding | E4 |
-| E4 · 改进验证与采用 | Proposal Revision、Benchmark / Trial、Release、Adoption、Actual Usage | 固定样本双臂实验；资产审核发布；项目独立采用；记录真实投递 / 使用 | 可比性、权限、采用并发、在途版本、退化回退和生产效果可追溯 | 扩大资产类型 / 项目范围 |
+| E0 · 来源查回与生产兼容 | 稳定来源身份、唯一主 Task、Retry 谱系及 Purpose 基础表达 | 固定来源种类和原生查回关系，验证已有生产派发；明确历史 Task 的兼容映射，保留 Governance 扩展入口 | 重送查回同一主 Task，合法 Retry 可追溯，Production 回归通过 | E1 |
+| E1 · 授权、派发与消费 | Work Agreement 修订 / 授权代际、Main Bot 首次激活、Comment 目标委派、受控结果消费 | 沿 Issue 权威入口确认责任与授权；Task 异步创建 / 查回；消费记录按原委派和代际条件提交 | 区分中心 Start 与宿主启动；派发和消费响应丢失可恢复；重复消费及旧代际回报按契约处理 | E2 |
+| E2 · 交付验收闭环 | Artifact、Candidate Manifest / Generation、Evidence、Acceptance、Completion Gate | 首批一个默认验收通道，支持 Accept / Reject；说明追加到原 Issue，统一各完成入口 | 候选 / 接受 / Done 竞争、无关 revision、PR 集合变化、附件失效和视图重建通过 | 首条生产工作链验收，再进入 E3 |
+| E3 · 治理隔离、评价与预算 | Governance Task 隔离、Evaluation、适用范围的 Reservation、Finding | 先完成 pending / Session / Wakeup / Usage 隔离验收，再开放评价派发；预留、结算与结果消费可查回 | 治理执行与生产分离；适用预算全成全败；固定 Policy、合法 Retry 与幂等 Finding 通过 | E4 |
+| E4 · 改进验证与采用 | Proposal Revision、Benchmark / Trial、Release、Adoption、Actual Usage | 首批一个 Skill 资产、固定样本及一个项目；资产发布与项目采用分别决定 | 可比性、权限、采用并发、在途版本、退化回退和生产效果可追溯 | 按实际需要扩大资产类型与项目范围 |
+
+E0–E2 仅开放 Production 派发；Governance 入口在 E3 隔离通过后开放。E0 设计来源表达时考虑第 4 节各类来源及 Retry 关系，实际接入和验收按所属阶段进行。
 
 ### 9.2 第一条真实端到端切片
 
-E0 到 E2 完成后，先用一个 Project、一类真实研发 Issue、一个 Agent / 一个 Worker 和一种交付 Artifact 证明：
+E0 到 E2 完成后，用一个 Project、一类真实研发 Issue、一个协调 Agent、一个 Worker 和一种 Artifact 验证：
 
 Issue → Main Bot → Worker → Multica Task / Run → Artifact → Candidate → Evidence → Acceptance Decision → Issue Completion。
 
-第一条工作链不强制启动 SOP、Evaluation、Benchmark 或 Release。它证明最核心协作、执行、交付和验收成立。
+首批按一个默认 Acceptance Channel 完成 Accept / Reject；部分接受、例外放行和并行验收通道保留 D6 的规则，启用时增加对应验收。第一条链的交付范围止于 Issue 完成。
 
-之后以同一执行用途和恢复底座接入 E3；再用一个 Skill 或 SOP 资产、少量固定样本和一个 Project 验证 E4。不能把所有上游产品能力一次性塞入首期。
+E3 首批在单项目试点，先配置单次上限与项目周期额度；已有的 Team 底线或 Issue 限额也必须参与同一次原子预留。额度单位选用实际可观察、可控制的指标，缺失 Credits 保持 Unknown。完整四范围预算语义仍按 D11 / VS3 定义，新增启用范围时补相应并发与周期验收。
 
-### 9.3 工程设计开始的准入条件
+E4 再验证固定样本对照、发布、项目采用和真实效果；首批采用方式与观察窗口由试点项目明确。完整治理能力按试点结果逐步启用。
 
-进入 Schema / API / 部署设计前，必须：
-- 确认目标 Multica 提交，并对 E0 涉及的队列、Session、Wakeup、Usage 路径完成逐项源码核对；
-- 明确 Task Purpose 与来源身份的最小兼容方案；
-- 明确 Issue、Project、Asset、Budget 的权威写入入口和条件；
-- 对每个本地原子边界给出可验证的事务或等价机制；
-- 逐项定义重试、响应丢失、未知结果和对账行为；
-- 确定第一条真实纵向切片和故障注入验收标准。
+### 9.3 当前工程切片的前置条件
 
-在这些条件满足前，不应让多个 Agent 分别设计 D5、D6、D7 的表结构，避免重复引入身份、状态和恢复机制。
+每个切片进入 Schema / API / 部署设计前，先落实该切片需要的契约与证据：
+
+| 阶段 | 前置决定与验收输入 |
+|---|---|
+| E0 | 目标 Multica 提交、扩展代码维护位置、上游同步 / 升级策略；证明第 6.2 节的 Issue 原子提交可实现，并列明原生写入入口的接入 / 限制；主 Task 来源、Retry 及历史 Task 兼容方案；生产回归与故障注入范围 |
+| E1 | Work Agreement 创建 / 修订 / 撤销、授权代际、人工总责与 Acceptor 的正式引用；正式正文与背景描述分开投递；受控派发和消费操作及服务端校验；原生指派、描述和属性入口的映射及旁路验收 |
+| E2 | Candidate 业务内容摘要、不可变 Artifact 定位、交付注记的权威来源、Evidence 适用性、Completion Gate 条件竞争与重建验证 |
+| E3 | Governance 隔离各入口的源码差异和回归；固定 Policy 的开工复核；实际启用预算范围的原子预留、释放及迟到 Usage 更正 |
+| E4 | 候选 / 实验与发布的固定身份、项目采用权限及条件写入、真实使用证据与观察窗口 |
+
+[工作约定与委托](cross-layer-contracts.md)维护授权规则；[派发绑定](vs0-vs1-dispatch-binding-contract.md)与[D5 结果消费](d5-cross-layer-recovery-contract.md#6-结果消费契约)维护执行衔接。具体事务实现按权威提交点证明，进程和存储布局在相应工程设计中决定。复用 Multica 所需的源码扩展、迁移和维护成本须在方案中列明。
+
+### 9.4 后续 SOP 运行时切片
+
+E2 验收后，项目需要受托流程时单独安排 SOP 运行时切片：固定 SOP Definition、持久化 Execution / Activation / Attempt、就绪推进、Task 绑定、结果消费和出口回交。先选择实际要使用的节点类型；使用受管 Script 前完成对应 Backend 适配。验收覆盖重入、输入换版、取消、消费重放和出口交还。
+
+SOP 运行时的排期由项目需要决定，首个 E4 使用 Skill 即可验证改进闭环。后续选用 SOP 资产做运行对照时，先取得该运行时切片的验收结果。
 
 ## 10. 一致性审查后的未决事项
 
@@ -251,7 +270,7 @@ Issue → Main Bot → Worker → Multica Task / Run → Artifact → Candidate 
 
 | 未决事项 | 必须取得的证据 | 当前处理 |
 |---|---|---|
-| 当前 Multica 分支对 Task Purpose / 来源身份的最小扩展方式 | 目标提交源码、生产回归和治理隔离实验 | E0 前置 |
+| 当前 Multica 分支对来源身份和 Purpose 的最小扩展方式 | 主 Task / Retry 查回、历史兼容和生产回归；治理隔离另有专项实验 | 来源与生产兼容为 E0 前置；治理隔离为 E3 启用前置 |
 | 多层预算的原子 Reservation | 并发扣额、失败回滚、响应丢失和周期切换测试 | E3 前置 |
 | Artifact 长期可取性 | 存储版本、删除、权限撤回和 Digest 回读验证 | E2 前置 |
 | PR 自动完成所有入口接入 Completion Gate | 手动、批量、Workflow、Webhook 并发回归 | E2 前置 |
@@ -276,9 +295,9 @@ VS-5 架构一致性审查达到以下条件：
 
 ## 12. 后续阶段
 
-下一阶段进入 **E0 · Multica 原生执行兼容设计**。只研究和设计三件事：
-1. Task Purpose / Governance Sub-purpose 的最小表达及其对现有 Task 创建、去重和查询的影响；
-2. 稳定来源身份如何在 Task 创建边界唯一写入并查回；
-3. 如何隔离治理 Task 的 pending coalescing、Session 恢复、普通 Worker Wakeup 和生产成本视图，同时保持 Production 行为不变。
+下一阶段进入 **E0 · 来源查回与生产兼容设计**：
+1. 固定实际目标 Multica 提交、扩展维护方式及上游同步策略；
+2. 明确来源身份怎样唯一查回主 Task，并保留合法 Retry 子项的原生谱系；
+3. 确定 Purpose 的基础表达、历史任务兼容与生产回归。治理执行的完整隔离在 E3 启用前实施并验收。
 
 E0 必须先形成目标 Multica 提交的源码差异分析、最小扩展方案、迁移兼容策略和生产回归 / 故障注入验收，再进入实际工程修改。

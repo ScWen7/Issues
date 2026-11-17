@@ -162,6 +162,8 @@ Run 是实际受管执行记录。状态名称以 Multica 固定版本及具体 
 | Cancelled | 取得可信取消终态 | 区分停止请求与实际终止 |
 | Lost / Unknown | 无法取得可靠终态或资源失联 | 不得猜测成功、失败或释放资源 |
 
+原生状态与统一语义分别解释：Multica `71683141` 的 [CompleteAgentTask](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/pkg/db/queries/agent.sql#L975-L1003) 写入 Task `status = completed`，对应本表 Run 的 Succeeded。读取 Task Completed / `task.completed` 时保留原生状态与事件身份，再映射执行成功语义。SOP Execution、Evaluation、Proposal 和 Benchmark Experiment 的 Completed 继续表示各自业务对象完成；它们与 Task 的 completed 通过明确引用关联，不因名称相同互相推进。
+
 关键规则：
 
 - Run 进入 Succeeded 不代表 Candidate 合格，也不代表 Issue 完成。
@@ -186,7 +188,7 @@ Candidate 的 Manifest、Candidate Generation、Work Agreement、Artifact Locato
 
 Candidate 的处置按具体版本保存。Acceptance Decision 追加保存并绑定 Candidate ID、Generation、Manifest Digest、标准版本、决定者权限和 Evidence。旧候选的 Accepted 不能自动接受新候选；旧 Evidence 默认不适用于新候选，复用须有明确 Applicability 依据。
 
-Delivery Record 汇总候选、要求、制品、证据、缺项和决定。Artifact 的来源版本、内容完整性、可取得性和读取授权分别判断；来源失效不改变历史引用。它可以逐步补全，不应把记录已生成当成完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
+Delivery Record 是可重建视图，汇总候选、要求、制品、证据、缺项、决定和原 Issue 的交付注记。解释性补充先沿 Issue 追加注记，固定 Candidate ID、作者、时间与源操作身份，再由视图聚合，不直接修改投影。Artifact 的来源版本、内容完整性、可取得性和读取授权分别判断；来源失效不改变历史引用。交付事实可以逐步补全，记录已生成不代表完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
 
 ## 9. Evaluation 与 Improvement Proposal 生命周期
 
@@ -210,27 +212,26 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。Arti
 | Proposed | 从工作证据提出待评估改进 |
 | Triaged | 维护者确认问题归属、范围和是否继续 |
 | Evaluating | 正在进行根因分析、候选准备或对照 |
-| Ready for Approval | 已具备审核所需证据 |
-| Approved | 有权维护者批准提案中明确的变更路径；尚不代表资产已发布或项目已采用 |
 | Candidate Ready | 一个或多个候选修订已固定，等待实验或审核 |
 | Benchmarking | 一个或多个固定实验正在执行或汇总 |
 | Ready for Approval | 已具备审核所需证据 |
-| Approved | 有权维护者批准明确的候选修订和发布范围；尚不代表已发布 |
-| Released | 对应不可变 Release 已成功创建；不代表项目已采用 |
+| Approved | 有权维护者批准明确的候选修订、变更路径和完成范围；尚不代表资产已发布或项目配置已生效 |
+| Completed | 批准范围内要求的资产发布或项目配置生效已完成，引用相应 Release / Project Adoption 事实 |
 | Rejected / Withdrawn | 提案或候选被拒绝 / 撤回，保留依据 |
 
-Proposal 是治理容器，可以包含多个 Candidate Revision、Benchmark 和 Release。Proposal 的状态只表达提案整体进度，不替代这些对象自己的身份与结果。候选实验和发布关系见[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md)。
+Proposal 是治理容器，可以包含多个 Candidate Revision、Benchmark 和 Release。审核时固定提案的完成范围：资产改进可在要求的 Release 发布后完成，不要求项目同时采用；项目工作流 / 分工配置改进在有权成员的 Project Adoption 生效后完成，不伪造资产 Release；混合提案逐项满足批准范围后完成。Proposal 的状态只表达整体进度，不替代 Release、Project Adoption 或后续生产效果各自的事实。候选实验和发布关系见[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md)。
 
 ### 9.3 Benchmark Experiment 与 Trial
 
-| 状态 | 含义 |
+| 实验执行状态 | 含义 |
 |---|---|
 | Planned | 实验定义、样本、实验臂和预算已固定，尚未启动 |
 | Running | 至少一个 Trial 已派发或执行；实际 Task 状态仍读取 Multica |
 | Completed | 所有 Trial 已终结或按预定规则处理，结果已汇总 |
 | Failed | 实验执行本身未能完成，不能解释为候选质量失败 |
-| Inconclusive | 实验完成但样本、可比配对、证据或计量覆盖不足 |
 | Cancelled | 有权主体取消实验；已启动 Trial 仍需分别确认原生终态 |
+
+Benchmark Result 的结论与上述执行状态分别记录：Passed 表示预设改善目标和硬门槛满足；Failed 表示候选违反硬门槛或超出允许退化阈值；Inconclusive 表示样本、可比配对、证据或计量覆盖不足；Execution Failed 表示实验执行未按定义完成。执行状态 Completed 可以对应 Result = Passed、Failed 或 Inconclusive；执行状态 Failed 对应执行故障结论 Execution Failed，保留已取得的 Trial 事实。候选质量 Failed 不触发实验执行失败的恢复，也不自动重跑实验。
 
 每个 Trial 固定 Sample、Arm、Candidate / Baseline Revision、实验定义和 Multica Task / Run。候选或样本变化形成新实验修订；不可比配对、失败和未运行结果必须保留原因。
 
@@ -325,7 +326,7 @@ Project Adoption 是项目有权成员对具体 Release 或项目配置版本作
 - Project Workflow 根据 Issue 事实决定是否交接项目步骤。
 - SOP Execution 在受托范围内消费 Issue 约定和节点结果，决定自己的节点推进。
 - Run 只报告真实受管执行事实；节点和负责人消费结果。
-- Artifact、Evidence、Candidate 和 Delivery Record 固定交付与依据；Issue 有权主体决定接受与完成。
+- Artifact、Evidence、Candidate 和 Issue 交付注记保留各自的交付事实与依据，Delivery Record 只聚合展示；Issue 有权主体决定接受与完成。
 - Evaluation 消费已授权证据并给出评价；维护者决定是否改进、发布，项目维护者决定是否采用。
 - 后续工作记录实际选择、投递和使用，不把发布或采用推断成执行事实。
 
@@ -338,8 +339,9 @@ Project Adoption 是项目有权成员对具体 Release 或项目配置版本作
 | [工作生命周期](01-unified-work-lifecycle.md) | Issue 状态、工作约定、责任交接、候选处置、验收与完成 |
 | [SOP 与工作流](02-sop-workflow.md) | SOP Definition / Execution、节点激活与尝试、依赖、门禁、返工和出口 |
 | [本地执行](03a-execution-plane.md) | Run、Session、Runtime、Daemon、宿主回执、取消、恢复与执行归属 |
-| [能力与上下文](03b-capability-governance.md) | 资产定义、发布、采用、选择、投递及实际使用记录 |
-| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark 和 Release |
+| [能力与上下文](03b-capability-governance.md) | 方法资产与 Release 的发布 / 撤回、采用后的[能力解析、选择与投递](03b-capability-governance.md#5-一次工作如何选择和投递能力)及实际使用记录 |
+| [项目采用决定](vs4-benchmark-release-adoption-technical-contract.md#6-project-adoption项目独立决定采用) | Project Adoption 的生效、替换、暂停与回退；仍由 Project 权威域及项目有权成员维护 |
+| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark、Budget Reservation 与效果观察；验证结论交给资产维护者或项目有权成员 |
 | [统一工作台](05-unified-workbench.md) | 呈现权威状态、等待原因、因果关系和下一责任人 |
 
 若专题状态描述与本文冲突，应修订对应专题，使其符合统一语义；不能在局部文档中另造相互矛盾的状态定义。

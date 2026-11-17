@@ -28,7 +28,7 @@
 | 能力与上下文 | C 方法与上下文、I 来源与宿主适配 | 资产定义与 Release、来源修订、适用范围、实际选择与投递 | 获准的方法、资料和执行输入 |
 | 流程编排 | D 流程编排 | SOP Definition、SOP Execution、Node Activation、Node Attempt | 节点就绪、输入候选、结果消费和出口 |
 | 执行与回报 | E 执行集成、Multica、I 宿主适配 | 原生 Task / Run、Runtime、Session、Observation、原始 Usage | 实际执行、宿主回执、来源与用量 |
-| 度量、评价与改进 | F 交付与证据、G 度量评价与改进 | Artifact、Candidate、Evidence、Delivery Record、Evaluation、Finding、Proposal、Benchmark、效果观察 | 交付消费、评价证据、候选验证结果和改进建议 |
+| 度量、评价与改进 | F 交付与证据、G 度量评价与改进 | Artifact、Candidate、Evidence、Issue 交付注记、Evaluation、Finding、Proposal、Benchmark、效果观察 | Delivery Record 聚合、交付消费、评价证据、候选验证结果和改进建议 |
 
 H 工作台读取以上事实并调用相应权威入口，不拥有业务决定权。A 记录 Project Adoption；C 由资产维护者发布不可变 Release；G 提供 Evaluation、Finding、Proposal 和 Benchmark 证据，不直接发布资产或替项目采用。
 
@@ -136,7 +136,7 @@ flowchart TB
 
 1. **一个业务协作核心**：Issue 是工作归属，Main Bot 是 Issue 上的受托协调角色，不另建全局协调层。
 2. **一个受管执行控制面**：沿用 Multica Task / Run / Runtime / Daemon；SOP、Evaluation 和 Benchmark 复用该执行链。
-3. **一个交付验收模型**：Artifact、Candidate、Evidence、Delivery Record 和 Acceptance Decision 各自表达不同事实。
+3. **一个交付验收模型**：Artifact、Candidate、Evidence、Issue 交付注记和 Acceptance Decision 保存各自事实；Delivery Record 按来源重建交付过程视图。
 4. **一条改进治理链**：Evaluation / Finding → Proposal → Benchmark → Release → Project Adoption → 实际 Usage → 效果观察。
 5. **权限与版本贯穿全链**：来源读取、执行授权、结果消费、发布和采用均由各自有权主体决定；旧版本和迟到结果不得越代推进。
 6. **工作台只呈现与路由**：不复制业务状态、不直接写其他模块底层存储、不在 UI 中重实现业务规则。
@@ -154,28 +154,14 @@ flowchart TB
 
 ## 8. 技术方案推进状态
 
-技术方案已按纵向切片形成连续契约：
-- VS-0 / VS-1：业务意图身份、授权代际、原生 Task 绑定、幂等查回和恢复。
-- VS-2：Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate。
-- VS-3：Evaluation 目标快照、独立治理用途 Task / Run、预算预留 / 结算、结果消费和 Finding 回写；Multica 必须隔离生产 pending coalescing、Session 恢复、Worker Wakeup 和生产成本视图。
-- VS-4：Proposal Candidate Revision、可比 Benchmark、不可变 Release、Project Adoption、实际资产投递 / 使用证据及生产效果观察 / 回退。
+纵向契约的定义与证据分别保留在 [VS0 / VS1](../architecture/vs0-vs1-dispatch-binding-contract.md)、[VS2](../architecture/vs2-candidate-acceptance-technical-contract.md)、[VS3](../architecture/vs3-evaluation-technical-contract.md)和 [VS4](../architecture/vs4-benchmark-release-adoption-technical-contract.md)。横向权威边界和工程顺序以 [VS5](../architecture/vs5-overall-technical-consistency-review.md)为准。
 
-VS-4 明确离线 Benchmark Passed 只支持 Release 审核，不等于项目采用或生产效果稳定；Project Adoption 也不等于宿主实际加载 / 使用。TeamAI 的 Benchmark 配对比较与自改进阈值源码证据见[VS-4 研究](vs4-teamai-benchmark-source-evidence.md)。
+本次交叉核对补齐了主 Task 与 Retry 谱系、中心 Start 与宿主启动、候选业务内容摘要、交付注记来源、Policy 版本、实际使用证据以及项目配置改进的收尾规则。各规则直接维护在对应正式契约中。
 
-D5 / D6 / D7 / D11 的纵向技术契约现已齐备。当前仍未确定数据库表、API 路径、具体事务实现、预算锁和存储产品；下一步应做整体技术方案一致性审查，统一核对身份、权限、版本、写入竞争、恢复、Task Purpose、Usage 和来源保留，再选择最小可验证实现切片。
+## 9. 架构审查结论与当前阶段
 
-## 9. 技术方案一致性审查
+设计沿 Multica 的 Issue、Task / Run、Runtime 和 Usage 扩展。Work Agreement、派发来源、交付与治理记录各有权威归属；它们的关系和阶段准入见[技术方案准备](../architecture/technical-solution-readiness.md)及 [VS5 工程前置](../architecture/vs5-overall-technical-consistency-review.md#93-当前工程切片的前置条件)。
 
-VS-0 到 VS-4 的纵向契约已经形成完整链路。横向审查进一步统一了四项共性要求：
-- Multica Task 具有可查询的 Execution Purpose；Production 与 Governance 在现有执行模型中隔离，Evaluation、Benchmark、Improvement、Calibration 不各自建设队列。
-- Main Bot、Worker、SOP、Evaluation、Benchmark Trial 等来源保留各自稳定业务身份；原生 Task 创建必须支持来源身份查回。
-- Issue、Project、Asset、Budget、Multica Task / Run、Usage 各自维护权威事实；跨对象最终一致，不依赖全局事务。
-- Candidate 指针与 Candidate 实体、Release 与 Adoption、Adoption 与实际使用分别归属；预算全范围预留在预算权威边界内全成或全败。
+当前进入 E0 的来源查回与生产兼容设计，先明确目标提交、扩展维护方式、主 Task / Retry 关联和生产回归，再按 E1 / E2 完成授权、派发、消费及交付验收。治理隔离在 E3 启用前验收；改进发布采用在 E4 接入；SOP 运行时按项目需要另列切片。D11 的实际额度与观察窗口随试点校准。
 
-完整审查结果、写入边界矩阵、Multica 复用 / 扩展清单和 E0–E4 实施顺序见[VS-5 整体技术方案一致性审查](../architecture/vs5-overall-technical-consistency-review.md)。下一阶段只进入 E0：Multica 原生执行兼容设计。
-
-## 9. 架构审查结论
-
-当前架构的核心对象、权威事实、生命周期、模块依赖和跨层业务链可以互相解释，D5 / D6 / D7 已经组成从工作发起到持续改进的闭环，D11 已补齐评价触发和资源治理规则。当前没有需要通过增加新领域对象或第二套控制平面才能解决的结构性断点。
-
-下一阶段从“继续增加架构概念”转向“技术方案准备与最小纵向切片”，其范围、复用边界和验收顺序见[技术方案准备与最小纵向切片](../architecture/technical-solution-readiness.md)。优先收敛 VS-0 / VS-1 的来源身份、授权代际、Task 查回和恢复契约，再细化 D6 权威写入与 D7 评价承载。D11 的抽样比例和预算数值由后续真实运行校准。
+本报告保存设计核对依据；具体实现进展以正式工程阶段及其实际回执为准。

@@ -53,7 +53,7 @@
 
 同一 Proposal 的候选可以分别尝试不同修复路径，但每个 Revision 独立验证。若候选 A 的 Benchmark 结果通过，不代表候选 B 或后续修改自动通过。
 
-Proposal 的状态是治理视图，不替代 Revision、Benchmark、Release 的具体状态。
+Proposal 的状态是治理视图，不替代 Revision、Benchmark、Release 或 Project Adoption 的具体状态。审核时明确完成范围：资产变更在要求的 Release 发布后可完成；项目配置变更在相应 Project Adoption 生效后完成；混合提案逐项满足批准范围后完成。统一进度按[Proposal 生命周期](lifecycle-state-event-model.md#92-improvement-proposal)记录，不强制项目配置经过资产发布，也不从提案完成推断项目已采用资产或生产效果已改善。
 
 ## 3. Benchmark Experiment：固定实验定义和可比边界
 
@@ -142,6 +142,8 @@ Benchmark 结果按预先声明的门槛输出：
 - **Failed**：候选违反硬门槛或发生超出阈值的退化；
 - **Inconclusive**：样本、可比配对、证据或 Usage 覆盖不足；
 - **Execution Failed**：实验执行未能按定义完成，不能把它解释成候选质量失败。
+
+上述是 Benchmark Result 的结论，Experiment 的执行状态另行记录。执行状态 Completed 可对应 Result = Passed、Failed 或 Inconclusive；执行状态 Failed 对应 Result = Execution Failed。质量判定 Failed 不触发实验故障恢复或自动重跑，具体生命周期见[统一状态模型](lifecycle-state-event-model.md#93-benchmark-experiment-与-trial)。
 
 ## 4. Benchmark 执行与结果恢复
 
@@ -273,9 +275,9 @@ Release 可存在但没有任何 Project Adoption。一个 Release 可被多个�
 | Selected | 本次 Work / Run 解析选择了某版本 | Work Agreement / Run 输入清单 / 解析结果 |
 | Delivered | 版本内容成功送到执行环境或宿主 | Adapter 投递回执、内容 Digest、目标 Runtime |
 | Loaded / Observed | 宿主明确证明已加载 / 观察到该版本 | 宿主原生回执、受控探针或可验证运行时快照 |
-| Used | 有证据证明本次执行实际消费了该版本 | Task / Run 与资产 Digest 关联、宿主可核验引用或明确的执行 Trace |
+| Used | 有证据证明本次执行实际消费了该版本 | 带有 Task / Run 身份及资产 Digest 的宿主消费 / 调用回执、可核验的资产调用记录或明确指向该版本消费行为的执行 Trace |
 
-并非所有宿主都能证明 Loaded / Used。只能证明 Selected 或 Delivered 时，不得将其宣传为已实际使用；记录宿主、版本、观察方法、时间、覆盖范围和证据强度，缺失保持 Unknown。
+Task / Run 与资产 Digest 的关联只定位本次选择的版本，本身属于 Selected 依据；Used 还需上述实际消费证据。并非所有宿主都能证明 Loaded / Used。只能证明 Selected 或 Delivered 时，不得将其宣传为已实际使用；记录宿主、版本、观察方法、时间、覆盖范围和证据强度，缺失保持 Unknown。
 
 ### 7.2 资产使用清单
 
@@ -392,4 +394,4 @@ Benchmark Trial 的治理用途、来源身份、预算和结果消费必须与 
 
 VS-0 / VS-1 解决业务意图如何可靠绑定原生 Task；VS-2 解决产物、候选、证据和验收如何固定与竞争；VS-3 解决评价如何独立执行、计量和回写；VS-4 解决改进如何通过可比实验、审核发布、项目采用和生产效果回收。
 
-完成本契约后，D5 / D6 / D7 / D11 的纵向技术契约已齐备。下一步不应继续增加抽象对象，而应做一次整体技术方案一致性审查：核对共用身份与版本、权限、原子写入、恢复、Task Purpose、Usage、来源保留和事件消费是否能组成一套最小实现；随后选择最小纵向切片，形成有源码依据的工程实现方案。
+纵向契约的横向关系已汇总到 [VS5](vs5-overall-technical-consistency-review.md)。当前从 E0 的来源查回与生产兼容设计开始；本契约在 E4 接入，先完成 E0–E2 的生产工作链和 E3 的治理隔离、评价与预算验收。首批资产及范围按 VS5 工程顺序确定。

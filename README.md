@@ -16,20 +16,19 @@
 | 何时自主规划，何时让 SOP 处理依赖、核验和返工？ | [SOP 与项目工作流](docs/architecture/02-sop-workflow.md) |
 | 成员本机怎样接工作，Agent 怎样取得工具和项目依据？ | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
 | 怎样计算已知用量、评价交付，并让有效的方法进入下次工作？ | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) |
-| 评价什么时候触发、如何抽样和控制资源？ | [D11 · 评价触发与资源预算治理](docs/architecture/d11-evaluation-trigger-budget-policy.md) |
-| 如何从整体架构进入技术方案并选择最小纵向切片？ | [技术方案准备与最小纵向切片](docs/architecture/technical-solution-readiness.md) |
-| Issue / Comment 的业务意图怎样可靠绑定原生 Task？ | [VS-0 / VS-1 派发绑定与恢复契约](docs/architecture/vs0-vs1-dispatch-binding-contract.md) |
-| Artifact、Candidate、Evidence 和 Acceptance 如何技术承载？ | [VS-2 · Candidate 与验收技术契约](docs/architecture/vs2-candidate-acceptance-technical-contract.md) |
-| Evaluation 如何独立执行、预算结算并回写 Finding？ | [VS-3 · Evaluation 技术承载契约](docs/architecture/vs3-evaluation-technical-contract.md) |
-| 改进如何经过 Benchmark、Release、项目采用并回收生产效果？ | [VS-4 · Benchmark、Release 与 Adoption 技术承载契约](docs/architecture/vs4-benchmark-release-adoption-technical-contract.md) |
-| VS-0 到 VS-4 如何形成一致的技术方案，工程从哪里开始？ | [VS-5 · 整体技术方案一致性审查](docs/architecture/vs5-overall-technical-consistency-review.md) |
 | 成员在哪里处理待办、查看交付、接手工作与选用方法？ | [统一工作台](docs/architecture/05-unified-workbench.md) |
+
+## 跨层契约与工程入口
+
+业务规则见 [D5 派发与恢复](docs/architecture/d5-cross-layer-recovery-contract.md)、[D6 交付与验收](docs/architecture/d6-delivery-acceptance-contract.md)、[D7 持续改进](docs/architecture/d7-continuous-improvement-loop.md)和 [D11 评价策略与预算](docs/architecture/d11-evaluation-trigger-budget-policy.md)。
+
+工程从[技术方案准备](docs/architecture/technical-solution-readiness.md)进入，按 [VS5 的工程顺序](docs/architecture/vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)先完成派发、消费与交付验收，再接入评价和改进。详细契约分别为 [VS0 / VS1 派发绑定](docs/architecture/vs0-vs1-dispatch-binding-contract.md)、[VS2 交付验收](docs/architecture/vs2-candidate-acceptance-technical-contract.md)、[VS3 评价执行](docs/architecture/vs3-evaluation-technical-contract.md)和 [VS4 发布采用](docs/architecture/vs4-benchmark-release-adoption-technical-contract.md)。
 
 项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
 
 ## 研究与架构治理
 
-后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。 整体对象、职责、生命周期及 D5 / D6 / D7 闭环的交叉核验见[整体架构一致性审查](docs/research/architecture-consistency-review.md)。
+后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。整体对象、职责、生命周期及 D5 / D6 / D7 闭环的交叉核验见[整体架构一致性审查](docs/research/architecture-consistency-review.md)。
 
 ## 查设计与依据
 

@@ -75,9 +75,9 @@ Candidate Manifest 至少包括：
 - 提交者、提交时间和来源操作身份；
 - 规范化 Manifest Digest。
 
-Manifest Digest 对规范化后的条目集合计算，必须明确排序、字段规范化和摘要算法版本。相同内容重送返回同一候选或识别为重复提交；任何实质性条目增删、替换、版本变化或验收范围变化形成新 Candidate。
+Manifest Digest 覆盖本次送审的业务内容：Issue / Acceptance Channel、Work Agreement / 要求版本、Artifact 条目及各自来源版本、送审范围、说明与已知缺项、Acceptance Standard / Rubric 版本。明确条目排序、字段规范化和摘要算法版本；Candidate ID、Generation、提交者、提交时间和来源操作身份作为提交元数据单独保存，不参与内容摘要。Digest 标识送审内容，sourceIntent 标识一次提交操作；相同内容可以在不同轮次形成不同 Candidate。Artifact 条目、验收范围、标准或工作约定等业务内容变化形成新 Candidate。
 
-Candidate 创建后不可原地修改 Manifest。解释性补充可以追加到 Delivery Record，但不能改变送审内容。
+Candidate 创建后不可原地修改 Manifest。解释性补充按 [D6 的交付注记规则](d6-delivery-acceptance-contract.md#22-candidate-固定清单)追加到原 Issue，Delivery Record 从来源记录聚合。
 
 ### 3.2 多生产者组合由整合者明确提交
 
@@ -146,7 +146,7 @@ Decision 不能自动扩大到其他 Candidate、其他 Acceptance Channel 或�
 
 Candidate 替换、Acceptance Decision 生效和 Issue 完成资格，必须在同一 Issue 权威写入边界按 Acceptance Channel 串行化。
 
-该边界可以在 Multica Issue 写入事务中扩展，也可以由受控交付域执行，但必须保证同一 Issue / Channel 的候选指针、Generation 和有效 Decision 不会出现矛盾；每次命令携带预期 Candidate / Generation / Standard；写入时再次校验当前 Candidate、权限、Evidence 和完成条件；业务决定成功与待处理下游动作具备可恢复关联；任何 PR / 手动 / SOP / 批量入口都不能绕开该边界。
+该边界沿 Multica Issue 的原子权威提交落实；受控交付域可以准备不可变 Candidate / Evidence 并提交命令，当前候选指针、Generation、有效 Decision 和完成资格仍在同一 Issue / Channel 权威边界核验。每次命令携带预期 Candidate / Generation / Standard；写入时再次校验当前候选、权限、Evidence 和完成条件，业务决定与待处理下游动作共同可查回。PR、手动、SOP、批量和其他原生完成入口均须经过该校验；具体集成方案须满足 [VS5 原子边界及原生入口约束](vs5-overall-technical-consistency-review.md#62-必须具备的本地原子边界)。
 
 本阶段不决定锁、CAS 字段或事务实现；后续技术设计需要以 Multica 的实际事务能力证明可实现。
 
@@ -155,11 +155,14 @@ Candidate 替换、Acceptance Decision 生效和 Issue 完成资格，必须在�
 **SubmitCandidate(issue, channel, expectedCurrent, manifest, sourceIntent)**
 
 - 验证提交者权限、来源 Artifact 可取得性 / 完整性和 Work Agreement；
-- 按 Manifest Digest 查重；
-- 检查 expectedCurrent / Generation；
-- 原子登记 Candidate、推进当前候选指针和 Generation；
+- 先按 sourceIntent 查回原提交结果；重送的业务内容须与原请求一致，返回原 Candidate 时保持当前候选指针不变；
+- 对新的 sourceIntent，先检查 expectedCurrent / Generation，再与该通道当前 Submitted / Under Review 候选比较业务内容摘要；内容相同则记录本次操作返回该当前候选，保持代际不变；
+- 其余合法的新送审形成新的 Candidate ID 和 Generation；内容与历史候选相同，或当前候选已退回 / 撤回时，保留相同内容的来源引用，原候选的处置历史和决定保持原归属；
+- 新候选登记、当前指针、Generation 及来源操作结果在权威入口原子提交；
 - 旧候选转为 Superseded 的派生状态，历史 Evidence / Decision 不变；
 - 同一 sourceIntent 重送查回原 Candidate。
+
+仅补充 Evidence 时沿 `RecordEvidence` 处理，当前候选可继续核验；成员明确要求退回后的重新送审或恢复历史内容时，使用新的 sourceIntent。新候选复用旧证据须记录 Evidence Applicability，不继承旧 Acceptance Decision。已完成 Issue 的再次送审先按 D6 的重开或后续 Issue 规则处理。
 
 **RecordEvidence(candidate, requirement, standard, result, source)**
 
@@ -217,7 +220,7 @@ Multica PR 自动完成当前具备独立的原生条件写入：重新检查关
 
 ## 8. Delivery Record 与历史可追溯
 
-Delivery Record 是可重建的交付过程视图，聚合 Artifact 生产与可取得性、Candidate 提交 / 替代 / 撤回、Evidence 与 Applicability、Acceptance Decision、Issue 完成或重开、接收方消费和交接。
+Delivery Record 是可重建的交付过程视图，聚合 Artifact 生产与可取得性、Candidate 提交 / 替代 / 撤回、Evidence 与 Applicability、Acceptance Decision、Issue 完成或重开、接收方消费、交接，以及带 Candidate 引用的原 Issue 交付注记。注记的权威来源、署名和追加规则见 [D6](d6-delivery-acceptance-contract.md#22-candidate-固定清单)；同一注记操作重送查回原记录。
 
 它不另建一套 Candidate / Decision 状态，也不成为权威写入入口。历史事实按原对象引用，不因当前候选指针变化而重写。
 
@@ -227,6 +230,9 @@ Delivery Record 是可重建的交付过程视图，聚合 Artifact 生产与可
 |---|---|---|
 | Artifact 登记后来源上传响应丢失 | 来源 ID、版本 Locator、Digest | 按来源版本查回原 Artifact |
 | Candidate 已提交，返回响应丢失 | Manifest Digest、Source Intent、Candidate ID | 重送查回同一 Candidate |
+| C2 已替代 C1，成员再次送审 C1 的内容 | 新 sourceIntent、预期 C2 / Generation、C1 的内容摘要 | 创建 C3 并推进代际，引用 C1 的内容来源；C1 / C2 的历史决定保持原归属 |
+| 候选被退回后补齐证据并明确再次送审 | 新 sourceIntent、原候选、补充 Evidence | 创建新候选并记录证据适用性，不因摘要相同取回已退回候选 |
+| 当前 Submitted / Under Review 候选收到相同内容的新提交 | 当前 Candidate / Generation、相同业务摘要 | 返回当前候选并保存该次操作结果，不推进代际；旧操作重放仍查回自己的原结果 |
 | Candidate 创建成功但当前指针未确认 | Candidate 与当前通道状态可核对 | 读取权威指针；补完成仍有效的转换，不重复创建 |
 | Candidate C2 已替代 C1，旧检查迟到 | Evidence 仍指向 C1 | 保存历史结果，不推进 C2 |
 | Acceptance 已生效，响应丢失 | 不可变 Decision ID 和目标 Candidate | 查回原 Decision，不重复接受或发通知 |
@@ -255,6 +261,6 @@ Delivery Record 是可重建的交付过程视图，聚合 Artifact 生产与可
 
 ## 11. 后续技术设计前置
 
-VS-2 收敛后，仍需确定 Artifact 快照与对象保留的具体存储能力、Candidate / Decision 权威记录在 Multica Issue 事务或交付域的具体承载、Candidate Generation / Source Intent 的唯一约束与并发写入实现、Acceptance 权限复核来源、PR / CI Provider 适配、Evidence Applicability 的审核权限，以及统一 Completion Gate 与现有 PR 自动完成代码的接入方式。
+VS-2 收敛后，仍需确定 Artifact 快照与对象保留的具体存储能力、不可变交付记录与 Issue 原子提交的具体承载、Candidate Generation / Source Intent 的唯一约束与并发写入实现、Acceptance 权限复核来源、PR / CI Provider 适配、Evidence Applicability 的审核权限，以及统一 Completion Gate 与现有 PR 自动完成代码的接入方式。
 
 这些是接口、存储和迁移设计工作；不要求新增第二套 Issue 状态机或执行控制面。
