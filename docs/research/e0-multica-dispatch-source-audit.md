@@ -57,6 +57,53 @@
 
 只有全部满足，才可将新来源绑定到已有 Task；否则保持 Blocked / Unknown，不能把“索引冲突”伪装成“已接单”。
 
+## 2.3 Issue 更新事务与派发事务之间的真实边界
+
+进一步核对 `UpdateIssue`、`updateIssueWithStatusGuard` 与 `dispatchIssueRun` 后，事务边界更明确：
+
+- `UpdateIssue` 通过 `updateIssueWithStatusGuard` 写入 Issue；当需要状态保护时，Issue 更新及关闭状态时停止 Wakeup 在该写事务内完成。
+- 部分普通内建状态更新路径可直接使用 Queries，但 Issue 更新仍在派发前完成。
+- Handler 在 Issue 更新、事件发布及后续处理之后才调用 `dispatchIssueRun`。
+- Agent 派发分支仍忽略 enqueue 错误。
+- assignee_changed Activity 由事件监听器消费 IssueUpdated 事件后异步写入；它不是 Issue 更新事务中的可靠来源意图，也不能承担派发恢复。
+
+因此，不能简单把 Activity 当作 outbox，也不能只在派发失败时补一条日志。最小可靠切入点应是：**在 Issue 权威写入事务中，为真实的 assignee / 授权转换追加不可变来源身份记录；该记录同时保存待派发状态或待派发关联。** 后续 Task 创建和绑定可以独立事务完成，按来源身份查回、对账恢复。
+
+注意：若某条路径的 Issue 更新不是显式事务，仍可由 SQL statement 的原子写入边界完成 Issue 变更与来源记录；不能先更新 Issue，再用另一个非原子请求补写来源记录。
+
+## 2.4 普通指派不天然等于“一次性执行”
+
+本轮还发现一个需要修正产品契约表达的边界：
+
+Multica 原生的 Agent Assignee 不只是一个启动按钮。Issue 指派可以触发 Task；Issue 状态从 Backlog 进入可执行状态也可以触发；Comment 路由、Wakeup 和后续 Issue 变化还会继续影响同一 Agent 的执行。
+
+所以“普通 Agent 指派只允许一次交付、不获得持续协调权”是 AgentPlatform 的授权语义，**不是当前 Multica Assignee 字段天然提供的执行保证**。
+
+实现时必须把两件事分开：
+
+- Issue Assignee：当前工作分配给谁，继续沿用 Multica 的责任与展示语义。
+- Work Agreement / Delegation Mode：这次被授予的是 One-shot Delivery 还是 Sustained Coordination，决定是否允许后续 Wakeup 消费、主动继续推进、追加委派和跨回合协调。
+
+因此普通 One-shot Agent 的执行结束后，不能仅依靠“它不是 Main Bot”来保证不会再次执行。后续所有能重新触发该 Agent 的入口，都必须检查当前有效授权模式；无持续授权时，只能允许与原一次性交付直接相关的完成回执 / 结果消费，不能被普通状态变更或新评论隐式升级为持续协调。
+
+这项授权门控不能破坏 Multica 对普通 Agent 的既有行为。AgentPlatform 接管的 Issue 才应用新规则；未纳入 AgentPlatform Work Agreement 的原生 Multica Issue 仍保持上游原语义。如何识别受管 Issue、如何对历史 Issue 渐进启用，在集成实现阶段设计。
+
+## 2.5 Comment 路由已有成熟机制，不应重做
+
+Comment 路径并非简单的“逐个 enqueue 后记录失败”。当前代码已经有：
+
+- 按执行 Agent 去重并保留显式 mention targets；
+- AlreadyPending 与 enqueue 并发冲突后的 bounded retry；
+- 只有在真实 merge、planned-id 注册、新 Task 创建或可证明的 deferred replay 时才返回 success-shaped outcome；
+- queued Task 的 head-scoped coalescing；
+- Claim 时的 delivered-comment receipt；
+- completion reconcile 与 uncovered obligation propagation；
+- 每个目标独立 outcome fan-out。
+
+因此 E0 的扩展应当复用并增强这些既有保证，不得把它简化成新的 Comment Intent 队列。
+
+源码同时明确存在一个未闭合边界：不同 HEAD 的 queued blocker 既不能覆盖新 Comment，也不能安全地合并；当前记录 error，持久化 obligation 仍在既有实现范围之外。AgentPlatform 若要求“每个目标最终可恢复”，需要决定是把此类 obligation 纳入来源身份记录，还是先接受明确的 Blocked / Unknown 并在后续专项补齐；不能将它描述成当前已完整解决。
+
 ## 3. E0 最小扩展方案
 
 ### 3.1 来源侧：由业务来源保存可恢复身份
