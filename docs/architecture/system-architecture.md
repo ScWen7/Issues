@@ -300,9 +300,10 @@ flowchart TB
   Evaluation["按需 Evaluation"]
   Proposal["跨工作 Improvement Proposal"]
   Benchmark["固定样本与标准的 Benchmark"]
-  Release["审核发布 Release"]
-  Change["有权成员调整项目工作流或分工"]
-  Next["后续 Issue 的实际使用记录"]
+  Release["资产维护者发布不可变 Release"]
+  Adoption["项目有权成员作出 Project Adoption"]
+  Config["Project 当前有效配置 / 工作版本选择"]
+  Next["后续 Issue 的实际选择、投递与生产使用"]
   Outcome["观察真实质量与成本效果"]
   Issue -->|"成员提交所选成果"| Delivery
   Issue -->|"受管执行"| Run --> Delivery
@@ -314,10 +315,11 @@ flowchart TB
   Evaluation --> Finding
   Finding -->|"有跨工作价值时"| Proposal
   Proposal --> Benchmark
-  Benchmark -->|"方法资产通过审核"| Release
-  Benchmark -->|"项目配置获准变更"| Change
-  Release -->|"按项目默认或本项选择实际使用"| Next
-  Change -->|"适用的工作按新配置推进"| Next
+  Benchmark -->|"资产候选达到标准并获准"| Release
+  Benchmark -->|"项目配置候选经授权决定"| Adoption
+  Release --> Adoption
+  Adoption --> Config
+  Config --> Next
   Next --> Outcome
   Outcome -->|"有新的跨工作发现时"| Proposal
 ~~~
@@ -328,7 +330,7 @@ D7 的内循环由现有 Issue、Run、Candidate、Evidence、Evaluation、Impro
 
 1. **本次交付反馈。** 发现问题后，当前负责人或受托 SOP 决定修正、返工、等待或接受例外。无需先建立改进项目。
 2. **单次执行评价。** 对 Run、Candidate 或交付做按需评价，结果作为当前负责人和维护者的证据。评价不是业务验收。
-3. **跨工作自改进。** 重复出现或有推广价值的问题形成 Proposal；维护者固定候选、样本和成功标准进行对照。团队方法由资产维护者审核发布，项目可设为默认，负责人也可为本项选用获准版本。工作流或分工配置由有权成员在原项目或 Issue 指明生效范围并安排在途工作。后续按实际使用的版本或配置核对质量、返工和可获知的成本。
+3. **跨工作自改进。** 重复出现或有推广价值的问题形成 Proposal；维护者固定改进候选、样本和成功标准进行对照。资产维护者审核并发布不可变 Release；项目有权成员另行决定 Project Adoption，记录范围和在途安排。后续工作分别记录实际选择、投递与宿主使用，再按真实质量、返工和可获知成本核对效果。
 
 ### 9.2 成本归属原则
 
