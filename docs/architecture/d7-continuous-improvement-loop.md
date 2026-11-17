@@ -139,6 +139,8 @@ Improvement Proposal 至少引用：
 
 历史 Run 继续引用当时实际使用的版本。新候选通过不意味着历史执行自动升级到新版本。
 
+VS-4 将上述候选、对照实验、发布、采用与生产效果回收细化为技术契约，见[Benchmark、Release、Project Adoption 与生产效果回收技术承载契约](vs4-benchmark-release-adoption-technical-contract.md)及[TeamAI Benchmark 源码取证](../research/vs4-teamai-benchmark-source-evidence.md)。
+
 ### 6.4 Benchmark 必须证明可比
 
 对照前固定：
