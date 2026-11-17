@@ -20,6 +20,7 @@
 | 如何从整体架构进入技术方案并选择最小纵向切片？ | [技术方案准备与最小纵向切片](docs/architecture/technical-solution-readiness.md) |
 | Issue / Comment 的业务意图怎样可靠绑定原生 Task？ | [VS-0 / VS-1 派发绑定与恢复契约](docs/architecture/vs0-vs1-dispatch-binding-contract.md) |
 | Artifact、Candidate、Evidence 和 Acceptance 如何技术承载？ | [VS-2 · Candidate 与验收技术契约](docs/architecture/vs2-candidate-acceptance-technical-contract.md) |
+| Evaluation 如何独立执行、预算结算并回写 Finding？ | [VS-3 · Evaluation 技术承载契约](docs/architecture/vs3-evaluation-technical-contract.md) |
 | 成员在哪里处理待办、查看交付、接手工作与选用方法？ | [统一工作台](docs/architecture/05-unified-workbench.md) |
 
 项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
