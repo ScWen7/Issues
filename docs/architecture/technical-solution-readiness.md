@@ -137,8 +137,8 @@ VS 表达技术契约的覆盖范围，E 表达实际工程步骤。先完成 E0
 
 ## 8. 当前阶段结论与下一步
 
-当前进入 **E0 · 来源查回与生产兼容设计**，设计正文见 [E0 来源身份与生产兼容设计](e0-source-identity-production-compatibility.md)。E0 已补齐普通 Issue Agent 一次性指派这一 Production 来源：它与 Main Bot 首次激活使用不同业务身份和授权边界，但共用 Multica 原生 Task / Run 创建、查回和 Retry 谱系。
+当前进入 **E0 · 来源查回与生产兼容设计**。设计正文见 [E0 来源身份与生产兼容设计](e0-source-identity-production-compatibility.md)，Multica 源码核验见[ E0 派发来源审查](../research/e0-multica-dispatch-source-audit.md)。
 
-E0 仍需在实际目标 Multica 分支完成源码差异核验、扩展维护方式、历史 Task 兼容、主 Task / Retry 查回和生产回归设计。未完成这些前置及故障注入标准前，不进入工程修改。之后再按 E1 授权 / 消费、E2 交付验收、E3 治理隔离与评价、E4 改进采用推进。
+已对照 Multica `main` @ `b70c8b96d0c638e73802336063abfe3734f69f65` 核实普通指派派发错误被忽略、来源 evidence 不具备幂等查回语义、pending 槽位按 Issue / Agent / Thread 工作，以及 Retry 继承原生谱系。E0 已收敛为来源侧持久身份 + 原生 Task 主来源查回，不增加第二套执行队列。
 
-数据库、API 和部署方案按各切片的权威写入与恢复要求细化，不提前展开。
+仍需确定实际集成目标仓库 / 分支，并在该 SHA 复核事务边界、历史 Task 兼容和扩展维护策略；未完成前不进入 Schema / API 或代码修改。之后按 E1 授权 / 消费、E2 交付验收、E3 治理隔离与评价、E4 改进采用推进。
