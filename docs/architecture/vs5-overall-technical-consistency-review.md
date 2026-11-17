@@ -301,6 +301,8 @@ VS-5 架构一致性审查达到以下条件：
 
 E0 的最小扩展方向已收敛：业务来源侧先保存可恢复的来源转换 / 目标身份；原生 Task 创建边界写入主来源身份并提供幂等查回；来源侧与 Task 侧双向关联；pending 冲突只有在证明输入、授权和覆盖范围兼容时才能复用已有 Task。具体字段与事务实现仍待实际集成目标分支复核。
 
+源码审查还明确了两个必须纳入 E0 的兼容边界：Issue 更新与 Agent Task enqueue 分属先后事务，异步 Activity 不能充当派发意图；普通 One-shot 是 AgentPlatform 授权模式，不是 Multica Assignee 的天然语义，受管 Issue 的后续 Wakeup / Comment / 状态触发必须核对授权模式。
+
 当前仍需完成：
 1. 确定实际集成 Multica 仓库 / 分支及扩展维护方式；
 2. 对该目标 SHA 复核 Issue 写入、Task 创建、Retry、Comment coalescing 和历史兼容；
