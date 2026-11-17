@@ -88,8 +88,8 @@ Project Adoption 是 Project 配置中的决定记录，不是新建一套资产
 
 ~~~mermaid
 flowchart TB
-  Work["Project / Issue · 目标、责任、授权"]
-  Method["已发布 Release / Project Adoption"]
+  Work["Project / Issue / Project Adoption · 目标、责任、授权"]
+  Method["资产定义与 Release"]
   Context["本项实际选择与获准上下文"]
   Coordination["成员或 Main Bot · 动态组织"]
   SOP["按需委托 SOP"]
@@ -123,6 +123,7 @@ flowchart TB
   Finding --> Proposal
   Proposal --> Benchmark
   Benchmark --> Release
+  Benchmark -->|项目流程 / 分工配置候选| Adoption
   Release --> Adoption
   Adoption --> Usage
   Usage --> Outcome
