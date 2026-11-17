@@ -104,6 +104,18 @@ Comment 路径并非简单的“逐个 enqueue 后记录失败”。当前代码
 
 源码同时明确存在一个未闭合边界：不同 HEAD 的 queued blocker 既不能覆盖新 Comment，也不能安全地合并；当前记录 error，持久化 obligation 仍在既有实现范围之外。AgentPlatform 若要求“每个目标最终可恢复”，需要决定是把此类 obligation 纳入来源身份记录，还是先接受明确的 Blocked / Unknown 并在后续专项补齐；不能将它描述成当前已完整解决。
 
+## 2.6 来源记录与恢复边界：不是通用事件总线
+
+本轮建议的来源记录不等于新增一套通用 Event Bus，也不要求把每次 Task enqueue 都变成一个全局 Outbox 平台。
+
+- Issue 来源转换记录归 Issue 权威写入边界；它记录本次真实指派 / 授权转换及其派发处理状态。
+- Comment 目标来源记录归 Comment 触发域；复用现有 Comment 目标解析和覆盖回执，只为需要跨请求恢复的未完成目标补齐稳定身份。
+- SOP Node Attempt 身份归 SOP 执行域。
+- Task 侧只保存稳定的来源类型 + 来源 ID 引用和执行用途，不复制业务对象全文。
+- 恢复由已有服务启动时的有限对账 / 定时 sweep / 用户显式重试触发；不新建常驻 Coordinator 或第二队列。
+
+如果 AgentPlatform 与 Multica 最终采用同一数据库，来源记录可以与权威 Issue 更新在同一数据库事务中写入。如果两者数据库隔离，则必须由 Multica 的 Issue 写入事务提供可靠提交记录（例如同事务 outbox / change record），AgentPlatform 消费后再创建业务绑定；不能在两个数据库之间假装存在原子事务。这个部署差异必须在实际集成方案确定后再决定，不影响当前逻辑契约。
+
 ## 3. E0 最小扩展方案
 
 ### 3.1 来源侧：由业务来源保存可恢复身份
