@@ -154,11 +154,15 @@ flowchart TB
 
 ## 8. 技术方案推进状态
 
-整体架构审查后，技术方案按纵向切片推进：VS-0 / VS-1 已形成业务意图身份、Task 绑定与恢复契约；VS-2 已形成 Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate；VS-3 已形成 Evaluation 目标快照、独立治理用途 Task / Run、预算预留 / 结算、结果消费和 Finding 回写契约。
+技术方案已按纵向切片形成连续契约：
+- VS-0 / VS-1：业务意图身份、授权代际、原生 Task 绑定、幂等查回和恢复。
+- VS-2：Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate。
+- VS-3：Evaluation 目标快照、独立治理用途 Task / Run、预算预留 / 结算、结果消费和 Finding 回写；Multica 必须隔离生产 pending coalescing、Session 恢复、Worker Wakeup 和生产成本视图。
+- VS-4：Proposal Candidate Revision、可比 Benchmark、不可变 Release、Project Adoption、实际资产投递 / 使用证据及生产效果观察 / 回退。
 
-VS-3 的关键源码发现是：Evaluation Task 不能简单作为普通 Issue Task 入队，否则会与生产 Task 竞争 pending 唯一槽位、污染 Main Bot Session 恢复、触发普通 Worker Wakeup，并混入生产成本视图。需要在 Multica 现有 Task / Run 中补充治理用途隔离，不新增执行队列。详见[VS-3 技术契约](../architecture/vs3-evaluation-technical-contract.md)及[Multica Runtime 隔离取证](vs3-evaluation-multica-runtime-evidence.md)。
+VS-4 明确离线 Benchmark Passed 只支持 Release 审核，不等于项目采用或生产效果稳定；Project Adoption 也不等于宿主实际加载 / 使用。TeamAI 的 Benchmark 配对比较与自改进阈值源码证据见[VS-4 研究](vs4-teamai-benchmark-source-evidence.md)。
 
-当前仍未确定数据库表、API 路径、预算锁实现和模型调用协议；下一阶段进入 VS-4：Benchmark、Release、Project Adoption 与实际生产效果回收。
+D5 / D6 / D7 / D11 的纵向技术契约现已齐备。当前仍未确定数据库表、API 路径、具体事务实现、预算锁和存储产品；下一步应做整体技术方案一致性审查，统一核对身份、权限、版本、写入竞争、恢复、Task Purpose、Usage 和来源保留，再选择最小可验证实现切片。
 
 ## 9. 架构审查结论
 
