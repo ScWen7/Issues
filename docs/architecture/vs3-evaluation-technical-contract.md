@@ -95,7 +95,7 @@ Multica 的 parent_task_id、retry / rerun 字段具有既定执行谱系语义�
 
 Issue 下 Task Usage 的原生汇总仍会包含该评价 Task，这是底座按 Issue 聚合的事实；AgentPlatform 的生产成本视图必须按 Task 的业务来源 / 角色分开归集，不得把评价费用算作生产 Run 成本。团队总资源统计则应同时纳入两者。
 
-### 4.3.1 Governance Purpose 必须贯穿 Multica 原生执行语义
+### 4.3 Governance Purpose 必须贯穿 Multica 原生执行语义
 
 源码复核发现，普通 Issue Task 的 pending 唯一约束按 Issue / Agent 竞争；Comment 路径还会将新输入 coalesce 到同一 Agent 的 pending Task。普通 Session 恢复会选择同 Agent / Issue 的最近终态 Session（目前显式排除 Triage）。Issue Wakeup 也可能按事件类型捕获同 Issue Task 的终态；Issue Usage 查询会聚合该 Issue 下所有 Task。
 
@@ -108,7 +108,7 @@ Issue 下 Task Usage 的原生汇总仍会包含该评价 Task，这是底座按
 
 这是复用 Multica 控制面的必要适配，不是第二套执行队列。统一用途边界由[VS-5 整体技术一致性审查](vs5-overall-technical-consistency-review.md)定义。具体源码证据见[VS-3 Multica Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md)。
 
-### 4.3 不用 Agent 身份伪装 Scorer 身份
+### 4.4 不用 Agent 身份伪装 Scorer 身份
 
 评价执行记录必须分别固定：
 - Scorer / Rubric 的发布者与版本；
