@@ -22,7 +22,7 @@
 
 业务规则见 [D5 派发与恢复](docs/architecture/d5-cross-layer-recovery-contract.md)、[D6 交付与验收](docs/architecture/d6-delivery-acceptance-contract.md)、[D7 持续改进](docs/architecture/d7-continuous-improvement-loop.md)和 [D11 评价策略与预算](docs/architecture/d11-evaluation-trigger-budget-policy.md)。
 
-工程从[技术方案准备](docs/architecture/technical-solution-readiness.md)进入，按 [VS5 的工程顺序](docs/architecture/vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)先完成派发、消费与交付验收，再接入评价和改进。详细契约分别为 [VS0 / VS1 派发绑定](docs/architecture/vs0-vs1-dispatch-binding-contract.md)、[VS2 交付验收](docs/architecture/vs2-candidate-acceptance-technical-contract.md)、[VS3 评价执行](docs/architecture/vs3-evaluation-technical-contract.md)和 [VS4 发布采用](docs/architecture/vs4-benchmark-release-adoption-technical-contract.md)。
+当前进入 [E0 来源身份与生产兼容设计](docs/architecture/e0-source-identity-production-compatibility.md)，并按 [VS5 的工程顺序](docs/architecture/vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)先完成派发、消费与交付验收，再接入评价和改进。详细契约分别为 [VS0 / VS1 派发绑定](docs/architecture/vs0-vs1-dispatch-binding-contract.md)、[VS2 交付验收](docs/architecture/vs2-candidate-acceptance-technical-contract.md)、[VS3 评价执行](docs/architecture/vs3-evaluation-technical-contract.md)和 [VS4 发布采用](docs/architecture/vs4-benchmark-release-adoption-technical-contract.md)。
 
 项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
 
