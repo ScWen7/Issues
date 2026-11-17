@@ -22,7 +22,7 @@
 
 ## 研究与架构治理
 
-后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。
+后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。 整体对象、职责、生命周期及 D5 / D6 / D7 闭环的交叉核验见[整体架构一致性审查](docs/research/architecture-consistency-review.md)。
 
 ## 查设计与依据
 
