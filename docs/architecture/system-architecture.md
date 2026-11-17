@@ -424,6 +424,7 @@ flowchart TB
 | 团队需要规模化运行评价与 Benchmark 时 | D11 评价触发与资源预算 | 通过版本化 Evaluation Policy 定义必需门禁、风险触发、分层抽样、评价器范围、原生单位预算、重试和停止条件；预算耗尽不能静默跳过强制门禁，抽样则停止新增。实际抽样比例和预算阈值由运行数据校准。[D11 治理契约](d11-evaluation-trigger-budget-policy.md) · [上游机制取证](../research/d11-evaluation-policy-evidence.md) |
 | 工程方案需要确定进程与存储边界 | D4 实际部署 | 用已明确的写入、权限及故障恢复要求判断哪些职责沿用 Multica 的现有部署，哪些需要独立承载。 |
 | 设计第一条真实执行链时 | VS-0 / VS-1 派发绑定 | 先固定业务意图身份、授权代际、Task 幂等查回、目标级委派状态和事务后恢复；复用 Multica Claim / Start / Reclaim，不新建 Run 控制面。[派发绑定契约](vs0-vs1-dispatch-binding-contract.md) |
+| 设计交付与验收的权威写入时 | VS-2 Candidate / Acceptance | Artifact 固定不可变来源版本；Candidate Manifest / Generation 与 Issue revision 分离；Evidence 不可改写且复用需 Applicability；Acceptance、换版和 Issue Done 服从统一 Completion Gate，PR 自动完成不得旁路。[VS-2 技术契约](vs2-candidate-acceptance-technical-contract.md) · [Multica 源码取证](../research/vs2-multica-delivery-source-evidence.md) |
 | 进入详细技术方案与最小验证时 | 技术方案准备与纵向切片 | 先按[技术方案准备与最小纵向切片](technical-solution-readiness.md)收敛 VS-0 / VS-1 的来源身份、授权代际、原生 Task 查回与恢复契约；再推进 D6 和 D7 的技术承载。当前仍不预设数据库、API 或部署拆分。 |
 
 ## 12. 架构验收标准
