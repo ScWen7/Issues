@@ -426,6 +426,7 @@ flowchart TB
 | 设计第一条真实执行链时 | VS-0 / VS-1 派发绑定 | 先固定业务意图身份、授权代际、Task 幂等查回、目标级委派状态和事务后恢复；复用 Multica Claim / Start / Reclaim，不新建 Run 控制面。[派发绑定契约](vs0-vs1-dispatch-binding-contract.md) |
 | 设计交付与验收的权威写入时 | VS-2 Candidate / Acceptance | Artifact 固定不可变来源版本；Candidate Manifest / Generation 与 Issue revision 分离；Evidence 不可改写且复用需 Applicability；Acceptance、换版和 Issue Done 服从统一 Completion Gate，PR 自动完成不得旁路。[VS-2 技术契约](vs2-candidate-acceptance-technical-contract.md) · [Multica 源码取证](../research/vs2-multica-delivery-source-evidence.md) |
 | 接入独立评价与质量反馈时 | VS-3 Evaluation 技术承载 | Evaluation 固定被评目标版本和输入快照；Model-based 评价沿 Multica 创建独立治理用途 Task / Run，完成预算预留、双向关联、结果消费和 Finding 回写；治理 Task 必须隔离普通生产 coalescing、Session 恢复和 Worker Wakeup。[VS-3 技术契约](vs3-evaluation-technical-contract.md) · [Runtime 隔离取证](../research/vs3-evaluation-multica-runtime-evidence.md) |
+| 验证改进并推广到项目时 | VS-4 Benchmark / Release / Adoption | 固定 Proposal Candidate Revision、Baseline、样本和双臂 Trial；先核验配对可比性与硬门槛，再由资产维护者发布不可变 Release，项目有权成员独立 Adoption；后续 Work 记录 Selected / Delivered / Loaded / Used，生产效果不足保持待观察，退化通过新 Adoption 决定回退。[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md) · [TeamAI 源码取证](../research/vs4-teamai-benchmark-source-evidence.md) |
 | 进入详细技术方案与最小验证时 | 技术方案准备与纵向切片 | 先按[技术方案准备与最小纵向切片](technical-solution-readiness.md)收敛 VS-0 / VS-1 的来源身份、授权代际、原生 Task 查回与恢复契约；再推进 D6 和 D7 的技术承载。当前仍不预设数据库、API 或部署拆分。 |
 
 ## 12. 架构验收标准
