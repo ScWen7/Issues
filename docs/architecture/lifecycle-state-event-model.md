@@ -201,7 +201,7 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Failed | 评价执行本身失败，不能把它当成被评对象失败 |
 | Cancelled | 评价任务被撤销 |
 
-评价器执行自身可有 Run；Run 终态与 Evaluation 结论分别记录。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。
+评价器执行自身可有 Run；Run 终态与 Evaluation 结论分别记录。Evaluation 固定触发类型、Team / Project Evaluation Policy 版本、Work Agreement 版本、评价器版本、输入快照和资源预算。Requested 可表示已获准但等待预算 / Runtime 的评价；尚未被策略选中的工作不创建 Evaluation。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。触发、抽样、重试和预算耗尽规则见[ D11 评价触发与资源预算治理](d11-evaluation-trigger-budget-policy.md)。
 
 ### 9.2 Improvement Proposal
 
