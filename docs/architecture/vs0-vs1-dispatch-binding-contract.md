@@ -140,9 +140,9 @@ Main Bot / Worker 不能仅凭收到派发请求就声称已开工。
 2. 在 Comment 保存时固定本次目标解析结果及解析版本，或保存足以按固定解析器版本确定性恢复的原始提及信息；不能在恢复时用当前 Agent 名称 / 目录重新解释历史文本并静默改变目标集合；
 3. 为解析出的每个目标形成稳定 Intent；若目标解析需要异步完成，Comment 的持久化事实必须足以恢复同一解析修订，目标解析完成前状态为待解析而非已派发；
 4. 每个目标独立调用 CreateOrGetTask(intentId) 或登记到可证明覆盖的现有 Task；
-4. 某个目标失败不回滚已保存 Comment，也不抹去其他目标成功；
-5. 目标级 Pending / Blocked / Unknown 可从 Comment 重新查回；
-6. 同 HEAD 评论可复用 Multica coalescing / planned comment；不同 HEAD blocker 保留目标级未解决状态，不能虚报已接单。
+5. 某个目标失败不回滚已保存 Comment，也不抹去其他目标成功；
+6. 目标级 Pending / Blocked / Unknown 可从 Comment 重新查回；
+7. 同 HEAD 评论可复用 Multica coalescing / planned comment；不同 HEAD blocker 保留目标级未解决状态，不能虚报已接单。
 
 评论事务和派发事务不要求跨外部 Runtime 做全局事务。关键是来源意图持久存在、Task 创建幂等、恢复可查回。
 
