@@ -6,7 +6,7 @@
 
 ## 1. 设计结论
 
-**Evaluation 是业务评价事实；Evaluation Run 是为完成该评价而发生的独立执行。二者关联但不是同一个对象，也不是被评生产 Run 的子状态。**
+**Evaluation 是业务评价事实；Evaluation Task / Run 是为完成该评价而发生的独立执行。二者关联但不是同一个对象，也不是被评生产 Run 的子状态。Model-based 评价有一个主 Task；其有限重试沿 Multica 原生 retry 谱系关联，不创建新 Evaluation。Deterministic / Human Review 可以没有 Agent Task。**
 
 - 被评对象保持原身份和原状态：Issue / Production Task / Run / Candidate / SOP Activation / Release。
 - Evaluation 固定被评对象版本、输入证据快照、触发策略、Scorer / Rubric 和结论。
@@ -79,7 +79,7 @@ Evaluation 的执行方式由方法决定，不是所有评价都启动 Agent。
 - Task 有自己的 Task ID、Claim / Start / 终态、Session、Trace 和 Usage；
 - Task 明确属于原 Issue（若评价目标属于 Issue），以便沿用 Issue 访问、运行权限和原生 Usage 查询；
 - Task 的直接触发证据指向 Evaluation ID，使用自由文本 evidence kind 标记 evaluation，ref 指向 Evaluation ID；
-- Evaluation 记录该 Task ID；Task 记录 Evaluation 来源引用，形成双向可核对关系；
+- Evaluation 记录主 Task ID；Task 记录 Evaluation 来源引用，形成双向可核对关系；Multica 自动重试产生的子 Task 继承该来源身份，归入同一 Evaluation 执行尝试链；
 - Task 必须带有明确的治理用途标识（Evaluation Purpose / Execution Lane），不能只靠 prompt 或 trigger summary 猜测；
 - Target Production Task / Run 通过 Evaluation 记录关联，不将其伪装成 parent_task_id、retry_of_task_id 或 rerun_of_task_id；
 - Evaluation Task 即使归属同一 Issue，也不能与普通生产 Task 共用 pending coalescing 槽位、Session 恢复池或普通 Worker Wakeup 消费路径。
@@ -138,7 +138,7 @@ Evaluation 状态与 Multica Task 状态分别维护：
 - Insufficient Evidence 是无法判断，不是低分；
 - Cancelled 不代表已启动 Task 已停止。
 
-Task Queued / Claimed / Running / Completed 等执行状态直接读取 Multica，不复制成第二套执行状态机。Evaluation 可显示聚合进度，但不能自行声称 Task 已启动。
+Task Queued / Claimed / Running / Completed 等执行状态直接读取 Multica，不复制成第二套执行状态机。Evaluation 可显示主 Task 和其 retry 谱系的聚合进度，但不能自行声称 Task 已启动。
 
 ## 6. Evaluation 身份与幂等
 
@@ -318,7 +318,7 @@ Task Completed 事件只触发结果消费。消费者必须：
 1. Evaluation 与生产 Run 是独立业务事实，彼此引用但状态不互相覆盖。
 2. 一份 Evaluation 固定唯一目标版本、策略版本、Scorer / Rubric 和输入快照。
 3. Deterministic / Trace / Model-based / Human Review 按需选择；不是所有评价都强制创建 Agent Task。
-4. Model-based Evaluation 使用独立 Multica Task / Run，Task 来源指向 Evaluation；不滥用 parent / retry / rerun 谱系字段。
+4. Model-based Evaluation 使用独立 Multica Task / Run，主 Task 来源指向 Evaluation，原生 retry 子 Task 继承来源并保留真实 retry 谱系；不滥用 parent / rerun 字段。
 5. Evaluation 与 Task 双向可核对，创建和查回幂等；Evaluation Purpose 隔离 pending coalescing、Session 恢复和普通 Worker Wakeup。
 6. 单次、Issue、Project、Team 预算全范围原子预留；不能部分扣额。
 7. 可观测的 Run 数、时长、并发与原生单位分别记账；未知 Credits / Token / USD 保持 Unknown。
