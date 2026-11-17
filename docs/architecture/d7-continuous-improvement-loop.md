@@ -56,7 +56,7 @@
 
 评价器可以有自己的 Multica Run，引用被评 Run / Candidate，但保留自己的执行身份、输入证据、评价器版本和 Usage。被评 Run 的生产事实不可被评分覆盖；评价失败只表示评价执行失败，证据不足也不等于被评工作失败。
 
-TeamAI 的可借鉴机制是：在已结算的生产 pass 之后启动独立评分 Run，评分读取具体 Run / Step / Pass 和当时 Scorer 版本；评分启动失败保留待处理，不改变原执行结论。LoopForge 则使用独立的 Run Evaluation 记录读取原 Run 的事实和轨迹，提供评价及受限建议。两者的具体实现见[上游机制取证](../research/d7-continuous-improvement-evidence.md)。AgentPlatform 沿现有 Run 链承载评价执行，不新增评价专用 Runtime 或第二套任务系统。
+TeamAI 的可借鉴机制是：在已结算的生产 pass 之后启动独立评分 Run，评分读取具体 Run / Step / Pass 和当时 Scorer 版本；评分启动失败保留待处理，不改变原执行结论。LoopForge 则使用独立的 Run Evaluation 记录读取原 Run 的事实和轨迹，提供评价及受限建议。两者的具体实现见[上游机制取证](../research/d7-continuous-improvement-evidence.md)。AgentPlatform 沿现有 Run 链承载评价执行，不新增评价专用 Runtime 或第二套任务系统。 AgentPlatform 的 Evaluation 目标快照、独立治理用途 Task、预算预留 / 结算、结果消费与 Multica 隔离要求见[VS-3 技术承载契约](vs3-evaluation-technical-contract.md)。
 
 ## 4. Evaluation 如何形成可行动的 Finding
 
