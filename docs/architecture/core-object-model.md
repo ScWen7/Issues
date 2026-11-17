@@ -139,7 +139,7 @@ Project Adoption 归 Project 配置与决定权，不属于评价或资产发布
 
 Evaluation Policy 是 Team / Project 配置中的版本化治理规则，定义必需门禁、风险触发、抽样范围、可用评价器、资源预算和停止条件。Work Agreement 可以增加本项要求但不能降低团队或项目的强制底线。它不产生独立执行实例；每份 Evaluation 固定实际采用的策略版本。Scorer / Rubric 由资产维护者版本化，策略制定者与评价器维护者的职责分开。
 
-Evaluation Task 是治理用途的受管执行，不是生产 Worker 委派。它保留自己的 Task / Run / Session / Usage，并通过 Evaluation ID 双向关联；普通生产 Task 的 pending coalescing、Session 恢复和 Worker Wakeup 不得将其视为生产执行。团队总资源统计纳入治理消耗，生产成本视图单独识别并排除治理 Task。
+治理 Task（Evaluation、Benchmark、Improvement、Calibration 等）是 Governance Purpose 的受管执行，不是生产 Worker 委派。它保留自己的 Task / Run / Session / Usage，并通过各自业务来源身份双向关联；普通生产 Task 的 pending coalescing、Session 恢复和 Worker Wakeup 不得将其视为生产执行。团队总资源统计纳入治理消耗，生产成本视图单独识别并排除治理 Task。
 
 Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adoption 是不同事实。一个评分通过不自动完成 Issue；一个 Issue 验收通过也不自动发布新方法。
 
