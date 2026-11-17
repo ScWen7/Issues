@@ -212,10 +212,39 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。Arti
 | Evaluating | 正在进行根因分析、候选准备或对照 |
 | Ready for Approval | 已具备审核所需证据 |
 | Approved | 有权维护者批准提案中明确的变更路径；尚不代表资产已发布或项目已采用 |
-| Applied | 获批的变更已按目标路径发布为 Release，或已由有权成员写入项目级配置决定；具体 Release / Adoption 仍分别记录 |
-| Rejected / Withdrawn | 提案被拒绝或撤回，保留依据 |
+| Candidate Ready | 一个或多个候选修订已固定，等待实验或审核 |
+| Benchmarking | 一个或多个固定实验正在执行或汇总 |
+| Ready for Approval | 已具备审核所需证据 |
+| Approved | 有权维护者批准明确的候选修订和发布范围；尚不代表已发布 |
+| Released | 对应不可变 Release 已成功创建；不代表项目已采用 |
+| Rejected / Withdrawn | 提案或候选被拒绝 / 撤回，保留依据 |
 
-Proposal 的 Approved / Applied 只表示提案自身的审核与变更执行进度。资产维护者发布不可变 Release；项目有权成员另行作出 Project Adoption，记录范围、生效条件和在途安排。项目配置体现当前有效采用，历史采用决定保留。后续工作再分别记录资产选择、实际投递和可核对的宿主使用；Release、Adoption 和 Usage 不能合并为一个状态。
+Proposal 是治理容器，可以包含多个 Candidate Revision、Benchmark 和 Release。Proposal 的状态只表达提案整体进度，不替代这些对象自己的身份与结果。候选实验和发布关系见[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md)。
+
+### 9.3 Benchmark Experiment 与 Trial
+
+| 状态 | 含义 |
+|---|---|
+| Planned | 实验定义、样本、实验臂和预算已固定，尚未启动 |
+| Running | 至少一个 Trial 已派发或执行；实际 Task 状态仍读取 Multica |
+| Completed | 所有 Trial 已终结或按预定规则处理，结果已汇总 |
+| Failed | 实验执行本身未能完成，不能解释为候选质量失败 |
+| Inconclusive | 实验完成但样本、可比配对、证据或计量覆盖不足 |
+| Cancelled | 有权主体取消实验；已启动 Trial 仍需分别确认原生终态 |
+
+每个 Trial 固定 Sample、Arm、Candidate / Baseline Revision、实验定义和 Multica Task / Run。候选或样本变化形成新实验修订；不可比配对、失败和未运行结果必须保留原因。
+
+### 9.4 Release 与 Project Adoption
+
+Release 是资产维护者审核后发布的不可变版本。其状态投影可为 Published、Deprecated 或 Withdrawn；撤回 / 废弃不删除历史版本，也不自动改变已固定的工作版本。
+
+Project Adoption 是项目有权成员对具体 Release 或项目配置版本作出的追加式决定。当前采用状态由 Project + Asset + Scope 下最新有效 Adoption 决定；新增采用、暂停、替换和回退均产生新决定并推进 Adoption Generation。Release Published 不等于 Project Adopted；Adoption 生效也不证明新工作已经选择或使用。
+
+### 9.5 Actual Usage 与 Production Observation
+
+每次 Work / Run 对资产分别记录 Selected、Delivered、Loaded / Observed、Used 等证据阶段。宿主不能证明的阶段保持 Unknown，不从 Adoption 或配置推断。
+
+生产效果观察绑定 Release、Adoption Scope、观察窗口、样本队列、可比基线和实际使用证据。结果可为 Pending Observation、Improving、Stable、Regressed、Inconclusive 或 Stopped。Benchmark Passed 不能直接生成 Stable；只有后续真实生产样本满足预设门槛，才能形成生产效果结论。回退通过新 Adoption 决定完成，历史使用记录不覆盖。
 
 ## 10. 跨对象事件模型
 
@@ -229,7 +258,7 @@ Proposal 的 Approved / Applied 只表示提案自身的审核与变更执行进
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
 | Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、EvidenceApplicabilityRecorded、AcceptanceDecisionRecorded、DeliveryReturned | 生产者与交付通道 |
 | Evaluation | EvaluationRequested、EvaluationTaskBound、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、EvaluationResultConsumed、FindingRecorded | 评价任务及结果 |
-| Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 提案审核、资产发布、项目采用分别由各自权威记录产生 |
+| Improvement | ImprovementProposed、ImprovementCandidateCreated、BenchmarkPlanned、BenchmarkTrialBound、BenchmarkCompleted、BenchmarkInconclusive、ImprovementApproved、AssetReleased、ProjectAdoptionRecorded、AssetDeprecated、AssetWithdrawn、AssetUsageObserved、ProductionOutcomeRecorded | 提案、候选、实验、发布、采用和效果观察分别由各自权威记录产生 |
 
 事件名称表示语义类别，不要求直接作为 API 名称或消息 Topic。实现可沿用 Multica 原生事件，并映射到这些语义。
 
