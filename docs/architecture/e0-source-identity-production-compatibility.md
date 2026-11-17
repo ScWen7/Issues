@@ -31,7 +31,7 @@ Production 是执行用途；一次性执行、Main Bot 协调和 SOP 节点是�
 
 ## 3. 普通指派与 Main Bot 的边界
 
-### 3.1 普通 Agent 指派是完整的一次执行模式
+### 3.1 普通 Agent 指派是平台授权的一次执行模式
 
 成员把 Issue 指派给 Agent，但没有明确授予持续协调权时：
 
@@ -41,7 +41,7 @@ Production 是执行用途；一次性执行、Main Bot 协调和 SOP 节点是�
 - 它不能仅凭 Assignee 身份继续委派 Worker、扩大范围、创建后续独立分工或代表成员作业务决定。
 - 执行结束后，结果回到原 Issue，由当前有权成员消费；是否接受、是否继续、是否转成持续协调由成员决定。
 
-这不是“缺少 Main Bot 的半成品模式”，而是完整、低复杂度的普通协作方式。
+这不是“缺少 Main Bot 的半成品模式”，而是完整、低复杂度的普通协作方式。但这项一次性语义由 AgentPlatform 的 Work Agreement / Delegation Mode 保证，不是 Multica Assignee 字段的原生属性。
 
 ### 3.2 转为 Main Bot 是新的明确授权转换
 
@@ -118,8 +118,8 @@ Production 是执行用途；一次性执行、Main Bot 协调和 SOP 节点是�
 ### 6.2 必须证明或补足
 
 - 来源身份与主 Task 创建 / 查回之间的唯一、可恢复关联；
-- Issue 指派转换与对应生产执行意图的持久化关系；
-- Comment 每个目标的独立委派状态，以及与既有 coalescing / planned input 的覆盖依据；
+- Issue 指派转换与对应生产执行意图的持久化关系；来源身份必须与 Issue 权威写入处于同一事务 / 原子 SQL 写入边界；不能依赖后续异步 Activity 事件补写；
+- Comment 每个目标的独立委派状态，以及与既有 coalescing / planned input 的覆盖依据；优先复用 Multica 已有的 bounded merge、planned-id、delivered receipt 和 completion reconcile，不重建 Comment 队列；
 - 普通 Agent 指派、Main Bot 激活、Comment 协助和 SOP Attempt 均能使用来源查回能力；
 - Task 的执行用途可被查询，至少能区分 Production 与 Governance；E0 先保证 Production 路径不回归，Governance 的隔离在 E3 启用前完成；
 - 目标 Agent、授权、输入基准和执行模式在 Task 创建时可核对。
@@ -173,7 +173,7 @@ E0 只有在以下条件全部满足后才可进入 E1：
 2. 普通指派、Main Bot、Comment 目标和 SOP Attempt 的身份映射已明确；
 3. 同一来源身份的主 Task 创建 / 查回具备唯一语义，合法 Retry 谱系可查回；
 4. 来源侧与 Task 侧可以双向核对；
-5. 普通 Production 的 pending、coalescing、Session、Wakeup、Usage 和 Runtime 行为回归通过；
+5. 普通 Production 的 pending、coalescing、Session、Wakeup、Usage 和 Runtime 行为回归通过；受管 One-shot Issue 的后续触发门控也通过；
 6. 普通 Agent 指派失败恢复、响应丢失、并发恢复和撤权场景通过真实故障注入；
 7. 无法证明的场景保持 Unknown，不通过猜测补齐；
 8. 未引入第二套 Task / Run / Runtime / Queue / Coordinator；
