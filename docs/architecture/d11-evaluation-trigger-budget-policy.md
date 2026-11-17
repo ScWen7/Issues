@@ -14,7 +14,7 @@ D11 必须同时控制四件事：
 3. **资源有界**：单次评价、单项工作、项目周期和团队周期均有明确预算及停止条件。
 4. **结果可解释**：没有触发、未抽中、未能评价、评价失败和评价不通过是不同事实。
 
-D11 不建立第二套 Run、队列、调度器或评价专用 Runtime。评价和 Benchmark 沿 Multica 现有 Task / Run / Runtime 链执行；Evaluation 记录固定目标、政策、评价器和结论。
+D11 不建立第二套 Run、队列、调度器或评价专用 Runtime。评价和 Benchmark 沿 Multica 现有 Task / Run / Runtime 链执行；Evaluation 记录固定目标、政策、评价器和结论。 Model-based Evaluation 使用独立治理用途 Task；该用途必须与普通生产 Task 的 coalescing、Session 恢复、Worker Wakeup 和成本视图隔离，具体承载见[VS-3 技术契约](vs3-evaluation-technical-contract.md)。
 
 ## 2. 评价触发分为四种入口
 
