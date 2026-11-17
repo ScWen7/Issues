@@ -23,12 +23,18 @@
 
 | 权威对象 | 可改变的事实 | 其他对象如何使用 |
 |---|---|---|
-| Issue | 工作约定、负责人、业务状态、决定、当前候选和完成状态 | SOP、Run、工作台和通知读取 Issue 的当前有效版本 |
-| Project 配置 | 项目成员、工作流、采用的能力版本、资源策略 | 新工作按适用配置版本建立约定；在途工作按已固定版本处理 |
+| Issue | 工作约定、负责人、业务状态、决定、当前 Acceptance Channel 的 Candidate 指针和完成状态 | SOP、Run、Delivery、工作台和通知读取 Issue 的当前有效版本；Candidate 实体本身由交付域维护 |
+| Project 配置 | 项目成员、工作流、Project Adoption、资源策略和当前采用版本 | 新工作按适用配置版本建立约定；在途工作按已固定版本处理 |
+| Work Agreement / Delegation | 目标、范围、人工总责、持续协调授权和授权代际 | 每次派发、结果消费和业务决定复核当前有效版本 |
 | SOP Execution | 受托范围、流程实例状态、节点激活、尝试、结果消费和出口 | Issue 与后继节点消费其明确交回的结果 |
-| Run | 受管派发、领取、启动、停止请求和实际执行回执 | SOP、Issue、Evaluation 和用量视图引用 Run 的事实 |
-| Artifact / Candidate | 具体制品版本及候选组成 | 检查、验收和后继工作固定引用具体版本 |
-| Evaluation / Asset Release | 评价结果、候选审核和发布事实 | Issue 或项目维护者按其职责消费，不反向改写被评对象 |
+| Multica Task / Run | Task Purpose、来源身份、领取、启动、停止请求、重试谱系和实际执行回执 | SOP、Issue、Evaluation、Benchmark 和 Usage 视图引用原生执行事实 |
+| Artifact / Candidate / Evidence | 不可变制品版本、Candidate Manifest、Evidence 与 Applicability | Issue 只维护当前候选指针和完成资格；检查与验收固定引用具体版本 |
+| Evaluation / Finding | 固定目标评价、结果、Finding 与证据引用 | 原 Issue / SOP / Asset 消费；不反向改写被评对象 |
+| Proposal / Benchmark | 改进候选修订、实验定义、Trial 和比较结果 | 资产维护者审核发布，不自动改变默认资产 |
+| Asset Release | 资产维护者发布的不可变版本和依赖 | Project Adoption 只能引用已发布且未撤回版本 |
+| Project Adoption | 项目有权成员对 Release / 项目配置的采用决定及范围 | 新 Work 固定采用版本；不推断在途工作已加载 |
+| Budget Reservation | Evaluation / Benchmark 的单次与多层预算预留、结算和释放 | 在预算权威边界原子预留；不与 Task 创建构成全局事务 |
+| Usage | Multica Task 级原生单位累计快照和来源更正 | 按 Task Purpose 形成生产、治理和团队总量视图 |
 
 一个对象的状态变化必须经过其权威写入入口。工作台可以聚合展示多个对象，但不得通过更新投影、通知或缓存来代替权威写入。
 
@@ -285,6 +291,8 @@ Fencing 是安全语义要求，不预设一定由独立锁服务实现。
 | 修复派发、通知和投影失败 | 平台恢复机制 | 根据权威事实幂等重试，不代替业务决定 |
 
 平台可以自动恢复技术动作，但不能自动替代业务取舍、授权扩大、验收或风险接受。
+
+VS-0 至 VS-4 的横向一致性审查、统一 Task Purpose、权威写入矩阵和最小工程切片见[VS-5 整体技术方案一致性审查](vs5-overall-technical-consistency-review.md)。本文件中的 Outbox / Inbox 是可恢复投递与幂等消费语义，不表示 Multica Wakeup Receipt 已经实现完整消息账本。
 
 ## 11. 与前序架构的关系
 
