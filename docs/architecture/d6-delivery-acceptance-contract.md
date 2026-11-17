@@ -4,6 +4,7 @@
 > 对象归属见[核心对象模型](core-object-model.md)；状态见[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)；并发与恢复见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。
 > Multica 现有交付能力及缺口见[D6 源码取证](../research/d6-delivery-acceptance-evidence.md)。
 > 本文是产品级契约，不定义数据库表、API 或部署结构。
+> 技术承载、不可变 Artifact 定位、Candidate Generation、Evidence Applicability、统一 Completion Gate 与故障恢复见[VS-2 技术契约](vs2-candidate-acceptance-technical-contract.md)及[Multica 交付源码取证](../research/vs2-multica-delivery-source-evidence.md)。
 
 ## 1. 核心判断
 
