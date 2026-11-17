@@ -16,12 +16,12 @@
 | 对象组 | 核心对象 | 主要职责 |
 |---|---|---|
 | 组织与范围 | Team、Project、Member、Agent | 界定协作范围、参与主体及组织关系 |
-| 工作与责任 | Issue、工作约定、Decision、Project Workflow | 承载业务目标、责任、决定和工作生命周期 |
-| 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool 配置、Knowledge | 定义可复用的方法、规则、能力和资料 |
+| 工作与责任 | Issue、工作约定、Decision、Project Workflow、Project Adoption | 承载业务目标、责任、项目采用决定和工作生命周期 |
+| 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool 配置、Knowledge、Release | 定义可复用的方法、规则、能力、资料及其不可变发布版本 |
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
 | 执行资源与记录 | Host、Runtime、Daemon、Backend、Session、Run | 提供本地执行能力并记录真实受管执行 |
 | 交付与证据 | Artifact、Candidate、Evidence、Delivery Record | 表达交付内容、版本、检查依据和交接结果 |
-| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark、Release、Project Adoption | 评价实际结果，审核和发布可复用改进，记录项目采用决定 |
+| 评价与演进 | Evaluation、Finding、Improvement Proposal、Benchmark | 评价实际结果，形成可审查的改进提案并验证候选变更 |
 
 这些分组是概念边界，不要求对应独立服务、数据库或部署单元。
 
@@ -51,6 +51,7 @@
 | Work Agreement | 某一时点有效的目标、范围、完成要求、责任与约束 | 由有权成员在所属 Issue 上确认或变更；历史版本可追溯 |
 | Decision | 对工作范围、授权、例外、接管、门禁或验收作出的明确决定 | 由对应事项的有权主体作出，记录对象、适用版本、范围和后果 |
 | Project Workflow | 项目层的 Issue 阶段、步骤指令和负责人交接规则 | 项目配置定义规则；具体 Issue 记录实际发生的阶段与交接 |
+| Project Adoption | 有权项目成员对已发布 Release 或项目级流程 / 分工配置版本作出的采用决定 | 作为 Project 配置中的不可变决定记录，固定范围、生效条件、在途工作处理及替代关系；当前配置表达有效采用 |
 
 **Issue 是业务工作与责任的权威归属。** 评论、通知、Run、SOP 和交付记录都可以关联 Issue，但不能自行改变 Issue 的业务事实，除非通过 Issue 的有效授权入口完成相应写入。
 
@@ -133,7 +134,7 @@ Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录�
 
 改进提案中的候选内容称为**改进候选修订**，由 Proposal 固定其变更对象、基线、依赖和内容摘要，并关联 Benchmark。它不是 D6 的交付 Candidate：交付 Candidate 固定一次工作送审的 Artifact 组合；改进候选修订固定拟发布的方法 / 能力 / 流程变更。两者不可互相替代，也不需要再建立一个全局通用 Candidate 对象。
 
-Project Adoption 是项目配置中的有权决定记录，不是另一套资产仓库或执行对象。它引用已发布 Release，或明确的项目级工作流 / 分工配置版本，记录采用范围、生效条件、在途工作处理和替代关系。项目当前有效配置决定当前采用什么；历史采用决定不可覆盖。后续 Work / Run 的资产选择与实际投递回执，才证明具体工作使用了哪个版本。
+Project Adoption 归 Project 配置与决定权，不属于评价或资产发布过程。它引用已发布 Release，或明确的项目级工作流 / 分工配置版本，记录采用范围、生效条件、在途工作处理和替代关系。项目当前有效配置决定当前采用什么；历史采用决定不可覆盖。后续 Work / Run 的资产选择与实际投递回执，才证明具体工作使用了哪个版本。
 
 Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adoption 是不同事实。一个评分通过不自动完成 Issue；一个 Issue 验收通过也不自动发布新方法。
 
