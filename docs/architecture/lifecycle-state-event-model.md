@@ -41,7 +41,9 @@
 | Run | 受管执行是否排队、领取、运行、终止或失联待核实 | Multica 派发、Daemon、Runtime 和宿主回执 |
 | Candidate | 固定交付版本是否待检查、接受、退回或被替代 | Issue 对该候选的处置决定 |
 | Evaluation | 一次评价是否待执行、执行中、完成或证据不足 | 评价任务与评价结果 |
-| Improvement Proposal | 改进是否提出、评估、对照、审核、发布 | 资产维护者及项目有权成员的决定 |
+| Improvement Proposal | 改进是否提出、分诊、评估、审核及完成批准的变更 | 提案记录及相应维护者决定 |
+| Release | 不可变资产版本是否可供选用 | 对应资产的发布记录与维护者决定 |
+| Project Adoption | 项目是否在声明范围采用某个 Release 或项目配置版本 | 项目配置及有权成员的采用决定 |
 
 这些是概念语义，不要求每个对象都新增一套物理状态字段。
 
@@ -209,12 +211,11 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Triaged | 维护者确认问题归属、范围和是否继续 |
 | Evaluating | 正在进行根因分析、候选准备或对照 |
 | Ready for Approval | 已具备审核所需证据 |
-| Approved | 有权维护者批准候选发布或配置采用 |
-| Released | 不可变资产版本已发布 |
-| Adopted | 项目已决定在声明范围采用该版本或配置 |
+| Approved | 有权维护者批准提案中明确的变更路径；尚不代表资产已发布或项目已采用 |
+| Applied | 获批的变更已按目标路径发布为 Release，或已由有权成员写入项目级配置决定；具体 Release / Adoption 仍分别记录 |
 | Rejected / Withdrawn | 提案被拒绝或撤回，保留依据 |
 
-方法资产获批后由维护者发布，项目可将它设为默认，工作负责人也可在授权范围内为本项选用。若批准的是项目工作流或分工配置，有权成员直接在原项目或 Issue 记录生效范围及在途安排。后续工作分别记录本次选择、投递和可核对的实际使用。
+Proposal 的 Approved / Applied 只表示提案自身的审核与变更执行进度。资产维护者发布不可变 Release；项目有权成员另行作出 Project Adoption，记录范围、生效条件和在途安排。项目配置体现当前有效采用，历史采用决定保留。后续工作再分别记录资产选择、实际投递和可核对的宿主使用；Release、Adoption 和 Usage 不能合并为一个状态。
 
 ## 10. 跨对象事件模型
 
@@ -228,7 +229,7 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
 | Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、DeliveryReturned | 生产者与交付通道 |
 | Evaluation | EvaluationRequested、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、FindingRecorded | 评价任务及结果 |
-| Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 维护者审核、资产发布和项目采用 |
+| Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 提案审核、资产发布、项目采用分别由各自权威记录产生 |
 
 事件名称表示语义类别，不要求直接作为 API 名称或消息 Topic。实现可沿用 Multica 原生事件，并映射到这些语义。
 
