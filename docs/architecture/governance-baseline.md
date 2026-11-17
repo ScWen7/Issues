@@ -18,7 +18,7 @@
 
 ## 固定版本的底座盘点
 
-对应 Multica 提交 [fdfbfcd](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)。各项能力均以所引版本及入口为准。
+本页原生能力盘点固定对应 Multica 提交 [fdfbfcd](https://github.com/multica-ai/multica/tree/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc)，仅代表本页各项源码证据的取证基准，不等同于后续专题的最新复核基准。VS-0 / VS-1、VS-2、VS-3 和 VS-5 的跨层复核基准为 [71683141](https://github.com/multica-ai/multica/tree/71683141a764ed3b1620db4bc26a2d0a098f135c)。D5 早期业务派发研究另固定在其文档列出的提交；进入 E0 前必须以目标 Multica 分支重新核对派发、Task 来源、Session、Wakeup 和 Usage 路径，不将不同提交的证据拼成一个未经验证的源码状态。各项能力仍以各自所引版本及入口为准。
 
 | 能力 | 该版本的行为 | 产品需要的扩展 |
 |---|---|---|
