@@ -127,7 +127,7 @@ Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录�
 
 | 对象 | 定义 | 与业务完成的关系 |
 |---|---|---|
-| Evaluation | 使用明确评价器和输入证据，对 Run、Candidate、资产或流程作出的评价记录 | 固定触发类型、Team / Project Evaluation Policy、Work Agreement、评价器版本、输入快照、预算和结论；为负责人、维护者或质量门禁提供依据，本身不等于业务验收 |
+| Evaluation | 使用明确评价器和输入证据，对 Run、Candidate、资产或流程作出的独立评价记录 | 固定目标版本、触发策略、Scorer / Rubric、输入快照、预算和结论；需要受管模型执行时关联独立 Multica Task / Run；本身不等于业务验收 |
 | Finding | Evaluation 中一条有定位、有依据的问题或观察 | 可被当前 Issue 修正，也可成为改进提案的来源 |
 | Improvement Proposal | 对方法、能力、知识或流程提出的可审查变更 | 引用源工作、Finding、拟改资产、基线、预期效果和验证方式；其候选修订属于提案内容，不是交付 Candidate |
 | Benchmark | 在固定输入、环境、评价标准和候选版本下进行的可比对照 | 证明候选在声明范围内的实验结果，不替代真实业务效果 |
@@ -138,6 +138,8 @@ Evidence 的来源强度不能混为一谈。成员自述、宿主原生记录�
 Project Adoption 归 Project 配置与决定权，不属于评价或资产发布过程。它引用已发布 Release，或明确的项目级工作流 / 分工配置版本，记录采用范围、生效条件、在途工作处理和替代关系。项目当前有效配置决定当前采用什么；历史采用决定不可覆盖。后续 Work / Run 的资产选择与实际投递回执，才证明具体工作使用了哪个版本。
 
 Evaluation Policy 是 Team / Project 配置中的版本化治理规则，定义必需门禁、风险触发、抽样范围、可用评价器、资源预算和停止条件。Work Agreement 可以增加本项要求但不能降低团队或项目的强制底线。它不产生独立执行实例；每份 Evaluation 固定实际采用的策略版本。Scorer / Rubric 由资产维护者版本化，策略制定者与评价器维护者的职责分开。
+
+Evaluation Task 是治理用途的受管执行，不是生产 Worker 委派。它保留自己的 Task / Run / Session / Usage，并通过 Evaluation ID 双向关联；普通生产 Task 的 pending coalescing、Session 恢复和 Worker Wakeup 不得将其视为生产执行。团队总资源统计纳入治理消耗，生产成本视图单独识别并排除治理 Task。
 
 Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adoption 是不同事实。一个评分通过不自动完成 Issue；一个 Issue 验收通过也不自动发布新方法。
 
