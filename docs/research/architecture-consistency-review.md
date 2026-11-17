@@ -154,9 +154,11 @@ flowchart TB
 
 ## 8. 技术方案推进状态
 
-整体架构审查后，技术方案按纵向切片推进：VS-0 / VS-1 已形成业务意图身份、Task 绑定与恢复契约；VS-2 已形成 Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate 契约。Multica 当前附件、Issue revision 与 PR 自动完成路径的真实边界见[VS-2 源码取证](vs2-multica-delivery-source-evidence.md)。
+整体架构审查后，技术方案按纵向切片推进：VS-0 / VS-1 已形成业务意图身份、Task 绑定与恢复契约；VS-2 已形成 Artifact 不可变定位、Candidate Manifest / Generation、Evidence Applicability、Acceptance Decision 和统一 Completion Gate；VS-3 已形成 Evaluation 目标快照、独立治理用途 Task / Run、预算预留 / 结算、结果消费和 Finding 回写契约。
 
-当前仍未确定数据库表、API 路径、事务实现和附件快照存储产品；这些需在共用身份与权威写入边界确认后设计。下一阶段为 VS-3：Evaluation Policy、预算预留、独立 Evaluation Run 与结果消费。
+VS-3 的关键源码发现是：Evaluation Task 不能简单作为普通 Issue Task 入队，否则会与生产 Task 竞争 pending 唯一槽位、污染 Main Bot Session 恢复、触发普通 Worker Wakeup，并混入生产成本视图。需要在 Multica 现有 Task / Run 中补充治理用途隔离，不新增执行队列。详见[VS-3 技术契约](../architecture/vs3-evaluation-technical-contract.md)及[Multica Runtime 隔离取证](vs3-evaluation-multica-runtime-evidence.md)。
+
+当前仍未确定数据库表、API 路径、预算锁实现和模型调用协议；下一阶段进入 VS-4：Benchmark、Release、Project Adoption 与实际生产效果回收。
 
 ## 9. 架构审查结论
 
