@@ -41,7 +41,7 @@ def knowledge_recall(query: str, principal: dict, corpus: dict) -> list[dict]:
     Important ordering: authorization/scope filtering occurs before ranking and
     before any candidate fields are serialized to the caller.
     """
-    visible = [item for item in corpus["knowledge"] if authorized(principal, item)]
+    visible = [item for item in corpus["knowledge"] if authorized(principal, item) and item.get("distribution_status", "active") == "active"]
     ranked = [(lexical_score(query, item), item) for item in visible]
     ranked = [(score, item) for score, item in ranked if score > 0]
     ranked.sort(key=lambda pair: (-pair[0], pair[1]["id"]))
@@ -165,7 +165,13 @@ def run() -> dict:
     # Revocation simulation: source-origin evidence is revoked for future reads.
     revoked = {**b, "teams": []}
     revoked_hits = knowledge_recall("regional data export permissions", revoked, corpus)
-    checks["team_revocation_removes_future_recall"] = "T1" not in ids(revoked_hits)
+    checks["team_membership_revocation_removes_future_recall"] = "T1" not in ids(revoked_hits)
+    revoked_corpus = {**corpus, "knowledge": [
+        {**item, "distribution_status": "paused"} if item["id"] == "T1" else item
+        for item in corpus["knowledge"]
+    ]}
+    grant_revoked_hits = knowledge_recall("regional data export permissions", b, revoked_corpus)
+    checks["source_derivation_revocation_pauses_future_team_recall"] = "T1" not in ids(grant_revoked_hits) and "B1" in ids(grant_revoked_hits)
     checks["project_B_knowledge_remains_with_project_membership"] = "B1" in ids(b_hits)
 
     # Scope filtering happens before serialization: no result envelope for A1.
