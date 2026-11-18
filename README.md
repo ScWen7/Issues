@@ -1,37 +1,46 @@
-# AgentPlatform · 团队 Agent 研发协作工作台
+# AgentPlatform · 团队 AI 研发能力平台
 
-团队成员在项目中共同推进 Issue，在各自获准的本地 Agent 环境中完成研发工作。打开一个 Issue，接手者能找到目标、当前负责人、已交付的变更，以及接下来要谁作什么决定。仓库提供产品与架构设计、上游源码依据及研究原型。
+AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队。平台以团队知识为基础、以产研工作为主线、以 Engineering Harness 为质量保障，通过真实执行证据、Evaluation 和持续改进，让团队经验进入研发、研发结果反哺知识与工程方法。
 
-## 核心架构
+**核心目标：让团队知识在研发中被复用，让 Harness 使研发过程可控、交付质量可验证，并让每一轮研发都为下一轮积累有效知识和更好的工程方法。**
 
-从[一项工作的核心流程](docs/architecture/overview.md#4-一项工作的核心流程)看成员怎样发起或接回工作、取用项目方法、提交成果，以及下一位负责人怎样检查和接手。成员可以亲自推进，也可以将持续协调委托给一个 Agent，由它在授权内选择执行、分工或使用 SOP。工作台贯穿这些环节。
+## 产品设计基线
 
-[架构总览](docs/architecture/overview.md)说明中心、成员本机和资料来源各自维护哪些事实。[整体系统架构与模块边界](docs/architecture/system-architecture.md)说明五项职责如何结合 Multica、TeamAI 和 LoopForge 的机制。对象、状态、并发和交接分别见[核心对象模型](docs/architecture/core-object-model.md)、[统一生命周期](docs/architecture/lifecycle-state-event-model.md)、[协作一致性与并发控制](docs/architecture/core-consistency-concurrency.md)和[跨层业务契约](docs/architecture/cross-layer-contracts.md)。
+[产品定位与总体设计基线](docs/architecture/product-foundation.md)是产品目标、核心能力域、双飞轮、关键边界和架构完成标准的权威入口。现有设计与该目标的差距、可继承机制和融合工作见[产品定位与现有架构审计](docs/research/product-architecture-audit.md)。
 
-## 五个设计专题
+## 核心能力域
 
-| 要了解的问题 | 设计正文 |
+| 能力域 | 职责 |
 |---|---|
-| 谁负责、怎样分工、介入和完成？ | [工作生命周期](docs/architecture/01-unified-work-lifecycle.md) |
-| 何时自主规划，何时让 SOP 处理依赖、核验和返工？ | [SOP 与项目工作流](docs/architecture/02-sop-workflow.md) |
-| 成员本机怎样接工作，Agent 怎样取得工具和项目依据？ | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
-| 怎样计算已知用量、评价交付，并让有效的方法进入下次工作？ | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) |
-| 成员在哪里处理待办、查看交付、接手工作与选用方法？ | [统一工作台](docs/architecture/05-unified-workbench.md) |
+| 团队知识管理 | 团队知识、项目资料和项目代码知识的接入、证据化、提炼、治理、检索、复用与更新 |
+| 产研工作与流程 | 以 Issue 承载目标、责任、上下文、协作决定、交付和交接 |
+| Engineering Harness | Principles、Rules、Skills、Playbooks、Workflow、SOP、Scripts 与 Evaluation |
+| Agent 执行、观测与改进 | 连接成员本地 Agent，记录执行事实和交付证据，驱动知识与 Harness 持续改进 |
 
-## 跨层契约与工程入口
+知识管理与 Harness 演进形成两个相互促进的飞轮。知识不是对话和日志的堆积；Harness 也不只是提示词集合。完整职责和端到端工作链见[产品设计基线](docs/architecture/product-foundation.md)。
 
-业务规则见 [D5 派发与恢复](docs/architecture/d5-cross-layer-recovery-contract.md)、[D6 交付与验收](docs/architecture/d6-delivery-acceptance-contract.md)、[D7 持续改进](docs/architecture/d7-continuous-improvement-loop.md)和 [D11 评价策略与预算](docs/architecture/d11-evaluation-trigger-budget-policy.md)。
+## 架构专题
 
-当前进入 [E0 来源身份与生产兼容设计](docs/architecture/e0-source-identity-production-compatibility.md)，源码依据见 [E0 Multica 派发来源审查](docs/research/e0-multica-dispatch-source-audit.md)，并按 [VS5 的工程顺序](docs/architecture/vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)先完成派发、消费与交付验收，再接入评价和改进。详细契约分别为 [VS0 / VS1 派发绑定](docs/architecture/vs0-vs1-dispatch-binding-contract.md)、[VS2 交付验收](docs/architecture/vs2-candidate-acceptance-technical-contract.md)、[VS3 评价执行](docs/architecture/vs3-evaluation-technical-contract.md)和 [VS4 发布采用](docs/architecture/vs4-benchmark-release-adoption-technical-contract.md)。
+现有对象、生命周期、跨层契约和模块设计仍是架构融合的基础材料：
 
-项目可以直接使用现有文档和代码仓。需要长期查阅资料或理解实现时，可分别接入[团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md)和[项目代码 Wiki](docs/architecture/code-wiki.md)。两者都沿原 Issue 引用团队获准使用的内容。
+| 主题 | 设计与依据 |
+|---|---|
+| 工作责任与交接 | [工作生命周期](docs/architecture/01-unified-work-lifecycle.md) |
+| SOP 与项目工作流 | [SOP 与研发工作流](docs/architecture/02-sop-workflow.md) |
+| 本地执行与能力上下文 | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
+| 成本、质量与持续改进 | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) · [D7 持续改进内循环](docs/architecture/d7-continuous-improvement-loop.md) |
+| 团队 Wiki 与项目资料 | [团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) |
+| 项目代码知识 | [项目代码 Wiki](docs/architecture/code-wiki.md) |
+| 统一工作入口 | [统一工作台](docs/architecture/05-unified-workbench.md) |
+| 整体系统架构 | [现有系统架构与模块边界](docs/architecture/system-architecture.md) |
 
-## 研究与架构治理
+## 研究与治理
 
-后续研究和架构推进遵循[研究与架构治理规则](docs/governance/research-and-architecture-rules.md)，确保所有专题围绕完整产品主线推进，优先复用 Multica，不重复建设协作控制平面。整体对象、职责、生命周期及 D5 / D6 / D7 闭环的交叉核验见[整体架构一致性审查](docs/research/architecture-consistency-review.md)。
+- [产品定位与现有架构审计](docs/research/product-architecture-audit.md)：当前阶段的架构审计与融合议题。
+- [整体架构一致性审查](docs/research/architecture-consistency-review.md)：现有对象、职责与 D5 / D6 / D7 契约的交叉核对。
+- [研究与架构推进规则](docs/governance/research-and-architecture-rules.md)：研究、来源核验和远端文档治理要求。
+- [统一术语](CONTEXT.md)：项目正式术语。
+- [底座能力与边界](docs/architecture/governance-baseline.md)：Multica 原生能力及扩展边界。
+- [源码与研究](docs/research)：上游源码观察、实验和证据。
 
-## 查设计与依据
-
-对象含义见[统一术语](CONTEXT.md)。Multica 原生覆盖、项目配置与需要补充的能力见[底座能力与边界](docs/architecture/governance-baseline.md)，各宿主可观察的事实见[宿主能力矩阵](docs/architecture/execution-capabilities.md)。源码核对、场景假设和历史实验按版本收录在[源码与研究](docs/research)。
-
-流程研究涵盖 [SOP 的发现与提炼](docs/research/sop-discovery-extraction.md)及 [LoopForge SOP 生命周期](docs/research/loopforge-sop-lifecycle.md)。持续委托的研究涵盖 [Issue 内的分工](docs/research/mainbot-issue-operating-model.md)、[跨 Runtime 协调](docs/research/mainbot-runtime-coordination.md)及[等待与回唤](docs/research/mainbot-lifecycle-and-progress.md)。
+当前阶段聚焦产品定位、知识生命周期、业务对象与整体架构融合。产品和业务关系收敛前，不进入数据库 Schema、API、部署拓扑、原型或工程实现设计。
