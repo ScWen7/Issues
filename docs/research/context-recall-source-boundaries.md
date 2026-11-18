@@ -364,3 +364,16 @@ AgentPlatform 应采用：
 - [Recall Rule](https://github.com/Tencent/teamai-cli/blob/main/rules/teamai-recall/RULE.md)
 - [Recall Subagent](https://github.com/Tencent/teamai-cli/blob/main/agents/teamai-recall.md)
 - [Recall Agent README](https://github.com/Tencent/teamai-cli/blob/main/agents/README.md)
+
+
+## 10. 双场景回归后的实证状态
+
+双场景验收见[Context Contract 双场景端到端验收](context-contract-two-scenario-acceptance.md)。本次回归重读 Topic 3B 的 project-knowledge、knowledge-contribution、cross-host-handoff、role-composition 和固定 fixtures，没有重新运行模型或宿主请求。
+
+结论必须分开：
+- 项目来源按角色选段、源修订变化后的重新选择、撤权后的新线程重建、Codex 实际请求观察：已有实证。
+- C1 / C2 项目证据派生为团队经验、目标受众授权、普通团队读者与项目原始证据隔离、单来源撤回和重新复审：已有实证。
+- Codex / Claude Code 的原生工具调用、跨宿主接续、候选 / 工具回执 / XLSX 制品关联：已有实证。
+- AgentPlatform 正式 Knowledge Recall 是否能找到 Team / Project Knowledge、是否正确过滤 Project A 私有内容、Project B 是否能组合 Team Knowledge 与自己的来源和代码：未实证。
+
+因此，现有 Topic 3B 证明了 Context Contract 的来源、权限、版本和宿主消费基础，但不能被解释为 Knowledge Recall 已验收。下一轮应限定为最小双项目语料下的 Recall 专项实验，优先复用 C1 / C2 派生的 Team Knowledge 样本，新增业务模型不同的 Project B，检查结果隔离、适用性、证据展开和真实宿主输入。
