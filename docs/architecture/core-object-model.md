@@ -15,10 +15,10 @@
 
 | 对象组 | 核心对象 | 主要职责 |
 |---|---|---|
-| 组织与范围 | Team、Project、Member、Agent | 界定协作范围、参与主体及组织关系 |
-| 来源与知识 | Source Connection、Source Item / Revision、Evidence Anchor、Knowledge Item / Revision | 连接权威来源、固定修订、保留证据位置并治理可复用知识 |
-| 工作与责任 | Issue、工作约定、Decision、Project Workflow、Project Adoption | 承载业务目标、责任、项目采用决定和工作生命周期 |
-| 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool 配置、Knowledge、Release | 定义可复用的方法、规则、能力、资料及其不可变发布版本 |
+| 平台基础治理 | Team、Project、Member、Agent、Project Configuration / Adoption | 界定组织范围、参与主体、权限、项目配置和采用决定 |
+| 来源与知识 | Source Connection、Source Item / Revision、Ingestion Batch、Evidence Anchor、Knowledge Item / Revision | 连接权威来源、固定修订、保留证据位置并治理可复用知识 |
+| 工作与责任 | Issue、工作约定、Decision、Project Workflow | 承载业务目标、责任、项目阶段、决定和工作生命周期 |
+| Harness 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool / Harness 配置、Harness Revision / Release | 定义可复用的研发方法、约束、流程和验证资产及其发布版本 |
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
 | 执行资源与记录 | Host、Runtime、Daemon、Backend、Session、Run | 提供本地执行能力并记录真实受管执行 |
 | 交付与证据 | Artifact、Candidate、Evidence、Delivery Record | 表达交付内容、版本、检查依据和交接结果 |
