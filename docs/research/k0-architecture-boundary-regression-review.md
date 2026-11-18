@@ -305,3 +305,20 @@ K0-A 的主题资产 + Claim + Evidence 结论保持不变。
 6. 项目例外不能静默覆盖 Harness 强制规则；知识事实、强制方法和当前 Issue 决定分别沿各自权威机制处理。
 
 本轮完成的是业务边界与契约语义收敛，不代表多宿主真实投递和使用能力已经全部验收。下一阶段进入场景验收：选取项目内功能开发和跨项目经验复用两类真实 Issue，检查来源选择、权限、版本、冲突、投递和宿主观察。
+
+
+## 15. Recall 与多来源检索边界补充
+
+后续 TeamAI 源码研究形成[Recall 与多来源工作上下文的职责边界研究](context-recall-source-boundaries.md)，并将关键语义同步到跨层契约和知识管理生命周期。
+
+本轮明确：
+- AgentPlatform 的 Knowledge Recall 主要检索正式 Team Knowledge / Project Knowledge；
+- Issue / Work Agreement / Project / Run 等确定性工作事实按对象身份直接读取；
+- Project Sources 通过来源 Search / Read 消费，不要求进入 Knowledge Recall；
+- Project Code Knowledge 通过项目代码 Wiki / 当前代码工具检索，绑定仓库和代码基准；
+- Harness 通过发布、项目采用和本项工作选择机制解析，不由 Recall 命中决定；
+- Context Contract 统一约束这些来源如何被选择、核验、固定和投递，但不实现搜索引擎或独立 Context Compiler。
+
+TeamAI 当前 Recall 已不只检索 learnings：普通索引包含 learnings、docs、rules、skills，代码知识图谱另有检索路径后合并输出。可借鉴其任务相关性预检、检索深度选择、专用 Recall Subagent 和紧凑摘要，但不能把其 Git 资产分发语义直接等同于 AgentPlatform 的多权威来源模型。
+
+本轮不新增 Recall 业务对象、Recall Runtime 或统一全源索引。下一步通过真实 Issue 场景验证 Knowledge Recall、Source Search / Read、Code Retrieval 与确定性 Work Context 的互补关系。
