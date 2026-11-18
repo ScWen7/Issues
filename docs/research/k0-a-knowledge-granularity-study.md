@@ -103,3 +103,9 @@ AgentPlatform 是团队 AI 研发能力平台，以团队知识为基础、以 I
 - [知识来源与可见性](../topic-03b/knowledge-sources.md)
 - [知识贡献与复审](../topic-03b/knowledge-contribution.md)
 - [专题三 B 来源与知识实证](../03b-source-evidence.md)
+
+## 10. 研究完成记录
+
+K0-A 已完成。最终结论见[知识资产粒度研究结论](k0-a-knowledge-granularity-findings.md)。
+
+本轮结论：默认采用“主题知识资产 + 可独立核验的结论单元 + 来源证据”。主题是人工浏览和维护边界，结论是检索、核验和局部更新边界，证据是事实依据。结论只有在需要独立适用范围、责任、发布 / 撤回、版本或冲突治理时，才提升为独立 Knowledge Item。详见最终研究报告；本任务书保留为研究范围和验收依据。
