@@ -8,21 +8,19 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 
 [产品定位与总体设计基线](docs/architecture/product-foundation.md)是产品目标、核心能力域、双飞轮、关键边界和架构完成标准的权威入口。现有设计与该目标的差距、可继承机制和融合工作见[产品定位与现有架构审计](docs/research/product-architecture-audit.md)。
 
-## 核心能力域
+## 核心业务能力
 
 | 能力域 | 职责 |
 |---|---|
-| 组织与项目治理 | 成员、项目、授权、项目配置和项目采用决定 |
 | 团队知识管理 | 来源接入、证据处理、知识提炼、发布、检索、复用和失效治理 |
-| 产研工作协作 | Issue 目标、责任、上下文、协作决定、工作流交接和交付消费 |
-| Engineering Harness 治理 | Principles、Rules、Skills、Playbooks、SOP、Scripts、Scorer / Rubric 及版本发布 |
-| 研发流程与 SOP 执行 | 明确委托的流程实例、节点依赖、结果消费、门禁和返工 |
-| 执行集成与 Runtime 观测 | 复用 Multica 执行链，连接成员本地 Agent 并记录实际回执 |
-| 交付与证据 | Artifact、Candidate、Evidence、核验依据和交付消费 |
-| Evaluation、度量与持续改进 | Finding 分诊、知识 / Harness 改进、Benchmark、发布采用和真实效果回收 |
+| 产研工作与流程协作 | Issue 目标、责任、业务决定、Project Workflow 和受托 SOP 执行 |
+| Engineering Harness 治理 | Principles、Rules、Skills、Playbooks、SOP 定义、Scripts 与评价标准 |
+| 执行与交付证据 | Multica 本地执行接入、Runtime 观察、Artifact、Candidate 和 Evidence |
+| Evaluation、度量与持续改进 | 质量评价、Finding 分诊、知识 / Harness 改进、Benchmark 和真实效果回收 |
 
-知识管理与 Harness 演进形成两个相互促进的飞轮。知识不是对话和日志的堆积；Harness 也不只是提示词集合。完整职责和端到端工作链见[产品设计基线](docs/architecture/product-foundation.md)。
+组织与项目权限属于平台基础治理；统一工作台、来源连接器和宿主适配器是横向能力，不作为并列业务系统。完整职责和事实归属见[整体系统架构](docs/architecture/system-architecture.md)。
 
+知识管理与 Harness 演进形成两个相互促进的飞轮。知识不是对话和日志的堆积；Harness 也不只是提示词集合。
 ## 架构专题
 
 现有对象、生命周期、跨层契约和模块设计仍是架构融合的基础材料：
