@@ -44,10 +44,11 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 - [产品定位与现有架构审计](docs/research/product-architecture-audit.md)：当前阶段的架构审计与融合议题。
 - [整体架构一致性审查](docs/research/architecture-consistency-audit.md)：五个核心业务域、对象权威归属、专题冲突与端到端验证。
 - [双飞轮端到端场景验收](docs/research/scenario-acceptance.md)：完整研发交付链与知识 / Harness 自进化链的架构级验收。
+- [K0 团队知识中心调研](docs/research/k0-team-knowledge-center-research.md)：知识资产、组织维护、来源治理、研发消费、知识运营与底座边界研究。
 - [整体架构一致性审查](docs/research/architecture-consistency-review.md)：现有对象、职责与 D5 / D6 / D7 契约的交叉核对。
 - [研究与架构推进规则](docs/governance/research-and-architecture-rules.md)：研究、来源核验和远端文档治理要求。
 - [统一术语](CONTEXT.md)：项目正式术语。
 - [底座能力与边界](docs/architecture/governance-baseline.md)：Multica 原生能力及扩展边界。
 - [源码与研究](docs/research)：上游源码观察、实验和证据。
 
-当前产品与业务架构已完成基线收敛。下一步从 P0 现有底座与真实工作基线核验开始，按纵向业务闭环渐进落地；不提前建设完整技术平台。
+当前产品与业务架构已完成基线收敛。落地前置工作调整为 K0 团队知识中心产品设计；K0 通过后再进入 P0 现有底座与真实工作基线核验。
