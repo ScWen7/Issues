@@ -14,7 +14,7 @@ AgentPlatform 是面向研发团队的 AI 研发能力平台。它以团队知�
 | 执行与交付证据 | Multica 执行接入、Runtime 观察、Artifact、Candidate 和 Evidence |
 | Evaluation、度量与持续改进 | 质量评价、Finding 分诊、知识 / Harness 改进、Benchmark 和真实效果回收 |
 
-组织与项目权限属于平台基础治理；统一工作台、来源连接器和宿主适配器是横向能力，不作为并列业务系统。详细边界见[整体系统架构](system-architecture.md)和[整体架构一致性审查](../research/architecture-consistency-audit.md)。
+身份、权限、项目配置、工作台、来源连接器和宿主适配器属于实施时的横切设计事项，不构成额外产品能力域或独立系统。详见[整体系统架构](system-architecture.md)和[整体架构一致性审查](../research/architecture-consistency-audit.md)。
 
 ## 2. 核心业务对象与事实归属
 
