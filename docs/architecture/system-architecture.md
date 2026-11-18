@@ -340,4 +340,4 @@ flowchart LR
 
 ## 10. 架构审查与后续基线
 
-本架构的跨专题审查结论见[整体架构一致性审查](../research/architecture-consistency-audit.md)。审查提出的五域收敛、03B 边界、对象分类和跨层契约修正，以该审查及本文件的更新版本为准。
+本架构的跨专题审查结论见[整体架构一致性审查](../research/architecture-consistency-audit.md)。审查提出的五域收敛、03B 边界、对象分类和跨层契约修正，以该审查及本文件的更新版本为准。 当前冻结的产品与业务架构、权威文档层级、首期范围和渐进落地路线见[架构基线冻结与渐进落地规划](implementation-roadmap.md)。
