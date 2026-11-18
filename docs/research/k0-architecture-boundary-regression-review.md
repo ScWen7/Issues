@@ -287,3 +287,21 @@ K0-A 的主题资产 + Claim + Evidence 结论保持不变。
 ## 13. 本轮回归后的下一步
 
 整体架构无需因第二轮 K0 扩张而重画。下一步应从现有跨层契约中挑选真实工作场景，审查“上下文选择 → 权限核对 → 版本固定 → 投递 → 实际消费”的端到端闭环，重点检查不同 Agent 宿主的能力差异与失败接续。该工作属于现有 Context Contract / 执行证据专题的深化，不重新建立知识中心专题，也不进入底层技术选型。
+
+
+## 14. Context Contract 知识来源融合审查完成
+
+后续研究已形成[Context Contract 中 Team Knowledge / Project Knowledge 融合审查](context-contract-knowledge-scope-integration.md)，并将结论同步到：
+- [跨层业务契约与协作协议](../architecture/cross-layer-contracts.md)；
+- [知识管理生命周期](../architecture/knowledge-management-lifecycle.md)；
+- [核心业务对象与统一关系模型](../architecture/core-business-object-model.md)。
+
+本轮确认：
+1. Team Knowledge 与 Project Knowledge 共用知识内容和治理机制，分别归属 Team 与 Project。
+2. Project Sources 可直接作为工作依据，不要求先提炼成 Project Knowledge。
+3. Project Code Knowledge 是绑定仓库与代码基准的可选项目认知能力，不属于 Team Knowledge。
+4. Team Knowledge 由项目引用时保留原身份和版本；Project Knowledge 跨项目复用时形成新的 Team Knowledge 候选并重新授权、核验和发布。
+5. Context Contract 按 Issue 工作需要组合各权威来源，分别检查作用域、适用性、读权和版本，不把来源复制到知识中心。
+6. 项目例外不能静默覆盖 Harness 强制规则；知识事实、强制方法和当前 Issue 决定分别沿各自权威机制处理。
+
+本轮完成的是业务边界与契约语义收敛，不代表多宿主真实投递和使用能力已经全部验收。下一阶段进入场景验收：选取项目内功能开发和跨项目经验复用两类真实 Issue，检查来源选择、权限、版本、冲突、投递和宿主观察。
