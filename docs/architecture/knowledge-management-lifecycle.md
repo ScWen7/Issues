@@ -37,6 +37,30 @@ Issue 工作上下文和执行资源不是知识资产：
 
 团队 Wiki、项目资料和项目代码 Wiki 可以分别浏览或独立启用，但统一遵循来源、证据、权限、版本和引用原则。代码知识不替代业务知识；PRD 不证明代码实际实现；代码静态分析也不证明线上运行行为。
 
+
+### 2.3 Team Knowledge 与 Project Knowledge 的作用域
+
+Team Knowledge 与 Project Knowledge 共用本生命周期中的来源、Evidence、Knowledge Item / Revision / Release、反馈、检索和失效治理机制；它们不是两套独立知识系统，但有不同的权威归属和治理责任。
+
+| 维度 | Team Knowledge | Project Knowledge |
+|---|---|---|
+| 资产归属 | Team | 单一 Project |
+| 默认维护责任 | 团队领域维护者 | 项目业务 / 技术责任人 |
+| 默认可见范围 | 团队授权范围 | 项目成员及项目授权范围 |
+| 默认适用范围 | 明确声明适用的多个项目 / 工作条件 | 当前 Project 的业务、系统、版本和环境 |
+| 跨范围复用 | 按团队授权和适用条件被项目引用 | 必须经来源派生许可、去敏、重新核验后形成新的 Team Knowledge |
+| 发布决定 | 团队有权领域责任人 | 项目有权维护者 |
+
+**知识作用域、适用范围、可见权限和来源派生许可是四个不同维度。** 某条 Team Knowledge 适用于项目，不代表该项目的所有成员都自动有权查看它的证据原文；项目成员有权读取原文，也不代表有权将其派生给团队。
+
+Project Sources 与 Project Knowledge 也必须区分。PRD、接口文档、项目决策原文和代码仓继续由原系统维护；Issue 可以按来源当前权限直接引用这些材料，不要求先转成 Project Knowledge。只有具备跨工作复用价值、需要稳定解释和维护的项目结论，才提炼成 Project Knowledge。
+
+Project Code Knowledge 是绑定仓库和 Commit / Tree 基准的可选代码认知能力。模块地图、调用关系和当前实现状态不自动成为 Team Knowledge 或 Project Knowledge；需要表达设计动机、业务不变量或长期经验时，再引用代码证据形成相应范围的知识。
+
+Team Knowledge 被项目引用时保留原资产身份和版本，不复制正文、不转移维护权。只有项目需要固定某项团队知识作为持续采用的基线时，才通过既有 Project Adoption / Project Configuration 采用具体版本；一般知识检索不要求每条知识都经过 Adoption。若知识内容需要成为强制执行规则，应另由 Harness 资产独立治理和发布。
+
+Project Knowledge 跨项目复用不是直接修改原资产的作用域。它必须形成新的 Team Knowledge 候选，逐份核对来源派生许可和目标团队受众，去除项目私有信息，重新验证跨项目适用条件、反例和限制，再由团队领域责任人发布。原 Project Knowledge 保持其项目范围、版本和责任不变。
+
 ## 3. 来源接入与资料处理
 
 ### 3.1 来源连接与资料收件区是两种不同职责
