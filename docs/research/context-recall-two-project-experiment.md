@@ -3,7 +3,7 @@
 > 状态：契约级实验通过；真实 Recall Provider 与宿主消费尚未验收  
 > 分支：design/system-architecture-convergence  
 > 实验实现：`prototypes/context-recall/`  
-> CI：Context Recall contract experiment  
+> CI：[Context Recall contract experiment · 20 / 20 通过](https://github.com/ScWen7/Issues/actions/runs/44351904497)  
 > 本报告不构成技术选型或生产实现方案。
 
 ## 1. 实验目的与边界
