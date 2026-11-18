@@ -284,3 +284,19 @@ Project A 的经验被抽象为 Team Knowledge 后，Project B 应获得的是�
 **下一步不再扩大 Context Contract 设计，而是专门补齐 Knowledge Recall 的双项目检索与真实宿主消费实验。** 这次实验应以已有 C1 / C2 派生经验为 Team Knowledge 样本，建立一个具有不同业务模型的 Project B，直接验证发现、隔离、组合和实际使用。
 
 这不是进入技术选型或工程实现，而是把现有业务契约转成可判定的产品验收。
+
+
+## 8. Recall 双项目契约实验的实际执行结果
+
+随后新增并执行了[Knowledge Recall 双项目隔离实验](context-recall-two-project-experiment.md)。该实验使用 T1 / A1 / A-S1 / B1 / B-S1 / B-C1 / H1 最小语料，在确定性 Provider 模拟下检查作用域、权限、结果元数据、Evidence 可见性、来源分流和 Harness 采用边界。
+
+GitHub Actions 实际执行 **20 / 20 项断言通过**。其中 Project A 返回 T1 + A1，Project B 返回 T1 + B1，非成员无私有知识结果；Project B 的 PRD 与代码检索分别只返回 B-S1、B-C1；未采用的 H1 不会通过能力解析，显式采用后才可解析；团队成员资格撤销和 Team 派生授权暂停分别阻止后续 T1 召回。
+
+必须保留实验限制：这是契约级确定性 Provider 模拟，不是生产检索算法、真实 Connector 权限或真实 Agent 宿主输入测试。它验证了结果边界和过滤次序，不验证语义 Recall 质量。
+
+因此双场景验收状态更新为：
+- 来源、权限、版本、角色化读取、知识派生和真实宿主执行基础：已有 Topic 3B 实证；
+- Recall 的 Team / Project 作用域与私有元数据隔离：契约模拟通过；
+- 真实 Knowledge Recall Provider、跨项目真实消费者和宿主实际使用：仍未验收。
+
+下一步应将确定性候选替换为真实知识检索入口并接入至少一个真实 Agent 宿主，继续使用相同双项目负向用例，不重新扩大产品范围。
