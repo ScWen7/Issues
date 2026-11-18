@@ -227,7 +227,7 @@ Benchmark 同时保留针对性失败样本和其他代表性工作，避免只�
 
 ### 7.2 不同对象按不同方式生效
 
-- Knowledge / Capability / SOP：由资产维护者发布不可变版本，再由项目或具体工作采用。
+- Knowledge：由知识维护者核验并发布 Knowledge Revision 对应的 Release；Harness Capability / SOP Definition：由 Harness 资产维护者验证并发布 Harness Release。两者分别治理，再由项目或具体工作按权限采用。
 - Project Workflow / 分工配置：由有权成员在原项目配置或 Issue 决定中明确范围、生效时间和在途工作处理，不通过资产 Release 冒充。
 - Runtime / Adapter：由执行集成维护者发布适配版本，明确支持的宿主版本和回执覆盖；项目 / Runtime 绑定按授权选择。
 - Evaluation / Measurement：新版本只影响后续评价或明确重评任务，不重写历史评分和计量结论。
