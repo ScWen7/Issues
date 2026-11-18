@@ -1,6 +1,6 @@
 # 核心对象模型
 
-本文定义 AgentPlatform 的核心对象、对象关系及事实归属，是各架构专题共同遵循的对象定义。对象状态、转换条件和跨层事件由[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)定义；并发写入、跨层恢复和结果消费一致性由[核心协作一致性与并发控制模型](core-consistency-concurrency.md)定义；本文不定义数据库表、接口字段或页面结构。
+本文详细定义现有协作、执行、交付和评价对象。跨团队知识、Harness、产研工作和证据的统一关系以[核心业务对象与统一关系模型](core-business-object-model.md)为准；知识来源、修订、证据锚点和知识修订的专门语义也见该模型及[知识管理生命周期](knowledge-management-lifecycle.md)。对象状态、转换条件和跨层事件由[统一生命周期、状态机与事件模型](lifecycle-state-event-model.md)定义；并发写入、跨层恢复和结果消费一致性由[核心协作一致性与并发控制模型](core-consistency-concurrency.md)定义；本文不定义数据库表、接口字段或页面结构。
 
 ## 1. 建模原则
 
@@ -16,6 +16,7 @@
 | 对象组 | 核心对象 | 主要职责 |
 |---|---|---|
 | 组织与范围 | Team、Project、Member、Agent | 界定协作范围、参与主体及组织关系 |
+| 来源与知识 | Source Connection、Source Item / Revision、Evidence Anchor、Knowledge Item / Revision | 连接权威来源、固定修订、保留证据位置并治理可复用知识 |
 | 工作与责任 | Issue、工作约定、Decision、Project Workflow、Project Adoption | 承载业务目标、责任、项目采用决定和工作生命周期 |
 | 方法与能力 | Skill、Rule、Playbook、SOP Definition、Role、Tool 配置、Knowledge、Release | 定义可复用的方法、规则、能力、资料及其不可变发布版本 |
 | 流程实例 | SOP Execution、Node Activation、Node Attempt | 管理一次受托流程的依赖、节点推进、结果消费和出口 |
@@ -71,7 +72,7 @@
 | SOP Definition | 具有明确输入、依赖、节点、输出、门禁、返工和交还规则的流程定义 | 发布不可变版本，由 Issue 明确调用 |
 | Role | 定义 Agent 在某项工作中的职责边界和预期行为 | 被工作或流程选用，不是独立执行实例 |
 | Tool / Harness Configuration | 定义可用工具、宿主能力和执行环境配置 | 受项目、成员、Runtime 和本次授权共同约束 |
-| Knowledge | 有来源、适用范围和有效版本的可复用知识 | 按读权和工作上下文需要被检索、引用和使用 |
+| Knowledge Item / Revision | 稳定知识身份及其不可变内容修订，包含类型、适用范围、维护者和 Evidence 引用 | 按权限和工作上下文检索；正式可用版本通过通用 Release 发布，具体语义见[统一关系模型](core-business-object-model.md) |
 | Release | 资产维护者审核发布的不可变资产版本，归方法与上下文模块维护 | 供项目或具体工作按权限选用；发布事实不代表项目已采用或工作已使用 |
 
 团队或项目可以维护、发布和采用这些资产。**资产定义不等于一次工作已经使用它。** 必须区分已发布、已采用、已选择、已投递、宿主实际使用等不同事实，并保留各自证据。
@@ -155,6 +156,7 @@ Evaluation 的结论、Issue 的验收决定、资产 Release 和 Project Adopti
 核心关系可概括为：
 
 - Team 组织 Project 和参与主体；Project 组织 Issue、项目配置和资源。
+- Source Connection 发现 Source Item，Source Item 有多个 Source Revision；解析位置形成 Evidence Anchor，具体可核验观察形成 Evidence。Knowledge Item 通过 Knowledge Revision 固定结论和证据，发布时复用 Release。
 - Issue 的当前委托确定谁组织工作。Main Bot 的轮次归该 Issue，同项 Worker 的 Run 也归该 Issue；独立子项的 Run 归子项，父项按约定接收子项交付。SOP 受托范围内的节点结果先由该 SOP 消费。
 - Issue 可以有 Sub-Issue、Project Workflow 交接和 SOP Execution；这些关系不改变 Issue 作为业务工作归属的地位。
 - SOP Execution 固定引用 SOP Definition 版本，包含节点激活和尝试；就绪的执行节点沿 Multica 原派发链产生 Run。
