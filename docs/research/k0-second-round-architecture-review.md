@@ -11,7 +11,7 @@
 
 本轮融合后的定位：
 
-**团队知识中心以可复用知识资产为治理核心，以权威来源和 Evidence 为事实依据，以项目认知视图为项目级上下文入口，以编译和供给能力将适用知识送入 Issue 与 Agent 的实际工作。**
+**团队知识中心以团队范围可复用知识资产为治理核心，以权威来源和 Evidence 为事实依据；它是平台 Context Contract 的一个知识提供方。上下文编译与供给属于跨能力的工作上下文准备机制，组合团队知识、Project 资料、可选代码认知、Issue / Run 与 Harness，不由团队知识中心独占。**
 
 知识中心需要区分四种性质不同的内容：
 
@@ -869,3 +869,18 @@ AgentPlatform 团队知识中心不应该被设计成一个“原始文档 + 原
 - [Backstage Software Catalog](https://backstage.io/docs/features/software-catalog/)
 - [Backstage Catalog Relations](https://backstage.io/docs/features/software-catalog/well-known-relations/)
 - [Onyx Connectors](https://docs.onyx.app/overview/core_features/connectors)
+
+
+## 17. 架构边界回归修订（后续审查补充）
+
+本报告原有表述曾将 Project Cognition View 描述为团队知识中心的重要产品能力，并将上下文编译与供给作为知识中心的核心职责。经对照 AgentPlatform 当前整体架构，需作如下边界修订；本节优先于报告中任何可能产生相反理解的描述。
+
+1. **团队知识中心只以团队范围可复用知识为核心。** 项目资料和项目范围知识可以由平台连接、引用和按权限检索，但不因此成为团队知识。
+2. **项目资料属于 Project 范围。** PRD、业务背景、项目决策和接口约定继续由原始权威来源维护；需要长期结构化维护的项目知识由项目责任人负责，项目 Wiki / 项目知识视图可独立设计和启用。
+3. **当前项目事实和代码认知不属于团队知识。** 模块地图、调用关系、API 实现和代码状态绑定具体仓库与代码基准，属于项目 / 代码认知；按需生成，不要求完整代码图谱。
+4. **Project Cognition View 是项目聚合视图。** 它聚合 Project 元数据、项目资料、项目知识和可选代码认知，不创建新的 Knowledge Item，不要求独立 Release，也不成为人工维护的第二份项目文档。
+5. **上下文编译与供给是跨能力机制。** 团队知识管理只提供团队知识；Project 资源和原始来源提供项目上下文；代码认知扩展提供代码事实；Multica / Issue 提供工作上下文；Harness 提供方法和约束。Issue 根据实际工作需要组合这些输入。
+6. **不新增第六个能力域或上下文控制平面。** 继续沿用现有五域、Project / Issue / Run、Context Contract、ContextReceipt、Observation 和 Work / Run Asset Pin。
+7. **项目知识跨项目复用仍走原有派生授权与独立核验。** 统一检索、项目导航或生成摘要均不改变原知识作用域。
+
+详细边界以 [K0 第二轮架构边界回归审查](k0-architecture-boundary-regression-review.md) 为准。原报告中的 Project Cognition View、项目资料和上下文编译设计应按上述归属理解。
