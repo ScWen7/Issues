@@ -95,13 +95,17 @@ Context Contract 解决“执行者本次应该看到什么”，不把所有历
 
 - Issue：当前正式工作约定、讨论、决定和交付；标题供识别，描述按背景 / 变更建议取材。
 - 父子 Issue：相关分工、依赖结果和整体约束。
-- Project：项目配置、工程仓、环境说明和已采用能力。
-- 团队 / 项目知识：有来源、版本、适用范围和当前读权的资料。
-- 工程来源：代码仓、提交、分支、工作副本基准及其他工程材料。
+- Project：项目配置、成员关系、工程仓、环境说明和已采用能力。
+- Team Knowledge：团队范围正式知识，按团队授权、明确适用条件和有效版本消费。
+- Project Knowledge：当前项目范围正式知识，按项目成员权限、项目适用条件和有效版本消费。
+- Project Sources：飞书 PRD、项目文档、接口资料等原始权威来源，可在有权时直接引用，不要求先转成 Knowledge。
+- Project Code Knowledge / 工程来源：代码 Wiki、代码仓、提交、分支和工作副本基准；代码认知绑定仓库与 Commit / Tree，不属于 Team Knowledge。
 - 执行历史：与当前工作相关且允许共享的 Run、Artifact、Evidence 和宿主片段。
 - 本地输入：成员明确选择分享的会话片段、工具结果、文件和未提交变更。
 
-团队 / 项目知识的来源接入、证据处理、提炼、核验、发布、冲突和失效由[知识管理生命周期](knowledge-management-lifecycle.md)唯一维护；Context Contract 只负责本次工作消费知识，不重复执行知识治理。知识输入必须引用明确的 Knowledge Revision，携带适用范围、有效状态、来源 Evidence 引用和当前读权限。只有摘要或检索片段、没有稳定修订身份和证据定位时，必须标注其依据限制，不得作为强制规则或高风险决定的唯一依据。
+Team Knowledge 与 Project Knowledge 共用知识管理生命周期，但分别归属 Team 与 Project，维护者、可见范围和跨域复用规则不同。Project Sources 的原始正文仍由来源系统维护；Context Contract 可以直接消费有权访问的原始来源，不要求先创建 Project Knowledge。Project Code Knowledge 是可选项目能力，不能与业务知识合并。
+
+Context Contract 只负责本次工作消费，不重复执行来源同步、证据处理、知识提炼、核验、发布、冲突和失效治理。正式知识输入必须引用明确的 Knowledge Revision / Release，携带知识作用域、适用范围、有效状态、来源 Evidence 引用和当前读权限。原始来源输入必须保留 Source Item / Revision、精确位置和来源系统当前读权。只有摘要或检索片段、没有稳定修订身份和证据定位时，必须标注依据限制，不得作为强制规则或高风险决定的唯一依据。
 
 
 ### 4.2 选择规则
@@ -112,6 +116,18 @@ Context Contract 解决“执行者本次应该看到什么”，不把所有历
 4. 每项材料记录来源、版本 / 修订、适用范围和可访问引用；知识材料还须保留 Knowledge Revision 与 Evidence 引用。不能定位版本的材料明确标注其证据限制。
 5. 权限撤回或来源修订时，判断哪些正在进行的工作受影响；不能把新版本静默替换到已经固定的执行上下文。
 6. 材料超预算、不可读或权限不明时，标明缺项。依赖它的工作等待有权决定；不相关且获准的工作可以继续。
+
+### 4.2.1 Team / Project 知识与项目来源的选择边界
+
+- Team Knowledge 按 Team 作用域和明确适用条件检索；命中不代表它自动成为项目强制规则。
+- Project Knowledge 默认只在所属 Project 范围内检索；不能因语义相似或 Issue 关联就向其他项目成员暴露。
+- Team Knowledge 被 Project 使用时优先保留原 Knowledge Item / Revision / Release 引用，不复制正文。只有项目明确需要固定某一团队知识版本作为长期基线时，才使用既有 Project Adoption / Project Configuration。
+- Project Sources 可以直接进入当前工作上下文。只有存在跨 Issue 长期复用价值时，才提炼为 Project Knowledge；原文仍由原系统维护。
+- Project Code Knowledge 绑定仓库和代码基准，作为代码事实提供方；模块地图、调用关系不自动变成 Knowledge Item。
+- Project Knowledge 跨项目复用时，必须形成新的 Team Knowledge 候选，完成逐来源派生许可、目标团队受众授权、去敏、跨项目适用性核验和团队责任人发布。不能直接把原 Project Knowledge 的 scope 改为 Team。
+- 知识适用范围不等于访问权限；对知识正文、Evidence 原文和来源派生内容分别执行接收者权限核验。
+
+Team / Project 内容冲突时，不使用全局优先级。先判断事实类型和各自适用条件；项目特有事实可以与团队通用经验并存。若项目需要偏离团队 Harness 强制规则，必须走 Harness 例外 / 项目采用和 Issue 有权决定机制，不能由 Project Knowledge 静默覆盖。
 
 ### 4.3 回执语义
 
