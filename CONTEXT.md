@@ -1,6 +1,6 @@
 # 协作平台术语
 
-团队用 Issue 表达工作，用 Run 记录受管执行。会话、流程、交付和评价按各自的作用关联到工作。产品范围及各专题的职责见[架构总览](docs/architecture/overview.md)。核心对象的权威定义、关系和事实归属见[核心对象模型](docs/architecture/core-object-model.md)；本文件维护术语释义，不另行定义对象关系。
+团队用 Issue 表达工作，用 Run 记录受管执行。会话、流程、交付和评价按各自的作用关联到工作。产品范围及各专题的职责见[架构总览](docs/architecture/overview.md)。核心对象的详细定义见[核心对象模型](docs/architecture/core-object-model.md)，跨知识、Harness、工作和证据的统一关系见[核心业务对象与统一关系模型](docs/architecture/core-business-object-model.md)；本文件维护术语释义，不另行定义对象关系。
 
 ## 工作与责任
 
@@ -21,6 +21,25 @@
 | Acceptor（验收人） | 工作约定中有权接受或退回交付的成员。要求具名验收时，对当前候选及其标准作决定，可与总责人是同一人。 |
 
 [工作责任与完成约定](docs/architecture/01-unified-work-lifecycle.md)
+
+## 来源与知识
+
+| 术语 | 在本项目中的含义 |
+|---|---|
+| Source Connection（来源连接） | 对飞书、Git、外部文档或其他权威来源的持续连接与授权，记录同步范围和状态；不代表资料已取得或可检索。 |
+| Source Item（来源条目） | 外部来源中的稳定内容身份，例如一份文档、网页、代码文件或业务记录。 |
+| Source Revision（来源修订） | 某次取得的不可变来源版本或平台快照，保留来源身份、修订和内容摘要。 |
+| Ingestion Batch（资料处理批次） | 一次导入或同步中共同处理的多份资料范围，不是第二套 Issue / Task。 |
+| Evidence Anchor（证据锚点） | 在来源修订中的精确位置，如文档块、标题路径、页码、表格范围、代码符号或执行回执位置。 |
+| Evidence（证据） | 对可核验事实的不可变观察，引用来源、版本、锚点、取得方式和可信等级；可被交付、知识和评价共同引用。 |
+| Knowledge Item（知识条目） | 一个稳定的可复用知识身份，不直接代表某一版正文。 |
+| Knowledge Revision（知识修订） | 固定某版知识正文、类型、适用范围、维护者及支持证据的不可变版本。 |
+| Knowledge Release（知识发布） | 通过知识核验后发布的 Knowledge Revision，复用通用 Release 语义；不等于项目采用或实际使用。 |
+| Harness Asset / Revision（Harness 资产 / 修订） | 可执行或可评估的工程方法资产及其不可变修订，如 Rule、Skill、Playbook、SOP、Script 和 Rubric。 |
+| Work / Run Asset Pin（工作 / 执行资产固定引用） | 当前工作明确选用的 Knowledge Revision 和 Harness Release 等版本引用，附着 Issue / Run，不是独立工作对象。 |
+| Knowledge Feedback（知识反馈） | 针对具体知识修订的有帮助、无关、过期、错误、冲突或缺失反馈，不自动改写正式知识。 |
+
+[知识管理生命周期](docs/architecture/knowledge-management-lifecycle.md) · [统一业务对象关系](docs/architecture/core-business-object-model.md)
 
 ## 上下文与结果
 
@@ -81,7 +100,7 @@
 | 资产选择记录 | 某份工作选中了什么版本、适用条件和理由。选用、实际投递、调用及产出分别有相应来源。 |
 | 上下文材料预算 | 本次派发为选定材料预留的额度和单位，按适用性取舍可选材料，必需项须齐备。 |
 | 工具调用回执 | 关联所选能力版本、实际服务、宿主调用身份、返回和结果归属的凭据。 |
-| Knowledge（正式知识） | 在给定范围内可复用、有来源、适用条件和有效版本的知识。项目文档、工程代码和团队经验分别由相应维护者负责。 |
+| Knowledge（知识） | 稳定 Knowledge Item 下的不可变 Knowledge Revision；正式可用版本通过通用 Release 发布，来源证据和适用范围必须可追溯。 |
 | 来源章节引用 / 派生使用授权 | 引用定位到原来源、修订、章节及内容摘要。跨项目分享从证据提炼的文案时，另按来源许可核对内容和受众。 |
 
 [SOP 的调用与交付](docs/architecture/02-sop-workflow.md) · [团队能力与上下文](docs/architecture/03b-capability-governance.md)
