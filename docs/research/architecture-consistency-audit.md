@@ -4,7 +4,7 @@
 
 本次以产品定位、统一业务对象模型和整体系统架构为基准，交叉检查核心对象、生命周期与事件、一致性与并发、跨层契约、03B 能力治理、D7、D11、知识管理生命周期及工作台。
 
-**结论：核心业务事实和两个飞轮可以成立，现有 Issue / Run / Artifact / Candidate / Evidence / Evaluation / Finding / Proposal / Benchmark / Release / Project Adoption 机制无需推翻。但八个并列能力域仍有过度拆分，且 03B 与知识管理存在职责重叠。需要将八个能力域收敛为五个核心业务能力域，并把组织权限作为基础治理、连接器 / 适配器 / 工作台作为横向能力。**
+**结论：核心业务事实和两个飞轮可以成立，现有 Issue / Run / Artifact / Candidate / Evidence / Evaluation / Finding / Proposal / Benchmark / Release / Project Adoption 机制无需推翻。但八个并列能力域仍有过度拆分，且 03B 与知识管理存在职责重叠。需要将八个并列域收敛为五个核心业务能力域。组织权限、项目配置、工作台、来源连接器和宿主适配器属于实施时的横切设计事项，不构成产品能力域、产品层级或独立子系统。**
 
 本次审查不要求另起产品，不新增平行控制面，不进入技术实现。
 
@@ -31,7 +31,7 @@
 
 五个域是业务责任归属，不要求五个独立服务、数据库或团队。一个工程模块可以承载多个域；一个域也可以由多个组件实现。
 
-### 2.3 平台基础治理与横向能力
+### 2.3 实施时的横切设计事项（不构成产品能力域）
 
 **平台基础治理：组织与项目治理**
 
@@ -50,14 +50,14 @@ Project Workflow 的配置归项目范围治理，但其业务语义、Issue 阶
 
 | 对象 / 事实 | 唯一权威归属 | 其他能力的使用方式 | 审查结论 |
 |---|---|---|---|
-| Team / Project / Member / 权限 / Project Adoption | 平台基础治理与 Multica 原生组织权限 | 其他域读取授权与项目范围 | 保留 |
+| Team / Project / Member / 权限 / Project Adoption | 各业务操作按项目授权规则写入；身份与权限按实际底座落实 | 其他域读取授权与项目范围 | 横切约束，不新增能力域 |
 | 原始文档、代码、外部记录正文 | 飞书、Git、项目系统等原来源 | 知识管理保存身份、修订快照、定位与派生许可 | 不复制原文权威 |
 | Source Connection / Item / Revision / Ingestion Batch | 团队知识管理 | 连接器负责协议适配 | 保留为知识域对象 |
 | Evidence Anchor | 来源解析与知识管理 | 作为 Evidence 的精确位置引用 | 保留，但不把每个 Chunk 建成业务对象 |
 | Evidence | 执行与交付证据 | 知识与 Evaluation 引用同一 Evidence；必要时补充 Evidence Applicability | 明确唯一证据事实，不建知识证据仓与交付证据仓两套系统 |
 | Knowledge Item / Revision / Release | 团队知识管理及知识维护者 | Harness、Issue 和检索消费引用固定版本 | 保留独立知识生命周期 |
 | Harness Asset / Revision / Release | Harness 治理及资产维护者 | 项目采用和工作执行引用固定版本 | 保留独立 Harness 生命周期 |
-| Project Adoption / Evaluation Policy | 平台基础治理中的项目配置与有权成员 | 知识、Harness、工作和评价按范围读取 | 保留，不能由 Release 自动触发 |
+| Project Adoption / Evaluation Policy | 项目有权成员按配置规则作出的决定；Scorer / Rubric 归 Harness | 知识、Harness、工作和评价按范围读取 | 决定权明确，不新增组织产品 |
 | Issue / Work Agreement / Decision | 产研工作与流程协作；Issue 沿用 Multica 权威记录 | Run、SOP、交付、知识提炼和评价引用 | 保留唯一工作主线 |
 | SOP Definition | Harness 治理 | Issue 按需调用已发布版本 | 从流程执行域移至 Harness 定义域 |
 | SOP Execution / Node Activation / Attempt | 产研工作与流程协作 | 调用原生 Run 并消费结果 | 从 Harness 定义域分离，保留受托流程实例 |
@@ -79,7 +79,7 @@ Project Workflow 的配置归项目范围治理，但其业务语义、Issue 阶
 
 | 文件 / 专题 | 当前问题 | 处理决定 |
 |---|---|---|
-| system-architecture.md | 八个同级能力域混入基础治理和子能力 | 收敛为五个核心业务域 + 平台基础治理 + 横向能力 |
+| system-architecture.md | 八个同级能力域混入基础治理和子能力 | 收敛为五个核心业务域；身份权限、工作台和外部接入作为实施横切事项 |
 | core-object-model.md | “方法与能力”对象组仍把 Knowledge 与 Skill / SOP 放在一起 | 将知识对象单独归入来源与知识；方法与能力只保留 Harness 资产 |
 | core-business-object-model.md | 对象分类把 Knowledge Feedback 同时列在知识域和横向消费记录；SOP 定义 / 执行分属未充分映射 | Knowledge Feedback 只归知识治理；SOP Definition 归 Harness，Execution 归工作流程 |
 | 03b-capability-governance.md | 同时承担能力选择、上下文投递和知识来源 / 知识贡献，和知识生命周期重复 | 保留为 Harness 选版、工作上下文组装与投递的详细专题；知识来源、提炼、许可、撤回与发布统一引用知识管理生命周期 |
@@ -130,7 +130,7 @@ Project Workflow 的配置归项目范围治理，但其业务语义、Issue 阶
 
 本次审查提出的结构性修正已写入对应正式文档：
 
-1. [整体系统架构](../architecture/system-architecture.md)：从八个并列能力域收敛为五个核心业务域，并明确平台基础治理和横向能力。
+1. [整体系统架构](../architecture/system-architecture.md)：从八个并列能力域收敛为五个核心业务域，并明确实施横切事项不构成额外产品能力域。
 2. [03B Harness 选用与工作上下文投递](../architecture/03b-capability-governance.md)：知识来源、证据、提炼、许可、撤回和发布不再由 03B 维护；03B 只定义知识与 Harness 如何进入本次工作。
 3. [核心对象模型](../architecture/core-object-model.md)：将 Knowledge 从 Harness 方法资产组分离；Project Adoption 归平台基础治理。
 4. [核心业务对象与统一关系模型](../architecture/core-business-object-model.md)：Knowledge Feedback 只归知识治理，工作资产使用记录作为引用 / 回执，不重复维护知识反馈。
