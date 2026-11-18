@@ -39,7 +39,7 @@
 | 执行与观察 | Multica Task / Run、Runtime、Session、AgentObservation、Usage | 实际受管执行、宿主连续性、可观察活动和原生计量 |
 | 交付与证据 | Artifact、Candidate、Evidence、Evidence Anchor、Evidence Applicability、Delivery Record | 不可变交付版本、证据事实及其适用关系 |
 | 评价与改进 | Evaluation、Finding、Improvement Proposal、Benchmark、Budget Reservation | 独立评价、问题归因、候选变更、对照结果和治理预算 |
-| 横向消费记录 | ContextReceipt、Work / Run Asset Pin、Knowledge Feedback / Usage Observation | 某次工作选择、投递和反馈哪些知识 / Harness 版本 |
+| 横向消费记录 | ContextReceipt、Work / Run Asset Pin、Asset Usage Observation | 某次工作选择、投递和可观察使用哪些知识 / Harness 版本；知识反馈仍归 Knowledge Feedback |
 
 分类是业务概念边界，不要求一对象一表、一模块一服务。后文说明哪些名称是独立对象，哪些只是现有对象的属性或关联。
 
