@@ -18,7 +18,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 | 执行与交付证据 | Multica 本地执行接入、Runtime 观察、Artifact、Candidate 和 Evidence |
 | Evaluation、度量与持续改进 | 质量评价、Finding 分诊、知识 / Harness 改进、Benchmark 和真实效果回收 |
 
-组织与项目权限属于平台基础治理；统一工作台、来源连接器和宿主适配器是横向能力，不作为并列业务系统。完整职责和事实归属见[整体系统架构](docs/architecture/system-architecture.md)。
+身份、权限、项目配置、工作台、来源连接器和宿主适配器属于实施时的横切设计事项，不构成额外产品能力域。完整职责和事实归属见[整体系统架构](docs/architecture/system-architecture.md)。
 
 知识管理与 Harness 演进形成两个相互促进的飞轮。知识不是对话和日志的堆积；Harness 也不只是提示词集合。
 ## 架构专题
