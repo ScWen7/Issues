@@ -377,3 +377,10 @@ AgentPlatform 应采用：
 - AgentPlatform 正式 Knowledge Recall 是否能找到 Team / Project Knowledge、是否正确过滤 Project A 私有内容、Project B 是否能组合 Team Knowledge 与自己的来源和代码：未实证。
 
 因此，现有 Topic 3B 证明了 Context Contract 的来源、权限、版本和宿主消费基础，但不能被解释为 Knowledge Recall 已验收。下一轮应限定为最小双项目语料下的 Recall 专项实验，优先复用 C1 / C2 派生的 Team Knowledge 样本，新增业务模型不同的 Project B，检查结果隔离、适用性、证据展开和真实宿主输入。
+
+
+## 11. 双项目契约实验结果
+
+[Knowledge Recall 双项目隔离实验](context-recall-two-project-experiment.md)已在 GitHub Actions 实际执行，20 / 20 项契约断言通过。实验覆盖 Team / Project 范围过滤、Project A 私有元数据隔离、Team 派生正文与原始 Evidence 分权、Project B 自己的 Source / Code 检索、Harness 采用解析，以及成员资格和派生授权撤回后的新召回资格。
+
+这不是生产搜索质量或真实宿主消费验收。当前结果只能说明推荐的业务边界可以被明确表达并通过确定性 Provider 测试；真实 Recall Provider 和 Agent 消费链路仍需单独接入与实测。
