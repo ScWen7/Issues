@@ -37,6 +37,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 | 项目代码知识 | [项目代码 Wiki](docs/architecture/code-wiki.md) |
 | 统一工作入口 | [统一工作台](docs/architecture/05-unified-workbench.md) |
 | 整体系统架构 | [整体系统架构与能力边界](docs/architecture/system-architecture.md) |
+| 架构基线与落地路线 | [架构基线冻结与渐进落地规划](docs/architecture/implementation-roadmap.md) |
 
 ## 研究与治理
 
@@ -49,4 +50,4 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 - [底座能力与边界](docs/architecture/governance-baseline.md)：Multica 原生能力及扩展边界。
 - [源码与研究](docs/research)：上游源码观察、实验和证据。
 
-当前阶段聚焦产品定位、知识生命周期、业务对象与整体架构融合。产品和业务关系收敛前，不进入数据库 Schema、API、部署拓扑、原型或工程实现设计。
+当前产品与业务架构已完成基线收敛。下一步从 P0 现有底座与真实工作基线核验开始，按纵向业务闭环渐进落地；不提前建设完整技术平台。
