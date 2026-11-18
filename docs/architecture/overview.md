@@ -1,6 +1,20 @@
 # AgentPlatform 核心架构
 
-AgentPlatform 面向使用各自本地 Agent 工具的研发团队。团队在项目中用 Issue 约定目标、分配责任、共享交付和作决定。平台负责让下一位负责人取得可用的工作依据，让团队已采用的方法能进入实际工作，并让交付中的发现有机会改善后续工作。
+AgentPlatform 是面向研发团队的 AI 研发能力平台。它以团队知识为基础、以产研工作为主线、以 Engineering Harness 为质量保障，通过真实执行证据、Evaluation 和持续改进，让团队经验进入研发、研发结果反哺知识与工程方法。
+
+产品目标、核心能力域、团队知识飞轮与 Harness 进化飞轮，以及产品范围边界，以[产品定位与总体设计基线](product-foundation.md)为准。本页说明现有工作协作、执行和交付架构；其中对象与模块边界将在整体融合设计中按产品基线统一收敛。
+
+## 产品能力如何落到现有架构
+
+| 产品能力 | 现有架构承载 | 融合设计重点 |
+|---|---|---|
+| 团队知识管理 | 团队 Wiki、项目资料、能力与上下文中的知识引用 | 补齐来源接入、证据处理、知识提炼、发布治理、检索复用和使用反馈的完整生命周期 |
+| 产研工作与流程 | Project、Issue、Project Workflow、SOP Execution | 保留 Issue 作为工作与责任主线，区分项目责任交接和受托 SOP |
+| Engineering Harness | Team / Project 方法、Rules、Skills、Playbooks、Workflow、Scripts、Evaluation | 从知识中取得依据，将团队方法带入执行，并以可验证的质量门槛约束结果 |
+| Agent 执行、观测与改进 | Multica Run / Runtime、Daemon、宿主适配、Observation、D5 / D6 / D7 | 让真实执行证据同时支持交付、知识贡献、评价和持续改进 |
+
+知识资产、Harness 资产、Issue 工作上下文和执行资源分别维护，不合并成一个通用资产仓库。两个飞轮共享可追溯证据，但各自的知识发布、Harness 发布、项目采用和业务验收保持独立权责。
+
 
 ## 1. 系统边界
 
