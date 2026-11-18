@@ -9,11 +9,11 @@ AgentPlatform 是面向研发团队的 AI 研发能力平台。它以团队知�
 | 产品能力 | 现有架构承载 | 融合设计重点 |
 |---|---|---|
 | 团队知识管理 | [团队知识管理与研发知识闭环](knowledge-management-lifecycle.md)、团队 Wiki、项目资料、能力与上下文中的知识引用 | 统一来源接入、证据处理、知识提炼、发布治理、检索复用、更新失效和使用反馈 |
-
-跨知识、Harness、工作、执行和证据的对象关系见[核心业务对象与统一关系模型](core-business-object-model.md)。
 | 产研工作与流程 | Project、Issue、Project Workflow、SOP Execution | 保留 Issue 作为工作与责任主线，区分项目责任交接和受托 SOP |
 | Engineering Harness | Team / Project 方法、Rules、Skills、Playbooks、Workflow、Scripts、Evaluation | 从知识中取得依据，将团队方法带入执行，并以可验证的质量门槛约束结果 |
 | Agent 执行、观测与改进 | Multica Run / Runtime、Daemon、宿主适配、Observation、D5 / D6 / D7 | 让真实执行证据同时支持交付、知识贡献、评价和持续改进 |
+
+跨知识、Harness、工作、执行和证据的对象关系见[核心业务对象与统一关系模型](core-business-object-model.md)。
 
 知识资产、Harness 资产、Issue 工作上下文和执行资源分别维护，不合并成一个通用资产仓库。两个飞轮共享可追溯证据，但各自的知识发布、Harness 发布、项目采用和业务验收保持独立权责。
 
