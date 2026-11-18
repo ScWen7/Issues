@@ -25,9 +25,7 @@ AgentPlatform 面向研发团队建设一套持续积累和改进 AI 研发能�
 flowchart TB
   People["团队成员 / 项目维护者 / Agent"]
   UI["统一工作台 · 查询、导航与操作入口"]
-  subgraph Foundation["平台基础治理"]
-    Org["组织 / 项目 / 身份 / 权限 / 项目采用"]
-  end
+  Org["身份 / 权限 / 项目配置规则（横切约束）"]
   subgraph Core["五个核心业务能力域"]
     Knowledge["A · 团队知识管理"]
     Work["B · 产研工作与流程协作"]
@@ -47,11 +45,11 @@ flowchart TB
   UI --> Harness
   UI --> Delivery
   UI --> Evolution
-  Org --> Knowledge
-  Org --> Work
-  Org --> Harness
-  Org --> Delivery
-  Org --> Evolution
+  Org -.-> Knowledge
+  Org -.-> Work
+  Org -.-> Harness
+  Org -.-> Delivery
+  Org -.-> Evolution
   Sources --> Knowledge
   Knowledge --> Work
   Knowledge --> Harness
@@ -179,32 +177,35 @@ Finding 按根因分流：
 - Evaluation、Benchmark、知识整理和改进自身的执行消耗单独归集，不污染生产成本。
 - 评价不是每项生产工作的必经阶段；按风险、门禁和实际改进价值触发。
 
-## 4. 平台基础治理与横向能力
+## 4. 实施时需要处理的横切设计事项
 
-### 4.1 平台基础治理：组织与项目范围
+本节列出五个业务能力落地时必然遇到的实现问题，**不代表新增能力域、产品层级或独立子系统**。它们应按实际业务流程分散落实到相应能力与交互中。
 
-维护 Team、Project、Member、Agent、访问控制、资源授权、Project Configuration、Project Adoption 和 Evaluation Policy 的 Team / Project 配置。它为五个核心业务域提供身份、范围和决定权，不承接 Issue 进展、知识正文、Harness 正文、Run 终态或评价结论。
+### 4.1 身份、权限、项目配置与采用决定
 
-Project Workflow 的配置属于项目配置；其阶段推进和责任交接语义由产研工作与流程协作维护。Project Adoption 决定由有权项目成员作出；被采用的 Knowledge / Harness 内容、版本和发布仍由对应资产维护者负责。
+身份、权限和项目配置是所有业务能力必须遵守的横切规则，不单独构成产品业务域。实施时需要明确：
+- 成员、Agent、Runtime 和外部来源访问身份如何识别；
+- Team / Project / Issue 的范围如何继承、收窄和校验；
+- 谁能创建、修改、审核、发布知识与 Harness；
+- 谁能修改 Issue 目标、责任、委托和验收决定；
+- 项目如何分别采用知识与 Harness 版本，以及新工作和在途工作的生效策略；
+- 来源读取、处理、派生、发布、投递等不同权限如何落实。
 
-### 4.2 来源连接器
+Project Adoption 是项目对已发布资产作出的业务决定，其写入权随项目管理规则落实；这不意味着要建设一个独立的“组织与项目治理产品”。
 
-负责适配飞书、Git、PDF、HTML、Office、表格和其他外部来源协议。连接器负责取得内容、分页、同步游标、格式转换和原生身份映射；Source Connection、Source Item / Revision、授权、证据定位、知识提炼和发布语义归团队知识管理。
+### 4.2 工作台与交互入口
 
-### 4.3 宿主适配器
+工作台是五个业务能力的统一交互方式，不拥有业务事实。页面和操作应围绕成员当前任务组织，读写分别调用相应权威能力或 Multica 原生入口。不得因为有五个能力域就机械建设五套后台页面，也不得把工作台本身当成业务主线。
 
-负责适配 Codex、Claude Code、Qoder、CodeBuddy 等宿主协议。适配器负责消息、工具、取消、Session、结果和宿主原生用量映射；Run 关联、Observation 可信度、交付证据和授权边界归执行与交付证据能力。
+### 4.3 来源接入实现
 
-### 4.4 统一工作台
+飞书、Git、PDF、HTML、Office、表格和其他来源需要不同的连接、授权、增量同步、内容取得和解析实现。连接器是这些实现的适配方式；来源身份、修订、证据定位、知识处理和知识治理语义仍归团队知识管理。不能因采用某种连接器就改变原始来源的权威归属。
 
-工作台是成员理解状态、寻找下一步和发起有权操作的共同入口，不是独立业务域。它围绕成员任务组织：
-- 项目与 Issue：目标、责任、阶段、阻塞、候选交付和待决事项；
-- 知识：团队 / 项目知识、来源状态、证据、有效性和贡献入口；
-- Harness：适用方法、版本、项目采用和改进候选；
-- 执行与交付：Run、Runtime、宿主回执、Artifact、Candidate 和 Evidence；
-- 质量与改进：评价结论、Finding、待处理提案和效果观察。
+### 4.4 本地宿主接入实现
 
-所有写操作回到拥有该事实决定权的能力域或 Multica 原生入口。页面不按内部模块机械铺设，普通 Issue 不要求打开所有能力。
+Codex、Claude Code、Qoder、CodeBuddy 等宿主需要不同的协议、事件、工具、Session、取消和用量适配。适配器是执行接入实现，不拥有 Run、Issue 或交付的业务决定权。Run / Runtime / Usage 沿用 Multica 原生执行事实；观察覆盖不足和宿主未提供的用量保持 Unknown。
+
+这些实现事项在后续落地设计中按优先级逐项处理，不应提前膨胀为新的产品能力域或服务拆分依据。
 
 ## 5. 关键端到端数据流
 
@@ -288,7 +289,7 @@ flowchart LR
 | 来源连接、取得修订和知识正文 | 团队知识管理及来源连接器 | 解析成功不得冒充知识发布 |
 | Knowledge Item / Revision / Release | 团队知识管理及知识维护者 | Harness 维护者不得擅自确认业务事实 |
 | Harness Asset / Revision / Release | Harness 治理及资产维护者 | 知识维护者不得直接修改团队强制规则 |
-| Project Adoption / 项目配置 / Policy | 平台基础治理及有权项目成员 | Release 不得自动改变项目配置 |
+| Project Adoption / 项目配置 / Policy | 项目有权成员按项目权限规则作出的配置与采用决定 | Release 不得自动改变项目配置 |
 | Issue / Work Agreement / Decision | 产研工作与流程协作，Issue 沿用 Multica 权威记录 | Run、SOP、Evaluation 不得自行完成 Issue |
 | SOP Definition | Harness 治理 | 工作流程不得私自改写已发布定义 |
 | SOP Execution / Node Activation | 产研工作与流程协作 | SOP 不得改变 Issue 目标、总责和保留决定 |
@@ -303,7 +304,7 @@ flowchart LR
 
 | 现有设计 | 新架构中的归属 | 处理 |
 |---|---|---|
-| Multica Issue / Project Workflow | 产研工作协作、平台基础治理 | 继承原生事实与入口，不复制控制平面 |
+| Multica Issue / Project Workflow | 产研工作协作及项目范围规则 | 继承原生事实与入口，不复制控制平面 |
 | Main Bot / Worker / Squad | 产研工作协作中的授权执行组织方式 | 保留机制，非所有 Issue 必需，不作为顶层产品模块 |
 | Team Wiki / Project Knowledge | 团队知识管理 | 从可选资料入口提升为完整知识能力域 |
 | Project Code Wiki | 团队知识管理中的代码知识专门能力 | 独立可扩展，不作为当前主线前置 |
@@ -311,7 +312,7 @@ flowchart LR
 | LoopForge SOP / Run Evaluation | Harness 定义、工作流程执行、Evaluation | SOP 定义归 Harness；执行实例归工作流程；评价进入 E 域 |
 | D5 / D6 | 工作连续性、执行与交付证据 | 作为跨域业务契约继续有效 |
 | D7 / D11 / VS3–VS4 | Evaluation、度量与持续改进 | 扩展知识改进路径，保留独立评价、Benchmark、发布与采用边界 |
-| 原八个并列能力域 | 五个核心业务域 + 平台基础治理 + 横向能力 | 合并子能力边界，不按旧域继续扩展 |
+| 原八个并列能力域 | 五个核心业务域；身份权限、交互入口和外部接入在实施中横切落实 | 合并子能力边界，不按旧域继续扩展 |
 | 原五层职责 | 不再作为产品模块或严格流程层级 | 仅可用于描述职责视角，不用于决定模块边界 |
 
 ## 9. 当前范围与架构验收标准
