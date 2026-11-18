@@ -84,6 +84,14 @@ Evidence 的生产来源、观察事实和后续解释分开。成员自述、�
 
 知识类型包括事实 / 约定、决策 / 理由、实践 / 方法、问题 / 踩坑经验、解释 / 导航和待确认认识。知识范围包括团队、项目；代码知识可作为项目知识中的专门类型或独立视图，必须绑定仓库和代码基准，不要求先建立独立代码知识产品。
 
+Team Knowledge 与 Project Knowledge 使用相同的 Knowledge Item / Revision / Release 语义，但 Knowledge Item 的归属范围分别为 Team 或单一 Project，维护责任和默认可见范围随归属确定。适用范围是知识可用于哪些项目、系统、版本或工作条件，不等于成员访问权限；Evidence 原文权限和来源派生许可还须独立核验。
+
+Project Sources（如 PRD、接口文档、项目决策原文）继续由 Source Item / Revision 指向原权威系统，工作可直接引用，不要求先创建 Project Knowledge。只有需要跨 Issue 长期复用、并由项目责任人维护的结论才形成 Project Knowledge。
+
+Project Code Knowledge / Code Wiki 是可选的项目代码认知视图，绑定仓库与 Commit / Tree 基准；模块地图、调用关系和当前实现事实不自动成为 Knowledge Item。若从代码事实提炼出需要长期维护的业务不变量、架构决策或经验，再按其 Team / Project 作用域形成正式知识。
+
+Team Knowledge 被 Project 引用时保留原 Knowledge Item / Revision / Release 身份，不复制正文或转移维护权。一般检索和引用不要求每条知识都创建 Project Adoption；只有项目需要将某一发布版本固定为持续采用基线时，才通过既有 Project Adoption / Project Configuration 采用。项目知识跨项目复用必须形成新的 Team Knowledge 候选并重新完成来源派生授权、去敏、适用性核验和团队发布，不得直接修改原 Project Knowledge 的作用域。
+
 Knowledge Revision 必须引用支持结论的 Evidence，并声明适用范围、限制、反例、有效状态和最近核验依据。证据不足的内容只能保持待确认认识，不得以正式强制知识投递。
 
 ### 4.4 知识治理与来源许可
