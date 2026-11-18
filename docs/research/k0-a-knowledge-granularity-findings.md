@@ -321,7 +321,7 @@ Agent 检索的返回单位不是“整篇主题”也不是“裸原子句”�
 
 ## 10. 参考资料
 
-- [K0 团队知识中心调研与产品设计研究](../k0-team-knowledge-center-research.md)
+- [K0 团队知识中心调研与产品设计研究](k0-team-knowledge-center-research.md)
 - [K0-A 知识资产粒度研究任务书](k0-a-knowledge-granularity-study.md)
 - [团队知识管理生命周期](../architecture/knowledge-management-lifecycle.md)
 - [统一业务对象模型](../architecture/core-business-object-model.md)
