@@ -147,6 +147,10 @@ Recall 结果是候选，不等于采用。无命中只表示本次检索没有�
 
 不同来源的相关性分数和权威语义不可直接合并成单一全局排序。先按接收者权限和来源作用域过滤，再在各来源内部排序，最后依据当前工作目的组合结果。Context Contract 统一约束选择、权限、版本固定和投递，不实现具体 BM25、向量搜索、代码图谱或来源 Connector。
 
+### 4.2.3 场景验收状态
+
+Team / Project Knowledge、Project Sources、Project Code Knowledge 与 Work Context 的职责边界已形成设计基线。Topic 3B 已对项目资料按角色读取、来源修订、权限撤回、真实宿主投递和项目证据派生团队知识提供实证；但正式 Knowledge Recall 的 Team / Project 范围检索、跨项目消费者检索以及 Recall 结果层的私有信息隔离尚未完成产品验收。不得将已有来源权限和宿主投递实验等同于 Recall 已通过验收。场景结果和下一轮最小专项测试见[Context Contract 双场景端到端验收](../research/context-contract-two-scenario-acceptance.md)。
+
 ### 4.3 回执语义
 
 必须区分：
