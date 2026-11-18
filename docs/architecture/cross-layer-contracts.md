@@ -129,6 +129,24 @@ Context Contract 只负责本次工作消费，不重复执行来源同步、证
 
 Team / Project 内容冲突时，不使用全局优先级。先判断事实类型和各自适用条件；项目特有事实可以与团队通用经验并存。若项目需要偏离团队 Harness 强制规则，必须走 Harness 例外 / 项目采用和 Issue 有权决定机制，不能由 Project Knowledge 静默覆盖。
 
+### 4.2.2 Recall、来源检索与确定性加载的边界
+
+Context Contract 不等于 Recall，也不要求所有工作依据进入一个统一检索索引。当前工作按以下不同动作取得依据：
+
+| 动作 | 读取对象 | 取得方式 | 边界 |
+|---|---|---|---|
+| 确定性工作上下文加载 | Issue / Work Agreement / Project / Run / 已明确引用 | 按稳定对象身份和关系读取 | 不通过语义搜索推测当前工作事实 |
+| Knowledge Recall | Team Knowledge / Project Knowledge | 按任务意图检索正式知识候选 | 返回候选及适用条件，不代表已选用 |
+| Project Source Search / Read | PRD、评审纪要、接口文档、工程资料等 | 在有权来源范围内发现，再按 Source Item / Revision / 位置读取 | 原始资料可直接消费，不要求先提炼为 Knowledge |
+| Project Code Retrieval | Code Wiki、代码仓、模块与调用关系 | 按仓库和 Commit / Tree 基准检索 / 读取 | 属于项目代码认知，不并入 Team Knowledge |
+| Harness Capability Resolution | Harness Release、Project Adoption、工作约定 | 按已发布、项目采用、工作类型和授权解析 | Recall 命中 Skill / Rule 文档不代表本次已采用或有权调用 |
+
+Knowledge Recall 的默认对象是正式 Team / Project Knowledge，不应把 Issue、Run、原始 PRD、所有代码文件和 Harness 状态都当作同质知识条目。不同来源可以在当前工作中组合，但保留各自权威、修订、权限和读取方式。
+
+Recall 结果是候选，不等于采用。无命中只表示本次检索没有找到相关结果，不代表其他来源不存在资料。显式引用的来源优先按身份直接读取；本地代码和当前 Issue 已足够时可以跳过 Recall。复杂工作可由 Agent 自主按需发起多种检索，不要求每个 Issue 都执行统一 Recall 步骤。
+
+不同来源的相关性分数和权威语义不可直接合并成单一全局排序。先按接收者权限和来源作用域过滤，再在各来源内部排序，最后依据当前工作目的组合结果。Context Contract 统一约束选择、权限、版本固定和投递，不实现具体 BM25、向量搜索、代码图谱或来源 Connector。
+
 ### 4.3 回执语义
 
 必须区分：
