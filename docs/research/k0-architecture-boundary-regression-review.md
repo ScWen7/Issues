@@ -322,3 +322,16 @@ K0-A 的主题资产 + Claim + Evidence 结论保持不变。
 TeamAI 当前 Recall 已不只检索 learnings：普通索引包含 learnings、docs、rules、skills，代码知识图谱另有检索路径后合并输出。可借鉴其任务相关性预检、检索深度选择、专用 Recall Subagent 和紧凑摘要，但不能把其 Git 资产分发语义直接等同于 AgentPlatform 的多权威来源模型。
 
 本轮不新增 Recall 业务对象、Recall Runtime 或统一全源索引。下一步通过真实 Issue 场景验证 Knowledge Recall、Source Search / Read、Code Retrieval 与确定性 Work Context 的互补关系。
+
+
+## 16. Context Contract 双场景回归验收状态
+
+新增[Context Contract 双场景端到端验收](context-contract-two-scenario-acceptance.md)，分别回归项目内功能研发和跨项目经验复用。
+
+本轮复用既有 Topic 3B 证据，没有重新执行宿主请求：
+- 项目内来源按角色读取、修订变化后重选、撤权后停止新投递、真实 Codex 输入观察已有实证；
+- C1 / C2 经验派生为 Team Knowledge、项目证据隔离、受众授权、单来源撤回和独立复审已有实证；
+- Codex / Claude Code 工具调用及交付制品关联已有实证；
+- 但正式 Knowledge Recall 的 Team / Project 检索、Project B 跨项目消费、Recall 结果层私有信息隔离和实际宿主知识使用尚未实证。
+
+因此 Context Contract 的来源、权限、版本和宿主消费基础已有实证，不能据此宣称 Knowledge Recall 产品行为已通过验收。下一步只补最小双项目 Recall 专项实验，不扩张为全源搜索平台或技术选型。
