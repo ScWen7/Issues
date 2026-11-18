@@ -1,6 +1,6 @@
 # 统一生命周期、状态机与事件模型
 
-本文定义核心对象在运行期间如何变化，以及这些变化如何跨层传递。它建立在[核心对象模型](core-object-model.md)之上，是各专题共同遵循的生命周期语义。并发写入、跨层动作恢复、结果消费和旧执行隔离见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本文不定义数据库表、API 字段、消息中间件或页面结构。
+本文定义核心对象在运行期间如何变化，以及这些变化如何跨层传递。知识来源、证据、知识修订与发布的对象关系见[核心业务对象与统一关系模型](core-business-object-model.md)，具体处理规则见[知识管理生命周期](knowledge-management-lifecycle.md)。它建立在[核心对象模型](core-object-model.md)之上，是各专题共同遵循的生命周期语义。并发写入、跨层动作恢复、结果消费和旧执行隔离见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本文不定义数据库表、API 字段、消息中间件或页面结构。
 
 ## 1. 统一规则
 
@@ -33,6 +33,10 @@
 | 对象 | 生命周期管理的问题 | 权威状态来源 |
 |---|---|---|
 | Issue | 业务工作是否待安排、推进、等待、审查、完成或取消 | Issue 工作记录与有效工作流写入 |
+| Source Connection / Item / Revision | 来源连接、内容发现、修订取得与撤回情况 | 来源系统、连接授权和平台取得快照 |
+| Ingestion Batch / Processing | 一批资料是否待取得、解析、部分完成或失败 | 批次与处理回执 |
+| Evidence / Evidence Anchor | 证据是否可定位、可用、待复核或失效 | 来源修订、证据记录和当前权限 |
+| Knowledge Item / Revision | 知识是否活跃、待核验、已核验、待复核或退役 | 知识治理记录及维护者决定 |
 | Project Workflow | 当前步骤、进入条件和负责人交接 | 项目配置及 Issue 上的实际步骤记录 |
 | SOP Definition | 定义如何草拟、审核、发布、弃用 | 能力资产维护与发布机制 |
 | SOP Execution | 受托流程是否准备、推进、等待、交还或终止 | 对应流程实例 |
@@ -247,6 +251,22 @@ Project Adoption 是项目有权成员对具体 Release 或项目配置版本作
 
 生产效果观察绑定 Release、Adoption Scope、观察窗口、样本队列、可比基线和实际使用证据。结果可为 Pending Observation、Improving、Stable、Regressed、Inconclusive 或 Stopped。Benchmark Passed 不能直接生成 Stable；只有后续真实生产样本满足预设门槛，才能形成生产效果结论。回退通过新 Adoption 决定完成，历史使用记录不覆盖。
 
+### 9.6 Source、Evidence 与 Knowledge 生命周期
+
+来源、证据和知识分别拥有自己的状态，不把资料处理进度等同于知识发布状态。
+
+**Source Connection** 记录授权、连接状态、同步进度和最近成功核对时间。连接断开不删除历史 Source Item / Revision；授权撤回立即影响后续取得和内容分发。
+
+**Source Item / Revision** 记录发现、取得、修订变化、删除或撤回。Source Revision 是某次取得的不可变快照；新修订到来时创建新 Revision，不覆盖旧版本。取得不完整、分页失败或源修订无法确认时，不得标记为完整取得。
+
+**Ingestion Batch / Processing** 记录待处理、取得中、解析中、部分完成、完成或失败。批次可包含多份 Source Item；单份失败不抹掉其他材料的成功结果。解析完成只说明结构化处理结束，不代表证据可用或知识已发布。
+
+**Evidence Anchor / Evidence** 记录定位和事实观察。来源变化、权限收缩、内容撤回或定位失效时，受影响证据进入待复核或不可用状态；历史事实保留，当前可读性按最新权限判断。
+
+**Knowledge Item / Revision** 维护稳定知识身份和不可变内容修订。修订可经历草拟、待核验、已核验、驳回、待复核或失效；是否成为正式可用知识，必须通过对应 Knowledge Release。检索索引可用状态是独立处理状态，不是发布状态。
+
+知识修订被来源新版本影响时，系统识别受影响范围并触发复核。旧版本是否继续投递按知识风险、权威来源变化和策略决定；历史工作仍引用当时选用的版本。来源权限撤回时，停止向失权主体提供原文、摘录和可反推私有内容的派生知识。
+
 ## 10. 跨对象事件模型
 
 ### 10.1 事件类别
@@ -258,6 +278,7 @@ Project Adoption 是项目有权成员对具体 Release 或项目配置版本作
 | SOP | SOPInvoked、SOPPrepared、NodeReady、NodeActivated、NodeResultReceived、HumanDecisionRequested、HumanDecisionRecorded、SOPReturned、SOPCompleted、SOPFailed、SOPCancelled | SOP Execution 及其权威状态变化 |
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
 | Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、EvidenceApplicabilityRecorded、AcceptanceDecisionRecorded、DeliveryReturned | 生产者与交付通道 |
+| Knowledge | SourceConnected、SourceItemDiscovered、SourceRevisionAcquired、SourceRevisionChanged、SourceAccessRevoked、IngestionStarted、IngestionCompleted、EvidenceAnchored、KnowledgeRevisionProposed、KnowledgeRevisionVerified、KnowledgeReleased、KnowledgeAdopted、KnowledgeFeedbackRecorded、KnowledgeSuperseded、KnowledgeWithdrawn | 来源连接、取得快照、证据处理、知识治理与项目采用分别提供 |
 | Evaluation | EvaluationRequested、EvaluationTaskBound、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、EvaluationResultConsumed、FindingRecorded | 评价任务及结果 |
 | Improvement | ImprovementProposed、ImprovementCandidateCreated、BenchmarkPlanned、BenchmarkTrialBound、BenchmarkCompleted、BenchmarkInconclusive、ImprovementApproved、AssetReleased、ProjectAdoptionRecorded、AssetDeprecated、AssetWithdrawn、AssetUsageObserved、ProductionOutcomeRecorded | 提案、候选、实验、发布、采用和效果观察分别由各自权威记录产生 |
 
