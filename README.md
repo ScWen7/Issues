@@ -29,7 +29,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 |---|---|
 | 工作责任与交接 | [工作生命周期](docs/architecture/01-unified-work-lifecycle.md) |
 | SOP 与项目工作流 | [SOP 与研发工作流](docs/architecture/02-sop-workflow.md) |
-| 本地执行与能力上下文 | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
+| 本地执行与能力上下文 | [本地执行](docs/architecture/03a-execution-plane.md) · [Harness 选用与上下文投递](docs/architecture/03b-capability-governance.md) |
 | 成本、质量与持续改进 | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) · [D7 持续改进内循环](docs/architecture/d7-continuous-improvement-loop.md) |
 | 团队知识生命周期 | [知识管理与研发知识闭环](docs/architecture/knowledge-management-lifecycle.md) |
 | 核心业务对象关系 | [核心业务对象与统一关系模型](docs/architecture/core-business-object-model.md) · [详细对象目录](docs/architecture/core-object-model.md) |
