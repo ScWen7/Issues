@@ -1,0 +1,19 @@
+name: Context Recall contract experiment
+on:
+  push:
+    branches: [design/system-architecture-convergence]
+    paths:
+      - prototypes/context-recall/**
+      - .github/workflows/context-recall-contract.yml
+permissions:
+  contents: read
+jobs:
+  recall-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Run two-project Recall isolation contract checks
+        run: python3 prototypes/context-recall/two_project_contract.py
