@@ -29,6 +29,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 | SOP 与项目工作流 | [SOP 与研发工作流](docs/architecture/02-sop-workflow.md) |
 | 本地执行与能力上下文 | [本地执行](docs/architecture/03a-execution-plane.md) · [能力与上下文](docs/architecture/03b-capability-governance.md) |
 | 成本、质量与持续改进 | [成本、质量与改进](docs/architecture/04-cost-quality-improvement.md) · [D7 持续改进内循环](docs/architecture/d7-continuous-improvement-loop.md) |
+| 团队知识生命周期 | [知识管理与研发知识闭环](docs/architecture/knowledge-management-lifecycle.md) |
 | 团队 Wiki 与项目资料 | [团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) |
 | 项目代码知识 | [项目代码 Wiki](docs/architecture/code-wiki.md) |
 | 统一工作入口 | [统一工作台](docs/architecture/05-unified-workbench.md) |
