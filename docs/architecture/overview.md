@@ -63,6 +63,22 @@ AgentPlatform 是面向研发团队的 AI 研发能力平台。它以团队知�
 
 具体规则见[本地执行](03a-execution-plane.md)、[工作生命周期](01-unified-work-lifecycle.md)和[统一工作台](05-unified-workbench.md)。
 
+
+## 首期协作范围
+
+首期以一项真实研发工作能顺畅接续为核心：成员从 Issue 取得目标和责任，按需检索团队 / 项目知识，选择适用 Harness，使用本地 Agent 或人工推进，交回可核验交付，并把有复用价值的经验反馈给知识和 Harness 维护者。普通工作不要求启用完整 SOP、独立 Evaluation 或全部知识扩展能力。
+
+## 共享业务契约
+
+| 契约 | 谁提供，谁使用 | 变化时如何处理 |
+|---|---|---|
+| Work Contract | Issue 提供目标、责任、范围和决定；成员、Agent 与流程按授权执行 | 目标或授权变化时由有权成员修订，后续执行核对有效版本 |
+| Context Contract | 知识、项目资料、代码与 Issue 提供有来源的上下文；执行者按读权取得 | 来源修订或权限变化时重算受影响输入，保留历史引用 |
+| Capability Contract | 团队 / 项目维护者发布 Harness；项目或工作按权限选用 | 新版本发布不自动改变项目采用或在途工作 |
+| Delegation / Execution Contract | Issue 负责人或授权 SOP 明确受托范围、动作、输入与产出 | 撤权、改派或接管时停止新的受影响动作并核对在途副作用 |
+| Delivery Contract | 生产者提供 Artifact / Candidate / Evidence；接收方按工作约定核验 | 候选或标准换版时重新判断证据适用性 |
+| Feedback Contract | 交付、执行、Evaluation 和人工反馈提供证据；知识 / Harness 维护者分别治理 | 同一 Finding 可产生独立知识与 Harness 候选，不合并发布权责 |
+
 ## 6. 跨层业务契约
 
 | 契约 | 主要回答的问题 |
