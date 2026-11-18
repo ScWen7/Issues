@@ -12,10 +12,14 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 
 | 能力域 | 职责 |
 |---|---|
-| 团队知识管理 | 团队知识、项目资料和项目代码知识的接入、证据化、提炼、治理、检索、复用与更新 |
-| 产研工作与流程 | 以 Issue 承载目标、责任、上下文、协作决定、交付和交接 |
-| Engineering Harness | Principles、Rules、Skills、Playbooks、Workflow、SOP、Scripts 与 Evaluation |
-| Agent 执行、观测与改进 | 连接成员本地 Agent，记录执行事实和交付证据，驱动知识与 Harness 持续改进 |
+| 组织与项目治理 | 成员、项目、授权、项目配置和项目采用决定 |
+| 团队知识管理 | 来源接入、证据处理、知识提炼、发布、检索、复用和失效治理 |
+| 产研工作协作 | Issue 目标、责任、上下文、协作决定、工作流交接和交付消费 |
+| Engineering Harness 治理 | Principles、Rules、Skills、Playbooks、SOP、Scripts、Scorer / Rubric 及版本发布 |
+| 研发流程与 SOP 执行 | 明确委托的流程实例、节点依赖、结果消费、门禁和返工 |
+| 执行集成与 Runtime 观测 | 复用 Multica 执行链，连接成员本地 Agent 并记录实际回执 |
+| 交付与证据 | Artifact、Candidate、Evidence、核验依据和交付消费 |
+| Evaluation、度量与持续改进 | Finding 分诊、知识 / Harness 改进、Benchmark、发布采用和真实效果回收 |
 
 知识管理与 Harness 演进形成两个相互促进的飞轮。知识不是对话和日志的堆积；Harness 也不只是提示词集合。完整职责和端到端工作链见[产品设计基线](docs/architecture/product-foundation.md)。
 
@@ -34,7 +38,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 | 团队 Wiki 与项目资料 | [团队 Wiki 与项目资料](docs/architecture/team-project-wiki.md) |
 | 项目代码知识 | [项目代码 Wiki](docs/architecture/code-wiki.md) |
 | 统一工作入口 | [统一工作台](docs/architecture/05-unified-workbench.md) |
-| 整体系统架构 | [现有系统架构与模块边界](docs/architecture/system-architecture.md) |
+| 整体系统架构 | [整体系统架构与能力边界](docs/architecture/system-architecture.md) |
 
 ## 研究与治理
 
