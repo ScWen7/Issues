@@ -96,13 +96,13 @@ AgentPlatform 是团队 AI 研发能力平台，以团队知识为基础、以 I
 
 ## 9. 研究输入
 
-- [K0 团队知识中心调研与产品设计研究](../k0-team-knowledge-center-research.md)
-- [团队知识管理生命周期](../../architecture/knowledge-management-lifecycle.md)
-- [统一业务对象模型](../../architecture/core-business-object-model.md)
-- [项目知识与真实宿主输入](../topic-03b/project-knowledge.md)
-- [知识来源与可见性](../topic-03b/knowledge-sources.md)
-- [知识贡献与复审](../topic-03b/knowledge-contribution.md)
-- [专题三 B 来源与知识实证](../03b-source-evidence.md)
+- [K0 团队知识中心调研与产品设计研究](k0-team-knowledge-center-research.md)
+- [团队知识管理生命周期](../architecture/knowledge-management-lifecycle.md)
+- [统一业务对象模型](../architecture/core-business-object-model.md)
+- [项目知识与真实宿主输入](topic-03b/project-knowledge.md)
+- [知识来源与可见性](topic-03b/knowledge-sources.md)
+- [知识贡献与复审](topic-03b/knowledge-contribution.md)
+- [专题三 B 来源与知识实证](03b-source-evidence.md)
 
 ## 10. 研究完成记录
 
