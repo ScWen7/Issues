@@ -261,9 +261,9 @@ Harness 资产不属于以上知识类型。Rule、Skill、Playbook、SOP、Scri
 
 - Multica 继续提供 Issue、Run、Runtime 和项目工作上下文，不另建工作控制平面。
 - TeamAI 的命名空间、增量索引、角色作用域、经验采纳和受控发布机制可作为方法参考，但不能把其 Git 经验仓直接当成完整团队知识中心。
-- WeKnora 的来源接入、异步解析、Wiki 编译、Chunk / Wiki 修订、权限范围和 MCP 消费可复用或借鉴；它解决知识处理和检索的部分底座问题，不自动替代 AgentPlatform 的团队 / 项目责任、知识派生许可、Issue 关联和 Harness 改进治理。
-- Backstage TechDocs 的 docs-like-code 与 Software Catalog ownership 说明代码旁文档和责任导航适合工程知识；但它不是跨飞书、Issue、项目经验和团队知识的统一来源治理中心。
-- Onyx 的 permission-aware connector 说明企业搜索必须把来源 ACL 纳入检索与回答范围；其连接器同步和检索能力不等于团队知识的维护责任与发布治理。
+- [WeKnora](https://github.com/Tencent/WeKnora)：来源接入、异步解析、Wiki 编译、Chunk / Wiki 修订、权限范围和 MCP 消费可复用或借鉴；它解决知识处理和检索的部分底座问题，不自动替代 AgentPlatform 的团队 / 项目责任、知识派生许可、Issue 关联和 Harness 改进治理。当前文档重点参考其[文档处理管线](https://github.com/Tencent/WeKnora/blob/main/website-docs/02-architecture/03-document-pipeline.md)与[Wiki 能力](https://github.com/Tencent/WeKnora/blob/main/website-docs/03-features/14-wiki.md)。
+- [Backstage TechDocs](https://backstage.io/docs/features/techdocs/) 的 docs-like-code 机制，以及 [Software Catalog](https://backstage.io/docs/features/software-catalog/) 的软件与 Owner 目录，说明代码旁文档和责任导航适合工程知识；但它不是跨飞书、Issue、项目经验和团队知识的统一来源治理中心。
+- [Onyx](https://onyx.app/search) 的 permission-aware connector 说明企业搜索必须把来源 ACL 纳入检索与回答范围；其[连接器机制](https://docs.onyx.app/overview/core_features/connectors)和检索能力不等于团队知识的维护责任与发布治理。
 
 ## 9. 对现有研究与实验的审查
 
