@@ -4,20 +4,17 @@ AgentPlatform 是面向研发团队的 AI 研发能力平台。它以团队知�
 
 产品目标、两个飞轮、范围边界见[产品定位与总体设计基线](product-foundation.md)。统一能力域、职责、事实权威、依赖和端到端数据流见[整体系统架构](system-architecture.md)。知识、Harness、工作、执行和证据的对象关系见[核心业务对象与统一关系模型](core-business-object-model.md)。
 
-## 1. 核心能力域
+## 1. 核心业务能力
 
 | 能力域 | 主要职责 |
 |---|---|
-| 组织与项目治理 | 成员、项目、授权、项目配置和项目采用决定 |
-| 团队知识管理 | 来源接入、证据处理、知识提炼、发布、检索、复用、更新与失效 |
-| 产研工作协作 | Issue 目标、责任、上下文、协作决定、工作流交接和交付消费 |
-| Engineering Harness 治理 | Principles、Rules、Skills、Playbooks、SOP、Scripts、Scorer / Rubric 及版本发布 |
-| 研发流程与 SOP 执行 | 明确委托的流程实例、节点依赖、结果消费、门禁和返工 |
-| 执行集成与 Runtime 观测 | 复用 Multica 执行链，连接成员本地 Agent 并记录实际回执 |
-| 交付与证据 | Artifact、Candidate、Evidence、核验依据和交付消费 |
-| Evaluation、度量与持续改进 | Finding 分诊、知识 / Harness 改进、Benchmark、发布采用和真实效果回收 |
+| 团队知识管理 | 来源接入、证据处理、知识提炼、发布、检索、复用与失效治理 |
+| 产研工作与流程协作 | Issue、责任、业务决定、Project Workflow 和受托 SOP 执行 |
+| Engineering Harness 治理 | Principles、Rules、Skills、Playbooks、SOP 定义、Scripts 与评价标准 |
+| 执行与交付证据 | Multica 执行接入、Runtime 观察、Artifact、Candidate 和 Evidence |
+| Evaluation、度量与持续改进 | 质量评价、Finding 分诊、知识 / Harness 改进、Benchmark 和真实效果回收 |
 
-统一工作台、来源连接器和宿主适配器是横向能力，不另立业务主线。详细边界见[整体系统架构](system-architecture.md)。
+组织与项目权限属于平台基础治理；统一工作台、来源连接器和宿主适配器是横向能力，不作为并列业务系统。详细边界见[整体系统架构](system-architecture.md)和[整体架构一致性审查](../research/architecture-consistency-audit.md)。
 
 ## 2. 核心业务对象与事实归属
 
