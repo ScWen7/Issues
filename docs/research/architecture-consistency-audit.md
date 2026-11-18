@@ -126,13 +126,28 @@ Project Workflow 的配置归项目范围治理，但其业务语义、Issue 阶
 - 连接器、宿主适配器和工作台保持横向能力。
 - Knowledge、Harness、Issue、Run 和 Evidence 各自保留独立事实和必要生命周期；不为视觉上的模块整齐强行合并对象。
 
-## 8. 后续需要补齐的最小修改
+## 8. 本轮已完成的收敛修改
 
-1. 将 system-architecture.md 更新为五个核心业务域、基础治理和横向能力。
-2. 将 03b-capability-governance.md 收敛为能力治理与上下文投递专题，知识生命周期统一指向知识管理设计。
-3. 更新 core-object-model.md 与 core-business-object-model.md 的对象分组和重复项。
-4. 在 core-consistency-concurrency.md 明确知识来源修订、知识候选 / 发布、权限撤回与投递的并发边界。
-5. 在 cross-layer-contracts.md 明确 Context Contract 消费知识版本的规则。
-6. 完成修改后进行 Markdown 链接、对象归属、状态事件和数据流的最终交叉审查。
+本次审查提出的结构性修正已写入对应正式文档：
 
-本审查不批准任何数据库 Schema、API、服务拆分或部署方案。五域模型收敛后，下一阶段才是整体架构基线冻结与落地切片规划。
+1. [整体系统架构](../architecture/system-architecture.md)：从八个并列能力域收敛为五个核心业务域，并明确平台基础治理和横向能力。
+2. [03B Harness 选用与工作上下文投递](../architecture/03b-capability-governance.md)：知识来源、证据、提炼、许可、撤回和发布不再由 03B 维护；03B 只定义知识与 Harness 如何进入本次工作。
+3. [核心对象模型](../architecture/core-object-model.md)：将 Knowledge 从 Harness 方法资产组分离；Project Adoption 归平台基础治理。
+4. [核心业务对象与统一关系模型](../architecture/core-business-object-model.md)：Knowledge Feedback 只归知识治理，工作资产使用记录作为引用 / 回执，不重复维护知识反馈。
+5. [一致性与并发控制模型](../architecture/core-consistency-concurrency.md)：增加 Source Revision、Knowledge Revision、Knowledge Release 的权威写入、条件更新、撤权和投递隔离要求。
+6. [跨层业务契约](../architecture/cross-layer-contracts.md)：Context Contract 明确只消费经知识治理的修订，不重复定义知识生命周期。
+7. [D7 持续改进](../architecture/d7-continuous-improvement-loop.md)：明确 Knowledge Release 与 Harness Release 的不同维护者和发布责任。
+8. README、产品基线与架构总览同步为五域架构。
+
+## 9. 最终审查结论与后续顺序
+
+当前五域架构与核心对象、生命周期、权限、证据、跨层消费和持续改进机制已形成一致的业务结构。Markdown 内部链接检查已通过。
+
+仍需在下一阶段用更具体的工作场景验证边界，但不再需要为本轮发现的结构性问题新增并列能力域或重复对象。
+
+下一步建议：
+1. 冻结整体产品与业务架构基线，明确哪些文档是权威定义、哪些是专题契约、哪些是研究证据。
+2. 选择一条通用研发工作链和一条知识更新 / Harness 改进链，完成架构级验收。
+3. 在验收通过后，才进行渐进落地切片和技术承载设计。
+
+本审查不批准数据库 Schema、API、服务拆分、存储选型或部署方案。
