@@ -23,6 +23,11 @@
 
 | 权威对象 | 可改变的事实 | 其他对象如何使用 |
 |---|---|---|
+| Source Connection / Source Item | 来源连接授权、来源身份、发现范围和同步游标 | 知识处理读取来源连接状态；外部正文仍由来源系统维护 |
+| Source Revision / Ingestion Batch | 不可变取得快照、批次处理意图与实际处理回执 | 解析、索引和知识提炼固定来源修订；新修订不得覆盖历史快照 |
+| Knowledge Item / Revision | 知识稳定身份、不可变正文修订、适用范围、证据引用和核验状态 | 检索与工作只引用明确 Knowledge Revision；候选修改须基于当前修订条件提交 |
+| Knowledge Release | 知识维护者审核发布的不可变 Knowledge Revision 及受众范围 | Project Adoption / Work Pin 只能引用已发布且未撤回的版本；发布不代表项目采用 |
+| Harness Asset / Revision / Release | Harness 维护者定义、修订和发布的方法资产 | 知识域可引用其版本，不得直接改写 Harness 正文或发布状态 |
 | Issue | 工作约定、负责人、业务状态、决定、当前 Acceptance Channel 的 Candidate 指针和完成状态 | SOP、Run、Delivery、工作台和通知读取 Issue 的当前有效版本；Candidate 实体本身由交付域维护 |
 | Project 配置 | 项目成员、工作流、Project Adoption、资源策略和当前采用版本 | 新工作按适用配置版本建立约定；在途工作按已固定版本处理 |
 | Work Agreement / Delegation | 目标、范围、人工总责、持续协调授权和授权代际 | 每次派发、结果消费和业务决定复核当前有效版本 |
@@ -37,6 +42,21 @@
 | Usage | Multica Task 级原生单位累计快照和来源更正 | 按 Task Purpose 形成生产、治理和团队总量视图 |
 
 一个对象的状态变化必须经过其权威写入入口。工作台可以聚合展示多个对象，但不得通过更新投影、通知或缓存来代替权威写入。
+
+### 2.1.1 知识来源与知识修订的一致性边界
+
+知识管理遵循与其他权威对象相同的条件写入和历史不可变原则，但不与 Issue / Run 共享一个总状态机：
+
+- Source Connection 的授权、同步范围和游标由连接管理入口维护；来源原文仍归外部系统。连接断开不删除已取得的 Source Revision。
+- Source Revision 是一次明确取得的不可变快照。新修订只能新增 Revision，不能覆盖旧快照；分页失败、权限不完整或内容摘要无法确认时，保留部分完成 / Unknown，不标记完整取得。
+- Knowledge Item 表达稳定身份；Knowledge Revision 固定正文、适用范围、Evidence 引用和维护者。候选修订提交时核对当前基准，竞争修改不得静默覆盖。
+- Knowledge Release 必须引用已核验的 Knowledge Revision 和明确受众 / 派生许可。发布、Project Adoption、工作选择、投递和宿主实际使用是不同事实。
+- 检索索引、解析结果和缓存是可重建投影，不拥有知识正文、发布状态或来源权限。索引删除不能代替撤权，索引命中也不能证明当前有权读取。
+- 来源读权、处理许可、派生许可和目标受众投递许可分别核对。来源撤权或范围收缩时，先阻止新的受影响取得 / 投递，再识别受影响 Evidence、Knowledge Revision、在途 ContextReceipt 和工作；历史工作保留当时的版本与共享事实，但查看原文仍遵守当前权限。
+- 旧 Knowledge Revision 是否继续用于新工作，依据来源权威变化、知识风险和维护者复核决定；在途工作已固定的版本不静默替换，若来源撤权或安全风险要求停止，必须显式暂停投递并处理在途执行。
+- 同一 Finding 同时产生 Knowledge 与 Harness 候选时，各自执行条件写入、审核和发布；共同 Evidence 只引用，不复制，也不将两条发布状态合并。
+
+
 
 ### 2.2 不做全局事务
 
