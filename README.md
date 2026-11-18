@@ -42,6 +42,7 @@ AgentPlatform 面向使用不同本地 Agent 工具共同开展研发的团队�
 
 - [产品定位与现有架构审计](docs/research/product-architecture-audit.md)：当前阶段的架构审计与融合议题。
 - [整体架构一致性审查](docs/research/architecture-consistency-audit.md)：五个核心业务域、对象权威归属、专题冲突与端到端验证。
+- [双飞轮端到端场景验收](docs/research/scenario-acceptance.md)：完整研发交付链与知识 / Harness 自进化链的架构级验收。
 - [整体架构一致性审查](docs/research/architecture-consistency-review.md)：现有对象、职责与 D5 / D6 / D7 契约的交叉核对。
 - [研究与架构推进规则](docs/governance/research-and-architecture-rules.md)：研究、来源核验和远端文档治理要求。
 - [统一术语](CONTEXT.md)：项目正式术语。
