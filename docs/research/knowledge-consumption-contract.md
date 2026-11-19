@@ -136,6 +136,19 @@ Agent 可提交查询意图和任务线索；A 域根据可信身份和授权上
 
 不能因为 Team 结果更通用就默认排在 Project 事实之前，也不能因为 Project 结果更贴近项目就自动覆盖团队通用经验。适用条件和事实类型由使用者判断；冲突按已有事实权威规则处理。
 
+### 4.4 Recall 覆盖状态不是知识状态
+
+Recall 必须同时说明本次查询是否完整，而不能只返回命中列表：
+- Complete + Hits：声明的可见范围已完整检索并返回候选；
+- Complete + No Match：声明范围检索完整，没有匹配的正式知识；
+- Partial / Stale：部分作用域或检索投影未追平，未命中不代表知识不存在；
+- Unavailable / Failed：当前不能可靠完成查询，应明确失败或降级；
+- Partial Success：多个 Team / Project 范围分别报告覆盖状态。
+
+无命中只表示正式 Knowledge Recall 未找到，不代表 Project Sources、Code Retrieval 或 Issue 上下文不存在。投影不可用时，可按稳定身份直接读取已知 Revision；不能把旧投影静默当成最新，也不能把不可用伪装成 Complete + No Match。
+
+Recall Projection 是可重建的派生视图，不是 Knowledge Release 或权限的权威。命中候选后、返回任何标题 / 摘要 / Claim / Evidence 元数据前，必须回查权威知识身份和当前资格。投影预过滤不构成安全边界。
+
 ## 5. Recall 响应：候选摘要应包含什么
 
 Recall 默认返回轻量、可核查的候选，而不是直接把整篇 Topic 或 Evidence 原文塞入 Agent 上下文。
