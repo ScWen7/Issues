@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 import {
   evaluateOrderExport,
   consumeEvaluationByWorkOwner,
-  routeFinding
+  routeFinding,
+  linkPriorKnowledgeContribution
 } from "./order-evaluation-closure.mjs";
 
 const fixture = (name) => {
@@ -151,6 +152,21 @@ test("one evidence-backed Finding may create separate A and C triage paths, neve
   assert.notEqual(routes[0].target, routes[1].target);
   assert.ok(routes.every((route) => route.status === "proposal_for_owner_triage"));
   assert.ok(routes.every((route) => route.releaseCreated === false && route.adoptionChanged === false));
+});
+
+test("E links the existing A contribution by exact C1/C2 evidence and respects its retired state", () => {
+  const url = new URL("../../docs/research/topic-03b/fixtures/project-knowledge.json", import.meta.url);
+  const contribution = JSON.parse(readFileSync(fileURLToPath(url), "utf8"));
+  const linked = linkPriorKnowledgeContribution(
+    contribution,
+    "da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1",
+    "e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514"
+  );
+  assert.equal(linked.proposalId, "b506b31bbe5da5e1ee898bee7edbe51996d10b441c61d4cc46cdaae72dfbdea5");
+  assert.equal(linked.assetKey, "export-scope-regression");
+  assert.equal(linked.historicalStatus, "retired");
+  assert.equal(linked.nextAction, "knowledge_owner_review_required");
+  assert.equal(linked.newKnowledgeReleaseCreated, false);
 });
 
 test("a Finding without evidence cannot be routed into knowledge or Harness publication", () => {
