@@ -180,6 +180,19 @@ Recall 结果在投递前重新核验当前成员资格、知识发布 / 暂停�
 
 Team / Project Knowledge、Project Sources、Project Code Knowledge 与 Work Context 的职责边界已形成设计基线。Topic 3B 已对项目资料按角色读取、来源修订、权限撤回、真实宿主投递和项目证据派生团队知识提供实证；但正式 Knowledge Recall 的 Team / Project 范围检索、跨项目消费者检索以及 Recall 结果层的私有信息隔离尚未完成产品验收。不得将已有来源权限和宿主投递实验等同于 Recall 已通过验收。场景结果和下一轮最小专项测试见[Context Contract 双场景端到端验收](../research/context-contract-two-scenario-acceptance.md)。
 
+### 4.2.6 Knowledge Release 与 Recall Projection 的一致性
+
+Knowledge Release 是正式发布决定；Recall Projection 是从正式知识派生的检索视图。两者状态分离：
+- Release 发布后触发投影更新，不等待索引完成才算发布；
+- Projection 更新失败不撤销 Release，但 Recall 必须报告 Partial / Stale 或 Unavailable / Failed；
+- Release 暂停、撤回或退役立即改变候选资格，不能等待旧投影清理完成；
+- Projection 只提供候选身份，任何可披露结果字段都必须回查权威 Knowledge Item / Revision / Release 和当前 Membership / Policy；
+- 投影预过滤不构成授权安全边界。
+
+Recall 覆盖状态必须区分 Complete + Hits、Complete + No Match、Partial / Stale、Unavailable / Failed 和多范围 Partial Success。只有 Complete + No Match 才能表达声明范围检索完整但无匹配知识。部分覆盖或失败不能伪装成空结果；无知识命中也不代表 Project Sources、Code Retrieval 或 Issue 上下文没有内容。
+
+来源修订变化只触发依赖 Evidence 的影响分析，不自动判定知识失效。根据事实类型、来源权威性、风险和撤回范围，决定只更新定位 / 投影、标记 Revision 待复核、暂停相关 Release 新投递或形成新 Revision。Work / Run Asset Pin 保留历史版本身份但不授予永久读取权；在途工作按当前权限、Release 和风险重新确认是否继续。
+
 ### 4.3 回执语义
 
 必须区分：
