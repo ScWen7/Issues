@@ -337,3 +337,19 @@ Task 原生状态 `completed`（统一 Run 成功语义 Succeeded）的终态事
 本契约在 E3 接入，依赖 E0–E2 的来源查回与生产工作链，并在启用治理 Task 前完成用途隔离。后续改进发布采用由 [VS4](vs4-benchmark-release-adoption-technical-contract.md)维护；当前阶段及启用顺序统一见 [VS5 工程顺序](vs5-overall-technical-consistency-review.md#9-实施依赖与最小工程切片)。
 
 VS-3 仍未确定具体数据库表、API、预算锁实现、模型调用协议和 UI。它们应在 VS-0 / VS-1 的来源身份与恢复机制、VS-2 的权威写入边界，以及本契约的预算原子性要求下统一设计。
+
+## 4.5 固定 Multica 源码的 Purpose 隔离缺口
+
+固定源码基准 `71683141a764ed3b1620db4bc26a2d0a098f135c` 的逐项取证见[VS-3 · Multica Evaluation / Governance Task 隔离源码取证](../research/vs3-evaluation-multica-runtime-evidence.md)。该版本提供 Task 来源证据，但没有贯穿 Task 创建、Claim、pending 唯一性、Comment Coalescing、Session 恢复、Issue Wakeup 和 Usage 视图的统一 Execution Purpose。
+
+因此，VS-3 的真实 Model-based Evaluation Run **必须以前置完成 Purpose 隔离为条件**，不能先创建普通 Issue Task 再依赖 Prompt 或 `trigger_evidence_kind='evaluation'` 约定它是治理执行。
+
+适配必须满足：
+- Task Purpose 是可查询、可随 Retry 继承、可由 Claim / Runtime 识别的执行语义；Trigger Evidence 仍只表达来源，不代替 Purpose。
+- 生产 Task 的 pending / Comment Coalescing 保持原语义；治理 Task 不占用、不被并入生产槽位，并按 Evaluation ID 自身幂等。
+- 治理与生产 Session 双向隔离；Evaluation 之间也不共享 Session。
+- 治理 Task 的终态、评论和 Issue 副作用默认不进入普通生产 Wakeup；评价结果成功消费后，再通过 Evaluation 业务结果通知原 Issue 负责人。
+- Multica 原生 Usage 继续归 Task；AgentPlatform 的生产成本视图按 Purpose 区分治理执行，团队总成本保留治理消耗。
+- 无 Purpose 的历史 Task 按 Production 解释；治理能力在混合版本环境不可确认时 fail closed。
+
+进入真实 Evaluation Task 前，必须完成取证报告 G1–G12 的控制面回归。该门槛是 VS-3 纵向执行的前置条件，不要求建设第二套 Task / Run / Runtime，也不在本契约中指定数据库字段或 API。
