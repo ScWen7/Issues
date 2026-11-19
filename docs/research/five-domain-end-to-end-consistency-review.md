@@ -263,3 +263,10 @@ E → B → A / C 的**产品责任和决策边界已通过确定性契约验证
 - 尚未在真实工作台完成 Evaluation 持久化、真实成员决策和后续生产效果回收。
 
 因此，原审查中“E 域缺少完整闭环”的判断收敛为：**产品契约与分流规则已有确定性验证；真实 Evaluation Run、Issue 决策持久化和后续生产效果联测仍是下一项实证缺口。**
+## 12. VS-3 真实 Evaluation 前置条件的源码复核
+
+在 E → B → A / C 的契约实验之后，继续对固定 Multica 源码 `71683141a764ed3b1620db4bc26a2d0a098f135c` 做了 Task 生命周期隔离审查。发现原生 Task 来源证据不等于 Execution Purpose；当前 pending 唯一性、Comment Coalescing、Session 恢复、Issue Wakeup 和 Usage 视图均未提供统一 Governance Purpose 隔离。
+
+该结论已形成[VS-3 · Multica Evaluation / Governance Task 隔离源码取证](vs3-evaluation-multica-runtime-evidence.md)，并回写[VS-3 技术承载契约](../architecture/vs3-evaluation-technical-contract.md)。在 Purpose 适配及 G1–G12 回归完成前，不应启动真实 Evaluation Task。
+
+这不是增加新能力域或第二套执行系统，而是保护现有 Multica 生产协作语义所必需的执行用途边界。
