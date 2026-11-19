@@ -300,6 +300,27 @@ flowchart LR
 
 跨域操作采用各自权威对象写入、稳定来源身份、幂等消费和对账恢复；不假设全局事务。撤权、来源更新、候选换版和迟到回执只影响受影响范围，保留历史事实。
 
+## 7.1 五域协作中的关键责任交接
+
+五个能力域围绕 Issue 按需协作，不构成固定流水线。跨域时统一遵守以下责任边界：
+
+| 交接 | 权威提供方 | 接收方责任 | 不得推导 |
+|---|---|---|---|
+| Knowledge → Work | A 提供正式知识候选、准确 Revision / Release、适用条件和 Evidence 可访问性 | B / 当前 Agent 判断是否适用于本项工作，决定是否采用 | Recall 命中不等于采用、强制规则或实际使用 |
+| Harness → Work / Execution | C 提供已发布方法、规则、SOP Definition 和评价标准定义 | 项目配置 / B 决定采用范围，B 组织本项执行 | Release 不等于 Project Adoption；SOP Definition 不等于 SOP Execution |
+| Work → Execution | B 提供 Issue、Work Agreement、授权代际、目标、允许动作和交付要求 | D / Multica 按当前授权执行并返回原生事实 | Issue 委托不转移业务总责；派发不等于启动 |
+| Execution → Work / Evaluation | D 提供 Run、Artifact、Candidate、Evidence 和观察覆盖 | B 独立消费交付并作业务决定；E 按固定标准评价 | Run 终态不等于交付接受；Observation 不补造缺失事实 |
+| Evaluation → Improvement | E 提供评价结果、Finding、根因状态和验证证据 | B 处理当前工作；A / C 分别治理知识或 Harness 候选 | Evaluation 不替代 Issue 验收，也不自动发布资产 |
+
+特别明确：
+- **SOP 定义与执行分离**：SOP Definition 归 C；SOP Execution / Node Activation / Node Attempt 归 B；实际 Task / Run 沿 Multica / D。
+- **Evaluation 定义与执行分离**：Scorer / Rubric / Evaluation Definition 归 C；Evaluation 实例、Finding、Benchmark 和改进提案归 E；门禁是否必需、采用哪个版本由项目配置与 B 的工作约定确定。
+- **Evidence 共享但权威不复制**：D 提供或引用执行 / 交付事实；A 将 Evidence 关联到 Knowledge Revision；E 将 Evidence 关联到 Evaluation / Finding；B 在 Decision 中引用。各域形成自己的结论，不复制同一事实。
+- **Release、Project Adoption、Work / Run Asset Pin、ContextReceipt / Observation 分别记录发布、项目采用、本项选择和实际投递 / 消费**，不能合并为一个启用状态。
+- **状态只跨域影响，不跨域覆盖**：Release 暂停不自动修改 Issue 状态；Run 失败不自动判定业务失败；Evaluation 不自动退回 Candidate；Candidate 接受与否由 B 按 Work Agreement 决定。
+
+更完整的交接矩阵、端到端研发场景和待验证问题见[五域端到端协作一致性审查](../research/five-domain-end-to-end-consistency-review.md)。
+
 ## 8. 与现有设计的承接和收敛
 
 | 现有设计 | 新架构中的归属 | 处理 |
