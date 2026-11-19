@@ -160,3 +160,10 @@ CI 工作流：`.github/workflows/context-recall-contract.yml`
 - [C1 / C2 项目知识贡献与复审](topic-03b/knowledge-contribution.md)
 - [项目知识与真实宿主输入](topic-03b/project-knowledge.md)
 - [项目知识来源与权限](topic-03b/knowledge-sources.md)
+
+
+## 9. 真实 Provider 可用性审查
+
+后续代码审查见[真实 Recall Provider 可用性审查与本地验证边界](context-recall-real-provider-readiness.md)。当前仓库存在 Knowledge 对象模型、Project Source 受限检索原型、C1 / C2 派生治理原型和真实 Codex 输入观察工具，但没有可直接调用的 AgentPlatform 正式 Knowledge Recall Provider。
+
+因此本报告中的 20 / 20 仍严格限定为契约模拟结果。下一步不是让成员在本地执行一个不存在的 Recall 命令，而是先在整体架构中明确正式 Knowledge 数据的权威读取入口、检索调用归属和 Agent 工具暴露位置。Provider 具备后，再使用本报告的双项目语料和断言接入真实 Recall 与宿主观察。
