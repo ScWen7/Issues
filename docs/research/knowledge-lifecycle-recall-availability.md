@@ -224,3 +224,15 @@ Knowledge Consumption Contract 定义单次查询、读取、Evidence 展开、�
 它们不能合并成一个状态，也不能由某一层代替另一层。
 
 这套分离使 AgentPlatform 能在索引延迟、来源修订、权限撤回和在途工作变化时，既不把未发布知识当成正式知识，也不因搜索故障误报知识不存在，更不让旧索引或历史 Pin 绕过当前授权。
+
+
+## 13. 契约回归测试补充
+
+双项目契约脚本已扩展投影状态检查，区分：
+- Release 已暂停但 Recall Projection 仍陈旧：旧索引候选不得返回；
+- Projection Unavailable：不得伪装为 Complete + No Match；
+- Projection Stale：无命中只能报告 Partial / Stale；
+- Projection Current 且无候选：才可报告 Complete + No Match；
+- 投影处理状态变化不改变 Release 的权威发布状态。
+
+本次 CI 对应提交：2a1b28ffe113e1bd70cfd902a7ec4e4bb428b5b8。测试结果以该提交的 GitHub Actions 实际执行记录为准。此脚本仍是确定性契约模拟，不证明生产索引和真实权限竞态。
