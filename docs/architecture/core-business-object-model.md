@@ -94,6 +94,8 @@ Team Knowledge 被 Project 引用时保留原 Knowledge Item / Revision / Releas
 
 Knowledge Revision 必须引用支持结论的 Evidence，并声明适用范围、限制、反例、有效状态和最近核验依据。证据不足的内容只能保持待确认认识，不得以正式强制知识投递。
 
+知识消费沿用上述对象，不新增 Recall Result 或 Knowledge Access Asset：Recall 发现 Knowledge Item / Revision / Release 候选；Read 按稳定 Revision 身份读取正文；Evidence Reference 与 Evidence 原文展开分别核验权限；本项实际采用的重要版本通过既有 Work / Run Asset Pin 固定；ContextReceipt 和 Asset Usage Observation 分别记录投递及可观察消费。命中、预览或读取本身不自动创建 Pin，也不代表实际使用。具体业务语义见[Knowledge Consumption Contract](../research/knowledge-consumption-contract.md)。
+
 ### 4.4 知识治理与来源许可
 
 知识发布至少检查：
