@@ -189,3 +189,36 @@ node --test \
 6. 后续真实生产工作验证改进效果，不能用本轮同一确定性 Scorer 自证。
 
 **本轮结论：E 应是证据驱动的评价与分诊能力，不是另一个验收人、资产发布者或自动改进代理。它把结果交给 B，由 B 决定当前工作；跨工作知识与 Harness 改进分别回到 A、C 的既有治理生命周期。**
+
+## 10. 与既有 VS-3 技术承载契约的对照
+
+本轮不重新设计 Evaluation 的技术承载。真实执行要求沿用[VS-3 · Evaluation、独立执行与预算预留技术承载契约](../architecture/vs3-evaluation-technical-contract.md)。本原型与 VS-3 的关系如下：
+
+| VS-3 要求 | 本轮覆盖 | 当前状态 |
+|---|---|---|
+| Evaluation 与源 Run 分离 | 原型使用不同 sourceRunId / evaluationRunId，回归验证源 Run 不被改写 | 契约模拟通过；尚未创建真实 Multica Evaluation Task / Run |
+| 固定 Target Version / Evidence Snapshot | C1 / C2 报告 SHA、Candidate、Artifact 摘要和核验器 SHA 固定并校验 | 样本级证据绑定通过；完整 Evaluation Target Snapshot 尚未持久化 |
+| Scorer / Rubric 版本 | 固定 order-export-review-v1，并检查门禁必须匹配源 Run 与 Scorer 版本 | 契约模拟通过；尚非 C 发布的正式 Scorer Release |
+| Trigger / Policy / Work Agreement | 本轮未创建 Evaluation Policy 或触发身份 | 未覆盖 |
+| 预算预留与结算 | 本轮无真实 Evaluation Task，也未占用 Multica 预算 | 未覆盖 |
+| 独立 Multica 主 Task 与 Retry 谱系 | 原型只有逻辑 evaluation Run 标识 | 未覆盖，必须在 VS-3 真实纵向切片验证 |
+| Governance Purpose 隔离 | 本轮未运行真实 Task / Session / Worker Wakeup | 未覆盖 |
+| Evaluation / Finding 幂等持久化 | 原型函数和 Node 测试验证重复输入边界，未接持久存储 | 逻辑契约部分通过；真实写入与响应丢失恢复未覆盖 |
+| Finding 回到原 Issue | 通过显式 B 决策函数验证责任人与不越权规则 | 契约模拟通过；未写入真实 Issue Decision |
+| A / C 分流 | 关联既有 A 贡献账本；双路分流为合成路由测试 | A 历史引用通过；C 真实缺陷仍无证据，真实维护者分诊未覆盖 |
+
+因此本轮 23 / 23 不是 VS-3 完成，也不替代 VS-3 故障注入。它只关闭了五域之间最重要的产品语义和决策边界。
+
+### 10.1 下一项纵向实跑应复用现有 VS-3 顺序
+
+真实集成时按 VS-3 已定义的顺序执行，不再增加第二套任务系统：
+1. 选取终态 C1 或 C2 的真实 Multica Run / Candidate，固定 Target Version、报告和制品 Evidence、D2 核验器及 Scorer Release。
+2. 通过 Evaluation Policy 触发，生成稳定 Evaluation ID；完成适用预算范围的原子预留。
+3. 通过现有 Multica 创建独立 Governance Purpose Task，Task 来源指向 Evaluation ID，Evaluation 反向绑定唯一主 Task；合法 Retry 沿原生谱系查回。
+4. 用真实成员 Runtime 执行一次 Scorer；观察 Claim、Start、宿主实际启动、终态和原生 Usage。不得用本轮逻辑 evaluationRunId 冒充真实 Run。
+5. 消费 Task 终态，核对 Target / Policy / Scorer / Evidence Snapshot，幂等写入 Evaluation 与 Finding。
+6. 将 Finding 通知回原 Issue，由真实 Accountable Member 作返工或交验收决定；不由 E 自动改 Issue 状态。
+7. A / C 维护者分别处理其候选；对 A 的 retired 贡献先按当前来源许可复核，对 C 只有出现独立 Harness 缺陷证据才建立候选。
+8. 注入重复触发、Task 创建响应丢失、结果回写响应丢失、权限撤回、预算不足和合法 Retry，验证无重复 Evaluation / 主 Task / Finding。
+
+上述步骤与 [VS-3 第 10–12 节](../architecture/vs3-evaluation-technical-contract.md)的首个纵向范围、故障注入和完成标准一致。真实 Multica 数据库、成员凭据和 Runtime 需要在集成环境提供；在它们可用前，不宣称生产闭环完成。
