@@ -206,3 +206,10 @@ AgentPlatform 的 Knowledge Recall 不应被理解为“一个统一检索系统
 - **Project Sources、Code Retrieval 和确定性 Work Context 保持各自权威读取路径。**
 
 这是一条沿现有五域与 Context Contract 的业务协作关系，不新增产品能力域、服务边界、控制平面或业务对象。
+
+
+## 10. 消费语义进一步收敛
+
+Recall 的具体产品行为已进一步定义于[Knowledge Consumption Contract](knowledge-consumption-contract.md)，包括可信调用上下文、候选资格过滤、候选响应、稳定 Revision 读取、Evidence 双层权限、明确采用、投递前复核、撤权与反馈语义。
+
+本轮将前文“最小业务能力”收敛为可判定的产品规则：权限和正式发布状态先于排序；命中 / 读取不自动固定 Work Pin；Evidence 引用可见不代表原文可读；B 准备阶段与 Agent 自主调用使用同一 A 域契约；实际投递前按具体接收者重新核验。
