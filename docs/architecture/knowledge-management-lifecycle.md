@@ -189,6 +189,10 @@ Agent 可以在工作准备时或执行中主动调用 A 域 Recall；这不意�
 
 Recall 默认返回带 Knowledge Item、Revision / Release、Claim、适用条件、限制、状态和 Evidence 引用的候选摘要。展开时再按稳定身份读取完整修订；命中不等于采用，只有本项实际采用的知识版本才固定为 Work / Run 引用。投递前重新核验接收者权限、知识状态和 Evidence 原文权限。Recall 的具体工具通道和搜索实现不在本生命周期中选型。
 
+本节的消费行为以[Knowledge Consumption Contract](../research/knowledge-consumption-contract.md)为准。其核心是“候选发现 → 稳定版本读取 → Evidence 按权展开 → 明确采用 → 按授权投递 → 观察消费 → 反馈”，但不是每项工作都必须走完整链路。
+
+Recall 返回候选时，只有通过接收者身份、Team / Project 作用域、正式 Release、派生许可和硬性适用边界检查的知识才可参与检索排序。命中和读取不自动创建 Work / Run Asset Pin；只有本项实际采用的重要知识版本才固定引用。投递前必须再次检查当前接收者权限和知识状态。
+
 ### 5.2 返回可核查的知识包
 
 面向成员或 Agent 的知识结果不只是文本片段。每项结果应保留：
