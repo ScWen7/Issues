@@ -147,7 +147,21 @@ Recall 结果是候选，不等于采用。无命中只表示本次检索没有�
 
 不同来源的相关性分数和权威语义不可直接合并成单一全局排序。先按接收者权限和来源作用域过滤，再在各来源内部排序，最后依据当前工作目的组合结果。Context Contract 统一约束选择、权限、版本固定和投递，不实现具体 BM25、向量搜索、代码图谱或来源 Connector。
 
-### 4.2.3 场景验收状态
+### 4.2.3 Recall 的能力归属与调用责任
+
+Knowledge Recall 的权威能力归属 A · 团队知识管理；工作触发与采用决策归属 B · 产研工作与流程协作；获准内容向本地 Agent 的投递与消费观察归属 D · 执行与交付证据。
+
+- A 提供正式 Team / Project Knowledge 的 Recall、Revision 读取、Evidence 引用和知识反馈能力。A 对候选范围、知识状态和知识正文权限负责。
+- B 以 Issue / Work Agreement 为起点，判断是否需要 Recall，提供工作意图和受信任的 Team / Project 范围，判断候选是否适用、是否采用，并将实际采用的版本关联到本项工作。
+- D 通过现有宿主适配和执行证据能力投递已获准选用的知识，记录 Prepared / Delivered；宿主支持时观察 Loaded / Used。D 不维护知识副本作为权威，也不扩大接收者权限。
+- Agent 可以在工作准备阶段或执行中主动发起 Recall，但调用身份、项目范围和授权必须来自现有受信任工作 / 宿主上下文；不能信任 Agent 自行声明的 Team / Project scope。
+- Recall 不创建 Issue、Task 或 Run，不是独立能力域或必经流程；简单工作可以不触发 Recall。
+
+Recall 的最小业务动作是 Search / Recall、按稳定身份 Read Revision、按权限 Read Evidence Reference 和针对具体修订提交 Feedback。默认先返回可核查候选摘要，展开后再读取完整修订；命中不等于采用，只有实际选用的版本才按本项工作规则固定引用。
+
+Recall 结果在投递前重新核验当前成员资格、知识发布 / 暂停状态、来源派生许可和接收者对 Evidence 的读取权。未授权候选的标题、摘要、Claim、Evidence ID、关系和错误信息都不得泄漏。此处定义业务职责，不定义 API、搜索引擎或独立服务。
+
+### 4.2.4 场景验收状态
 
 Team / Project Knowledge、Project Sources、Project Code Knowledge 与 Work Context 的职责边界已形成设计基线。Topic 3B 已对项目资料按角色读取、来源修订、权限撤回、真实宿主投递和项目证据派生团队知识提供实证；但正式 Knowledge Recall 的 Team / Project 范围检索、跨项目消费者检索以及 Recall 结果层的私有信息隔离尚未完成产品验收。不得将已有来源权限和宿主投递实验等同于 Recall 已通过验收。场景结果和下一轮最小专项测试见[Context Contract 双场景端到端验收](../research/context-contract-two-scenario-acceptance.md)。
 
