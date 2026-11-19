@@ -161,7 +161,22 @@ Recall 的最小业务动作是 Search / Recall、按稳定身份 Read Revision�
 
 Recall 结果在投递前重新核验当前成员资格、知识发布 / 暂停状态、来源派生许可和接收者对 Evidence 的读取权。未授权候选的标题、摘要、Claim、Evidence ID、关系和错误信息都不得泄漏。此处定义业务职责，不定义 API、搜索引擎或独立服务。
 
-### 4.2.4 场景验收状态
+### 4.2.4 Knowledge Consumption Contract
+
+知识消费的完整产品语义见[Knowledge Consumption Contract](../research/knowledge-consumption-contract.md)。本契约补充以下跨层规则：
+
+- Recall 请求表达当前工作意图，不由 Agent 自行声明可访问的 Team / Project 范围；身份、成员资格和工作授权来自现有可信工作 / Runtime 上下文。
+- A 域先核验主体、作用域、正式 Release 状态、派生许可和硬性适用边界，再在可见候选中检索 / 排序。权限与发布资格是门槛，不是排序权重。
+- Recall 默认返回候选摘要及 Item / Revision / Release、适用条件、限制和安全的 Evidence 概览；展开时按稳定 Revision 身份读取，不得用 latest 静默替换。
+- Evidence Reference 可见与 Evidence 原文可读分开授权。Team 派生知识可被授权消费，不自动开放其项目原始证据。
+- Recall 命中、预览或读取不自动形成 Work / Run Asset Pin。只有本项实际采用的重要知识版本才固定引用。
+- B 准备阶段调用与 Agent 执行中自主调用使用同一 A 域查询 / 读取契约；投递前再次核验具体接收者、知识状态、派生许可和当前工作授权。
+- Recall 无命中不代表 Project Sources、Code Retrieval 或 Issue 上下文不存在；这些来源继续走各自读取路径。
+- 成员资格撤销、来源派生许可撤回、Release 暂停和 Project 成员变化分别处理；历史投递事实保留，未来访问 / 投递重新核验。
+
+此处不新增 Recall Result、Recall Runtime、Context Compiler 或其他业务对象。
+
+### 4.2.5 场景验收状态
 
 Team / Project Knowledge、Project Sources、Project Code Knowledge 与 Work Context 的职责边界已形成设计基线。Topic 3B 已对项目资料按角色读取、来源修订、权限撤回、真实宿主投递和项目证据派生团队知识提供实证；但正式 Knowledge Recall 的 Team / Project 范围检索、跨项目消费者检索以及 Recall 结果层的私有信息隔离尚未完成产品验收。不得将已有来源权限和宿主投递实验等同于 Recall 已通过验收。场景结果和下一轮最小专项测试见[Context Contract 双场景端到端验收](../research/context-contract-two-scenario-acceptance.md)。
 
