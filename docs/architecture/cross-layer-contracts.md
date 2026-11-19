@@ -418,3 +418,15 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | [统一工作台](05-unified-workbench.md) | 呈现契约状态、来源、缺项、等待原因和下一责任人 |
 
 新增跨层能力时，优先复用以上契约和既有对象。只有现有契约无法表达新的责任边界或结果关系时，才考虑增加新概念，并说明其权威来源与生命周期。
+
+
+## 12. 五域端到端责任交接补充
+
+完整五域交接矩阵和研发场景回归见[五域端到端协作一致性审查](../research/five-domain-end-to-end-consistency-review.md)。本契约执行时尤其保持以下边界：
+
+- C 维护 SOP Definition 与 Evaluation Definition；B 维护 SOP Execution 并组织业务工作；D 沿 Multica 原生 Run 执行；E 创建 Evaluation 实例并形成 Finding。
+- Evaluation 的标准版本由 C 治理，项目 / B 决定是否作为本项必需门禁及采用哪个版本；E 的评价结果作为证据回到 B，不能代替 Issue 有权主体作业务验收。
+- D 提供或引用执行 / 交付 Evidence；A 将其作为 Knowledge Revision 的依据；E 将其作为 Evaluation / Finding 的输入；B 在 Decision 中引用。同一事实只保留一个权威来源，各域维护自己的解释与决定。
+- Release、Project Adoption、Work / Run Asset Pin、ContextReceipt / Observation 分别表达发布、项目采用、本项选择和实际投递 / 消费；不得合并成单一启用状态。
+- 跨域状态变化只触发受影响范围的重新核验和处理，不静默覆盖其他域的状态。例如 Release 暂停不自动把 Issue 置为 Blocked，Run 失败不自动判定业务验收失败，Evaluation 失败不自动退回 Candidate。
+
