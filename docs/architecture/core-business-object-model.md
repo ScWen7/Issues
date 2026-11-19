@@ -286,11 +286,18 @@ flowchart TD
 | Knowledge Item | 活跃、合并、替代、退役 | 知识维护者决定 |
 | Knowledge Revision | 草拟、待核验、已核验、驳回、待复核、失效 | 修订治理记录 |
 | Knowledge Release | 已发布、暂停投递、撤回、退役 | 知识发布者与来源授权 |
+| Recall Projection（派生处理状态，不是业务对象） | Pending、Building、Current、Stale、Unavailable、Failed | 由检索投影处理回执表达；不改变 Knowledge Release，不拥有知识内容、权限或发布资格 |
 | Harness Asset / Revision | 沿既有能力资产生命周期 | 对应资产维护者 |
 | Release / Project Adoption | 沿既有发布和项目采用生命周期 | 资产维护者 / 项目有权成员 |
 | Issue / SOP / Run / Candidate / Evaluation / Proposal / Benchmark | 沿现有生命周期专题 | 对应原权威对象 |
 
 “可检索”是知识修订 / 发布在特定索引和权限范围内的处理可用状态，不等于正式发布；“证据可用”也不等于结论正确。来源修订变化时可以暂时标记旧知识待复核，但是否停止投递取决于风险、权威来源变化和适用策略。
+
+
+
+Knowledge Release 与 Recall Projection 必须分离：Release 是正式发布决定；Projection 是从正式知识派生的可重建检索视图。投影更新失败不撤销 Release，Release 暂停 / 撤回时则立即阻止旧投影命中被返回，投影清理可异步。Recall 返回前必须按权威 Knowledge Item / Revision / Release 和当前 Membership / Policy 回查候选，不能直接向调用者暴露投影中的标题、摘要、Claim 或 Evidence 元数据。
+
+Recall 覆盖状态（Complete + Hits / Complete + No Match / Partial or Stale / Unavailable or Failed）属于本次查询的运行结果，不新增业务对象。只有 Complete + No Match 才能表达“当前声明范围检索完整但没有找到知识”；部分覆盖和检索失败不得伪装成空结果。
 
 ## 10. 共享事实的权威归属与写入权
 
