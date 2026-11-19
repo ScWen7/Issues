@@ -236,3 +236,30 @@
 
 因此下一阶段最有价值的实证不是重做订单开发，而是**在已有 C1 / C2 证据上补一条最小 E → B / A / C 闭环**：E 依据 C 发布的评价标准，对 D 提供的 Candidate / Evidence 建立独立 Evaluation；结果形成 Finding；B 决定当前 Issue 如何处理；A 或 C 只在对应维护者确认后形成各自候选。该实验不得让 E 代替业务验收或自动发布。
 
+
+## 11. E → B → A / C 闭环的契约级验证结果
+
+随后使用原有 C1 / C2 固定报告补充了[Evaluation → Issue → Knowledge / Harness 闭环验证](five-domain-evaluation-closure.md)，没有重新执行订单开发或伪造新的业务样本。
+
+**实际完成的验证：**
+- E 以 C1 / C2 报告摘要、Candidate、源 Run、核验器版本和 Artifact 摘要构造独立评价记录；逻辑 Evaluation Run 与源 Run 分离。
+- C1 的 A2 失败形成高严重度 Finding，精确引用 C1 报告和东区工作簿摘要；根因仍为 unknown。A3 通过不能抵消 A2 权限硬要求。
+- C2 的 A2 / A3 均通过，不制造 Finding。
+- 事后评价默认 advisory-only。只有显式门禁声明且源 Run / Scorer 版本精确匹配时，才可能形成门禁结果。
+- B 的模拟消费要求 Issue Accountable Member 身份。C1 显式返工；C2 仅提交业务验收，不由 Evaluation 自动接受 Candidate 或完成 Issue。
+- E 按精确 C1 / C2 报告摘要关联 Topic 3B 已有知识贡献；该贡献当前最终状态为 retired，故只请求 A 维护者复核，不自动创建新 Release 或恢复旧版本。
+- 真实 C1 / C2 使用同一核验器，且核验器正确检出 C1 的 A2 失败。因此本案例没有证据支持 Harness 缺陷，不创建 C 候选。
+- 另用合成路由用例验证：若同一 Finding 的独立证据分别支持 Knowledge 与 Harness 两种根因，可以向 A、C 建立两个独立待分诊路径，但不会合并发布或自动改变 Adoption。
+
+GitHub Actions 实际执行 **23 / 23 项回归通过**：[运行记录](https://github.com/ScWen7/Issues/actions/runs/44466281176)。
+
+### 11.1 对五域融合成熟度的修正
+
+E → B → A / C 的**产品责任和决策边界已通过确定性契约验证**，但生产集成仍未完成：
+- 原型中的 Evaluation Run 身份是逻辑测试身份，没有真正创建 Multica Task / Run；
+- B 的返工 / 交验收决定是契约测试显式输入，不是对历史 Issue 决定的伪造；
+- A 的知识贡献状态来自既有实验账本，未在本轮重新执行发布或复审；
+- C 的双路由仅为合成用例，C1 / C2 真实样本未证明 Harness 缺陷；
+- 尚未在真实工作台完成 Evaluation 持久化、真实成员决策和后续生产效果回收。
+
+因此，原审查中“E 域缺少完整闭环”的判断收敛为：**产品契约与分流规则已有确定性验证；真实 Evaluation Run、Issue 决策持久化和后续生产效果联测仍是下一项实证缺口。**
