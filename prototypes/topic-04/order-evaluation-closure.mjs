@@ -137,3 +137,20 @@ export function routeFinding(finding, targets) {
     sourceFindingPreserved: true
   }));
 }
+
+export function linkPriorKnowledgeContribution(contribution, c1ReportSha256, c2ReportSha256) {
+  const inputs = contribution?.contribution?.project_audit?.inputs ?? [];
+  const hasC1 = inputs.some((item) => item.report === "order-export-c1.json" && item.sha256 === c1ReportSha256);
+  const hasC2 = inputs.some((item) => item.report === "order-export-c2.json" && item.sha256 === c2ReportSha256);
+  if (!hasC1 || !hasC2) throw new Error("prior Knowledge contribution does not cite both exact source reports");
+  const asset = contribution.contribution.team_projection_at_first_publication;
+  const status = contribution.contribution.final_status;
+  return {
+    proposalId: contribution.contribution.project_audit.proposal_id,
+    assetKey: asset?.key ?? null,
+    firstPublishedText: asset?.text ?? null,
+    historicalStatus: status,
+    nextAction: status === "retired" ? "knowledge_owner_review_required" : "reuse_existing_contribution",
+    newKnowledgeReleaseCreated: false
+  };
+}
