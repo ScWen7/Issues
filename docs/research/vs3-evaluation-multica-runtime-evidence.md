@@ -101,3 +101,93 @@ Issue Usage 查询把该 Issue 下 Task Usage 聚合起来；terminal task cover
 ## 8. 证据边界
 
 本源码快照证明上述字段、唯一约束、Session 查询、Wakeup 捕获和 Usage upsert 的具体语义。它不证明 Multica 已有 Evaluation Task Purpose、Evaluation 对象、预算预留或 Finding 消费能力；这些是 AgentPlatform / Multica 适配需要设计和验证的内容。
+
+## 9. Execution Purpose 与 Trigger Evidence 的语义必须分离
+
+固定版本的 `CreateAgentTask` 写入 Issue、Agent、Runtime、Context、归因、Trigger Evidence 和 Workflow Step；Task Response 暴露来源、Session、Retry / Rerun、Wakeup、Usage 等信息，但没有标准化 Execution Purpose。Migration 184 对 `trigger_evidence_kind / trigger_evidence_ref_id` 的定义是“直接触发原因及其来源定位”，并明确允许自由文本 Kind；它不是任务用途或隔离类别。
+
+源码：[CreateAgentTask](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/pkg/db/queries/agent.sql#L319-L388) · [AgentTaskResponse](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/internal/handler/agent.go#L399-L690) · [Attribution / Evidence migration](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/migrations/184_agent_task_attribution.up.sql)。
+
+因此 `trigger_evidence_kind='evaluation'` 可以让 Task 指向 Evaluation ID，却不能让其他查询自动排除它。不能把 Purpose 从 Evidence Kind、Prompt、Agent Role、Squad Leader 标记或随意的 Context 字段推导出来。
+
+## 10. Pending 唯一索引的准确范围
+
+固定源码中的唯一约束已经从早期 Issue / Agent 粒度演进到 Issue / Agent / Comment Thread 粒度；但仍没有 Purpose 条件。Migration 257 创建的 pending v2 按 Issue / Agent 唯一；Migration 452 将唯一键扩展到 Comment Thread；两者的部分索引条件都是 queued / dispatched，或特定 channel media deferred，均不按治理用途区分。
+
+源码：[migration 257](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/migrations/257_agent_task_queue_channel_media_pending_unique_v2.up.sql) · [migration 452](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/migrations/452_agent_task_pending_thread_unique.up.sql)。
+
+**关键修正：** 不能只修改 `HasPendingTaskForIssueAndAgent` 查询。物理唯一索引同样必须允许同一 Issue / Agent / Thread 下，生产 Task 与 Governance Task 各自合法排队；治理 Task 自身则按稳定 Evaluation 来源身份幂等，不能因放开生产槽位而失去去重。
+
+## 11. Comment Coalescing 是独立于 Pending Lookup 的第二道边界
+
+`MergeCommentIntoPendingTask` 会把新评论合并到 queued 的同 Issue / Agent / Thread Task，并重新盖章 Trigger、Originator、Accountable、Evidence、Connected Apps 等信息。该 SQL 只排除 Wakeup Task，没有 Purpose 判断。
+
+源码：[MergeCommentIntoPendingTask](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/pkg/db/queries/agent.sql#L1779-L1865)。
+
+因此 G1 生产 / 评价任务并存后，还必须测试成员评论不会被并入 Evaluation 输入；评价快照不能被后来评论改写；普通生产评论仍能按原路径进入生产 Task。只在 pending 检查中区分 Purpose，而漏掉 Merge SQL，仍然不安全。
+
+## 12. Wakeup 不只消费 Task 终态，还捕获 Comment 与 Issue 写入
+
+Migration 520 为 Task 状态变化、Comment 创建 / 更新 / 删除、Issue 字段变化、Label、Reaction、Attachment 等建立事务性 Wakeup 捕获。Migration 579 解决的是 Issue 已交给某 Agent 时避免该 Agent 重复收到同一 Issue 变更；它明确保留其他订阅者，以及 Task、Comment、Reaction 事件。
+
+源码：[migration 520](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/migrations/520_collaboration_wakeup_events.up.sql) · [migration 579](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/migrations/579_wakeup_skip_handed_to_agent.up.sql)。
+
+因此不能只过滤 `task.completed`。治理 Task 的评论、Issue 更新及其他事务性副作用同样可能形成普通 Wakeup Receipt。治理执行应默认不产生普通生产 Wakeup 输入；治理结果由 Evaluation 消费器成功写入后，再通过明确的结果通知交回原 Issue 负责人。Task Purpose 必须能从来源 Task ID 解析，并在数据库触发捕获处或等价权威边界实施过滤。
+
+## 13. Usage 与执行列表的用途展示
+
+`ListIssueTaskUsage` 和 `GetIssueUsageSummary` 按 Issue 关联的 Task / Usage 汇总，原生账本没有 Purpose 分类。该行为保留团队总资源统计是合理的，但 AgentPlatform 的生产成本视图必须有可信 Purpose 来源，将治理 Task 单列；不能把 Evaluation Task 的费用记成生产交付成本。
+
+源码：[ListIssueTaskUsage / GetIssueUsageSummary](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/pkg/db/queries/task_usage.sql#L27-L120)。
+
+同理，任务历史可以保留治理 Task 的可追溯记录，但必须清楚标注用途；不能将它伪装成普通生产 Worker 结果，也不能为隔离而从团队治理总成本中删除。
+
+## 14. 最小 Purpose 隔离契约与测试门禁
+
+不增加第二套队列、Run 或 Runtime。沿用 Multica Task / Run，在现有任务语义中补充可查询、可继承、可传递到 Claim 的 Purpose：Production；Governance 下分 Evaluation、Benchmark、Improvement、Calibration。
+
+| 边界 | 必须满足的契约 |
+|---|---|
+| 创建 | 既有入口缺省为 Production；仅明确治理入口创建 Governance；未知 Purpose 不得获得治理权限 |
+| 来源 | Evaluation ID 是治理 Task 的稳定来源身份；与 Purpose 分开存储 / 查询 |
+| 幂等 | 同一 Evaluation ID 只绑定一个主 Task；响应丢失可查回；Retry 子 Task 继承 Purpose 和来源 |
+| Pending | 治理 Task 不占用也不被合并进生产 pending / coalescing 槽位；生产既有去重行为保持不变 |
+| Session | 治理与生产双向不恢复；不同 Evaluation 之间也不共享 Session |
+| Wakeup | 治理 Task 终态、评论和 Issue 副作用默认不进入普通生产 Wakeup |
+| Claim | Claim / Runtime 可识别 Purpose；实际 Agent、Runtime、Model 仍是真实执行主体 |
+| Usage | Usage 仍归 Multica Task；生产成本视图排除治理 Task，治理成本和团队总成本保留 |
+| 历史兼容 | 无 Purpose 的旧 Task 按 Production 解释；混合版本下治理隔离能力缺失时不得启动治理 Task |
+
+进入真实 Evaluation Run 前，必须完成以下控制面回归：
+
+| 编号 | 场景 | 通过条件 |
+|---|---|---|
+| G1 | 同 Issue / Agent / Thread 已有 queued Production Task，再创建 Evaluation Task | 两者分别存在，不冲突、不共用 pending 槽位 |
+| G2 | Evaluation Task queued 时成员发表评论 | 评论不进入 Evaluation 快照，生产评论不丢失 |
+| G3 | Evaluation Task queued 时新生产 Task 到达 | 生产任务可按原规则入队 |
+| G4 | Evaluation 终态后生产 Task 开始 | 不恢复 Evaluation Session |
+| G5 | Evaluation Task 开始 | 不恢复生产 Session 或生产 Transcript |
+| G6 | Evaluation Task 自动 Retry | 子 Task 保留 Purpose、Evaluation 来源和原生 Retry 谱系 |
+| G7 | Evaluation Task 终态 | 不触发普通生产 Wakeup，不产生评价递归 |
+| G8 | Evaluation Task 写入 Comment / Issue / Reaction | 默认受限或拒绝；不向普通 Wakeup 注入治理噪声 |
+| G9 | Evaluation Usage 写入 | 原生 Usage 可见；生产 / 治理 / 团队总量口径正确 |
+| G10 | Purpose 缺失、未知、旧 Server / Daemon 混合版本 | 旧生产兼容；治理任务 fail closed |
+| G11 | 同 Evaluation ID 并发触发 | 只创建一个主 Task；重复请求查回原 Task |
+| G12 | Task 创建成功但响应丢失 | 按 Evaluation 来源身份查回原主 Task，不重复创建 |
+
+每个用例记录 Multica commit、Evaluation ID、Target Version、Purpose、主 Task / Retry 谱系、Session ID、Claim / Start / 宿主启动 / 终态、Usage、Wakeup Receipt 和原 Issue 的生产 Task 状态。
+
+## 15. 当前结论与 VS-3 状态修正
+
+| 能力 | 当前状态 |
+|---|---|
+| Multica 原生 Task / Run / Runtime / Claim / Start / terminal | 可复用 |
+| Evaluation ID 作为 Task 来源证据 | 可复用现有 Evidence Kind / Ref 机制，但必须另有 Purpose |
+| Governance Purpose 原生字段与 Claim 传递 | 固定源码未提供，待适配 |
+| Pending / Unique / Comment Merge 隔离 | 固定源码未提供，待适配 |
+| Session 双向隔离 | 固定源码未提供，待适配 |
+| Task / Comment / Issue Wakeup 隔离 | 固定源码未提供，待适配 |
+| Usage 原生归属 | 可复用；用途分类视图待适配 |
+| 真实 Evaluation Task / Run | 尚未执行 |
+
+**当前不应直接在未完成 Purpose 隔离的 Multica 环境创建真实 Evaluation Task。** 先补齐 Purpose 的最小适配和 G1–G12 控制面回归，再进入 VS-3 首个真实 Model-based Evaluation Run。这是复用 Multica 原生执行链、同时保护现有生产协作语义的必要前置。
