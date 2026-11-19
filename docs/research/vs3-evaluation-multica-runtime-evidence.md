@@ -191,3 +191,18 @@ Migration 520 为 Task 状态变化、Comment 创建 / 更新 / 删除、Issue �
 | 真实 Evaluation Task / Run | 尚未执行 |
 
 **当前不应直接在未完成 Purpose 隔离的 Multica 环境创建真实 Evaluation Task。** 先补齐 Purpose 的最小适配和 G1–G12 控制面回归，再进入 VS-3 首个真实 Model-based Evaluation Run。这是复用 Multica 原生执行链、同时保护现有生产协作语义的必要前置。
+## 16. 对 Multica 当前 main 的增量复核（2026-11-19）
+
+为避免只沿用架构文档中的历史固定版本，本轮又检查了 Multica 当前默认分支：`main @ 528cd82711f2f99eedd04e4d3a68c6c31b514659`。
+
+检查当前 main 的以下文件，均未发现 `execution_purpose`、`governance_purpose`、`execution_lane`、`ExecutionPurpose` 或 `GovernancePurpose` 标识：
+
+- `server/pkg/db/queries/agent.sql`：仍包含 Task 创建、GetLastTaskSession、pending 检查和 Comment Merge 路径；
+- `server/internal/handler/agent.go`：Task Response 仍没有标准化 Purpose 字段；
+- `server/migrations/184_agent_task_attribution.up.sql`：仍将 Trigger Evidence 定义为直接触发原因；
+- `server/migrations/520_collaboration_wakeup_events.up.sql` 与 `579_wakeup_skip_handed_to_agent.up.sql`：仍按 Wakeup / source Task / handed-to-agent 等现有语义处理事件，没有治理用途过滤；
+- `server/pkg/db/queries/task_usage.sql`：Issue Usage 仍按 Issue 下 Task 聚合，没有 Purpose 维度。
+
+当前 main 源码链接：[agent.sql](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/pkg/db/queries/agent.sql) · [agent.go](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/internal/handler/agent.go) · [migration 184](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/184_agent_task_attribution.up.sql) · [migration 520](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/520_collaboration_wakeup_events.up.sql) · [migration 579](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/579_wakeup_skip_handed_to_agent.up.sql) · [task_usage.sql](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/pkg/db/queries/task_usage.sql)。
+
+因此，Purpose 隔离缺口不只是架构文档所 pin 的历史版本问题；在本轮检查的 Multica 当前 main 中仍然存在。该结论仅表示上述源码文件和机制没有对应 Purpose 标识 / 过滤，不代表对所有运行部署版本的现场验证。
