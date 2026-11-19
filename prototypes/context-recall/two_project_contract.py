@@ -67,6 +67,16 @@ def knowledge_recall(query: str, principal: dict, corpus: dict) -> list[dict]:
     ]
 
 
+
+def recall_with_projection(query: str, principal: dict, corpus: dict, projection_state: str) -> dict:
+    """Model coverage semantics separately from authoritative Release eligibility."""
+    if projection_state in {"Unavailable", "Failed"}:
+        return {"coverage": projection_state, "hits": []}
+    hits = knowledge_recall(query, principal, corpus)
+    if projection_state in {"Pending", "Building", "Stale"}:
+        return {"coverage": "Partial / Stale", "hits": hits}
+    return {"coverage": "Complete", "hits": hits}
+
 def source_search(query: str, principal: dict, corpus: dict) -> list[str]:
     # Independent provider. It never shares the Knowledge Recall corpus/output.
     return [
@@ -174,6 +184,36 @@ def run() -> dict:
     checks["source_derivation_revocation_pauses_future_team_recall"] = "T1" not in ids(grant_revoked_hits) and "B1" in ids(grant_revoked_hits)
     checks["project_B_knowledge_remains_with_project_membership"] = "B1" in ids(b_hits)
 
+    # Release authority and Recall projection freshness are separate dimensions.
+    paused_release_corpus = {**corpus, "knowledge": [
+        {**item, "distribution_status": "paused"} if item["id"] == "T1" else item
+        for item in corpus["knowledge"]
+    ]}
+    stale_after_pause = recall_with_projection(
+        "regional data export permissions", b, paused_release_corpus, "Stale"
+    )
+    unavailable = recall_with_projection(
+        "quantum compiler satellite telemetry", b, corpus, "Unavailable"
+    )
+    stale_no_hit = recall_with_projection(
+        "quantum compiler satellite telemetry", b, corpus, "Stale"
+    )
+    complete_no_hit = recall_with_projection(
+        "quantum compiler satellite telemetry", b, corpus, "Current"
+    )
+    checks["paused_release_blocked_even_when_projection_stale"] = "T1" not in ids(stale_after_pause["hits"])
+    checks["unavailable_projection_not_reported_as_no_match"] = unavailable["coverage"] == "Unavailable"
+    checks["stale_projection_not_reported_as_complete_no_match"] = stale_no_hit["coverage"] == "Partial / Stale"
+    checks["complete_current_no_hit_is_distinguished"] = complete_no_hit["coverage"] == "Complete" and complete_no_hit["hits"] == []
+    checks["projection_failure_does_not_change_release_authority"] = all(
+        item.get("distribution_status", "active") == "active" for item in corpus["knowledge"]
+    )
+    checks["projection_current_is_not_release_authority"] = (
+        "T1" not in ids(knowledge_recall(
+            "regional data export permissions", b, paused_release_corpus
+        ))
+    )
+
     # Scope filtering happens before serialization: no result envelope for A1.
     checks["unauthorized_candidate_not_serialized"] = "A1" not in json.dumps(b_hits)
 
@@ -202,6 +242,10 @@ def run() -> dict:
             "project_b_harness_without_adoption": harness_resolution(b, corpus),
             "project_b_harness_with_adoption": harness_resolution(b_adopter, corpus),
             "project_b_no_hit": ids(no_hit),
+            "stale_after_release_pause": {"coverage": stale_after_pause["coverage"], "hits": ids(stale_after_pause["hits"])},
+            "unavailable_projection": unavailable["coverage"],
+            "stale_projection_no_hit": stale_no_hit["coverage"],
+            "complete_projection_no_hit": complete_no_hit["coverage"],
         },
     }
 
