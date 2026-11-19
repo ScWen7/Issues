@@ -138,3 +138,18 @@ prototypes/topic-03b/knowledge/source_context.py 实现：
 这属于现有知识能力如何进入工作台主线的产品 / 业务承载审查，不是数据库或搜索技术选型。
 
 **结论：我可以继续推进仓库审查、产品契约、测试和文档；你只需要在真实 Provider 和本地宿主不可替代的环节参与。当前真实 Recall Provider 缺位，应先如实补齐架构承载设计，不应让你先去跑一个实际上不存在的产品入口。**
+
+
+## 8. Knowledge Recall 的架构承载审查结论
+
+后续形成[Knowledge Recall 的能力归属与调用承载审查](knowledge-recall-ownership-and-invocation.md)，并将关键规则同步到跨层业务契约和知识管理生命周期。
+
+职责归属明确为：
+- A · 团队知识管理拥有正式 Team / Project Knowledge 的查询与读取权威；
+- B · 产研工作与流程协作以 Issue / Work Agreement 决定是否触发 Recall、候选是否适用及是否纳入本项工作；
+- D · 执行与交付证据负责通过现有宿主适配通道投递获准内容并记录实际消费证据；
+- C · Harness 治理独立解析发布、采用和执行资格。
+
+Recall 可由工作准备阶段或 Agent 执行中主动触发，不要求每个 Issue 必须执行。它不是独立能力域、Recall Runtime、Issue / Task / Run 或 Context Compiler。Agent 不能自行声明 Team / Project scope，身份与授权必须由现有受信任工作 / 宿主上下文提供。
+
+当前缺口因此被准确定位为：**A 域尚未形成可供 B 和获准 Agent 调用的正式 Knowledge Recall / Read 能力实现**，而不是缺少一个新的统一搜索服务。真实 Provider 出现前，双项目 20 / 20 测试仍然只是契约模拟；本地宿主验证应等 A 域真实读取入口可用后再执行。
