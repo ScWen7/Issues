@@ -193,3 +193,10 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 该实验把 E 的评价记录与源 Run 分离，C1 的 A2 失败形成有证据 Finding，C2 不制造负向 Finding；B 的决定必须由 Issue Accountable Member 显式输入；A 的既有贡献按 C1 / C2 精确报告摘要关联，且尊重当前 retired 状态；C1 / C2 使用同一核验器并成功发现 A2 问题，因此不虚构 Harness 缺陷。
 
 证据边界：这次是确定性评价 / 路由契约实验，Evaluation Run 使用逻辑测试身份，没有创建真实 Multica Task / Run，没有调用模型裁判，也没有重写历史 Issue 决定。真实 Evaluation Run、工作台持久化和后续生产效果仍待联测。
+## 12. VS-3 · Multica Governance Purpose 隔离源码复核
+
+固定 Multica 源码 `71683141a764ed3b1620db4bc26a2d0a098f135c` 的 Task / Run 隔离复核见[VS-3 Multica Evaluation / Governance Task 隔离源码取证](vs3-evaluation-multica-runtime-evidence.md)。确认当前源码有 Task 来源 Evidence、Retry 谱系、Session 恢复、Issue Wakeup 和 Task Usage，但没有贯穿这些机制的 Execution Purpose。
+
+关键风险不是 Evaluation Task 能否被派发，而是它与生产 Task 共用 Issue / Agent 时，可能争抢 pending 唯一槽位、被普通评论合并、与生产 Session 串线、触发普通 Wakeup，或混入生产成本视图。Trigger Evidence Kind 只说明来源，不提供这些隔离语义。
+
+因此 VS-3 真实 Model-based Evaluation Run 的前置顺序修正为：先完成 Purpose 的原生 Task / Claim 语义及 G1–G12 控制面回归，再运行真实 Scorer。当前未修改 Multica 上游，也未把源码审查声称为 Runtime 实证。
