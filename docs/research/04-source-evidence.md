@@ -185,3 +185,11 @@ Copilot 本机测试在同一 Session 中执行两个不同 Run，直接证明 S
 **用量结论未变化：** Assistant 事件 0 条，原生 `request_id` 为 null，请求 Credits 为 null / unknown；Result 的 `total_credits=0` 仅为 Session 累计快照。Result event_id 离线三次重放后保留一个观察，但这不是请求级计量幂等证明。总判定 PARTIAL。
 
 归档：[validation.json](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/validation.json) · [process-observation.json](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/process-observation.json) · [原始回执](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/qoder-receipt.jsonl) · [SHA-256](../../artifacts/topic-04/mac-qoder-daemon-close-20261115-0459/SHA256SUMS.txt)。
+
+## 11. C1 / C2 的 Evaluation → Issue → Knowledge / Harness 闭环补充
+
+沿用第 3A / 3B 的 C1、C2 固定报告，新增[五域 Evaluation 闭环实验](five-domain-evaluation-closure.md)。独立 Evaluation 原型与 C1 / C2 样本联测后，23 / 23 项契约回归通过：[GitHub Actions](https://github.com/ScWen7/Issues/actions/runs/44466281176)。
+
+该实验把 E 的评价记录与源 Run 分离，C1 的 A2 失败形成有证据 Finding，C2 不制造负向 Finding；B 的决定必须由 Issue Accountable Member 显式输入；A 的既有贡献按 C1 / C2 精确报告摘要关联，且尊重当前 retired 状态；C1 / C2 使用同一核验器并成功发现 A2 问题，因此不虚构 Harness 缺陷。
+
+证据边界：这次是确定性评价 / 路由契约实验，Evaluation Run 使用逻辑测试身份，没有创建真实 Multica Task / Run，没有调用模型裁判，也没有重写历史 Issue 决定。真实 Evaluation Run、工作台持久化和后续生产效果仍待联测。
