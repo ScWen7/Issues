@@ -430,3 +430,16 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 - Release、Project Adoption、Work / Run Asset Pin、ContextReceipt / Observation 分别表达发布、项目采用、本项选择和实际投递 / 消费；不得合并成单一启用状态。
 - 跨域状态变化只触发受影响范围的重新核验和处理，不静默覆盖其他域的状态。例如 Release 暂停不自动把 Issue 置为 Blocked，Run 失败不自动判定业务验收失败，Evaluation 失败不自动退回 Candidate。
 
+
+## 13. Evaluation Finding 的跨域消费边界
+
+Evaluation 与 Finding 的端到端案例及契约回归见[五域 Evaluation → Issue → Knowledge / Harness 闭环验证](../research/five-domain-evaluation-closure.md)。
+
+- E 的 Evaluation 引用被评 Run / Candidate 和固定 Evidence，使用独立评价执行身份；缺少必需证据时返回 Inconclusive，不把缺项解释为低分。
+- 事后评价默认 advisory-only。只有项目 / SOP 明确声明门禁，并且源 Run、Scorer 版本与门禁定义匹配时，才产生门禁结果。
+- E 将 Finding 交回 B；只有 Issue 的 Accountable Member / 有权 Acceptor 可以作业务返工、交验收或接受决定。Evaluation 不直接修改 Issue、Candidate 或源 Run。
+- 跨工作 Finding 由 E 提供证据和路由建议；A / C 分别判断是否建立知识或 Harness 候选。两条候选独立维护、验证、发布和采用，不共享一个改进 Release。
+- 同一 Finding 可以支持多个处理路径，但无证据不路由；根因未知时保持未知，不强行归咎于模型、知识或 Harness。
+- Evaluation 通过不等于 Issue Accepted；Harness / Knowledge 候选准备完成不等于 Release；Release 不等于 Project Adoption。
+
+上述规则是跨层消费契约，不新增全局改进协调器、第二套 Run 或统一资产发布对象。
