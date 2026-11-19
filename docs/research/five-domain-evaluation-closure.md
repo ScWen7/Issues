@@ -222,3 +222,12 @@ node --test \
 8. 注入重复触发、Task 创建响应丢失、结果回写响应丢失、权限撤回、预算不足和合法 Retry，验证无重复 Evaluation / 主 Task / Finding。
 
 上述步骤与 [VS-3 第 10–12 节](../architecture/vs3-evaluation-technical-contract.md)的首个纵向范围、故障注入和完成标准一致。真实 Multica 数据库、成员凭据和 Runtime 需要在集成环境提供；在它们可用前，不宣称生产闭环完成。
+### 10.2 VS-3 源码审查发现的真实前置阻塞
+
+随后对固定 Multica `71683141a764ed3b1620db4bc26a2d0a098f135c` 做了源码级复核，发现现有底座没有统一 Execution Purpose / Governance Purpose。`trigger_evidence_kind` 只定位触发来源，不能隔离 pending 唯一槽位、Comment Coalescing、Session 恢复、Issue Wakeup 或 Usage 视图。
+
+这意味着之前“下一步直接创建真实 Evaluation Task”的顺序需要修正：**不能在未完成 Purpose 隔离的原生 Multica Task 链上直接启动 Evaluation**，否则存在评价上下文串线、普通评论并入评价输入、治理终态触发生产 Wakeup 等风险。
+
+已新增[VS-3 · Multica Evaluation / Governance Task 隔离源码取证](vs3-evaluation-multica-runtime-evidence.md)，并将 Purpose 隔离及 G1–G12 控制面回归加入 VS-3 技术承载契约。下一步必须先验证这组底座隔离门禁，再执行真实 Model-based Evaluation Run。
+
+这一发现不推翻五域职责结论；它修正的是 VS-3 的工程先后顺序和 Multica 适配前置条件。
