@@ -354,3 +354,4 @@ VS-3 仍未确定具体数据库表、API、预算锁实现、模型调用协议
 
 进入真实 Evaluation Task 前，必须完成取证报告 G1–G12 的控制面回归。该门槛是 VS-3 纵向执行的前置条件，不要求建设第二套 Task / Run / Runtime，也不在本契约中指定数据库字段或 API。
 补充：该缺口不仅存在于本文固定的 Multica `71683141a764ed3b1620db4bc26a2d0a098f135c`，也已对照 2026-11-19 检查时的 Multica 当前 `main @ 528cd82711f2f99eedd04e4d3a68c6c31b514659`。两者均未发现统一 Execution / Governance Purpose 字段及其在上述生命周期查询中的过滤。详见[源码取证第 16 节](../research/vs3-evaluation-multica-runtime-evidence.md#16-对-multica-当前-main-的增量复核2026-11-19)。
+Purpose 适配的具体源码触点、推进顺序及 Wakeup 来源身份注意事项见[VS-3 源码取证第 17 节](../research/vs3-evaluation-multica-runtime-evidence.md#17-purpose-适配的最小源码触点与推进顺序)。
