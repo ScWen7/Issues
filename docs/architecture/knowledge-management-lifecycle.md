@@ -179,6 +179,16 @@ Knowledge Recall 只负责从正式 Team Knowledge 和 Project Knowledge 中发�
 
 Issue / Work Agreement、Project 配置和已明确引用的来源应按稳定身份直接读取；Project Sources 的原文检索 / 读取由对应来源连接与 Context Contract 提供；Project Code Knowledge 由代码 Wiki 或当前代码工具提供。它们不是 Knowledge Recall 的默认索引范围，也不因被工作消费就自动成为 Knowledge Item。
 
+
+知识 Recall 的能力归属和调用责任按现有五域分工：
+- **A · 团队知识管理**拥有正式 Team / Project Knowledge 的查询与读取权威，负责候选范围过滤、知识状态、Revision / Release 读取、Evidence 引用和 Knowledge Feedback。
+- **B · 产研工作与流程协作**以 Issue / Work Agreement 为起点，决定是否触发 Recall，提供工作意图和可信的 Team / Project 范围，并判断候选是否适用于当前工作、是否采用。
+- **D · 执行与交付证据**通过现有宿主适配通道投递已获准选用的知识，记录准备 / 投递回执，并按宿主实际能力观察加载、工具调用和使用证据。
+
+Agent 可以在工作准备时或执行中主动调用 A 域 Recall；这不意味着每个 Issue 必须执行 Recall，也不意味着新增 Recall Agent、Recall Run 或 Context Compiler。调用上下文中的成员身份、项目范围和授权来自现有受信任工作 / 宿主链，不能由 Agent 自行声明。
+
+Recall 默认返回带 Knowledge Item、Revision / Release、Claim、适用条件、限制、状态和 Evidence 引用的候选摘要。展开时再按稳定身份读取完整修订；命中不等于采用，只有本项实际采用的知识版本才固定为 Work / Run 引用。投递前重新核验接收者权限、知识状态和 Evidence 原文权限。Recall 的具体工具通道和搜索实现不在本生命周期中选型。
+
 ### 5.2 返回可核查的知识包
 
 面向成员或 Agent 的知识结果不只是文本片段。每项结果应保留：
