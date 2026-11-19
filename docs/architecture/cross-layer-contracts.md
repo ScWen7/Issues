@@ -189,7 +189,7 @@ Knowledge Release 是正式发布决定；Recall Projection 是从正式知识�
 - Projection 只提供候选身份，任何可披露结果字段都必须回查权威 Knowledge Item / Revision / Release 和当前 Membership / Policy；
 - 投影预过滤不构成授权安全边界。
 
-Recall 覆盖状态必须区分 Complete + Hits、Complete + No Match、Partial / Stale、Unavailable / Failed 和多范围 Partial Success。只有 Complete + No Match 才能表达声明范围检索完整但无匹配知识。部分覆盖或失败不能伪装成空结果；无知识命中也不代表 Project Sources、Code Retrieval 或 Issue 上下文没有内容。
+知识生命周期与投影可用性详见[Knowledge 生命周期与 Recall 可用性融合审查](../research/knowledge-lifecycle-recall-availability.md)。Recall 覆盖状态必须区分 Complete + Hits、Complete + No Match、Partial / Stale、Unavailable / Failed 和多范围 Partial Success。只有 Complete + No Match 才能表达声明范围检索完整但无匹配知识。部分覆盖或失败不能伪装成空结果；无知识命中也不代表 Project Sources、Code Retrieval 或 Issue 上下文没有内容。
 
 来源修订变化只触发依赖 Evidence 的影响分析，不自动判定知识失效。根据事实类型、来源权威性、风险和撤回范围，决定只更新定位 / 投影、标记 Revision 待复核、暂停相关 Release 新投递或形成新 Revision。Work / Run Asset Pin 保留历史版本身份但不授予永久读取权；在途工作按当前权限、Release 和风险重新确认是否继续。
 
