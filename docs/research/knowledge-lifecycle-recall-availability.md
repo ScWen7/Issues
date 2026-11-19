@@ -235,4 +235,4 @@ Knowledge Consumption Contract 定义单次查询、读取、Evidence 展开、�
 - Projection Current 且无候选：才可报告 Complete + No Match；
 - 投影处理状态变化不改变 Release 的权威发布状态。
 
-本次 CI 对应提交：2a1b28ffe113e1bd70cfd902a7ec4e4bb428b5b8。测试结果以该提交的 GitHub Actions 实际执行记录为准。此脚本仍是确定性契约模拟，不证明生产索引和真实权限竞态。
+本次 CI 对应提交：2a1b28ffe113e1bd70cfd902a7ec4e4bb428b5b8，实际结果 **26 / 26 通过**，无失败断言：[GitHub Actions 执行记录](https://github.com/ScWen7/Issues/actions/runs/44449841512)。此脚本仍是确定性契约模拟，不证明生产索引和真实权限竞态。
