@@ -1,6 +1,6 @@
 # 统一生命周期、状态机与事件模型
 
-本文定义核心对象在运行期间如何变化，以及这些变化如何跨层传递。它建立在[核心对象模型](core-object-model.md)之上，是各专题共同遵循的生命周期语义。并发写入、跨层动作恢复、结果消费和旧执行隔离见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本文不定义数据库表、API 字段、消息中间件或页面结构。
+本文定义核心对象在运行期间如何变化，以及这些变化如何跨层传递。知识来源、证据、知识修订与发布的对象关系见[核心业务对象与统一关系模型](core-business-object-model.md)，具体处理规则见[知识管理生命周期](knowledge-management-lifecycle.md)。它建立在[核心对象模型](core-object-model.md)之上，是各专题共同遵循的生命周期语义。并发写入、跨层动作恢复、结果消费和旧执行隔离见[核心协作一致性与并发控制模型](core-consistency-concurrency.md)。本文不定义数据库表、API 字段、消息中间件或页面结构。
 
 ## 1. 统一规则
 
@@ -23,7 +23,7 @@
 
 1. 谁发起或观察：主体身份及权限。
 2. 改变哪个对象：对象身份、当前版本和当前状态。
-3. 为什么允许改变：前置条件、授权范围、当前候选和因果来源。
+3. 为什么允许改变：前置条件、授权范围、适用的输入版本与候选、因果来源。
 4. 改变后谁接续：等待、派发、交接、消费结果，或不触发后续动作。
 
 不满足条件时，保留拒绝或待处理事实，不通过猜测补齐状态。
@@ -33,6 +33,10 @@
 | 对象 | 生命周期管理的问题 | 权威状态来源 |
 |---|---|---|
 | Issue | 业务工作是否待安排、推进、等待、审查、完成或取消 | Issue 工作记录与有效工作流写入 |
+| Source Connection / Item / Revision | 来源连接、内容发现、修订取得与撤回情况 | 来源系统、连接授权和平台取得快照 |
+| Ingestion Batch / Processing | 一批资料是否待取得、解析、部分完成或失败 | 批次与处理回执 |
+| Evidence / Evidence Anchor | 证据是否可定位、可用、待复核或失效 | 来源修订、证据记录和当前权限 |
+| Knowledge Item / Revision | 知识是否活跃、待核验、已核验、待复核或退役 | 知识治理记录及维护者决定 |
 | Project Workflow | 当前步骤、进入条件和负责人交接 | 项目配置及 Issue 上的实际步骤记录 |
 | SOP Definition | 定义如何草拟、审核、发布、弃用 | 能力资产维护与发布机制 |
 | SOP Execution | 受托流程是否准备、推进、等待、交还或终止 | 对应流程实例 |
@@ -41,7 +45,9 @@
 | Run | 受管执行是否排队、领取、运行、终止或失联待核实 | Multica 派发、Daemon、Runtime 和宿主回执 |
 | Candidate | 固定交付版本是否待检查、接受、退回或被替代 | Issue 对该候选的处置决定 |
 | Evaluation | 一次评价是否待执行、执行中、完成或证据不足 | 评价任务与评价结果 |
-| Improvement Proposal | 改进是否提出、评估、对照、审核、发布 | 资产维护者及项目有权成员的决定 |
+| Improvement Proposal | 改进是否提出、分诊、评估、审核及完成批准的变更 | 提案记录及相应维护者决定 |
+| Release | 不可变资产版本是否可供选用 | 对应资产的发布记录与维护者决定 |
+| Project Adoption | 项目是否在声明范围采用某个 Release 或项目配置版本 | 项目配置及有权成员的采用决定 |
 
 这些是概念语义，不要求每个对象都新增一套物理状态字段。
 
@@ -67,6 +73,8 @@ Issue 表达业务工作，不表达 Agent 进程的运行情况。沿用项目�
 - Cancelled 是业务决定，不等同于停止 Run。仍在运行的执行需单独请求停止并核对实际终态和副作用。
 - 改派负责人本身不必改变 Issue 状态；负责人变化与执行处置是两个独立事实。
 - 子 Issue 独立推进。父 Issue 是否可完成，按父项工作约定消费子项交付，不由子项状态简单汇总推导。
+
+**持续协调委托。** 有权成员把 Issue 指派给承担 Main Bot 职责的 Agent，并确认范围后，委托可跨多个 Coordinator Turn（协调回合）持续。每个回合对应一次原生 Task / Run。等待 Worker 时，Main Bot 可结束当前回合，已派发的 Worker 按自己的授权和 Run 继续。改派、撤销、Issue 完成或取消结束当前委托。重新指派给同一 Agent 也须依据新的委托继续。
 
 ## 4. Project Workflow 生命周期
 
@@ -113,7 +121,9 @@ Returned 是交接结果，不等于成功或失败。Completed 只说明受托�
 
 ### 6.1 Node Activation
 
-一次 Node Activation 表示某个节点在确定输入、候选和授权下的一次有效进入。
+一次 Node Activation 表示某个节点在确定的工作约定、输入和授权下的一次有效进入。首次生产可以只固定工程或资料基准及必需输入，尚无 Candidate 也可按前置条件启动。针对已有交付的检查或修正节点，须固定其输入 Candidate。
+
+本轮生成的 Artifact 及其组成的 Candidate 记录为该激活的输出，后继节点将选定的输出版本作为自己的输入。首次产出或在原修正预算内改进输出，均保留在本轮生产激活中。
 
 | 语义状态 | 含义 |
 |---|---|
@@ -126,7 +136,7 @@ Returned 是交接结果，不等于成功或失败。Completed 只说明受托�
 | Skipped | 按已声明条件和授权跳过，并记录依据 |
 | Cancelled | 本轮被取消，不再接受其结果推进后继 |
 
-节点重新进入、候选变化或业务返工必须创建新的激活轮次。同一激活内的技术重试和执行重跑保留各自尝试及 Run 关系。旧激活的迟到结果只能补充旧轮次，不能推进新轮次。
+节点重新进入、已固定的输入候选被替换或发起业务返工时，受影响节点必须创建新的激活轮次。本轮产出新 Candidate 不会自行重开生产节点；若新版替换了下游节点已绑定的输入，则为受影响的下游节点建立新激活并重验。同一激活内的技术重试和执行重跑保留各自尝试及 Run 关系。旧激活的迟到结果只能补充旧轮次，不能推进新轮次。
 
 ### 6.2 Node Attempt
 
@@ -147,6 +157,7 @@ Run 是实际受管执行记录。状态名称以 Multica 固定版本及具体 
 |---|---|---|
 | Queued | 执行安排已保存，等待可用 Runtime / Daemon | 已安排，不代表已领取或已执行 |
 | Claimed | 某 Runtime 已领取安排 | 已领取，不代表宿主进程已启动 |
+| 等待本地目录（`waiting_local_directory`） | 已领取的执行因原地目录占用或准备工作树快照而等待真实路径释放 | 只在取得相应回执时显示。释放后原 Run 继续准备，也可由有权主体取消 |
 | Starting | Daemon 正在准备环境或启动宿主 | 启动尚未得到确认 |
 | Running | 宿主已确认开始执行 | 可继续产生观察、结果和用量 |
 | Stop Requested | 平台或有权主体已请求停止 | 请求不等于已停止 |
@@ -154,6 +165,8 @@ Run 是实际受管执行记录。状态名称以 Multica 固定版本及具体 
 | Failed | 取得可信失败终态 | 失败范围和副作用另行记录 |
 | Cancelled | 取得可信取消终态 | 区分停止请求与实际终止 |
 | Lost / Unknown | 无法取得可靠终态或资源失联 | 不得猜测成功、失败或释放资源 |
+
+原生状态与统一语义分别解释：Multica `71683141` 的 [CompleteAgentTask](https://github.com/multica-ai/multica/blob/71683141a764ed3b1620db4bc26a2d0a098f135c/server/pkg/db/queries/agent.sql#L975-L1003) 写入 Task `status = completed`，对应本表 Run 的 Succeeded。读取 Task Completed / `task.completed` 时保留原生状态与事件身份，再映射执行成功语义。SOP Execution、Evaluation、Proposal 和 Benchmark Experiment 的 Completed 继续表示各自业务对象完成；它们与 Task 的 completed 通过明确引用关联，不因名称相同互相推进。
 
 关键规则：
 
@@ -165,20 +178,21 @@ Run 是实际受管执行记录。状态名称以 Multica 固定版本及具体 
 
 ## 8. Candidate、Delivery Record 与验收
 
-Candidate 的内容和组成版本一经创建即固定。后续变化形成新 Candidate 或新版本引用，不覆盖旧内容。
+Candidate 的 Manifest、Candidate Generation、Work Agreement、Artifact Locator / Digest、送审范围和适用标准一经创建即固定。候选替换必须在 Issue / Acceptance Channel 的权威写入边界比较预期当前 Candidate；Issue revision 不是 Candidate 身份。后续变化形成新 Candidate，不覆盖旧内容。
 
 | 处置 | 含义 | 影响 |
 |---|---|---|
 | Submitted | 候选已交回 Issue，等待处理 | 可进入检查、补充或验收 |
 | Under Review | 当前候选正在按约定检查 | 不改变候选内容 |
-| Accepted | 有权主体接受该候选及适用标准 | 满足 Issue 完成条件时可用于完成 |
+| Partially Accepted | 有权主体接受明确范围 / 用途，仍有必需范围未完成 | 记录已接受范围、剩余要求和责任人；默认不能据此完成整个 Issue |
+| Accepted | 有权主体接受该候选的全部必需范围及适用标准 | 仍需核对 Issue 的其他完成条件后才可完成 |
 | Rejected | 有权主体或约定检查流程指出未满足项 | 当前负责人按范围修正或重新提交 |
 | Superseded | 新候选替代其作为当前待处理版本 | 历史检查和决定仍指向旧候选 |
 | Withdrawn | 提交者或有权主体撤回候选 | 保留原因和已有检查；不得作为当前完成依据 |
 
-Candidate 的处置按具体版本保存。旧候选的 Accepted 不能自动接受新候选；旧报告是否可复用，由检查要求和变化范围决定。
+Candidate 的处置按具体版本保存。Acceptance Decision 追加保存并绑定 Candidate ID、Generation、Manifest Digest、标准版本、决定者权限和 Evidence。旧候选的 Accepted 不能自动接受新候选；旧 Evidence 默认不适用于新候选，复用须有明确 Applicability 依据。
 
-Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它可以逐步补全，不应把记录已生成当成完整交付。
+Delivery Record 是可重建视图，汇总候选、要求、制品、证据、缺项、决定和原 Issue 的交付注记。解释性补充先沿 Issue 追加注记，固定 Candidate ID、作者、时间与源操作身份，再由视图聚合，不直接修改投影。Artifact 的来源版本、内容完整性、可取得性和读取授权分别判断；来源失效不改变历史引用。交付事实可以逐步补全，记录已生成不代表完整交付。部分接受和例外放行必须固定范围、用途、理由及剩余责任；PR 合并、Run 成功或 Evaluation 通过均不能替代 Candidate 的有效验收决定。详见[候选交付与验收契约](d6-delivery-acceptance-contract.md)。
 
 ## 9. Evaluation 与 Improvement Proposal 生命周期
 
@@ -193,7 +207,7 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Failed | 评价执行本身失败，不能把它当成被评对象失败 |
 | Cancelled | 评价任务被撤销 |
 
-评价器执行自身可有 Run；Run 终态与 Evaluation 结论分别记录。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。
+评价器执行自身可有独立 Multica Task / Run；Run 终态与 Evaluation 结论分别记录。Model-based Evaluation Task 使用治理用途标识和独立 Session，不进入普通生产 Session 恢复或 Worker Wakeup 消费路径。Evaluation 固定目标版本、触发类型、Team / Project Evaluation Policy 版本、Work Agreement 版本、评价器版本、输入快照和资源预算。Requested 可表示已获准但等待预算 / Runtime 的评价；尚未被策略选中的工作不创建 Evaluation。Insufficient Evidence 不等同于质量失败；Failed 也不意味着被评 Run 失败。触发、抽样、重试和预算耗尽规则见[D11 评价触发与资源预算治理](d11-evaluation-trigger-budget-policy.md)。
 
 ### 9.2 Improvement Proposal
 
@@ -202,13 +216,56 @@ Delivery Record 汇总候选、要求、制品、证据、缺项和决定。它�
 | Proposed | 从工作证据提出待评估改进 |
 | Triaged | 维护者确认问题归属、范围和是否继续 |
 | Evaluating | 正在进行根因分析、候选准备或对照 |
+| Candidate Ready | 一个或多个候选修订已固定，等待实验或审核 |
+| Benchmarking | 一个或多个固定实验正在执行或汇总 |
 | Ready for Approval | 已具备审核所需证据 |
-| Approved | 有权维护者批准候选发布或配置采用 |
-| Released | 不可变资产版本已发布 |
-| Adopted | 项目已决定在声明范围采用该版本或配置 |
-| Rejected / Withdrawn | 提案被拒绝或撤回，保留依据 |
+| Approved | 有权维护者批准明确的候选修订、变更路径和完成范围；尚不代表资产已发布或项目配置已生效 |
+| Completed | 批准范围内要求的资产发布或项目配置生效已完成，引用相应 Release / Project Adoption 事实 |
+| Rejected / Withdrawn | 提案或候选被拒绝 / 撤回，保留依据 |
 
-Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用。实际选择、投递和使用在对应工作与执行记录中体现。
+Proposal 是治理容器，可以包含多个 Candidate Revision、Benchmark 和 Release。审核时固定提案的完成范围：资产改进可在要求的 Release 发布后完成，不要求项目同时采用；项目工作流 / 分工配置改进在有权成员的 Project Adoption 生效后完成，不伪造资产 Release；混合提案逐项满足批准范围后完成。Proposal 的状态只表达整体进度，不替代 Release、Project Adoption 或后续生产效果各自的事实。候选实验和发布关系见[VS-4 技术契约](vs4-benchmark-release-adoption-technical-contract.md)。
+
+### 9.3 Benchmark Experiment 与 Trial
+
+| 实验执行状态 | 含义 |
+|---|---|
+| Planned | 实验定义、样本、实验臂和预算已固定，尚未启动 |
+| Running | 至少一个 Trial 已派发或执行；实际 Task 状态仍读取 Multica |
+| Completed | 所有 Trial 已终结或按预定规则处理，结果已汇总 |
+| Failed | 实验执行本身未能完成，不能解释为候选质量失败 |
+| Cancelled | 有权主体取消实验；已启动 Trial 仍需分别确认原生终态 |
+
+Benchmark Result 的结论与上述执行状态分别记录：Passed 表示预设改善目标和硬门槛满足；Failed 表示候选违反硬门槛或超出允许退化阈值；Inconclusive 表示样本、可比配对、证据或计量覆盖不足；Execution Failed 表示实验执行未按定义完成。执行状态 Completed 可以对应 Result = Passed、Failed 或 Inconclusive；执行状态 Failed 对应执行故障结论 Execution Failed，保留已取得的 Trial 事实。候选质量 Failed 不触发实验执行失败的恢复，也不自动重跑实验。
+
+每个 Trial 固定 Sample、Arm、Candidate / Baseline Revision、实验定义和 Multica Task / Run。候选或样本变化形成新实验修订；不可比配对、失败和未运行结果必须保留原因。
+
+### 9.4 Release 与 Project Adoption
+
+Release 是资产维护者审核后发布的不可变版本。其状态投影可为 Published、Deprecated 或 Withdrawn；撤回 / 废弃不删除历史版本，也不自动改变已固定的工作版本。
+
+Project Adoption 是项目有权成员对具体 Release 或项目配置版本作出的追加式决定。当前采用状态由 Project + Asset + Scope 下最新有效 Adoption 决定；新增采用、暂停、替换和回退均产生新决定并推进 Adoption Generation。Release Published 不等于 Project Adopted；Adoption 生效也不证明新工作已经选择或使用。
+
+### 9.5 Actual Usage 与 Production Observation
+
+每次 Work / Run 对资产分别记录 Selected、Delivered、Loaded / Observed、Used 等证据阶段。宿主不能证明的阶段保持 Unknown，不从 Adoption 或配置推断。
+
+生产效果观察绑定 Release、Adoption Scope、观察窗口、样本队列、可比基线和实际使用证据。结果可为 Pending Observation、Improving、Stable、Regressed、Inconclusive 或 Stopped。Benchmark Passed 不能直接生成 Stable；只有后续真实生产样本满足预设门槛，才能形成生产效果结论。回退通过新 Adoption 决定完成，历史使用记录不覆盖。
+
+### 9.6 Source、Evidence 与 Knowledge 生命周期
+
+来源、证据和知识分别拥有自己的状态，不把资料处理进度等同于知识发布状态。
+
+**Source Connection** 记录授权、连接状态、同步进度和最近成功核对时间。连接断开不删除历史 Source Item / Revision；授权撤回立即影响后续取得和内容分发。
+
+**Source Item / Revision** 记录发现、取得、修订变化、删除或撤回。Source Revision 是某次取得的不可变快照；新修订到来时创建新 Revision，不覆盖旧版本。取得不完整、分页失败或源修订无法确认时，不得标记为完整取得。
+
+**Ingestion Batch / Processing** 记录待处理、取得中、解析中、部分完成、完成或失败。批次可包含多份 Source Item；单份失败不抹掉其他材料的成功结果。解析完成只说明结构化处理结束，不代表证据可用或知识已发布。
+
+**Evidence Anchor / Evidence** 记录定位和事实观察。来源变化、权限收缩、内容撤回或定位失效时，受影响证据进入待复核或不可用状态；历史事实保留，当前可读性按最新权限判断。
+
+**Knowledge Item / Revision** 维护稳定知识身份和不可变内容修订。修订可经历草拟、待核验、已核验、驳回、待复核或失效；是否成为正式可用知识，必须通过对应 Knowledge Release。检索索引可用状态是独立处理状态，不是发布状态。
+
+知识修订被来源新版本影响时，系统识别受影响范围并触发复核。旧版本是否继续投递按知识风险、权威来源变化和策略决定；历史工作仍引用当时选用的版本。来源权限撤回时，停止向失权主体提供原文、摘录和可反推私有内容的派生知识。
 
 ## 10. 跨对象事件模型
 
@@ -220,9 +277,10 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 | Workflow | WorkflowStepEntered、WorkflowHandoffRequested、WorkflowHandoffCompleted、WorkflowStepReturned | Project Workflow 与 Issue 交接记录 |
 | SOP | SOPInvoked、SOPPrepared、NodeReady、NodeActivated、NodeResultReceived、HumanDecisionRequested、HumanDecisionRecorded、SOPReturned、SOPCompleted、SOPFailed、SOPCancelled | SOP Execution 及其权威状态变化 |
 | Execution | RunQueued、RunClaimed、RunStarted、RunStopRequested、RunSucceeded、RunFailed、RunCancelled、RunLost、RunRecovered | Multica、Daemon、Runtime、Backend 和宿主回执 |
-| Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、DeliveryReturned | 生产者与交付通道 |
-| Evaluation | EvaluationRequested、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、FindingRecorded | 评价任务及结果 |
-| Improvement | ImprovementProposed、CandidateCompared、ImprovementApproved、AssetReleased、ProjectAdopted、AssetDeprecated | 维护者审核、资产发布和项目采用 |
+| Delivery | ArtifactProduced、ArtifactAttached、CandidateCreated、CandidateSuperseded、EvidenceRecorded、EvidenceApplicabilityRecorded、AcceptanceDecisionRecorded、DeliveryReturned | 生产者与交付通道 |
+| Knowledge | SourceConnected、SourceItemDiscovered、SourceRevisionAcquired、SourceRevisionChanged、SourceAccessRevoked、IngestionStarted、IngestionCompleted、EvidenceAnchored、KnowledgeRevisionProposed、KnowledgeRevisionVerified、KnowledgeReleased、KnowledgeAdopted、KnowledgeFeedbackRecorded、KnowledgeSuperseded、KnowledgeWithdrawn | 来源连接、取得快照、证据处理、知识治理与项目采用分别提供 |
+| Evaluation | EvaluationRequested、EvaluationTaskBound、EvaluationStarted、EvaluationCompleted、EvaluationInsufficientEvidence、EvaluationFailed、EvaluationResultConsumed、FindingRecorded | 评价任务及结果 |
+| Improvement | ImprovementProposed、ImprovementCandidateCreated、BenchmarkPlanned、BenchmarkTrialBound、BenchmarkCompleted、BenchmarkInconclusive、ImprovementApproved、AssetReleased、ProjectAdoptionRecorded、AssetDeprecated、AssetWithdrawn、AssetUsageObserved、ProductionOutcomeRecorded | 提案、候选、实验、发布、采用和效果观察分别由各自权威记录产生 |
 
 事件名称表示语义类别，不要求直接作为 API 名称或消息 Topic。实现可沿用 Multica 原生事件，并映射到这些语义。
 
@@ -243,21 +301,28 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 7. **失败可恢复。** 状态写入与后续通知、派发分开处理。下游动作失败时，从已生效的权威状态恢复仍适用的动作，不能重复执行原业务转换。
 8. **保留未知。** 没有宿主回执、请求身份或用量证据时标为未知，不根据模型自述或 Session 推测补齐。
 
+### 10.4 Issue 回唤与结果消费
+
+协调方等待同一 Issue 的具体 Worker Run 时，可为该源 Task 登记 Issue Wakeup，匹配成功、失败或取消。原生派发可合并唤醒信号。收到信号的回合重新读取当前 Issue、原委派和相关 Run，逐项核对待消费结果。子 Issue 的交付、SOP 的出口以及针对 Candidate 的验收分别回到其权威记录核对。[Multica 回唤事件与投递语义](https://github.com/multica-ai/multica/blob/fdfbfcd5e5d30c135255e63ab9af4c52672b7bbc/docs/engineering/issue-wakeups.md#L124-L223)
+
 ## 11. 关键跨层转换
 
 | 触发事实 | 权威转换 | 允许的后续动作 | 不允许的推断 |
 |---|---|---|---|
-| Issue 指派给 Agent / Squad | Issue 负责人变化 | 按资格创建或恢复受管执行安排；Squad Leader 可组织协调 | 指派成功不代表 Run 已启动 |
+| Issue 指派给 Agent | Issue 负责人变化 | 按资格安排受管执行。工作约定授予持续协调权时，由该 Agent 担任 Main Bot | 指派生效只能证明责任发生变化 |
+| Worker 的终态或其他匹配事实触发已登记回唤 | 来源事实归原 Issue / Run，匹配回执供原生派发处理 | 现任协调方核对原委派、授权及结果版本，决定消费、补交、重排或交还 | 单次回唤不证明每份结果均已消费 |
 | SOP 节点满足前置 | Node Activation 进入 Ready | Agent / Script 节点请求原派发入口；人工节点在 Issue 等待决定 | Ready 不代表 Run 已存在 |
 | Runtime 领取执行 | Run 进入 Claimed | Daemon 准备环境并启动 | Claimed 不代表执行开始 |
 | 宿主确认开始 | Run 进入 Running | 收集可观察活动、结果和用量 | Session 或进程句柄不必然证明业务已开始 |
+| 成员从本地交付 | 原 Issue 记录提交者、所选材料及对应版本 | 接收方按自己的读权取用并核对本项要求 | 成员署名只证明本次提交，关联宿主活动须另有来源依据 |
 | Run 产生终态 | Run 记录真实终态 | 对应 Attempt 接收结果，节点按契约判断；负责人可检查 Candidate | Run 成功不代表节点成功、候选接受或 Issue 完成 |
 | 节点结果满足契约 | Node Activation 进入 Succeeded | 激活满足依赖的后继节点，或准备 SOP 出口 | 不能完成超出 SOP 授权范围的 Issue |
 | SOP 出口交回 | SOP Execution 进入 Returned 或 Completed | Issue 负责人或 Project Workflow 消费结果并安排下一责任 | SOP 返回不自动改变 Issue 为 Done |
 | Candidate 被接受 | Issue 记录针对当前候选的有效 Decision | 满足全部完成条件时，Issue 可完成 | 旧候选的接受不能用于新候选 |
 | Issue 被取消 | Issue 记录业务取消决定 | 撤销后续派发并分别处理在途 SOP / Run | Issue Cancelled 不代表所有 Run 已 Cancelled |
 | Evaluation 完成 | Evaluation 保存独立结论 | 维护者评估是否提出改进 | Evaluation 通过不自动发布资产 |
-| Release 发布并被项目采用 | 资产发布和 Project Adoption 分别记录 | 新工作按适用范围选用版本 | 采用不证明每个工作都已投递或使用 |
+| 方法资产发布 | Release 固定审核通过的版本和适用范围 | 项目可设为默认，或由负责人在获准 Issue 内选用 | 发布和选版均不证明实际使用 |
+| 项目批准工作流或分工变更 | 有权成员在原配置或 Issue 记录范围及在途安排 | 适用工作按该决定继续，并记录实际使用的配置 | 新配置不自动改变既有交付或验收 |
 
 ## 12. 重试、返工、取消与接管
 
@@ -282,7 +347,7 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 - Project Workflow 根据 Issue 事实决定是否交接项目步骤。
 - SOP Execution 在受托范围内消费 Issue 约定和节点结果，决定自己的节点推进。
 - Run 只报告真实受管执行事实；节点和负责人消费结果。
-- Artifact、Evidence、Candidate 和 Delivery Record 固定交付与依据；Issue 有权主体决定接受与完成。
+- Artifact、Evidence、Candidate 和 Issue 交付注记保留各自的交付事实与依据，Delivery Record 只聚合展示；Issue 有权主体决定接受与完成。
 - Evaluation 消费已授权证据并给出评价；维护者决定是否改进、发布，项目维护者决定是否采用。
 - 后续工作记录实际选择、投递和使用，不把发布或采用推断成执行事实。
 
@@ -295,8 +360,9 @@ Released 与 Adopted 不同；Adopted 也不证明某个 Issue 已实际使用�
 | [工作生命周期](01-unified-work-lifecycle.md) | Issue 状态、工作约定、责任交接、候选处置、验收与完成 |
 | [SOP 与工作流](02-sop-workflow.md) | SOP Definition / Execution、节点激活与尝试、依赖、门禁、返工和出口 |
 | [本地执行](03a-execution-plane.md) | Run、Session、Runtime、Daemon、宿主回执、取消、恢复与执行归属 |
-| [能力与上下文](03b-capability-governance.md) | 资产定义、发布、采用、选择、投递及实际使用记录 |
-| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark 和 Release |
+| [能力与上下文](03b-capability-governance.md) | 方法资产与 Release 的发布 / 撤回、采用后的[能力解析、选择与投递](03b-capability-governance.md#5-一次工作如何选择和投递能力)及实际使用记录 |
+| [项目采用决定](vs4-benchmark-release-adoption-technical-contract.md#6-project-adoption项目独立决定采用) | Project Adoption 的生效、替换、暂停与回退；仍由 Project 权威域及项目有权成员维护 |
+| [成本、质量与改进](04-cost-quality-improvement.md) | Usage、Evaluation、Finding、Proposal、Benchmark、Budget Reservation 与效果观察；验证结论交给资产维护者或项目有权成员 |
 | [统一工作台](05-unified-workbench.md) | 呈现权威状态、等待原因、因果关系和下一责任人 |
 
 若专题状态描述与本文冲突，应修订对应专题，使其符合统一语义；不能在局部文档中另造相互矛盾的状态定义。

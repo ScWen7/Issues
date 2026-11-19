@@ -1,0 +1,27 @@
+name: Five-domain Evaluation closure contract
+on:
+  push:
+    branches:
+      - design/system-architecture-convergence
+    paths:
+      - .github/workflows/five-domain-evaluation-closure.yml
+      - prototypes/topic-04/evaluation.mjs
+      - prototypes/topic-04/order-evaluation-closure.mjs
+      - prototypes/topic-04/order-evaluation-closure.test.mjs
+      - docs/research/topic-03a/fixtures/order-export-c1.json
+      - docs/research/topic-03a/fixtures/order-export-c2.json
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evaluation-closure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify Evaluation to Issue and asset-governance boundaries
+        run: |
+          node --version
+          node --test prototypes/topic-04/evaluation.test.mjs prototypes/topic-04/order-evaluation-closure.test.mjs

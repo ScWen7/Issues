@@ -7,7 +7,7 @@
 ## 1. 设计原则
 
 1. **从 Issue 的工作约定出发。** 所有参与者先明确本项目标、范围、责任和完成条件，不以 Run、SOP 或某个 Agent 的提示词代替业务约定。
-2. **按需组织工作。** 负责人可自主推进、邀请协助、拆分独立子 Issue，或把明确范围委托给 SOP。平台不强制每项工作都经过 Squad、SOP 或固定阶段。
+2. **按需组织工作。** 负责人可自主推进、邀请协助、拆分独立子 Issue，或把稳定环节委托给 SOP。
 3. **方法与执行分离。** Playbook 提供可选择的指导；Skill / Rule / Knowledge 提供能力和依据；SOP 定义可执行的依赖与结果规则；Run 才记录实际受管执行。
 4. **准备、投递、使用和结果分别举证。** 选择了能力不等于投递成功，投递成功不等于宿主实际读取，宿主读取不等于调用成功，调用成功不等于结果符合要求。
 5. **结果由接收方按自己的契约消费。** 生产者不能单方面宣布自己的结果已被所有下游接受。
@@ -18,10 +18,10 @@
 
 | 契约 | 主要提供方 | 主要消费方 | 权威来源 | 解决的问题 |
 |---|---|---|---|---|
-| Work Contract（工作契约） | 提出人、当前负责人及有权成员 | 成员、Agent、Squad、Project Workflow、SOP | Issue 与有效工作约定 | 这项工作要完成什么、谁负责、谁能决定 |
+| Work Contract（工作契约） | 提出人、当前负责人及有权成员 | 成员、Agent、Project Workflow、SOP | Issue 与有效工作约定 | 这项工作要完成什么、谁负责、谁能决定 |
 | Context Contract（上下文契约） | Issue、项目配置、资料与工程来源维护者 | 当前执行者及接手者 | 原始来源及本次上下文准备记录 | 执行者能取得哪些有权使用的依据 |
-| Capability Contract（能力契约） | 团队 / 项目资产维护者，工作负责人选用 | Agent、Squad、SOP、执行宿主 | 资产发布版本、项目采用配置和本项选择记录 | 本次工作可以使用哪些方法、规则和工具 |
-| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Squad Leader、SOP Execution、受托成员 | Issue 上的委托决定与固定 SOP 版本 | 受托方能自主推进到什么边界，何时必须交还 |
+| Capability Contract（能力契约） | 团队 / 项目资产维护者，工作负责人选用 | Agent、SOP、执行宿主 | 资产发布版本、项目采用配置和本项选择记录 | 本次工作可以使用哪些方法、规则和工具 |
+| Delegation Contract（委托契约） | Issue 当前负责人及有权成员 | Main Bot、SOP Execution、受托协作者 | Issue 上的委托决定，调用 SOP 时还包括固定的定义版本 | 受托方能自主推进到什么边界，何时必须交还 |
 | Execution Contract（执行契约） | 负责人或获授权的 SOP 节点 | Run 派发链、Daemon、Backend、Agent / Script | 本次执行安排及授权来源 | 一次实际执行允许做什么、输入输出是什么 |
 | Delivery Contract（交付契约） | 生产者与工作约定 / SOP 定义者 | 负责人、节点、检查者、验收人 | 工作约定、SOP 输出定义、Candidate 与 Evidence | 交付什么版本、怎样检查、接收方如何采用 |
 | Feedback Contract（反馈契约） | 执行者、检查者、评价器 | 当前负责人、资产维护者、项目维护者 | Run、Delivery Record、Evaluation、Finding、Proposal | 如何处理本次问题，以及何时形成跨工作改进 |
@@ -35,25 +35,55 @@ Work Contract 由 Issue 承载，是其他契约的上游依据。
 至少明确：
 
 - 目标与范围：希望改变什么，明确不包含什么。
-- 业务责任：当前 Assignee；需要时明确 Accountable Member、协作者和 Acceptor。
+- Issue 记录当前 Assignee。成员委托 Agent 持续协调时，工作约定保留具名的 Accountable Member（业务责任人）、授权范围，以及按需指定的 Acceptor（验收人）。
 - 完成条件：需要交付的结果、必需检查、是否需要独立审查或具名验收。
 - 约束：适用项目规则、风险限制、预算边界和不可执行动作。
 - 决定权：谁可以澄清范围、扩大授权、接受例外、验收和取消。
 - 版本：本项工作当前有效的约定版本，以及发生变更的原因和影响范围。
 
-工作约定由有权成员在 Issue 上确认或修改。Agent、Squad、SOP 可以提出澄清和变更建议，但不能因为执行需要自行扩大目标、权限或完成条件。
+工作约定由有权成员在 Issue 上确认或修改。受托 Agent 可提出澄清和变更建议，SOP 可在约定节点请求决定。调整目标、权限或完成条件由有权成员确认。
 
 Work Contract 不规定必须采用哪种组织方式。当前负责人根据工作特点选择：
 
 | 组织方式 | 适用边界 | 责任结果 |
 |---|---|---|
-| 负责人自主推进 | 工作探索性强，分工仍需动态判断 | 当前 Issue 负责人持续承担组织责任 |
+| 负责人自主推进 | 当前负责人可直接完成或自行组织 | 当前 Issue 负责人持续承担组织责任 |
+| 委托 Main Bot 持续协调 | 有权成员将 Issue 指派给现有 Agent，并在工作约定中明确本次授权 | Main Bot 可自行执行或调用获准的 Worker，业务取舍仍归相应有权成员 |
 | Issue 内邀请协助 | 需要咨询、检查或短时操作，不产生独立交付责任 | 原负责人不变 |
 | 子 Issue 分工 | 一段工作有独立负责人、输入、交付和生命周期 | 子项负责人对该分工负责，父项负责人对整体目标负责 |
-| Squad 负责 | 明确将 Issue 指派给一个 Squad，希望 Leader 自主组织其内部协作 | Squad 作为当前负责人，Leader 在授权内协调 |
 | SOP 委托 | 输入、输出、依赖、失败处置和交还条件已经足够稳定 | SOP 只在明确受托范围内组织流程，范围外决定交还 Issue |
 
-以上方式可以组合，但每一份独立交付责任都必须有明确归属。SOP 节点不自动创建子 Issue；Squad 协调也不自动意味着启用 SOP。
+这些方式可以组合。独立交付有各自的负责人，受托 SOP 仅在明确范围内安排节点和返工。
+
+### 3.1 正式工作约定与责任引用
+
+Work Agreement 是所属 Issue 上目标、完成条件、正式责任和授权的权威记录；Delegation 是其中明确授予持续协调或受托工作的范围。记录关联稳定身份、当前约定版本、来源成员决定，以及存在委托时的目标、有效状态和授权代际。Accountable Member 和 Acceptor 使用可核验的成员身份引用；验收人仅在本项要求具名验收时指定。创建人、Run 的人员归因和当前 Assignee 分别保留自己的含义。
+
+执行目标以正式 Work Agreement 正文及其有效版本为准。Issue 标题用于识别事项，描述承载背景、取材和变更建议，均可按原权限编辑；这些编辑不静默推进约定版本或授权代际，也不替代正式目标。首次可从 Issue 描述、讨论和项目资料提炼约定正文，由有权成员确认，或按成员已明确预授权的项目配置形成约定，并保留所用来源与版本。Agent 不从描述中的措辞自行推导新的权限。
+
+项目已有目标模板、完成规则、责任分工、验收角色与资源许可可直接继承，生效时记录实际采用的配置版本和解析后的责任引用；成员只补充本项差异，无需重新填写一套表单。后续项目默认变化不静默改写已经生效的工作约定；受影响工作经本节修订入口确认。
+
+Multica 通用 `actor` 属性如被沿用，只作联系人或正式责任的展示投影。直接修改该属性不改变 Work Agreement，不授予总责改任、验收、持续协调或扩大授权的资格。正式责任变更由有权成员通过工作约定入口确认，随后刷新展示；派发、消费和完成入口读取正式约定。
+
+### 3.2 工作约定的逻辑操作
+
+以下是同一 Issue 工作约定权威入口的逻辑操作，不预设 HTTP 路径、表单或独立服务。每个操作携带稳定来源操作身份；网络重送先查回原决定，条件写入失败则读取当前约定，由有权成员处理实质变化。
+
+| 操作 | 权威入口核对与结果 |
+|---|---|
+| `CreateWorkAgreement(issue, defaults, overrides, sourceOperation)` | 核对成员创建 / 授权资格及继承配置，固定目标、范围、完成条件、本项适用的总责和按需指定的 Acceptor，建立首个约定版本。普通指派按本次交付执行；只有本项确认或成员预先授权的项目配置已明确持续协调模式、受托 Agent 与范围时，才建立有效 Delegation。 |
+| `ReviseWorkAgreement(issue, expectedVersion, changes, sourceOperation)` | 核对当前版本、成员对所改责任 / 范围 / 权限的决定资格，追加新版本及变更原因、影响范围和在途安排。Agent 可以提出修改建议，由有权成员确认后生效。持续协调的首次授权、改派、恢复或授权范围调整也经此入口处理。 |
+| `RevokeDelegation(issue, expectedVersion, expectedGeneration, reason, sourceOperation)` | 核对撤权资格和当前代际，追加撤销决定及新约定版本，使原代际立即失效；停止新派发和业务消费，在途 Run 按原生停止与副作用规则单独处理。撤销记录保留，不删除既有执行和交付。 |
+
+普通 Agent 指派只决定本次工作的处理者，不自动授予持续协调。普通指派、评论中的一次性邀请和持续委托由有效约定明确区分；同一 Agent 从普通执行转为 Main Bot，必须经过持续授权转换。需要同时变更指派时，当前 Assignee、有效委托 / 授权代际与首次激活意图在同一 Issue 权威提交中生效。项目工作流交接沿用相同规则，不凭步骤名称或 Agent 身份推断持续授权。
+
+### 3.3 约定版本与授权代际
+
+- 目标、范围、完成条件、正式责任、验收人、保留决定或授权内容发生实质变化时，追加 Work Agreement 新版本；仅有解释性讨论、联系人属性修改、通知重发和同一操作重送不推进该版本。
+- 首次持续授权、受托 Agent 改变、撤权 / 暂停后的重新授权，以及允许动作、资源、授权预算或保留决定权的变化，产生新的授权代际。撤权、改派、暂停或 Issue 结束使原代际失效；恢复时建立新代际，不复活旧权限。
+- 只调整交付要求而未改变委托权限时，约定版本变化，授权代际可保留；派发与消费仍重新核对新要求的影响。Candidate 换版使用其自己的 Generation，不因候选变化自动扩大委托权限。
+
+每次有效授权转换保留转换身份、决定成员和适用约定版本，用于派发绑定与迟到结果核对。新的首次协调意图由需要开始 / 恢复协调的转换产生；普通约定修订按影响唤醒现有协调者，不重复建立首次激活。具体派发与结果消费按[恢复契约](d5-cross-layer-recovery-contract.md)执行。
 
 ## 4. Context Contract：准备可用且有权的工作依据
 
@@ -63,22 +93,105 @@ Context Contract 解决“执行者本次应该看到什么”，不把所有历
 
 按本项工作实际需要，从以下来源选择：
 
-- Issue：目标、当前工作约定、讨论、决定和交付。
+- Issue：当前正式工作约定、讨论、决定和交付；标题供识别，描述按背景 / 变更建议取材。
 - 父子 Issue：相关分工、依赖结果和整体约束。
-- Project：项目配置、工程仓、环境说明和已采用能力。
-- 团队 / 项目知识：有来源、版本、适用范围和当前读权的资料。
-- 工程来源：代码仓、提交、分支、工作副本基准及其他工程材料。
+- Project：项目配置、成员关系、工程仓、环境说明和已采用能力。
+- Team Knowledge：团队范围正式知识，按团队授权、明确适用条件和有效版本消费。
+- Project Knowledge：当前项目范围正式知识，按项目成员权限、项目适用条件和有效版本消费。
+- Project Sources：飞书 PRD、项目文档、接口资料等原始权威来源，可在有权时直接引用，不要求先转成 Knowledge。
+- Project Code Knowledge / 工程来源：代码 Wiki、代码仓、提交、分支和工作副本基准；代码认知绑定仓库与 Commit / Tree，不属于 Team Knowledge。
 - 执行历史：与当前工作相关且允许共享的 Run、Artifact、Evidence 和宿主片段。
 - 本地输入：成员明确选择分享的会话片段、工具结果、文件和未提交变更。
 
+Team Knowledge 与 Project Knowledge 共用知识管理生命周期，但分别归属 Team 与 Project，维护者、可见范围和跨域复用规则不同。Project Sources 的原始正文仍由来源系统维护；Context Contract 可以直接消费有权访问的原始来源，不要求先创建 Project Knowledge。Project Code Knowledge 是可选项目能力，不能与业务知识合并。
+
+Context Contract 只负责本次工作消费，不重复执行来源同步、证据处理、知识提炼、核验、发布、冲突和失效治理。正式知识输入必须引用明确的 Knowledge Revision / Release，携带知识作用域、适用范围、有效状态、来源 Evidence 引用和当前读权限。原始来源输入必须保留 Source Item / Revision、精确位置和来源系统当前读权。只有摘要或检索片段、没有稳定修订身份和证据定位时，必须标注依据限制，不得作为强制规则或高风险决定的唯一依据。
+
+
 ### 4.2 选择规则
 
-1. 先取得本项目标、当前有效工作约定和有权决定。
-2. 按执行者身份、项目成员关系、来源权限和共享范围过滤候选资料。
+1. 先取得当前有效 Work Agreement 正文、版本和有权决定；存在委托时同时核对其有效状态与授权代际。
+2. 按接收者实际的项目读权、来源权限和共享范围选取资料。受管执行沿本次 Run 的项目访问规则核对，外部材料按实际访问身份取用。[组织与参与主体](core-object-model.md#31-组织与参与主体)
 3. 优先取得完成工作必需的输入，再按预算加入可选方法和背景。
-4. 每项材料记录来源、版本 / 修订、适用范围和可访问引用；不能定位版本的材料明确标注其证据限制。
+4. 每项材料记录来源、版本 / 修订、适用范围和可访问引用；知识材料还须保留 Knowledge Revision 与 Evidence 引用。不能定位版本的材料明确标注其证据限制。
 5. 权限撤回或来源修订时，判断哪些正在进行的工作受影响；不能把新版本静默替换到已经固定的执行上下文。
 6. 材料超预算、不可读或权限不明时，标明缺项。依赖它的工作等待有权决定；不相关且获准的工作可以继续。
+
+### 4.2.1 Team / Project 知识与项目来源的选择边界
+
+- Team Knowledge 按 Team 作用域和明确适用条件检索；命中不代表它自动成为项目强制规则。
+- Project Knowledge 默认只在所属 Project 范围内检索；不能因语义相似或 Issue 关联就向其他项目成员暴露。
+- Team Knowledge 被 Project 使用时优先保留原 Knowledge Item / Revision / Release 引用，不复制正文。只有项目明确需要固定某一团队知识版本作为长期基线时，才使用既有 Project Adoption / Project Configuration。
+- Project Sources 可以直接进入当前工作上下文。只有存在跨 Issue 长期复用价值时，才提炼为 Project Knowledge；原文仍由原系统维护。
+- Project Code Knowledge 绑定仓库和代码基准，作为代码事实提供方；模块地图、调用关系不自动变成 Knowledge Item。
+- Project Knowledge 跨项目复用时，必须形成新的 Team Knowledge 候选，完成逐来源派生许可、目标团队受众授权、去敏、跨项目适用性核验和团队责任人发布。不能直接把原 Project Knowledge 的 scope 改为 Team。
+- 知识适用范围不等于访问权限；对知识正文、Evidence 原文和来源派生内容分别执行接收者权限核验。
+
+Team / Project 内容冲突时，不使用全局优先级。先判断事实类型和各自适用条件；项目特有事实可以与团队通用经验并存。若项目需要偏离团队 Harness 强制规则，必须走 Harness 例外 / 项目采用和 Issue 有权决定机制，不能由 Project Knowledge 静默覆盖。
+
+### 4.2.2 Recall、来源检索与确定性加载的边界
+
+Context Contract 不等于 Recall，也不要求所有工作依据进入一个统一检索索引。当前工作按以下不同动作取得依据：
+
+| 动作 | 读取对象 | 取得方式 | 边界 |
+|---|---|---|---|
+| 确定性工作上下文加载 | Issue / Work Agreement / Project / Run / 已明确引用 | 按稳定对象身份和关系读取 | 不通过语义搜索推测当前工作事实 |
+| Knowledge Recall | Team Knowledge / Project Knowledge | 按任务意图检索正式知识候选 | 返回候选及适用条件，不代表已选用 |
+| Project Source Search / Read | PRD、评审纪要、接口文档、工程资料等 | 在有权来源范围内发现，再按 Source Item / Revision / 位置读取 | 原始资料可直接消费，不要求先提炼为 Knowledge |
+| Project Code Retrieval | Code Wiki、代码仓、模块与调用关系 | 按仓库和 Commit / Tree 基准检索 / 读取 | 属于项目代码认知，不并入 Team Knowledge |
+| Harness Capability Resolution | Harness Release、Project Adoption、工作约定 | 按已发布、项目采用、工作类型和授权解析 | Recall 命中 Skill / Rule 文档不代表本次已采用或有权调用 |
+
+Knowledge Recall 的默认对象是正式 Team / Project Knowledge，不应把 Issue、Run、原始 PRD、所有代码文件和 Harness 状态都当作同质知识条目。不同来源可以在当前工作中组合，但保留各自权威、修订、权限和读取方式。
+
+Recall 结果是候选，不等于采用。无命中只表示本次检索没有找到相关结果，不代表其他来源不存在资料。显式引用的来源优先按身份直接读取；本地代码和当前 Issue 已足够时可以跳过 Recall。复杂工作可由 Agent 自主按需发起多种检索，不要求每个 Issue 都执行统一 Recall 步骤。
+
+不同来源的相关性分数和权威语义不可直接合并成单一全局排序。先按接收者权限和来源作用域过滤，再在各来源内部排序，最后依据当前工作目的组合结果。Context Contract 统一约束选择、权限、版本固定和投递，不实现具体 BM25、向量搜索、代码图谱或来源 Connector。
+
+### 4.2.3 Recall 的能力归属与调用责任
+
+Knowledge Recall 的权威能力归属 A · 团队知识管理；工作触发与采用决策归属 B · 产研工作与流程协作；获准内容向本地 Agent 的投递与消费观察归属 D · 执行与交付证据。
+
+- A 提供正式 Team / Project Knowledge 的 Recall、Revision 读取、Evidence 引用和知识反馈能力。A 对候选范围、知识状态和知识正文权限负责。
+- B 以 Issue / Work Agreement 为起点，判断是否需要 Recall，提供工作意图和受信任的 Team / Project 范围，判断候选是否适用、是否采用，并将实际采用的版本关联到本项工作。
+- D 通过现有宿主适配和执行证据能力投递已获准选用的知识，记录 Prepared / Delivered；宿主支持时观察 Loaded / Used。D 不维护知识副本作为权威，也不扩大接收者权限。
+- Agent 可以在工作准备阶段或执行中主动发起 Recall，但调用身份、项目范围和授权必须来自现有受信任工作 / 宿主上下文；不能信任 Agent 自行声明的 Team / Project scope。
+- Recall 不创建 Issue、Task 或 Run，不是独立能力域或必经流程；简单工作可以不触发 Recall。
+
+Recall 的最小业务动作是 Search / Recall、按稳定身份 Read Revision、按权限 Read Evidence Reference 和针对具体修订提交 Feedback。默认先返回可核查候选摘要，展开后再读取完整修订；命中不等于采用，只有实际选用的版本才按本项工作规则固定引用。
+
+Recall 结果在投递前重新核验当前成员资格、知识发布 / 暂停状态、来源派生许可和接收者对 Evidence 的读取权。未授权候选的标题、摘要、Claim、Evidence ID、关系和错误信息都不得泄漏。此处定义业务职责，不定义 API、搜索引擎或独立服务。
+
+### 4.2.4 Knowledge Consumption Contract
+
+知识消费的完整产品语义见[Knowledge Consumption Contract](../research/knowledge-consumption-contract.md)。本契约补充以下跨层规则：
+
+- Recall 请求表达当前工作意图，不由 Agent 自行声明可访问的 Team / Project 范围；身份、成员资格和工作授权来自现有可信工作 / Runtime 上下文。
+- A 域先核验主体、作用域、正式 Release 状态、派生许可和硬性适用边界，再在可见候选中检索 / 排序。权限与发布资格是门槛，不是排序权重。
+- Recall 默认返回候选摘要及 Item / Revision / Release、适用条件、限制和安全的 Evidence 概览；展开时按稳定 Revision 身份读取，不得用 latest 静默替换。
+- Evidence Reference 可见与 Evidence 原文可读分开授权。Team 派生知识可被授权消费，不自动开放其项目原始证据。
+- Recall 命中、预览或读取不自动形成 Work / Run Asset Pin。只有本项实际采用的重要知识版本才固定引用。
+- B 准备阶段调用与 Agent 执行中自主调用使用同一 A 域查询 / 读取契约；投递前再次核验具体接收者、知识状态、派生许可和当前工作授权。
+- Recall 无命中不代表 Project Sources、Code Retrieval 或 Issue 上下文不存在；这些来源继续走各自读取路径。
+- 成员资格撤销、来源派生许可撤回、Release 暂停和 Project 成员变化分别处理；历史投递事实保留，未来访问 / 投递重新核验。
+
+此处不新增 Recall Result、Recall Runtime、Context Compiler 或其他业务对象。
+
+### 4.2.5 场景验收状态
+
+Team / Project Knowledge、Project Sources、Project Code Knowledge 与 Work Context 的职责边界已形成设计基线。Topic 3B 已对项目资料按角色读取、来源修订、权限撤回、真实宿主投递和项目证据派生团队知识提供实证；但正式 Knowledge Recall 的 Team / Project 范围检索、跨项目消费者检索以及 Recall 结果层的私有信息隔离尚未完成产品验收。不得将已有来源权限和宿主投递实验等同于 Recall 已通过验收。场景结果和下一轮最小专项测试见[Context Contract 双场景端到端验收](../research/context-contract-two-scenario-acceptance.md)。
+
+### 4.2.6 Knowledge Release 与 Recall Projection 的一致性
+
+Knowledge Release 是正式发布决定；Recall Projection 是从正式知识派生的检索视图。两者状态分离：
+- Release 发布后触发投影更新，不等待索引完成才算发布；
+- Projection 更新失败不撤销 Release，但 Recall 必须报告 Partial / Stale 或 Unavailable / Failed；
+- Release 暂停、撤回或退役立即改变候选资格，不能等待旧投影清理完成；
+- Projection 只提供候选身份，任何可披露结果字段都必须回查权威 Knowledge Item / Revision / Release 和当前 Membership / Policy；
+- 投影预过滤不构成授权安全边界。
+
+知识生命周期与投影可用性详见[Knowledge 生命周期与 Recall 可用性融合审查](../research/knowledge-lifecycle-recall-availability.md)。Recall 覆盖状态必须区分 Complete + Hits、Complete + No Match、Partial / Stale、Unavailable / Failed 和多范围 Partial Success。只有 Complete + No Match 才能表达声明范围检索完整但无匹配知识。部分覆盖或失败不能伪装成空结果；无知识命中也不代表 Project Sources、Code Retrieval 或 Issue 上下文没有内容。
+
+来源修订变化只触发依赖 Evidence 的影响分析，不自动判定知识失效。根据事实类型、来源权威性、风险和撤回范围，决定只更新定位 / 投影、标记 Revision 待复核、暂停相关 Release 新投递或形成新 Revision。Work / Run Asset Pin 保留历史版本身份但不授予永久读取权；在途工作按当前权限、Release 和风险重新确认是否继续。
 
 ### 4.3 回执语义
 
@@ -93,6 +206,14 @@ Context Contract 解决“执行者本次应该看到什么”，不把所有历
 | Used | 有可核对的调用、引用或产物表明材料实际参与工作 | 不能单独证明最终结果正确 |
 
 ContextReceipt 记录准备和投递事实；逐调用输入、工具调用、服务返回和制品检查分别使用对应宿主或服务证据。来源没有提供的层级保持未知。
+
+### 4.4 正式约定投递与上下文更新
+
+受管派发、实际启动、后续协调回合和向运行中 Agent 提供继续执行输入时，执行入口先核对当前约定版本与授权。投递给 Agent 的必需输入包括正式 Work Agreement 正文（目标、范围、完成条件和授权限制）、版本，以及适用的 Delegation 状态和授权代际；不能只给约定 ID、Issue 描述或历史 Session。通过现有受支持的上下文 / 宿主输入通道送达，回执关联正式正文的版本 / 摘要与实际通道。取不到正式正文时补齐后再开始受影响执行，不用描述代替。
+
+Issue 描述、讨论与外部资料分开标注来源、修订和用途，作为背景或待确认建议提供。它们与正式约定冲突时，Agent 依据当前正式约定行动，明确指出差异；需要改变目标、范围、完成条件或权限的部分由有权成员通过 `ReviseWorkAgreement` 确认。其余仍在有效约定内的工作继续。
+
+计划和上下文更新记录其依据的约定版本与授权代际；提交执行安排、采用新的工作计划或继续下一段执行时重新核对。准备期间正式约定变化，先重读新版本、核对影响并投递相应正文，再采用仍有效的安排；旧计划与上下文保留原来源，不因 Session 接续而视为当前有效。仅补充背景、刷新资料或修改普通文档时沿原权限办理；未改变正式目标和授权的内容不触发约定审批，是否采用按其实际影响判断。
 
 ## 5. Capability Contract：方法、规则和工具如何生效
 
@@ -131,7 +252,7 @@ Capability Contract 解决“本项工作允许或要求采用哪些可复用能
 
 ## 6. Delegation Contract：明确委托边界
 
-Delegation Contract 仅在负责人将工作交给 Squad、SOP 或其他受托主体时需要。它把 Work Contract 中的一部分权限和责任明确委托出去，不转移超出声明范围的业务决定权。
+Delegation Contract 仅在负责人将协调、执行或一段流程委托出去时需要。它把 Work Contract 中的一部分权限和责任明确委托出去，不转移超出声明范围的业务决定权。
 
 至少明确：
 
@@ -144,17 +265,13 @@ Delegation Contract 仅在负责人将工作交给 Squad、SOP 或其他受托�
 - 需要由谁决定的事项，以及交还触发条件；
 - 委托的版本、有效期和撤销方式。
 
-### 6.1 Squad 与 SOP 的不同职责
+### 6.1 Issue 协调与局部委托
 
-**Squad 是协作组织主体。** 当 Issue 负责人是 Squad 时，Leader 自主分析任务、判断是否需要成员或 Agent、建立独立分工、跟进结果并组织下一步。其规划不需要先由另一层 SOP 再规划一次。
+Issue 指派给 Agent 并明确持续协调范围后，该 Agent 作为 Main Bot 承担整体组织工作。同一 Issue 在同一范围只有一个协调方。评论中的一次性邀请只表达该次请求，执行仍按调用者权限与工作约定核准。
 
-**SOP 是受托流程机制。** 它依据已发布定义执行明确的依赖、节点、输出、检查、返工和出口规则。它不替代业务负责人探索未知方案，也不自动成为 Issue 的负责人。
+短时协助留在原 Issue，委派方说明 Worker、预期输出及回交位置，并关联实际 Run。需要独立责任或独立交付时，建立或复用子 Issue，父项按自己的工作约定消费子项交付。Worker 使用自身获准的 Runtime。
 
-两者可以组合，但必须指定谁拥有当前协调权：
-
-- Squad Leader 可决定在其授权范围内调用一个局部 SOP。
-- 完整交付 SOP 可以在授权内安排节点和子项；若 Issue 同时由 Squad 负责，SOP 的作用范围必须明确为该 Squad 委托的流程部分，不能另行争夺整个 Issue 的总协调权。
-- 任何超出委托范围的目标变更、预算扩大、业务例外和最终验收均回到 Issue 的有权主体。
+协调方可把稳定范围委托给 SOP。节点就绪、依赖、返工和出口由该 SOP Execution 决定。协调方消费交回的结果或将待决事项交给有权成员。目标变更、预算扩大、业务例外和具名验收按 Issue 的决定权处理。
 
 ## 7. Execution Contract：将工作安排转换为一次可执行授权
 
@@ -174,7 +291,11 @@ Execution Contract 是某次受管执行或可识别的本地执行段所遵守�
 
 Execution Contract 不保证宿主具备所有观察能力。实际输入、工具调用、模型用量和结果只能按宿主真实回执标记覆盖；成员自述不得提升为宿主确认事实。
 
+Main Bot 的每个协调回合沿普通 Task / Run 执行。需要等待时，协调方在原 Issue 留下等待对象、继续条件和待消费结果的来源，再结束当前回合。回唤提供继续处理的线索，后续回合按当前读权重取工作约定、决定、原委派与交付记录。
+
 执行开始前重新核对授权、工作约定版本、激活代际和资源资格。准备期间若 Issue、Candidate 或授权发生变化，必须重新判断是否仍可启动。执行中撤权时停止新的受影响动作，并核对已发生的外部副作用。
+
+跨层派发不另建统一任务系统。Issue 首次协调激活、Comment 目标级 Worker 委派和 SOP Node Attempt 各自以原业务对象为权威来源，沿 Multica 原生 Task / Run 执行。三者的稳定来源身份、Task 绑定、Unknown 对账、恢复责任和结果消费按[跨层派发、执行绑定与结果消费契约](d5-cross-layer-recovery-contract.md)执行。Main Bot 首次激活由 Issue 派发恢复入口接续；一次性 Worker 委派由评论目标恢复入口逐项接续；SOP 节点由流程推进器接续；Claim / Start 由 Multica 原生机制恢复；Run 终态由原业务接收方消费。Wakeup 只提供协调唤醒，不替代这些业务身份。
 
 ## 8. Delivery Contract：生产者如何交付，接收方如何消费
 
@@ -182,7 +303,7 @@ Delivery Contract 定义生产者必须交付什么，以及接收方凭什么�
 
 ### 8.1 生产者交付
 
-生产者提交：
+成员可以直接从 Issue 提交所选材料，受管执行沿原 Run 回报。提交多份材料时，生产者在本次交付中指明同一候选的组成，检查者和下游据此引用当时的组合。
 
 - 具体 Candidate 及其组成 Artifact 版本；
 - 每个制品的生产者、来源、版本 / 摘要、代码或文件基准；
@@ -225,7 +346,7 @@ Delivery Contract 定义生产者必须交付什么，以及接收方凭什么�
 当前负责人或受托 SOP 根据 Delivery Contract 的失败项安排修正：
 
 - 生产方在同一目标、输入和授权内修正，可在原激活的修正预算内继续。
-- 产生新 Candidate 或改变标准时，建立新版本 / 激活并重验受影响要求。
+- 新产出形成独立 Candidate 版本并归原生产激活。新版替换消费节点已固定的输入候选，或适用标准改变时，为受影响节点建立新激活并重验；具体轮次遵循[节点激活规则](lifecycle-state-event-model.md#61-node-activation)。
 - 超出委托范围、需要业务取舍或预算扩大时，交还 Issue 有权主体。
 - 核验者可以完成其检查职责并交出失败报告；被检查的业务工作仍可继续推进。
 
@@ -233,11 +354,11 @@ Delivery Contract 定义生产者必须交付什么，以及接收方凭什么�
 
 只有当发现具备复用价值，才进入改进提案：
 
-1. 引用原 Issue、Run、Candidate、Evidence、Evaluation 和 Finding。
+1. 指向来源 Issue 和支撑发现的具体证据。涉及受管执行、候选或独立评价时，引用相应 Run、Candidate 或 Evaluation。
 2. 说明根因假设及拟修改的知识、能力、SOP 或项目工作流。
-3. 资产维护者判断是否投入候选、回归样本和 Benchmark。
+3. 相应维护者判断是否投入候选、回归样本和 Benchmark。
 4. 候选在固定样本、标准和环境下与当前版本比较。
-5. 有权维护者审核并发布资产版本；项目维护者决定是否采用。
+5. 方法资产由维护者审核发布，项目可设为默认，负责人也可在授权内为本项选用。工作流或分工配置由有权成员在原项目或 Issue 决定生效范围及在途安排。
 6. 后续工作分别记录选择、投递、实际使用和结果，观察真实效果。
 
 Evaluation 只提供证据和结论，不自动生成提案、不自动发布资产，也不自动改变项目配置。
@@ -249,18 +370,19 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | 顺序 | 产生或消费的契约 | 负责方 | 继续条件 |
 |---|---|---|---|
 | 1. 建立工作 | Work Contract | 提出人、Issue 负责人及有权成员 | 目标、责任和完成要求足以开始；未决业务问题有明确处理人 |
-| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人或被指派 Squad Leader | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
+| 2. 组织工作 | Work Contract / Delegation Contract | 当前负责人（获持续协调授权的 Agent 担任 Main Bot） | 自主推进、协助、子项或 SOP 的选择与责任归属清楚 |
 | 3. 准备依据 | Context Contract / Capability Contract | 项目与资产配置、当前负责人、执行入口 | 必需输入有权、可读、版本固定；强制规则冲突已解决 |
-| 4. 授权执行 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
-| 5. 生产结果 | Execution Contract / Delivery Contract | 成员、Agent、Script、SOP 节点 | 实际结果与来源回执归回正确 Run / Attempt / Issue |
+| 4. 派发受管执行时 | Execution Contract | 当前负责人或受托 SOP 节点；Multica 校验派发资格 | 当前工作版本、授权、Runtime 和激活仍有效 |
+| 5. 交回结果 | Delivery Contract | 成员或受管执行者 | 成员提交的选定版本和署名说明归原 Issue。受管执行附实际 Run，涉及 SOP 时关联本轮尝试 |
 | 6. 消费结果 | Delivery Contract | SOP 后继节点、子 Issue 负责人或原 Issue 负责人 | 当前消费者独立确认版本、输入条件、证据和缺项 |
 | 7. 决定与交接 | Work Contract / Delivery Contract | Issue 有权主体、Project Workflow | 接受、退回、例外或责任交接明确；完成条件满足才完成 Issue |
-| 8. 评价与改进 | Feedback Contract | 负责人、评价器、资产和项目维护者 | 本次问题已处理；跨工作改进经过审核、发布和项目采用 |
+| 8. 需要反馈时 | Feedback Contract | 负责人、受托节点、评价器或相应维护者 | 本项发现回到当前负责人或受托节点修正。跨工作改进按变更对象审核发布或调整配置，供后续工作选用并验证效果 |
 
 ### 10.1 人工介入与自动接续
 
 人工介入不是流程之外的旁路。需要决定时，流程将候选、适用标准、问题、可选动作及后果交回原 Issue。决定记录在 Issue 后：
 
+- 委托仍有效时，Main Bot 可根据原 Issue 的有效决定恢复协调。若工作流已将 Assignee 交给其他主体，该主体负责后续安排。
 - SOP 在原授权和有效版本内继续，重新检查节点前置和预算。
 - 超出原授权时等待负责人调整 Work / Delegation Contract。
 - 责任变更时通过原 Issue 指派或 Project Workflow 交接。
@@ -296,3 +418,28 @@ Evaluation 只提供证据和结论，不自动生成提案、不自动发布资
 | [统一工作台](05-unified-workbench.md) | 呈现契约状态、来源、缺项、等待原因和下一责任人 |
 
 新增跨层能力时，优先复用以上契约和既有对象。只有现有契约无法表达新的责任边界或结果关系时，才考虑增加新概念，并说明其权威来源与生命周期。
+
+
+## 12. 五域端到端责任交接补充
+
+完整五域交接矩阵和研发场景回归见[五域端到端协作一致性审查](../research/five-domain-end-to-end-consistency-review.md)。本契约执行时尤其保持以下边界：
+
+- C 维护 SOP Definition 与 Evaluation Definition；B 维护 SOP Execution 并组织业务工作；D 沿 Multica 原生 Run 执行；E 创建 Evaluation 实例并形成 Finding。
+- Evaluation 的标准版本由 C 治理，项目 / B 决定是否作为本项必需门禁及采用哪个版本；E 的评价结果作为证据回到 B，不能代替 Issue 有权主体作业务验收。
+- D 提供或引用执行 / 交付 Evidence；A 将其作为 Knowledge Revision 的依据；E 将其作为 Evaluation / Finding 的输入；B 在 Decision 中引用。同一事实只保留一个权威来源，各域维护自己的解释与决定。
+- Release、Project Adoption、Work / Run Asset Pin、ContextReceipt / Observation 分别表达发布、项目采用、本项选择和实际投递 / 消费；不得合并成单一启用状态。
+- 跨域状态变化只触发受影响范围的重新核验和处理，不静默覆盖其他域的状态。例如 Release 暂停不自动把 Issue 置为 Blocked，Run 失败不自动判定业务验收失败，Evaluation 失败不自动退回 Candidate。
+
+
+## 13. Evaluation Finding 的跨域消费边界
+
+Evaluation 与 Finding 的端到端案例及契约回归见[五域 Evaluation → Issue → Knowledge / Harness 闭环验证](../research/five-domain-evaluation-closure.md)。
+
+- E 的 Evaluation 引用被评 Run / Candidate 和固定 Evidence，使用独立评价执行身份；缺少必需证据时返回 Inconclusive，不把缺项解释为低分。
+- 事后评价默认 advisory-only。只有项目 / SOP 明确声明门禁，并且源 Run、Scorer 版本与门禁定义匹配时，才产生门禁结果。
+- E 将 Finding 交回 B；只有 Issue 的 Accountable Member / 有权 Acceptor 可以作业务返工、交验收或接受决定。Evaluation 不直接修改 Issue、Candidate 或源 Run。
+- 跨工作 Finding 由 E 提供证据和路由建议；A / C 分别判断是否建立知识或 Harness 候选。两条候选独立维护、验证、发布和采用，不共享一个改进 Release。
+- 同一 Finding 可以支持多个处理路径，但无证据不路由；根因未知时保持未知，不强行归咎于模型、知识或 Harness。
+- Evaluation 通过不等于 Issue Accepted；Harness / Knowledge 候选准备完成不等于 Release；Release 不等于 Project Adoption。
+
+上述规则是跨层消费契约，不新增全局改进协调器、第二套 Run 或统一资产发布对象。

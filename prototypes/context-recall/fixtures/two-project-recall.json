@@ -1,0 +1,59 @@
+{
+  "knowledge": [
+    {
+      "id": "T1",
+      "title": "Regional data export verification method",
+      "scope": {"kind": "team", "id": "engineering"},
+      "revision": "rev-1",
+      "release": "team-release-1",
+      "claim": "For regional data exports, verify the dataset returned to a regional account separately from a cross-region account, then independently verify required export fields.",
+      "conditions": ["The system enforces data access by region", "The task changes a data export path"],
+      "limitations": ["Does not define any project's concrete authorization model"],
+      "terms": ["regional", "region", "export", "dataset", "cross-region", "account", "verification", "permissions"],
+      "evidence": [
+        {"id": "T1-E1", "readable_projects": [], "readable_teams": []},
+        {"id": "T1-E2", "readable_projects": [], "readable_teams": []}
+      ]
+    },
+    {
+      "id": "A1",
+      "title": "Project A order export authorization",
+      "scope": {"kind": "project", "id": "project-a"},
+      "revision": "rev-3",
+      "release": "project-a-release-3",
+      "claim": "Project A order exports use regional account grants; order-8472 is a private fixture identifier and must never be disclosed outside Project A.",
+      "conditions": ["Project A order export only"],
+      "limitations": ["Not applicable to Project B organization-tree authorization"],
+      "terms": ["order", "orders", "export", "regional", "permissions", "authorization", "order-8472", "Project A"],
+      "evidence": [
+        {"id": "A-S1-C1", "readable_projects": ["project-a"], "readable_teams": []},
+        {"id": "A-S1-C2", "readable_projects": ["project-a"], "readable_teams": []}
+      ]
+    },
+    {
+      "id": "B1",
+      "title": "Project B organization-tree authorization",
+      "scope": {"kind": "project", "id": "project-b"},
+      "revision": "rev-2",
+      "release": "project-b-release-2",
+      "claim": "Project B derives export data scope from the user's current organization-tree grants, not from regional account membership.",
+      "conditions": ["Project B organization-tree authorization"],
+      "limitations": ["Does not define the cross-region model used by other projects"],
+      "terms": ["organization", "tree", "authorization", "grant", "export", "data", "scope"],
+      "evidence": [
+        {"id": "B-S1-PRD", "readable_projects": ["project-b"], "readable_teams": []}
+      ]
+    }
+  ],
+  "sources": [
+    {"id": "A-S1", "project": "project-a", "title": "Project A private order export evidence", "summary": "C1 and C2 order-8472 reports", "terms": ["order", "export", "C1", "C2"]},
+    {"id": "B-S1", "project": "project-b", "title": "Project B export PRD", "summary": "Organization-tree data export requirements", "terms": ["organization", "tree", "regional", "data", "export"]}
+  ],
+  "code": [
+    {"id": "A-C1", "project": "project-a", "title": "Project A order export module", "summary": "Regional order export implementation", "terms": ["order", "regional", "export", "module"]},
+    {"id": "B-C1", "project": "project-b", "title": "Project B export module", "summary": "Organization-tree export module and service call path", "terms": ["organization", "tree", "export", "module", "regional"]}
+  ],
+  "harness": [
+    {"id": "H1", "team": "engineering", "published": true, "kind": "required-rule"}
+  ]
+}

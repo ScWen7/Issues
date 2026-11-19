@@ -16,7 +16,7 @@
 
 ### T4 · 恢复时，最后一次写入也要检查进度
 
-**代码。** 跨机接管以团队报告分支的既有快照写标识为条件替换快照，转换所有权，释放旧租约。最新提交修复了实际竞态：慢请求正在固定工作流文件夹，快请求已经接管并领取、取消或发布；慢请求随后安装旧快照。修复在最终写锁内再次核对本地已确认版本。六个组合测试覆盖首次接管和恢复时发生上述三种操作，逐项断言本地状态保留。设计动机是把可能耗时的文件读取放在锁外，同时确保锁外读到的状态没有覆盖新进展的效力。**平台取舍。** 用中心存储的所有权代次与条件更新承接该机制。本地材料准备完毕再核对代次、取消和进度。换人接管 Squad 协调与重新领取某个 Agent Run 分别处理。[快照条件替换](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1075-L1104) · [旧租约移交](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1156-L1191) · [最终安装二次核对](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1284-L1358) · [竞态测试](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/__tests__/workflow-handoff.test.ts#L132-L173)
+**代码。** 跨机接管以团队报告分支的既有快照写标识为条件替换快照，转换所有权，释放旧租约。最新提交修复了实际竞态：慢请求正在固定工作流文件夹，快请求已经接管并领取、取消或发布；慢请求随后安装旧快照。修复在最终写锁内再次核对本地已确认版本。六个组合测试覆盖首次接管和恢复时发生上述三种操作，逐项断言本地状态保留。设计动机是把可能耗时的文件读取放在锁外，同时确保锁外读到的状态没有覆盖新进展的效力。**平台取舍。** 用中心存储的所有权代次与条件更新承接该机制。本地材料准备完毕再核对代次、取消和进度。成员接管 Issue 协调与重新领取某个 Agent Run 分别处理。[快照条件替换](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1075-L1104) · [旧租约移交](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1156-L1191) · [最终安装二次核对](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/workflow/handoff.ts#L1284-L1358) · [竞态测试](https://github.com/Tencent/teamai-cli/blob/556b5246f2c13ad28b8b79b5b513a78ed8ab9dae/src/__tests__/workflow-handoff.test.ts#L132-L173)
 
 ### T5 · 重试影响消费旧结果的路径；交付失败单独恢复
 

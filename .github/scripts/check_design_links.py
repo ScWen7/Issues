@@ -41,7 +41,11 @@ def headings_and_links(path):
 
 
 def main():
-    pages = {p: headings_and_links(p) for p in ROOT.rglob("*.md") if ".git" not in p.parts}
+    pages = {
+        p: headings_and_links(p)
+        for p in ROOT.rglob("*.md")
+        if not {".git", ".tmp"}.intersection(p.relative_to(ROOT).parts)
+    }
     edges = defaultdict(set)
     errors = []
     checked = 0
