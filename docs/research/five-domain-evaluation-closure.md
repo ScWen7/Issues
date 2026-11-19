@@ -35,7 +35,7 @@
 | 报告 SHA-256 | `da022445c03fa787af994101f47cd8cfb777913f882a6b7aa32116a3493afcb1` | `e9c93051c5b844cf23aa89061eed967c5a2267e846e26b37ece7275f194bd514` |
 | 原核验结论 | rework | pass |
 
-来源：[C1 固定报告](../topic-03a/fixtures/order-export-c1.json) · [C2 固定报告](../topic-03a/fixtures/order-export-c2.json) · [实际运行与工作簿核验](../topic-03a/order-export-workspace.md)。
+来源：[C1 固定报告](topic-03a/fixtures/order-export-c1.json) · [C2 固定报告](topic-03a/fixtures/order-export-c2.json) · [实际运行与工作簿核验](topic-03a/order-export-workspace.md)。
 
 这两份报告已证明“进程成功结束”与“候选符合标准”是不同事实：C1、C2 的核验进程都退出 0，但 C1 的 A2 失败，C2 的 A2 / A3 均通过。
 
@@ -111,7 +111,7 @@ Topic 3B 已经使用 C1 / C2 的同一组报告形成过团队经验提案：
 - 该提案的证据账本同时引用了 C1 / C2 的精确报告摘要。
 - 当前贡献夹具的最终状态为 **retired**，原因链包含来源撤回与证据对失效。
 
-来源：[项目知识与团队贡献夹具](../topic-03b/fixtures/project-knowledge.json) · [贡献、复审、撤权与退役实证](../topic-03b/knowledge-contribution.md)。
+来源：[项目知识与团队贡献夹具](topic-03b/fixtures/project-knowledge.json) · [贡献、复审、撤权与退役实证](topic-03b/knowledge-contribution.md)。
 
 本次 E 评价可以按两份精确报告摘要关联这个既有贡献，但不能把“历史上曾发布”当成“当前仍可用”。原型核对后得到：
 - 已存在同证据的 Knowledge Proposal；
