@@ -206,3 +206,34 @@ Migration 520 为 Task 状态变化、Comment 创建 / 更新 / 删除、Issue �
 当前 main 源码链接：[agent.sql](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/pkg/db/queries/agent.sql) · [agent.go](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/internal/handler/agent.go) · [migration 184](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/184_agent_task_attribution.up.sql) · [migration 520](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/520_collaboration_wakeup_events.up.sql) · [migration 579](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/migrations/579_wakeup_skip_handed_to_agent.up.sql) · [task_usage.sql](https://github.com/multica-ai/multica/blob/528cd82711f2f99eedd04e4d3a68c6c31b514659/server/pkg/db/queries/task_usage.sql)。
 
 因此，Purpose 隔离缺口不只是架构文档所 pin 的历史版本问题；在本轮检查的 Multica 当前 main 中仍然存在。该结论仅表示上述源码文件和机制没有对应 Purpose 标识 / 过滤，不代表对所有运行部署版本的现场验证。
+## 17. Purpose 适配的最小源码触点与推进顺序
+
+本节是按固定源码结构给出的适配边界，不是对 Multica 上游已经完成的实现描述，也不指定数据库字段或 API 形状。
+
+| 源码触点 | 当前职责 | Purpose 适配必须保证 |
+|---|---|---|
+| Task 创建入口：`TaskService.enqueueIssueTask` / `enqueueMentionTaskWithCommentPlan` 及其 `CreateAgentTask` | 普通 Issue / Mention / Thread / Squad Task 创建 | 既有入口默认 Production；只有明确治理入口能创建 Governance |
+| 治理 Task 创建入口 | 当前尚无 Evaluation 专用入口 | 通过现有 TaskService / CreateAgentTask 复用原生 Task，不新增队列；以 Evaluation ID 幂等创建主 Task |
+| `CreateRetryTask` | 系统失败重试，继承父 Task 归因并建立 retry 谱系 | 自动继承 Purpose 和治理来源身份；不能因 Retry 丢失隔离 |
+| `CreateWakeupTask` / Autopilot / Chat / Quick Create 等其他创建入口 | 各自已有生产或 Wakeup 语义 | 明确默认 Production；不得因 Evidence Kind 或 Context 中出现某个字符串就误分类为 Governance |
+| pending 查询与唯一索引 | Issue / Agent / Thread 生产排队唯一性 | Production 语义保持原样；治理 Task 有独立槽位语义，并由 Evaluation ID 做幂等 |
+| `MergeCommentIntoPendingTask` | 合并用户评论到尚未 Claim 的生产 Task | 只合并到 Production Task；不能改变治理 Task 的输入快照 |
+| `GetLastTaskSession` / 相关恢复查询 | 按 Agent + Issue 选择可恢复 Session | 普通恢复排除 Governance；治理只在同一 Evaluation 合法 Retry 范围内恢复 |
+| `capture_task_wakeup` / Comment / Issue / Reaction 等事务事件 | 产生 Issue Wakeup Receipt | 根据来源 Task Purpose 过滤治理事件；治理 Task 无 Task ID 的副作用不能被默认放行 |
+| `AgentTaskResponse` / Daemon Claim | 把 Task 身份和上下文交给 Runtime | 明确传递 Purpose 与兼容能力；旧 Runtime 不支持时禁止派发 Governance |
+| Task Usage / Issue Usage / Task History | 原生用量记录和产品展示 | 原生 Usage 仍按 Task 归属；生产、治理、团队总成本分别展示 |
+
+### 17.1 推荐实施顺序
+
+1. **Purpose 语义与兼容门槛**：定义 Production / Governance 及治理子用途；旧 Task 默认 Production；明确哪些 Runtime / Daemon 具备接收治理用途的能力。
+2. **创建与谱系**：给现有创建路径建立 Production 默认值；增加显式 Governance 创建路径；Evaluation ID 幂等绑定唯一主 Task；Retry 继承 Purpose。
+3. **Pending 与 Comment**：先保证生产 / 治理并存，再验证普通 Comment 不会进入 Governance 输入，生产原有去重与评论合并回归不退化。
+4. **Session 隔离**：普通 Session 恢复排除 Governance；治理只恢复同 Evaluation 的合法 Retry Session；生产与治理双向不串线。
+5. **Wakeup 与副作用**：Task 终态、Comment、Issue、Reaction 等事件均识别来源 Purpose；治理执行默认只通过 Evaluation 结果消费通知原 Issue 负责人。
+6. **Claim / Usage / History**：将 Purpose 传递到 Claim / Runtime；区分生产成本、治理成本和团队总成本；任务历史明确标识治理活动。
+7. **控制面回归**：执行 G1–G12；只有全部通过，才允许进入真实 Evaluation Run、预算预留和 Finding 持久化联测。
+
+### 17.2 两个不能忽略的细节
+
+- **Wakeup 的来源 Task 身份必须完整。** 固定 migration 520 的 Comment / Reaction / Issue 事件捕获依赖 `multica.source_task_id` 或 Comment 自身的 `source_task_id`。如果治理执行产生副作用却没有可定位的来源 Task ID，事件捕获层无法可靠判断 Purpose。最小安全边界是治理执行默认禁止无必要的 Issue 副作用；允许的写入必须携带真实 Task 来源身份。
+- **Purpose 不是权限本身。** Purpose 用于执行分类、隔离、预算和统计；它不能替代成员 / Agent / Runtime 的授权，也不能因为标记为 Evaluation 就自动获得读取原始 Evidence、Candidate 或 Issue 私有内容的权利。评价输入仍须按 VS-3 固定快照和原来源权限核验。
